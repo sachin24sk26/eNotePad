@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>eNotePad - Digital Curator</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-dim": "#455464",
+                        "on-tertiary": "#faf8ff",
+                        "tertiary-fixed": "#d5dcfb",
+                        "on-secondary-fixed": "#3e3f42",
+                        "on-surface": "#2f342e",
+                        "inverse-primary": "#daeafe",
+                        "primary-fixed": "#d4e4f8",
+                        "error": "#9f403d",
+                        "on-tertiary-fixed": "#343b53",
+                        "secondary-dim": "#525356",
+                        "surface-container-low": "#f4f4ef",
+                        "surface": "#faf9f5",
+                        "surface-container-highest": "#e0e4dc",
+                        "surface-tint": "#516070",
+                        "inverse-surface": "#0d0f0d",
+                        "on-secondary-container": "#505255",
+                        "secondary-fixed-dim": "#d4d4d7",
+                        "on-background": "#2f342e",
+                        "error-container": "#fe8983",
+                        "surface-bright": "#faf9f5",
+                        "on-tertiary-container": "#474d67",
+                        "on-surface-variant": "#5c605a",
+                        "outline-variant": "#afb3ac",
+                        "tertiary": "#575e78",
+                        "tertiary-dim": "#4b526c",
+                        "inverse-on-surface": "#9d9d9a",
+                        "secondary-fixed": "#e2e2e5",
+                        "on-error": "#fff7f6",
+                        "on-primary": "#f4f8ff",
+                        "primary": "#516070",
+                        "outline": "#787c75",
+                        "tertiary-fixed-dim": "#c7ceec",
+                        "secondary": "#5e5f62",
+                        "error-dim": "#4e0309",
+                        "on-secondary-fixed-variant": "#5a5b5e",
+                        "surface-variant": "#e0e4dc",
+                        "on-tertiary-fixed-variant": "#505771",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-fixed-variant": "#4e5d6d",
+                        "on-secondary": "#f9f8fc",
+                        "surface-container": "#edeee8",
+                        "background": "#faf9f5",
+                        "tertiary-container": "#d5dcfb",
+                        "secondary-container": "#e2e2e5",
+                        "on-error-container": "#752121",
+                        "on-primary-container": "#445363",
+                        "surface-container-high": "#e6e9e2",
+                        "on-primary-fixed": "#324150",
+                        "primary-fixed-dim": "#c6d6e9",
+                        "primary-container": "#d4e4f8",
+                        "surface-dim": "#d6dcd2"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Inter", "sans-serif"],
+                        "body": ["Newsreader", "serif"],
+                        "label": ["Inter", "sans-serif"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .paper-grain {
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            opacity: 0.02;
+        }
+        .paper-lines {
+            background-image: linear-gradient(#51607015 1px, transparent 1px);
+            background-size: 100% 2.5rem;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-label min-h-screen relative overflow-x-hidden">
+<!-- Grain Overlay -->
+<div class="fixed inset-0 pointer-events-none paper-grain z-50"></div>
+<div class="flex min-h-screen">
+<!-- SideNavBar (Desktop) -->
+<aside class="hidden md:flex flex-col w-64 h-screen p-4 space-y-4 bg-surface-container-low dark:bg-slate-800/50 rounded-r-2xl fixed left-0 top-0 z-40 transition-all duration-300 ease-out">
+<div class="flex flex-col gap-1 px-4 py-6">
+<span class="text-xs uppercase tracking-widest text-primary/50 font-bold">The Curator</span>
+<span class="font-body italic text-xl text-primary leading-tight">Your Digital Ink</span>
+</div>
+<nav class="flex-1 space-y-2 px-2">
+<button class="w-full flex items-center gap-3 px-4 py-3 bg-white dark:bg-slate-700 shadow-sm rounded-lg text-[#516070] dark:text-white font-medium transition-transform hover:translate-x-1">
+<span class="material-symbols-outlined" data-icon="ios_share">ios_share</span>
+<span>Share</span>
+</button>
+<button class="w-full flex items-center gap-3 px-4 py-3 text-[#516070]/70 dark:text-slate-400 hover:text-[#516070] dark:hover:text-white transition-transform hover:translate-x-1">
+<span class="material-symbols-outlined" data-icon="key">key</span>
+<span>Access</span>
+</button>
+</nav>
+<div class="mt-auto pt-6 px-2">
+<button class="w-full py-4 bg-primary text-on-primary rounded-full font-semibold shadow-lg hover:bg-primary-dim transition-all active:scale-[0.98]">
+                    New Note
+                </button>
+<div class="flex items-center gap-3 mt-6 p-2">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest overflow-hidden">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="Close up portrait of a professional man with friendly expression in soft studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDw16DMXE8CiG0tdzyywGsmx80Sin0f4U5glj1s45VjPe7lOZir4-mn1bhzViW-Kl7FHItwEai-QSluHRZypYoi6ogFzZwbF9CaElsoJEXx5duTsX9uu3nVN46R3qNqyKHs-QJ4c8kvl9FaT6ahd4eqHTB63qOgNOEisMuYwpmjCJIcnEiNPXmcgPHwv6Y7CAsMT3RBCN-DDEGAok1Q50wuntjynJUDa_qp7maUFAm6GSjpNWUDLkiolz9nvnl9guz6p8euVj8vCdA"/>
+</div>
+<div class="flex flex-col">
+<span class="text-sm font-bold text-on-surface">Alex Curator</span>
+<span class="text-xs text-on-surface-variant">Pro Member</span>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 md:ml-64 flex flex-col min-h-screen">
+<!-- TopAppBar -->
+<header class="bg-[#faf9f5] dark:bg-slate-900 docked full-width top-0 z-30">
+<div class="flex justify-between items-center w-full px-6 py-4 max-w-5xl mx-auto">
+<div class="flex items-center gap-8">
+<span class="text-2xl font-serif italic text-[#516070] dark:text-slate-200">eNotePad</span>
+<nav class="hidden sm:flex items-center gap-6">
+<a class="text-[#516070] dark:text-white font-bold border-b-2 border-[#516070] dark:border-slate-200 pb-1" href="#">History</a>
+<a class="text-[#516070]/60 dark:text-slate-400 hover:bg-[#f4f4ef] dark:hover:bg-slate-800 transition-colors px-2 py-1 rounded" href="#">Account</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-[#516070] dark:text-slate-300 hover:bg-[#f4f4ef] dark:hover:bg-slate-800 rounded-full transition-all active:scale-[0.98]">
+<span class="material-symbols-outlined" data-icon="dark_mode">dark_mode</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Dashboard Content -->
+<section class="flex-1 flex items-center justify-center p-6 md:p-12">
+<div class="w-full max-w-2xl bg-surface-container-lowest rounded-xl shadow-[0_12px_32px_rgba(47,52,46,0.06)] overflow-hidden relative border border-outline-variant/10">
+<!-- Tabs Selection -->
+<div class="flex bg-surface-container-low p-1 mx-6 mt-6 rounded-xl">
+<button class="flex-1 py-3 px-4 rounded-lg bg-white shadow-sm text-primary font-bold transition-all">
+                            Share
+                        </button>
+<button class="flex-1 py-3 px-4 rounded-lg text-primary/60 hover:text-primary transition-all">
+                            Access
+                        </button>
+</div>
+<!-- Share Content Area -->
+<div class="p-6 md:p-8 space-y-8">
+<div class="relative">
+<textarea class="w-full min-h-[250px] bg-transparent border-none focus:ring-0 font-body text-xl leading-relaxed text-on-surface paper-lines resize-none placeholder:text-outline-variant/40" placeholder="Start writing your note or paste a link here..."></textarea>
+</div>
+<!-- Image Upload Area -->
+<div class="group relative w-full h-40 border-2 border-dashed border-outline-variant/30 rounded-xl flex flex-col items-center justify-center bg-surface hover:bg-surface-container-low transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-4xl text-primary/40 group-hover:scale-110 transition-transform" data-icon="add_photo_alternate">add_photo_alternate</span>
+<p class="mt-2 text-sm text-on-surface-variant font-medium">Click to upload an image</p>
+</div>
+<!-- Action Button -->
+<div class="flex justify-center pt-4">
+<button class="px-12 py-4 bg-primary text-on-primary rounded-full font-bold text-lg shadow-xl hover:bg-primary-dim transition-all active:scale-[0.98] flex items-center gap-3">
+<span>Share Content</span>
+<span class="material-symbols-outlined" data-icon="send">send</span>
+</button>
+</div>
+</div>
+<!-- Access Content Area (Hidden by default in static mockup but styled here) -->
+<!-- To show, add 'hidden' to the share content area and remove it here -->
+<div class="hidden p-6 md:p-8 space-y-12 text-center">
+<div class="space-y-4">
+<h2 class="font-body text-3xl italic text-primary">Enter Secret Code</h2>
+<p class="text-on-surface-variant max-w-sm mx-auto">Enter the 6-digit code shared with you to unlock the curated content.</p>
+</div>
+<div class="flex justify-center gap-3 md:gap-4">
+<input class="w-12 h-16 md:w-16 md:h-20 text-center text-3xl font-bold bg-surface-dim/30 rounded-xl border-none shadow-inner focus:ring-2 focus:ring-primary/20 text-primary" maxlength="1" type="text"/>
+<input class="w-12 h-16 md:w-16 md:h-20 text-center text-3xl font-bold bg-surface-dim/30 rounded-xl border-none shadow-inner focus:ring-2 focus:ring-primary/20 text-primary" maxlength="1" type="text"/>
+<input class="w-12 h-16 md:w-16 md:h-20 text-center text-3xl font-bold bg-surface-dim/30 rounded-xl border-none shadow-inner focus:ring-2 focus:ring-primary/20 text-primary" maxlength="1" type="text"/>
+<span class="w-2 h-16 md:h-20 flex items-center text-outline-variant">•</span>
+<input class="w-12 h-16 md:w-16 md:h-20 text-center text-3xl font-bold bg-surface-dim/30 rounded-xl border-none shadow-inner focus:ring-2 focus:ring-primary/20 text-primary" maxlength="1" type="text"/>
+<input class="w-12 h-16 md:w-16 md:h-20 text-center text-3xl font-bold bg-surface-dim/30 rounded-xl border-none shadow-inner focus:ring-2 focus:ring-primary/20 text-primary" maxlength="1" type="text"/>
+<input class="w-12 h-16 md:w-16 md:h-20 text-center text-3xl font-bold bg-surface-dim/30 rounded-xl border-none shadow-inner focus:ring-2 focus:ring-primary/20 text-primary" maxlength="1" type="text"/>
+</div>
+<div class="pt-6">
+<button class="px-12 py-4 bg-primary text-on-primary rounded-full font-bold text-lg shadow-xl hover:bg-primary-dim transition-all active:scale-[0.98] flex items-center gap-3 mx-auto">
+<span>Fetch Content</span>
+<span class="material-symbols-outlined" data-icon="cloud_download">cloud_download</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Footer -->
+<footer class="flex justify-center items-center gap-6 py-8 w-full opacity-60 bg-transparent text-[#516070] dark:text-slate-500 font-label text-sm">
+<span>© eNotePad - Digital Curator</span>
+<div class="flex gap-4">
+<a class="text-[#516070]/50 dark:text-slate-600 hover:text-[#516070] dark:hover:text-slate-300" href="#">Privacy</a>
+<a class="text-[#516070]/50 dark:text-slate-600 hover:text-[#516070] dark:hover:text-slate-300" href="#">Terms</a>
+<a class="text-[#516070]/50 dark:text-slate-600 hover:text-[#516070] dark:hover:text-slate-300" href="#">Support</a>
+</div>
+</footer>
+</main>
+</div>
+<!-- Mobile Navigation Shell -->
+<nav class="md:hidden fixed bottom-0 left-0 right-0 bg-surface-container-lowest/80 backdrop-blur-xl border-t border-outline-variant/10 px-6 py-3 flex justify-around items-center z-50">
+<button class="flex flex-col items-center gap-1 text-primary">
+<span class="material-symbols-outlined" data-icon="ios_share" style="font-variation-settings: 'FILL' 1;">ios_share</span>
+<span class="text-[10px] font-bold uppercase tracking-tighter">Share</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-primary/40">
+<span class="material-symbols-outlined" data-icon="key">key</span>
+<span class="text-[10px] font-bold uppercase tracking-tighter">Access</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-primary/40">
+<span class="material-symbols-outlined" data-icon="history">history</span>
+<span class="text-[10px] font-bold uppercase tracking-tighter">History</span>
+</button>
+</nav>
+</body></html>

@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <meta name="description" content="eNotePad — Instantly share text, links, and images across devices with a simple secret code. No login required." />
+  <meta name="theme-color" content="#516070" />
+  <title>eNotePad — Digital Curator</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+  <!-- Google Fonts: Inter + Newsreader -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet" />
+
+  <!-- Material Symbols -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind Config: The Tactile Editorial Design System -->
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary-dim": "#455464",
+            "on-tertiary": "#faf8ff",
+            "tertiary-fixed": "#d5dcfb",
+            "on-secondary-fixed": "#3e3f42",
+            "on-surface": "#2f342e",
+            "inverse-primary": "#daeafe",
+            "primary-fixed": "#d4e4f8",
+            "error": "#9f403d",
+            "on-tertiary-fixed": "#343b53",
+            "secondary-dim": "#525356",
+            "surface-container-low": "#f4f4ef",
+            "surface": "#faf9f5",
+            "surface-container-highest": "#e0e4dc",
+            "surface-tint": "#516070",
+            "inverse-surface": "#0d0f0d",
+            "on-secondary-container": "#505255",
+            "secondary-fixed-dim": "#d4d4d7",
+            "on-background": "#2f342e",
+            "error-container": "#fe8983",
+            "surface-bright": "#faf9f5",
+            "on-tertiary-container": "#474d67",
+            "on-surface-variant": "#5c605a",
+            "outline-variant": "#afb3ac",
+            "tertiary": "#575e78",
+            "tertiary-dim": "#4b526c",
+            "inverse-on-surface": "#9d9d9a",
+            "secondary-fixed": "#e2e2e5",
+            "on-error": "#fff7f6",
+            "on-primary": "#f4f8ff",
+            "primary": "#516070",
+            "outline": "#787c75",
+            "tertiary-fixed-dim": "#c7ceec",
+            "secondary": "#5e5f62",
+            "error-dim": "#4e0309",
+            "on-secondary-fixed-variant": "#5a5b5e",
+            "surface-variant": "#e0e4dc",
+            "on-tertiary-fixed-variant": "#505771",
+            "surface-container-lowest": "#ffffff",
+            "on-primary-fixed-variant": "#4e5d6d",
+            "on-secondary": "#f9f8fc",
+            "surface-container": "#edeee8",
+            "background": "#faf9f5",
+            "tertiary-container": "#d5dcfb",
+            "secondary-container": "#e2e2e5",
+            "on-error-container": "#752121",
+            "on-primary-container": "#445363",
+            "surface-container-high": "#e6e9e2",
+            "on-primary-fixed": "#324150",
+            "primary-fixed-dim": "#c6d6e9",
+            "primary-container": "#d4e4f8",
+            "surface-dim": "#d6dcd2"
+          },
+          borderRadius: {
+            DEFAULT: "0.25rem",
+            lg: "1rem",
+            xl: "1.5rem",
+            full: "9999px"
+          },
+          fontFamily: {
+            headline: ["Inter", "sans-serif"],
+            body: ["Newsreader", "serif"],
+            label: ["Inter", "sans-serif"]
+          }
+        }
+      }
+    };
+  </script>
+
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body class="bg-background text-on-surface font-label min-h-screen relative overflow-x-hidden">
+
+  <!-- Paper Grain Overlay -->
+  <div class="fixed inset-0 pointer-events-none paper-grain z-50"></div>
+
+  <!-- Toast Notification Container -->
+  <div class="fixed top-5 right-5 z-[9999] flex flex-col gap-2 pointer-events-none" id="toastContainer"></div>
+
+  <div class="flex min-h-screen">
+
+    <!-- ========== SIDEBAR (Desktop) ========== -->
+    <aside class="sidebar-aside flex-col w-64 h-screen p-4 space-y-4 bg-surface-container-low rounded-r-2xl fixed left-0 top-0 z-40 transition-all duration-300 ease-out" id="sidebar" style="display:none;">
+      <!-- Branding -->
+      <div class="flex flex-col gap-1 px-4 py-6">
+        <span class="text-xs uppercase tracking-widest text-primary/50 font-bold">The Curator</span>
+        <span class="font-body italic text-xl text-primary leading-tight">Your Digital Ink</span>
+      </div>
+
+      <!-- Sidebar Navigation -->
+      <nav class="flex-1 space-y-1 px-2" id="sidebarNav">
+        <button class="sidebar-nav-btn active w-full flex items-center gap-3 px-4 py-3 bg-white shadow-sm rounded-lg text-primary font-medium transition-transform hover:translate-x-1" data-tab="share" id="sidebarShare">
+          <span class="material-symbols-outlined">ios_share</span>
+          <span>Share</span>
+        </button>
+        <button class="sidebar-nav-btn w-full flex items-center gap-3 px-4 py-3 text-primary/70 hover:text-primary transition-transform hover:translate-x-1 rounded-lg" data-tab="access" id="sidebarAccess">
+          <span class="material-symbols-outlined">key</span>
+          <span>Access</span>
+        </button>
+        <button class="sidebar-nav-btn w-full flex items-center gap-3 px-4 py-3 text-primary/70 hover:text-primary transition-transform hover:translate-x-1 rounded-lg" data-tab="account" id="sidebarAccount">
+          <span class="material-symbols-outlined">person</span>
+          <span>Account</span>
+        </button>
+
+        <!-- Logged-in Quick Links (hidden when guest) -->
+        <div id="sidebarLoggedInLinks" data-hidden="true">
+          <div class="my-3 border-t border-outline-variant/15"></div>
+          <p class="text-[10px] uppercase tracking-widest text-primary/30 font-bold px-4 mb-1">Your Library</p>
+          <button class="sidebar-quick-link w-full flex items-center gap-3 px-4 py-2.5 text-primary/60 hover:text-primary hover:bg-white/50 transition-all rounded-lg text-sm" data-sidebar-action="recent">
+            <span class="material-symbols-outlined text-lg">schedule</span>
+            <span>Recent Activity</span>
+          </button>
+          <button class="sidebar-quick-link w-full flex items-center gap-3 px-4 py-2.5 text-primary/60 hover:text-primary hover:bg-white/50 transition-all rounded-lg text-sm" data-sidebar-action="saved">
+            <span class="material-symbols-outlined text-lg">bookmark</span>
+            <span>Saved Notes</span>
+            <span class="ml-auto text-[10px] font-bold bg-primary-container/40 text-primary rounded-full px-2 py-0.5" id="sidebarSavedCount"></span>
+          </button>
+          <button class="sidebar-quick-link w-full flex items-center gap-3 px-4 py-2.5 text-primary/60 hover:text-primary hover:bg-white/50 transition-all rounded-lg text-sm" data-sidebar-action="settings">
+            <span class="material-symbols-outlined text-lg">settings</span>
+            <span>Settings</span>
+          </button>
+        </div>
+      </nav>
+
+      <!-- Sidebar Footer -->
+      <div class="mt-auto pt-4 px-2">
+        <button class="w-full py-4 bg-primary text-on-primary rounded-full font-semibold shadow-lg hover:bg-primary-dim transition-all active:scale-[0.98]" id="newNoteBtn">
+          New Note
+        </button>
+        <!-- User Profile (shown when logged in) -->
+        <div class="flex items-center gap-3 mt-4 p-3 bg-white/40 rounded-xl cursor-pointer hover:bg-white/60 transition-all" id="sidebarUserInfo" data-hidden="true">
+          <div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-primary font-bold text-lg" id="sidebarUserAvatar"></div>
+          <div class="flex flex-col flex-1 min-w-0">
+            <span class="text-sm font-bold text-on-surface truncate" id="sidebarUserName"></span>
+            <span class="text-[10px] text-on-surface-variant">Member</span>
+          </div>
+          <span class="material-symbols-outlined text-primary/30 text-lg">chevron_right</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ========== MAIN CONTENT ========== -->
+    <main class="flex-1 md:ml-64 flex flex-col min-h-screen">
+
+      <!-- Top App Bar -->
+      <header class="bg-background sticky top-0 z-30">
+        <div class="flex justify-between items-center w-full px-6 py-4 max-w-5xl mx-auto">
+          <div class="flex items-center gap-8">
+            <span class="text-2xl font-body italic text-primary">eNotePad</span>
+            <nav class="hidden sm:flex items-center gap-6">
+              <a class="topnav-link active text-primary font-bold border-b-2 border-primary pb-1" href="#" data-tab="share" id="topnavShare">Share</a>
+              <a class="topnav-link text-primary/60 hover:bg-surface-container-low transition-colors px-2 py-1 rounded" href="#" data-tab="access" id="topnavAccess">Access</a>
+              <a class="topnav-link text-primary/60 hover:bg-surface-container-low transition-colors px-2 py-1 rounded" href="#" data-tab="account" id="topnavAccount">Account</a>
+            </nav>
+          </div>
+          <div class="flex items-center gap-4">
+            <button class="p-2 text-primary hover:bg-surface-container-low rounded-full transition-all active:scale-[0.98]" id="themeToggle" aria-label="Toggle theme">
+              <span class="material-symbols-outlined theme-icon-dark">dark_mode</span>
+              <span class="material-symbols-outlined theme-icon-light">light_mode</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- ========== PANELS ========== -->
+      <section class="flex-1 flex items-start justify-center p-6 md:p-12">
+        <div class="w-full max-w-2xl">
+
+          <!-- ===== SHARE PANEL ===== -->
+          <div class="tab-panel" id="panelShare" data-active="true">
+            <div class="bg-surface-container-lowest rounded-xl editorial-shadow overflow-hidden relative editorial-border">
+
+              <!-- Tab Selector (Share/Access inline) -->
+              <div class="flex bg-surface-container-low p-1 mx-6 mt-6 rounded-xl" id="inlineTabBar">
+                <button class="inline-tab flex-1 py-3 px-4 rounded-lg bg-white shadow-sm text-primary font-bold transition-all" data-tab="share">
+                  Share
+                </button>
+                <button class="inline-tab flex-1 py-3 px-4 rounded-lg text-primary/60 hover:text-primary transition-all" data-tab="access">
+                  Access
+                </button>
+              </div>
+
+              <!-- Share Form -->
+              <div class="p-6 md:p-8 space-y-6" id="shareForm">
+
+                <!-- Content Type Selector -->
+                <div class="flex gap-2" id="typeSelector">
+                  <button class="type-btn active flex-1 flex items-center justify-center gap-2 py-3 px-3 rounded-lg bg-primary-container/40 text-primary font-medium transition-all text-sm" data-type="text">
+                    <span class="material-symbols-outlined text-lg">edit_note</span> Text
+                  </button>
+                  <button class="type-btn flex-1 flex items-center justify-center gap-2 py-3 px-3 rounded-lg text-primary/50 hover:bg-surface-container-low transition-all text-sm" data-type="link">
+                    <span class="material-symbols-outlined text-lg">link</span> Link
+                  </button>
+                  <button class="type-btn flex-1 flex items-center justify-center gap-2 py-3 px-3 rounded-lg text-primary/50 hover:bg-surface-container-low transition-all text-sm" data-type="image">
+                    <span class="material-symbols-outlined text-lg">image</span> Image
+                  </button>
+                </div>
+
+                <!-- Note Title & Category (shown for logged-in save) -->
+                <div id="noteMeta" data-hidden="true">
+                  <div class="flex gap-3">
+                    <div class="flex-1">
+                      <label class="text-[10px] uppercase tracking-widest text-primary/40 font-bold block mb-1.5">Title / Headline</label>
+                      <input type="text" class="w-full px-4 py-2.5 bg-surface-dim/30 rounded-xl border-none shadow-inner focus:ring-2 focus:ring-primary/20 text-on-surface font-semibold placeholder:text-outline-variant/40 text-sm" placeholder="Give your note a title..." id="noteTitle" maxlength="100" autocomplete="off" />
+                    </div>
+                    <div class="w-[140px]">
+                      <label class="text-[10px] uppercase tracking-widest text-primary/40 font-bold block mb-1.5">Category</label>
+                      <select class="w-full px-3 py-2.5 bg-surface-dim/30 rounded-xl border-none shadow-inner focus:ring-2 focus:ring-primary/20 text-on-surface font-medium text-sm appearance-none cursor-pointer" id="noteCategory">
+                        <option value="">None</option>
+                        <option value="personal">📝 Personal</option>
+                        <option value="work">💼 Work</option>
+                        <option value="ideas">💡 Ideas</option>
+                        <option value="code">🖥️ Code</option>
+                        <option value="links">🔗 Links</option>
+                        <option value="important">⭐ Important</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Text Input -->
+                <div class="relative" id="inputText">
+                  <textarea class="w-full min-h-[200px] bg-transparent border-none focus:ring-0 font-body text-xl leading-relaxed text-on-surface paper-lines resize-none placeholder:text-outline-variant/40 p-0" placeholder="Start writing your note or paste a link here..." id="shareTextArea" maxlength="10000"></textarea>
+                </div>
+
+                <!-- Link Input -->
+                <div class="relative" id="inputLink" data-hidden="true">
+                  <div class="flex items-center gap-3 p-4 bg-surface-dim/30 rounded-xl">
+                    <span class="material-symbols-outlined text-primary/40">link</span>
+                    <input type="url" class="flex-1 bg-transparent border-none focus:ring-0 font-body text-lg text-on-surface placeholder:text-outline-variant/40" placeholder="https://example.com" id="shareLinkInput" />
+                  </div>
+                </div>
+
+                <!-- Image Upload Dropzone -->
+                <div id="inputImage" data-hidden="true">
+                  <div class="group relative w-full h-40 border-2 border-dashed border-outline-variant/30 rounded-xl flex flex-col items-center justify-center bg-surface hover:bg-surface-container-low transition-colors cursor-pointer" id="dropzone">
+                    <span class="material-symbols-outlined text-4xl text-primary/40 group-hover:scale-110 transition-transform">add_photo_alternate</span>
+                    <p class="mt-2 text-sm text-on-surface-variant font-medium">Click or drag to upload an image</p>
+                    <input type="file" accept="image/*" id="imageFileInput" class="absolute inset-0 opacity-0 cursor-pointer" />
+                  </div>
+                  <!-- Image Preview -->
+                  <div class="mt-4 relative" id="imagePreview" data-hidden="true">
+                    <img id="imagePreviewImg" alt="Preview" class="w-full max-h-[200px] object-contain rounded-xl shadow-md" />
+                    <button class="absolute top-2 right-2 w-8 h-8 bg-error text-on-error rounded-full flex items-center justify-center shadow-md hover:scale-110 transition-transform" id="removeImageBtn">
+                      <span class="material-symbols-outlined text-lg">close</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Auto-Erase Notice -->
+                <div class="flex items-center gap-3">
+                  <span class="material-symbols-outlined text-primary/40 text-lg">timer</span>
+                  <span class="text-sm text-on-surface-variant font-medium">Auto-erases in <strong class="text-primary">20 min</strong></span>
+                  <span class="ml-auto text-[10px] text-primary/40 font-medium flex items-center gap-1"><span class="material-symbols-outlined text-xs">info</span>For privacy</span>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex justify-center items-center gap-3 pt-2">
+                  <!-- Logged-out: single Share button -->
+                  <button class="px-12 py-4 bg-primary text-on-primary rounded-full font-bold text-lg shadow-xl hover:bg-primary-dim transition-all active:scale-[0.98] flex items-center gap-3" id="shareBtn">
+                    <span>Share Content</span>
+                    <span class="material-symbols-outlined">send</span>
+                  </button>
+
+                  <!-- Logged-in: Share icon + Save main button -->
+                  <button class="w-14 h-14 bg-surface-container-high text-primary rounded-full font-semibold shadow-md hover:bg-surface-container-highest transition-all active:scale-[0.95] flex items-center justify-center" id="shareIconBtn" data-hidden="true" title="Share with code">
+                    <span class="material-symbols-outlined text-xl">ios_share</span>
+                  </button>
+                  <button class="px-12 py-4 bg-primary text-on-primary rounded-full font-bold text-lg shadow-xl hover:bg-primary-dim transition-all active:scale-[0.98] flex items-center gap-3" id="saveBtn" data-hidden="true">
+                    <span>Save Note</span>
+                    <span class="material-symbols-outlined">bookmark</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Code Display (after share) -->
+              <div class="p-6 md:p-8 text-center space-y-4" id="codeDisplay" data-hidden="true">
+                <div class="w-16 h-16 mx-auto bg-tertiary-container rounded-full flex items-center justify-center mb-2">
+                  <span class="material-symbols-outlined text-3xl text-on-tertiary-container">check_circle</span>
+                </div>
+                <p class="text-xs uppercase tracking-widest text-primary/50 font-bold">Your Secret Code</p>
+                <p class="font-headline text-5xl font-bold tracking-[0.3em] text-primary code-reveal" id="codeValue"></p>
+                <p class="text-sm text-on-surface-variant" id="codeExpiry"></p>
+                <button class="inline-flex items-center gap-2 px-8 py-3 bg-primary text-on-primary rounded-full font-semibold shadow-lg hover:bg-primary-dim transition-all active:scale-[0.98]" id="codeCopyBtn">
+                  <span class="material-symbols-outlined text-lg">content_copy</span>
+                  <span id="codeCopyText">Copy Code</span>
+                </button>
+                <div class="pt-2">
+                  <button class="text-sm text-primary/60 hover:text-primary font-medium transition-colors" id="shareAnotherBtn">
+                    ← Share another
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- ===== ACCESS PANEL ===== -->
+          <div class="tab-panel" id="panelAccess" data-active="false">
+            <div class="bg-surface-container-lowest rounded-xl editorial-shadow overflow-hidden relative editorial-border">
+
+              <!-- Tab Selector -->
+              <div class="flex bg-surface-container-low p-1 mx-6 mt-6 rounded-xl" id="inlineTabBar2">
+                <button class="inline-tab flex-1 py-3 px-4 rounded-lg text-primary/60 hover:text-primary transition-all" data-tab="share">
+                  Share
+                </button>
+                <button class="inline-tab flex-1 py-3 px-4 rounded-lg bg-white shadow-sm text-primary font-bold transition-all" data-tab="access">
+                  Access
+                </button>
+              </div>
+
+              <div class="p-6 md:p-8 space-y-10 text-center">
+                <div class="space-y-3">
+                  <h2 class="font-body text-3xl italic text-primary">Enter Secret Code</h2>
+                  <p class="text-on-surface-variant max-w-sm mx-auto text-sm">Enter the 6-character code shared with you to unlock the curated content.</p>
+                </div>
+
+                <!-- OTP-style Code Input -->
+                <div class="flex justify-center gap-2 md:gap-3" id="codeInputGroup">
+                  <input class="code-input-box w-11 h-14 md:w-14 md:h-[4.5rem] text-center text-2xl md:text-3xl font-bold bg-surface-dim/30 rounded-xl border-none shadow-inner focus:ring-2 focus:ring-primary/20 text-primary font-headline" maxlength="1" type="text" data-index="0" id="codeBox0" autocomplete="off" />
+                  <input class="code-input-box w-11 h-14 md:w-14 md:h-[4.5rem] text-center text-2xl md:text-3xl font-bold bg-surface-dim/30 rounded-xl border-none shadow-inner focus:ring-2 focus:ring-primary/20 text-primary font-headline" maxlength="1" type="text" data-index="1" id="codeBox1" autocomplete="off" />
+                  <input class="code-input-box w-11 h-14 md:w-14 md:h-[4.5rem] text-center text-2xl md:text-3xl font-bold bg-surface-dim/30 rounded-xl border-none shadow-inner focus:ring-2 focus:ring-primary/20 text-primary font-headline" maxlength="1" type="text" data-index="2" id="codeBox2" autocomplete="off" />
+                  <span class="w-2 h-14 md:h-[4.5rem] flex items-center text-outline-variant">•</span>
+                  <input class="code-input-box w-11 h-14 md:w-14 md:h-[4.5rem] text-center text-2xl md:text-3xl font-bold bg-surface-dim/30 rounded-xl border-none shadow-inner focus:ring-2 focus:ring-primary/20 text-primary font-headline" maxlength="1" type="text" data-index="3" id="codeBox3" autocomplete="off" />
+                  <input class="code-input-box w-11 h-14 md:w-14 md:h-[4.5rem] text-center text-2xl md:text-3xl font-bold bg-surface-dim/30 rounded-xl border-none shadow-inner focus:ring-2 focus:ring-primary/20 text-primary font-headline" maxlength="1" type="text" data-index="4" id="codeBox4" autocomplete="off" />
+                  <input class="code-input-box w-11 h-14 md:w-14 md:h-[4.5rem] text-center text-2xl md:text-3xl font-bold bg-surface-dim/30 rounded-xl border-none shadow-inner focus:ring-2 focus:ring-primary/20 text-primary font-headline" maxlength="1" type="text" data-index="5" id="codeBox5" autocomplete="off" />
+                </div>
+
+                <!-- Fetch Button -->
+                <div class="pt-2">
+                  <button class="px-12 py-4 bg-primary text-on-primary rounded-full font-bold text-lg shadow-xl hover:bg-primary-dim transition-all active:scale-[0.98] flex items-center gap-3 mx-auto" id="fetchBtn">
+                    <span>Fetch Content</span>
+                    <span class="material-symbols-outlined">cloud_download</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Content Result -->
+              <div class="p-6 md:p-8" id="contentResult" data-hidden="true">
+                <div class="bg-surface rounded-xl p-6 editorial-border">
+                  <div class="flex items-center justify-between mb-4 pb-4 border-b border-outline-variant/15">
+                    <span class="inline-flex items-center gap-2 px-3 py-1 text-xs font-semibold uppercase tracking-wider rounded-full bg-primary-container/40 text-primary" id="contentTypeBadge"></span>
+                    <button class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium text-primary hover:bg-surface-container-low transition-all" id="contentCopyBtn">
+                      <span class="material-symbols-outlined text-lg">content_copy</span> Copy
+                    </button>
+                  </div>
+                  <div id="contentBody"></div>
+                </div>
+              </div>
+
+              <!-- Access Status -->
+              <div class="p-6 md:p-8 text-center" id="accessStatus" data-hidden="true">
+                <div class="py-8">
+                  <div class="text-4xl mb-3" id="accessStatusIcon"></div>
+                  <p class="text-on-surface-variant font-medium" id="accessStatusText"></p>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- ===== ACCOUNT PANEL ===== -->
+          <div class="tab-panel" id="panelAccount" data-active="false">
+
+            <!-- Auth Card (shown when logged out) -->
+            <div class="bg-surface-container-lowest rounded-xl editorial-shadow overflow-hidden editorial-border" id="authCard">
+              <div class="p-6 md:p-8 space-y-6">
+                <div class="text-center space-y-2">
+                  <div class="w-14 h-14 mx-auto bg-primary-container rounded-full flex items-center justify-center mb-2">
+                    <span class="material-symbols-outlined text-2xl text-primary">lock</span>
+                  </div>
+                  <h2 class="font-body text-2xl italic text-primary" id="authTitle">Login</h2>
+                  <p class="text-sm text-on-surface-variant" id="authSubtitle">Enter your username and 4-digit PIN to access your account.</p>
+                </div>
+
+                <div class="space-y-4" id="authForm">
+                  <!-- Username -->
+                  <div>
+                    <label class="text-xs uppercase tracking-widest text-primary/50 font-bold block mb-2" for="authUsername">Username</label>
+                    <input class="w-full px-4 py-3 bg-surface-dim/30 rounded-xl border-none shadow-inner focus:ring-2 focus:ring-primary/20 text-on-surface font-medium placeholder:text-outline-variant/40" type="text" id="authUsername" placeholder="Enter a username" maxlength="20" autocomplete="off" />
+                  </div>
+
+                  <!-- 4-digit PIN -->
+                  <div>
+                    <label class="text-xs uppercase tracking-widest text-primary/50 font-bold block mb-2">4-Digit PIN</label>
+                    <div class="flex justify-center gap-3" id="pinInputGroup">
+                      <input class="pin-box w-14 h-16 text-center text-2xl font-bold bg-surface-dim/30 rounded-xl border-none shadow-inner focus:ring-2 focus:ring-primary/20 text-primary font-headline" type="tel" maxlength="1" data-index="0" id="pinBox0" style="-webkit-text-security: disc;" />
+                      <input class="pin-box w-14 h-16 text-center text-2xl font-bold bg-surface-dim/30 rounded-xl border-none shadow-inner focus:ring-2 focus:ring-primary/20 text-primary font-headline" type="tel" maxlength="1" data-index="1" id="pinBox1" style="-webkit-text-security: disc;" />
+                      <input class="pin-box w-14 h-16 text-center text-2xl font-bold bg-surface-dim/30 rounded-xl border-none shadow-inner focus:ring-2 focus:ring-primary/20 text-primary font-headline" type="tel" maxlength="1" data-index="2" id="pinBox2" style="-webkit-text-security: disc;" />
+                      <input class="pin-box w-14 h-16 text-center text-2xl font-bold bg-surface-dim/30 rounded-xl border-none shadow-inner focus:ring-2 focus:ring-primary/20 text-primary font-headline" type="tel" maxlength="1" data-index="3" id="pinBox3" style="-webkit-text-security: disc;" />
+                    </div>
+                  </div>
+
+                  <!-- Auth Button -->
+                  <div class="flex justify-center pt-2">
+                    <button class="w-full py-4 bg-primary text-on-primary rounded-full font-bold text-lg shadow-xl hover:bg-primary-dim transition-all active:scale-[0.98] flex items-center justify-center gap-3" id="authBtn">
+                      <span class="material-symbols-outlined">lock_open</span>
+                      <span id="authBtnText">Login</span>
+                    </button>
+                  </div>
+
+                  <!-- Toggle Login/Register -->
+                  <div class="text-center pt-2">
+                    <span class="text-sm text-on-surface-variant">Don't have an account?</span>
+                    <button class="text-sm text-primary font-bold hover:underline ml-1 bg-transparent border-none cursor-pointer" id="authToggleLink">Register</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Logged-in View (hidden by default) -->
+            <div class="space-y-4" id="accountView" data-hidden="true">
+
+              <!-- User Profile Card -->
+              <div class="bg-surface-container-lowest rounded-xl editorial-shadow editorial-border overflow-hidden">
+                <div class="p-6 flex items-center justify-between">
+                  <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 rounded-full bg-primary-container flex items-center justify-center text-primary font-bold text-2xl" id="userAvatar"></div>
+                    <div>
+                      <p class="font-bold text-lg text-on-surface" id="userName"></p>
+                      <p class="text-xs text-on-surface-variant flex items-center gap-1">
+                        <span class="material-symbols-outlined text-xs">verified</span>
+                        <span>Member since </span><span id="userJoinDate">—</span>
+                      </p>
+                    </div>
+                  </div>
+                  <button class="px-4 py-2 rounded-full text-sm font-medium text-error/80 hover:bg-error/5 transition-all flex items-center gap-1" id="logoutBtn">
+                    <span class="material-symbols-outlined text-base">logout</span>
+                    Logout
+                  </button>
+                </div>
+                <!-- Quick Stats -->
+                <div class="grid grid-cols-3 border-t border-outline-variant/10">
+                  <div class="p-4 text-center border-r border-outline-variant/10">
+                    <p class="text-2xl font-bold text-primary" id="statShared">0</p>
+                    <p class="text-[10px] uppercase tracking-wider text-on-surface-variant font-semibold">Shared</p>
+                  </div>
+                  <div class="p-4 text-center border-r border-outline-variant/10">
+                    <p class="text-2xl font-bold text-primary" id="statSaved">0</p>
+                    <p class="text-[10px] uppercase tracking-wider text-on-surface-variant font-semibold">Saved</p>
+                  </div>
+                  <div class="p-4 text-center">
+                    <p class="text-2xl font-bold text-primary" id="statTotal">0</p>
+                    <p class="text-[10px] uppercase tracking-wider text-on-surface-variant font-semibold">Total</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Account Section Tabs -->
+              <div class="flex bg-surface-container-low p-1 rounded-xl" id="accountTabBar">
+                <button class="account-tab active flex-1 py-2.5 px-3 rounded-lg bg-white shadow-sm text-primary font-bold transition-all text-sm flex items-center justify-center gap-1.5" data-account-tab="recent">
+                  <span class="material-symbols-outlined text-base">schedule</span> Recent
+                </button>
+                <button class="account-tab flex-1 py-2.5 px-3 rounded-lg text-primary/60 hover:text-primary transition-all text-sm flex items-center justify-center gap-1.5" data-account-tab="saved">
+                  <span class="material-symbols-outlined text-base">bookmark</span> Saved
+                </button>
+                <button class="account-tab flex-1 py-2.5 px-3 rounded-lg text-primary/60 hover:text-primary transition-all text-sm flex items-center justify-center gap-1.5" data-account-tab="settings">
+                  <span class="material-symbols-outlined text-base">settings</span> Settings
+                </button>
+              </div>
+
+              <!-- RECENT HISTORY Section -->
+              <div class="account-section bg-surface-container-lowest rounded-xl editorial-shadow editorial-border p-6" id="sectionRecent" data-account-active="true">
+                <div class="flex items-center justify-between mb-1">
+                  <h2 class="font-body text-xl italic text-primary">Recent Activity</h2>
+                  <button class="text-xs text-primary/50 hover:text-primary transition-colors font-semibold flex items-center gap-1" id="clearHistoryBtn">
+                    <span class="material-symbols-outlined text-sm">delete_sweep</span> Clear
+                  </button>
+                </div>
+                <p class="text-sm text-on-surface-variant mb-5">Your recently shared content — tap to copy the code.</p>
+                <ul id="notesHistory">
+                  <li class="text-center py-10 text-on-surface-variant" id="notesEmpty">
+                    <span class="material-symbols-outlined text-4xl text-primary/20 block mb-2">history</span>
+                    <span class="text-sm">No recent activity yet.</span>
+                  </li>
+                </ul>
+              </div>
+
+              <!-- SAVED NOTES Section -->
+              <div class="account-section bg-surface-container-lowest rounded-xl editorial-shadow editorial-border p-6" id="sectionSaved" data-account-active="false">
+                <div class="flex items-center justify-between mb-1">
+                  <h2 class="font-body text-xl italic text-primary">Saved Notes</h2>
+                  <span class="text-xs text-on-surface-variant font-medium px-2 py-1 bg-primary-container/30 rounded-full" id="savedCount">0 notes</span>
+                </div>
+                <p class="text-sm text-on-surface-variant mb-3">Your permanently saved notes — always accessible.</p>
+                <!-- Category Filter -->
+                <div class="flex gap-1.5 mb-5 overflow-x-auto pb-1" id="categoryFilter">
+                  <button class="cat-filter-btn active px-3 py-1.5 rounded-full text-xs font-semibold bg-primary-container/40 text-primary whitespace-nowrap transition-all" data-filter="all">All</button>
+                  <button class="cat-filter-btn px-3 py-1.5 rounded-full text-xs font-semibold text-primary/40 hover:text-primary whitespace-nowrap transition-all" data-filter="personal">📝 Personal</button>
+                  <button class="cat-filter-btn px-3 py-1.5 rounded-full text-xs font-semibold text-primary/40 hover:text-primary whitespace-nowrap transition-all" data-filter="work">💼 Work</button>
+                  <button class="cat-filter-btn px-3 py-1.5 rounded-full text-xs font-semibold text-primary/40 hover:text-primary whitespace-nowrap transition-all" data-filter="ideas">💡 Ideas</button>
+                  <button class="cat-filter-btn px-3 py-1.5 rounded-full text-xs font-semibold text-primary/40 hover:text-primary whitespace-nowrap transition-all" data-filter="code">🖥️ Code</button>
+                  <button class="cat-filter-btn px-3 py-1.5 rounded-full text-xs font-semibold text-primary/40 hover:text-primary whitespace-nowrap transition-all" data-filter="links">🔗 Links</button>
+                  <button class="cat-filter-btn px-3 py-1.5 rounded-full text-xs font-semibold text-primary/40 hover:text-primary whitespace-nowrap transition-all" data-filter="important">⭐ Important</button>
+                </div>
+                <ul id="savedNotesList">
+                  <li class="text-center py-10 text-on-surface-variant" id="savedEmpty">
+                    <span class="material-symbols-outlined text-4xl text-primary/20 block mb-2">bookmark_border</span>
+                    <span class="text-sm">No saved notes yet. Use "Save Note" while sharing!</span>
+                  </li>
+                </ul>
+              </div>
+
+              <!-- Edit Note Modal (inline) -->
+              <div class="bg-surface-container-lowest rounded-xl editorial-shadow editorial-border p-6" id="editNoteModal" data-hidden="true">
+                <div class="flex items-center justify-between mb-4">
+                  <h3 class="font-body text-lg italic text-primary">Edit Note</h3>
+                  <button class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-container-low transition-all" id="cancelEditBtn">
+                    <span class="material-symbols-outlined text-primary/40">close</span>
+                  </button>
+                </div>
+                <div class="space-y-4">
+                  <div class="flex gap-3">
+                    <div class="flex-1">
+                      <label class="text-[10px] uppercase tracking-widest text-primary/40 font-bold block mb-1.5">Title</label>
+                      <input type="text" class="w-full px-4 py-2.5 bg-surface-dim/30 rounded-xl border-none shadow-inner focus:ring-2 focus:ring-primary/20 text-on-surface font-semibold placeholder:text-outline-variant/40 text-sm" id="editNoteTitle" maxlength="100" />
+                    </div>
+                    <div class="w-[140px]">
+                      <label class="text-[10px] uppercase tracking-widest text-primary/40 font-bold block mb-1.5">Category</label>
+                      <select class="w-full px-3 py-2.5 bg-surface-dim/30 rounded-xl border-none shadow-inner focus:ring-2 focus:ring-primary/20 text-on-surface font-medium text-sm appearance-none cursor-pointer" id="editNoteCategory">
+                        <option value="">None</option>
+                        <option value="personal">📝 Personal</option>
+                        <option value="work">💼 Work</option>
+                        <option value="ideas">💡 Ideas</option>
+                        <option value="code">🖥️ Code</option>
+                        <option value="links">🔗 Links</option>
+                        <option value="important">⭐ Important</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div>
+                    <label class="text-[10px] uppercase tracking-widest text-primary/40 font-bold block mb-1.5">Content</label>
+                    <textarea class="w-full min-h-[150px] px-4 py-3 bg-surface-dim/30 rounded-xl border-none shadow-inner focus:ring-2 focus:ring-primary/20 text-on-surface font-body text-base resize-none" id="editNoteContent"></textarea>
+                  </div>
+                  <input type="hidden" id="editNoteId" />
+                  <div class="flex gap-3 pt-1">
+                    <button class="flex-1 py-3 rounded-full text-sm font-semibold text-error bg-error/5 hover:bg-error/10 transition-all flex items-center justify-center gap-2" id="deleteFromEditBtn">
+                      <span class="material-symbols-outlined text-base">delete</span> Delete
+                    </button>
+                    <button class="flex-1 py-3 rounded-full text-sm font-semibold text-on-primary bg-primary hover:bg-primary-dim transition-all flex items-center justify-center gap-2" id="saveEditBtn">
+                      <span class="material-symbols-outlined text-base">check</span> Save Changes
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- SETTINGS Section -->
+              <div class="account-section bg-surface-container-lowest rounded-xl editorial-shadow editorial-border" id="sectionSettings" data-account-active="false">
+                <!-- Change PIN -->
+                <div class="p-6 border-b border-outline-variant/10">
+                  <h2 class="font-body text-xl italic text-primary mb-1">Account Settings</h2>
+                  <p class="text-sm text-on-surface-variant mb-5">Manage your account preferences.</p>
+
+                  <div class="space-y-4">
+                    <div class="flex items-center justify-between p-4 bg-surface rounded-xl">
+                      <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-primary/50">lock</span>
+                        <div>
+                          <p class="text-sm font-semibold text-on-surface">Change PIN</p>
+                          <p class="text-xs text-on-surface-variant">Update your 4-digit security PIN</p>
+                        </div>
+                      </div>
+                      <button class="px-4 py-2 rounded-full text-xs font-semibold text-primary bg-primary-container/30 hover:bg-primary-container/50 transition-all" id="changePinBtn">Change</button>
+                    </div>
+
+                    <div class="flex items-center justify-between p-4 bg-surface rounded-xl">
+                      <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-primary/50">download</span>
+                        <div>
+                          <p class="text-sm font-semibold text-on-surface">Export Notes</p>
+                          <p class="text-xs text-on-surface-variant">Download all your saved notes</p>
+                        </div>
+                      </div>
+                      <button class="px-4 py-2 rounded-full text-xs font-semibold text-primary bg-primary-container/30 hover:bg-primary-container/50 transition-all" id="exportNotesBtn">Export</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Danger Zone -->
+                <div class="p-6">
+                  <p class="text-xs uppercase tracking-widest text-error/60 font-bold mb-3">Danger Zone</p>
+                  <div class="flex items-center justify-between p-4 bg-error/5 rounded-xl border border-error/10">
+                    <div class="flex items-center gap-3">
+                      <span class="material-symbols-outlined text-error/50">warning</span>
+                      <div>
+                        <p class="text-sm font-semibold text-on-surface">Delete Account</p>
+                        <p class="text-xs text-on-surface-variant">Permanently remove your account and all data</p>
+                      </div>
+                    </div>
+                    <button class="px-4 py-2 rounded-full text-xs font-semibold text-on-error bg-error hover:opacity-90 transition-all" id="deleteAccountBtn">Delete</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Change PIN Modal (inline) -->
+              <div class="bg-surface-container-lowest rounded-xl editorial-shadow editorial-border p-6" id="changePinModal" data-hidden="true">
+                <h3 class="font-body text-lg italic text-primary mb-4">Change Your PIN</h3>
+                <div class="space-y-4">
+                  <div>
+                    <label class="text-xs uppercase tracking-widest text-primary/50 font-bold block mb-2">Current PIN</label>
+                    <div class="flex justify-center gap-3" id="currentPinGroup">
+                      <input class="pin-change-box w-14 h-14 text-center text-xl font-bold bg-surface-dim/30 rounded-xl border-none shadow-inner focus:ring-2 focus:ring-primary/20 text-primary font-headline" type="tel" maxlength="1" style="-webkit-text-security: disc;" />
+                      <input class="pin-change-box w-14 h-14 text-center text-xl font-bold bg-surface-dim/30 rounded-xl border-none shadow-inner focus:ring-2 focus:ring-primary/20 text-primary font-headline" type="tel" maxlength="1" style="-webkit-text-security: disc;" />
+                      <input class="pin-change-box w-14 h-14 text-center text-xl font-bold bg-surface-dim/30 rounded-xl border-none shadow-inner focus:ring-2 focus:ring-primary/20 text-primary font-headline" type="tel" maxlength="1" style="-webkit-text-security: disc;" />
+                      <input class="pin-change-box w-14 h-14 text-center text-xl font-bold bg-surface-dim/30 rounded-xl border-none shadow-inner focus:ring-2 focus:ring-primary/20 text-primary font-headline" type="tel" maxlength="1" style="-webkit-text-security: disc;" />
+                    </div>
+                  </div>
+                  <div>
+                    <label class="text-xs uppercase tracking-widest text-primary/50 font-bold block mb-2">New PIN</label>
+                    <div class="flex justify-center gap-3" id="newPinGroup">
+                      <input class="pin-change-box w-14 h-14 text-center text-xl font-bold bg-surface-dim/30 rounded-xl border-none shadow-inner focus:ring-2 focus:ring-primary/20 text-primary font-headline" type="tel" maxlength="1" style="-webkit-text-security: disc;" />
+                      <input class="pin-change-box w-14 h-14 text-center text-xl font-bold bg-surface-dim/30 rounded-xl border-none shadow-inner focus:ring-2 focus:ring-primary/20 text-primary font-headline" type="tel" maxlength="1" style="-webkit-text-security: disc;" />
+                      <input class="pin-change-box w-14 h-14 text-center text-xl font-bold bg-surface-dim/30 rounded-xl border-none shadow-inner focus:ring-2 focus:ring-primary/20 text-primary font-headline" type="tel" maxlength="1" style="-webkit-text-security: disc;" />
+                      <input class="pin-change-box w-14 h-14 text-center text-xl font-bold bg-surface-dim/30 rounded-xl border-none shadow-inner focus:ring-2 focus:ring-primary/20 text-primary font-headline" type="tel" maxlength="1" style="-webkit-text-security: disc;" />
+                    </div>
+                  </div>
+                  <div class="flex gap-3 pt-2">
+                    <button class="flex-1 py-3 rounded-full text-sm font-semibold text-primary bg-surface-container-low hover:bg-surface-container transition-all" id="cancelPinBtn">Cancel</button>
+                    <button class="flex-1 py-3 rounded-full text-sm font-semibold text-on-primary bg-primary hover:bg-primary-dim transition-all" id="savePinBtn">Update PIN</button>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+        </section>
+
+
+
+      <!-- Footer -->
+      <footer class="flex justify-center items-center gap-6 py-8 w-full opacity-60 bg-transparent text-primary font-label text-sm">
+        <span>© eNotePad — Digital Curator</span>
+        <div class="flex gap-4">
+          <a class="text-primary/50 hover:text-primary transition-colors" href="#">Privacy</a>
+          <a class="text-primary/50 hover:text-primary transition-colors" href="#">Terms</a>
+          <a class="text-primary/50 hover:text-primary transition-colors" href="#">Support</a>
+        </div>
+      </footer>
+
+    </main>
+  </div>
+
+  <!-- ========== MOBILE BOTTOM NAV ========== -->
+  <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-surface-container-lowest/80 backdrop-blur-xl border-t border-outline-variant/10 px-6 py-3 flex justify-around items-center z-50" id="mobileNav">
+    <button class="mobile-nav-btn active flex flex-col items-center gap-1 text-primary" data-tab="share">
+      <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">ios_share</span>
+      <span class="text-[10px] font-bold uppercase tracking-tighter">Share</span>
+    </button>
+    <button class="mobile-nav-btn flex flex-col items-center gap-1 text-primary/40" data-tab="access">
+      <span class="material-symbols-outlined">key</span>
+      <span class="text-[10px] font-bold uppercase tracking-tighter">Access</span>
+    </button>
+    <button class="mobile-nav-btn flex flex-col items-center gap-1 text-primary/40" data-tab="account">
+      <span class="material-symbols-outlined">person</span>
+      <span class="text-[10px] font-bold uppercase tracking-tighter">Account</span>
+    </button>
+  </nav>
+
+  <!-- ========== Firebase SDK (v9 Compat) ========== -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
+
+  <!-- App Scripts -->
+  <script src="js/firebase-config.js?v=3"></script>
+  <script src="js/utils.js?v=3"></script>
+  <script src="js/share.js?v=3"></script>
+  <script src="js/access.js?v=3"></script>
+  <script src="js/auth.js?v=3"></script>
+  <script src="js/app.js?v=3"></script>
+</body>
+</html>
