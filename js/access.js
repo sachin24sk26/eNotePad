@@ -117,14 +117,23 @@ function initAccess() {
       copyBtn.style.display = '';
 
     } else if (data.type === 'link') {
-      const linkEl = document.createElement('a');
-      linkEl.className = 'content-link-display';
-      linkEl.href = data.content;
-      linkEl.target = '_blank';
-      linkEl.rel = 'noopener noreferrer';
-      linkEl.innerHTML = `<span class="material-symbols-outlined">open_in_new</span> <span>${data.content}</span>`;
-      contentBody.appendChild(linkEl);
+      const links = Array.isArray(data.content) ? data.content : [data.content];
+      const linkContainer = document.createElement('div');
+      linkContainer.className = 'flex flex-col gap-3';
+      
+      links.forEach(link => {
+        const linkEl = document.createElement('a');
+        linkEl.className = 'content-link-display';
+        linkEl.href = link;
+        linkEl.target = '_blank';
+        linkEl.rel = 'noopener noreferrer';
+        linkEl.innerHTML = `<span class="material-symbols-outlined">open_in_new</span> <span class="break-all">${link}</span>`;
+        linkContainer.appendChild(linkEl);
+      });
+      contentBody.appendChild(linkContainer);
       copyBtn.style.display = '';
+      
+      data.content = links.join('\n');
 
     } else if (data.type === 'image') {
       const imageDiv = document.createElement('div');

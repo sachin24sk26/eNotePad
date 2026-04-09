@@ -24,6 +24,43 @@ function initShare() {
   let selectedType = 'text';
   let selectedFile = null;
 
+  const addLinkBtn = document.getElementById('addLinkBtn');
+  const linkInputsContainer = document.getElementById('linkInputsContainer');
+
+  // ----- Dynamic Links -----
+  function updateRemoveLinkButtons() {
+    const rows = linkInputsContainer.querySelectorAll('.link-input-row');
+    rows.forEach(row => {
+      const rmBtn = row.querySelector('.remove-link-btn');
+      if (rows.length > 1) {
+        rmBtn.classList.remove('hidden');
+      } else {
+        rmBtn.classList.add('hidden');
+      }
+    });
+  }
+
+  if (linkInputsContainer) {
+    linkInputsContainer.addEventListener('click', (e) => {
+      const rmBtn = e.target.closest('.remove-link-btn');
+      if (rmBtn) {
+        rmBtn.closest('.link-input-row').remove();
+        updateRemoveLinkButtons();
+      }
+    });
+  }
+
+  if (addLinkBtn) {
+    addLinkBtn.addEventListener('click', () => {
+      const firstRow = linkInputsContainer.querySelector('.link-input-row');
+      const newRow = firstRow.cloneNode(true);
+      newRow.querySelector('input').value = '';
+      linkInputsContainer.appendChild(newRow);
+      newRow.querySelector('input').focus();
+      updateRemoveLinkButtons();
+    });
+  }
+
   // ----- Update button + fields visibility based on login state -----
   function updateActionButtons() {
     const user = getCurrentUser();
@@ -112,10 +149,17 @@ function initShare() {
       if (!content) { showToast('Please enter some text', 'warning'); return null; }
       return content;
     } else if (selectedType === 'link') {
-      const content = document.getElementById('shareLinkInput').value.trim();
-      if (!content) { showToast('Please enter a URL', 'warning'); return null; }
-      if (!isValidURL(content)) { showToast('Please enter a valid URL (https://...)', 'error'); return null; }
-      return content;
+      const linkInputs = document.querySelectorAll('.shareLinkInput');
+      const content = [];
+      for (const input of linkInputs) {
+        const val = input.value.trim();
+        if (val) {
+          if (!isValidURL(val)) { showToast('Please enter a valid URL (https://...)', 'error'); return null; }
+          content.push(val);
+        }
+      }
+      if (content.length === 0) { showToast('Please enter at least one URL', 'warning'); return null; }
+      return content.length === 1 ? content[0] : content;
     } else if (selectedType === 'image') {
       if (!selectedFile) { showToast('Please select an image', 'warning'); return null; }
       return '__image__';
@@ -179,7 +223,7 @@ function initShare() {
           .collection('history').doc(code)
           .set({
             type: selectedType,
-            preview: title || (selectedType === 'image' ? '🖼️ Image' : content.substring(0, 100)),
+            preview: title || (selectedType === 'image' ? '🖼️ Image' : (Array.isArray(content) ? content.join(', ') : content).substring(0, 100)),
             code: code,
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
           });
@@ -220,7 +264,7 @@ function initShare() {
 
       if (selectedType === 'image') content = await uploadImage(noteId);
 
-      const preview = title || (selectedType === 'image' ? '🖼️ Image' : content.substring(0, 100));
+      const preview = title || (selectedType === 'image' ? '🖼️ Image' : (Array.isArray(content) ? content.join(', ') : content).substring(0, 100));
 
       await db.collection('users').doc(currentUser.username)
         .collection('savedNotes').doc(noteId)
@@ -283,7 +327,18 @@ function initShare() {
   // ----- Reset Form -----
   function resetShareForm() {
     document.getElementById('shareTextArea').value = '';
-    document.getElementById('shareLinkInput').value = '';
+    const linkContainer = document.getElementById('linkInputsContainer');
+    if (linkContainer) {
+      linkContainer.innerHTML = `
+        <div class="flex items-center gap-3 p-4 bg-surface-dim/30 rounded-xl link-input-row">
+          <span class="material-symbols-outlined text-primary/40">link</span>
+          <input type="url" class="flex-1 bg-transparent border-none focus:ring-0 font-body text-lg text-on-surface placeholder:text-outline-variant/40 shareLinkInput" placeholder="https://example.com" />
+          <button class="remove-link-btn text-error/60 hover:text-error transition-colors hidden" type="button" aria-label="Remove link">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+      `;
+    }
     if (noteTitle) noteTitle.value = '';
     if (noteCategory) noteCategory.value = '';
     selectedFile = null;

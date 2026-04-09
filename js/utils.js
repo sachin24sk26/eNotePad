@@ -244,34 +244,58 @@ function setCurrentUser(user) {
 async function cleanupExpiredShares() {
   try {
     const now = firebase.firestore.Timestamp.now();
+    
+    // 1. Clean up old shares
     const snapshot = await db.collection('shares')
       .where('expiresAt', '<=', now)
       .limit(200)
       .get();
 
-    if (snapshot.empty) return;
+    if (!snapshot.empty) {
+      const docs = snapshot.docs;
+      for (let i = 0; i < docs.length; i += 50) {
+        const batch = db.batch();
+        const chunk = docs.slice(i, i + 50);
 
-    // Process in batches of 50 (Firestore batch limit is 500)
-    const docs = snapshot.docs;
-    for (let i = 0; i < docs.length; i += 50) {
-      const batch = db.batch();
-      const chunk = docs.slice(i, i + 50);
+        chunk.forEach(doc => {
+          const data = doc.data();
+          if (data.type === 'image' && data.content && data.content.includes('firebasestorage')) {
+            try {
+              const ref = storage.refFromURL(data.content);
+              ref.delete().catch(() => {});
+            } catch (e) { }
+          }
+          batch.delete(doc.ref);
+        });
 
-      chunk.forEach(doc => {
-        const data = doc.data();
-        // Clean up associated image from Storage
-        if (data.type === 'image' && data.content && data.content.includes('firebasestorage')) {
-          try {
-            const ref = storage.refFromURL(data.content);
-            ref.delete().catch(() => {}); // Best-effort cleanup
-          } catch (e) { /* ignore invalid refs */ }
-        }
-        batch.delete(doc.ref);
-      });
-
-      await batch.commit();
+        await batch.commit();
+      }
+      console.log(`🧹 Cleaned up ${docs.length} expired shares`);
     }
-    console.log(`🧹 Cleaned up ${docs.length} expired shares`);
+
+    // 2. Clean up old convo_rooms
+    const convoSnapshot = await db.collection('convo_rooms')
+      .where('expiresAt', '<=', now)
+      .limit(50)
+      .get();
+
+    if (!convoSnapshot.empty) {
+      for (const doc of convoSnapshot.docs) {
+         // Best effort delete subcollection messages first
+         try {
+             const msgs = await doc.ref.collection('messages').limit(200).get();
+             if(!msgs.empty) {
+                 const b = db.batch();
+                 msgs.forEach(m => b.delete(m.ref));
+                 await b.commit();
+             }
+         } catch(e) {}
+         // Finally delete the room doc
+         await doc.ref.delete();
+      }
+      console.log(`🧹 Cleaned up ${convoSnapshot.docs.length} expired convo rooms`);
+    }
+
   } catch (error) {
     console.warn('Cleanup skipped:', error.message);
   }
