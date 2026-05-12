@@ -237,6 +237,24 @@ function setCurrentUser(user) {
 }
 
 /**
+ * Debounce a function call.
+ * @param {Function} func - Function to debounce
+ * @param {number} wait - Wait time in ms
+ * @returns {Function} Debounced function
+ */
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
+
+/**
  * Clean up expired documents from Firestore.
  * All shared content auto-erases after 20 minutes.
  * Runs on load and every 5 minutes via initPeriodicCleanup().

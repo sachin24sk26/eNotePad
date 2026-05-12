@@ -15,7 +15,10 @@ const firebaseConfig = {
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 
-// Export Firestore and Storage references for use in other modules
+
+
+
+// Export Firestore, Storage, and Auth references for use in other modules
 const db = firebase.firestore();
 const storage = firebase.storage();
 

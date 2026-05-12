@@ -13,8 +13,25 @@ document.addEventListener('DOMContentLoaded', () => {
   initAccess();
   initAuth();
   initPeriodicCleanup();
+  initBroadcastListener();
+  initFeedback();
   console.log('✨ eNotePad — Digital Curator initialized');
 });
+
+/**
+ * Handle feedback submission modal.
+ */
+function initFeedback() {
+  const openFeedbackBtn = document.getElementById('openFeedbackBtn');
+  if (openFeedbackBtn) {
+    openFeedbackBtn.addEventListener('click', () => {
+      const message = prompt('Enter your feedback/suggestions:');
+      if (message && message.trim()) {
+        sendFeedback(message.trim());
+      }
+    });
+  }
+}
 
 /**
  * Show/hide sidebar based on viewport width.
@@ -68,7 +85,8 @@ function initNavigation() {
   const panels = {
     share: document.getElementById('panelShare'),
     access: document.getElementById('panelAccess'),
-    account: document.getElementById('panelAccount')
+    account: document.getElementById('panelAccount'),
+    admin: document.getElementById('panelAdmin')
   };
 
   const sidebarBtns = document.querySelectorAll('.sidebar-nav-btn');
@@ -99,9 +117,11 @@ function initNavigation() {
    * Switch to a tab and sync all navigation elements.
    */
   function switchTab(tabName) {
-    // Update panels
+    // Update panels — guard against null (e.g. panelAdmin may not exist for non-admins)
     Object.keys(panels).forEach(key => {
-      panels[key].setAttribute('data-active', key === tabName ? 'true' : 'false');
+      if (panels[key]) {
+        panels[key].setAttribute('data-active', key === tabName ? 'true' : 'false');
+      }
     });
 
     // Sync sidebar
@@ -119,8 +139,8 @@ function initNavigation() {
       const isActive = btn.dataset.tab === tabName;
       btn.classList.toggle('active', isActive);
       btn.classList.toggle('text-primary/40', !isActive);
-      btn.querySelector('.material-symbols-outlined').style.fontVariationSettings =
-        isActive ? "'FILL' 1" : "'FILL' 0";
+      const icon = btn.querySelector('.material-symbols-outlined');
+      if (icon) icon.style.fontVariationSettings = isActive ? "'FILL' 1" : "'FILL' 0";
     });
 
     // Sync inline tabs
