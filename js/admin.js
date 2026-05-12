@@ -78,18 +78,24 @@ function initBroadcastListener() {
 
 function showBroadcastPopup(message, timestamp) {
     const popup = document.createElement('div');
-    popup.className = 'fixed bottom-6 left-1/2 -translate-x-1/2 z-[10000] w-[90%] max-w-md bg-inverse-surface text-inverse-on-surface p-6 rounded-2xl editorial-shadow animate-slide-up border border-white/10';
+    popup.className = 'fixed inset-0 z-[11000] flex items-center justify-center p-4';
+    popup.id = 'broadcastModal';
     popup.innerHTML = `
-        <div class="flex gap-4">
-            <div class="w-10 h-10 bg-error rounded-full flex items-center justify-center flex-shrink-0">
-                <span class="material-symbols-outlined text-white">campaign</span>
-            </div>
-            <div class="space-y-1">
-                <p class="text-xs font-bold uppercase tracking-widest text-white/50">Admin Message</p>
-                <p class="text-sm font-medium leading-relaxed">${escapeHTML(message)}</p>
-                <div class="pt-2">
-                    <button class="px-4 py-1.5 bg-white/10 hover:bg-white/20 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all" id="closeBroadcast">Dismiss</button>
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-md"></div>
+        <!-- Card -->
+        <div class="relative w-full max-w-sm bg-surface-container-lowest rounded-3xl editorial-shadow editorial-border overflow-hidden animate-slide-up">
+            <div class="p-8 text-center space-y-6">
+                <div class="w-20 h-20 mx-auto bg-error/10 rounded-full flex items-center justify-center text-error">
+                    <span class="material-symbols-outlined text-4xl">campaign</span>
                 </div>
+                <div class="space-y-2">
+                    <h3 class="font-body text-2xl italic text-primary">Announcement</h3>
+                    <p class="text-sm text-on-surface-variant leading-relaxed px-4">${escapeHTML(message)}</p>
+                </div>
+                <button class="w-full py-4 bg-primary text-on-primary rounded-full font-bold text-sm shadow-lg hover:bg-primary-dim transition-all active:scale-[0.98]" id="closeBroadcast">
+                    Got it, thanks!
+                </button>
             </div>
         </div>
     `;
@@ -97,7 +103,9 @@ function showBroadcastPopup(message, timestamp) {
 
     popup.querySelector('#closeBroadcast').addEventListener('click', () => {
         localStorage.setItem('last_broadcast_read', timestamp.toString());
-        popup.remove();
+        popup.classList.add('opacity-0', 'scale-95');
+        popup.style.transition = 'all 0.3s ease';
+        setTimeout(() => popup.remove(), 300);
     });
 }
 

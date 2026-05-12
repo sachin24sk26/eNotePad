@@ -19,18 +19,100 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /**
- * Handle feedback submission modal.
+ * Feedback Modal — works for all users (guest + logged in).
+ * Opened from sidebar "Feedback to Dev" button or Settings page button.
  */
 function initFeedback() {
-  const openFeedbackBtn = document.getElementById('openFeedbackBtn');
-  if (openFeedbackBtn) {
-    openFeedbackBtn.addEventListener('click', () => {
-      const message = prompt('Enter your feedback/suggestions:');
-      if (message && message.trim()) {
-        sendFeedback(message.trim());
-      }
+  const modal       = document.getElementById('feedbackModal');
+  const textarea    = document.getElementById('feedbackTextarea');
+  const charCount   = document.getElementById('feedbackCharCount');
+  const submitBtn   = document.getElementById('submitFeedbackBtn');
+  const cancelBtn   = document.getElementById('cancelFeedbackBtn');
+  const closeBtn    = document.getElementById('closeFeedbackModal');
+  const backdrop    = document.getElementById('feedbackBackdrop');
+  const sidebarBtn  = document.getElementById('sidebarFeedbackBtn');
+  const settingsBtn = document.getElementById('openFeedbackBtn');
+
+  let selectedCategory = 'general';
+
+  // --- Open modal ---
+  function openModal() {
+    modal.style.display = 'flex';
+    textarea.value = '';
+    charCount.textContent = '0';
+    selectedCategory = 'general';
+    // Reset chips
+    document.querySelectorAll('.feedback-chip').forEach(c => {
+      const isGeneral = c.dataset.cat === 'general';
+      c.classList.toggle('active', isGeneral);
+      c.classList.toggle('bg-primary/10', isGeneral);
+      c.classList.toggle('text-primary', isGeneral);
+      c.classList.toggle('border-primary/20', isGeneral);
+      c.classList.toggle('text-primary/50', !isGeneral);
+      c.classList.toggle('border-outline-variant/20', !isGeneral);
+    });
+    setTimeout(() => textarea.focus(), 150);
+  }
+
+  // --- Close modal ---
+  function closeModal() {
+    modal.style.display = 'none';
+  }
+
+  // --- Category chips ---
+  document.querySelectorAll('.feedback-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      selectedCategory = chip.dataset.cat;
+      document.querySelectorAll('.feedback-chip').forEach(c => {
+        const isActive = c === chip;
+        c.classList.toggle('active', isActive);
+        c.classList.toggle('bg-primary/10', isActive);
+        c.classList.toggle('text-primary', isActive);
+        c.classList.toggle('border-primary/20', isActive);
+        c.classList.toggle('text-primary/50', !isActive);
+        c.classList.toggle('border-outline-variant/20', !isActive);
+      });
+    });
+  });
+
+  // --- Character counter ---
+  if (textarea) {
+    textarea.addEventListener('input', () => {
+      charCount.textContent = textarea.value.length;
     });
   }
+
+  // --- Submit ---
+  if (submitBtn) {
+    submitBtn.addEventListener('click', async () => {
+      const msg = textarea.value.trim();
+      if (!msg) {
+        textarea.classList.add('ring-2', 'ring-error/30');
+        setTimeout(() => textarea.classList.remove('ring-2', 'ring-error/30'), 1500);
+        return;
+      }
+      submitBtn.disabled = true;
+      submitBtn.classList.add('btn-loading');
+      const ok = await sendFeedback(`[${selectedCategory.toUpperCase()}] ${msg}`);
+      submitBtn.disabled = false;
+      submitBtn.classList.remove('btn-loading');
+      if (ok) closeModal();
+    });
+  }
+
+  // --- Open triggers ---
+  if (sidebarBtn)  sidebarBtn.addEventListener('click', openModal);
+  if (settingsBtn) settingsBtn.addEventListener('click', openModal);
+
+  // --- Close triggers ---
+  if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+  if (closeBtn)  closeBtn.addEventListener('click', closeModal);
+  if (backdrop)  backdrop.addEventListener('click', closeModal);
+
+  // --- Escape key ---
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && modal.style.display !== 'none') closeModal();
+  });
 }
 
 /**

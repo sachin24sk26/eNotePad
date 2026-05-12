@@ -1,0 +1,14 @@
+{
+  "name": "enotepad-frontend",
+  "version": "1.0.0",
+  "description": "eNotePad Firebase Frontend",
+  "main": "index.html",
+  "scripts": {
+    "start": "serve ."
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "serve": "^14.2.1"
+  }
+}
