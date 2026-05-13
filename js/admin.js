@@ -3,111 +3,64 @@
  * Premium administrative dashboard logic.
  */
 
+// Global State
+window.adminInitialized = false;
+let broadcastSnapshotListener = null;
+
 function initAdmin() {
     if (window.adminInitialized) {
         console.log('🛡️ Admin already initialized, skipping...');
         return;
     }
-    console.log('🛡️ Admin Command Center Initializing...');
     
     const adminTabs = document.querySelectorAll('.admin-tab-btn');
     const adminSections = document.querySelectorAll('.admin-section');
-    console.log(`🛡️ Found ${adminTabs.length} tabs and ${adminSections.length} sections`);
-    
     const sendBroadcastBtn = document.getElementById('adminSendBroadcastBtn');
     const broadcastInput = document.getElementById('adminBroadcastInput');
-    const currentBroadcastEl = document.getElementById('adminCurrentBroadcast');
-    
-    const feedbackList = document.getElementById('adminFeedbackListExpanded');
-    const userList = document.getElementById('adminUserList');
     const userSearch = document.getElementById('adminUserSearch');
 
-    // ----- 1. Tab Navigation -----
+    if (!adminTabs.length) {
+        console.warn('🛡️ Admin tabs not found in DOM');
+        return;
+    }
+
+    console.log('🛡️ Admin Command Center Initializing...');
+
+    // 1. Tab Switching (Horizontal Top-Nav)
     adminTabs.forEach(tab => {
         tab.addEventListener('click', () => {
             const target = tab.dataset.adminTab;
+            if (!target) return;
             
-            // Switch Active Tab Button
+            // Update buttons
             adminTabs.forEach(t => {
-                t.classList.remove('active', 'text-primary', 'font-bold');
-                t.classList.add('text-primary/50');
+                const isActive = t === tab;
+                t.classList.toggle('active', isActive);
+                t.classList.toggle('bg-white/5', isActive);
+                t.classList.toggle('text-white', isActive);
+                t.classList.toggle('text-white/30', !isActive);
             });
-            tab.classList.add('active', 'text-primary', 'font-bold');
-            tab.classList.remove('text-primary/50');
-            
-            // Switch Section Visibility
-            adminSections.forEach(s => s.classList.add('hidden'));
-            const activeSection = document.getElementById(`adminSection${target.charAt(0).toUpperCase() + target.slice(1)}`);
-            if (activeSection) {
-                activeSection.classList.remove('hidden');
-                activeSection.classList.add('animate-editorialFadeIn');
-            }
-            
+
+            // Update sections
+            adminSections.forEach(sec => {
+                const isTarget = sec.id === `adminSection${target.charAt(0).toUpperCase() + target.slice(1)}`;
+                sec.classList.toggle('hidden', !isTarget);
+                if (isTarget) sec.classList.add('animate-editorialFadeIn');
+            });
+
             // Contextual Data Loading
-            if (target === 'overview') loadAdminStats();
-            if (target === 'broadcast') loadCurrentBroadcast();
-            if (target === 'feedback') loadAdminFeedback();
-            if (target === 'users') loadAdminUsers();
+            switch(target) {
+                case 'feedback': loadAdminFeedback(); break;
+                case 'users': loadAdminUsers(); break;
+                case 'overview': loadAdminStats(); break;
+                case 'rooms': loadAdminStats(); break;
+                case 'broadcast': /* Listener handles this */ break;
+            }
         });
     });
 
-    // ----- 2. Dynamic Stats (with counters) -----
-    async function loadAdminStats() {
-        try {
-            // Parallel fetch for speed
-            const [usersSnap, sharesSnap, feedbackSnap] = await Promise.all([
-                db.collection('users').get(),
-                db.collection('shares').get(),
-                db.collection('feedback').get()
-            ]);
-            
-            animateCounter('adminStatUsers', usersSnap.size);
-            animateCounter('adminStatNotes', sharesSnap.size);
-            animateCounter('adminStatFeedback', feedbackSnap.size);
-
-            // Update badge if any feedback
-            const badge = document.getElementById('adminFeedbackBadge');
-            if (badge) {
-                if (feedbackSnap.size > 0) {
-                    badge.textContent = feedbackSnap.size;
-                    badge.classList.remove('hidden');
-                } else {
-                    badge.classList.add('hidden');
-                }
-            }
-        } catch (e) {
-            console.error('Stats fetch error:', e);
-        }
-    }
-
-    function animateCounter(id, target) {
-        const el = document.getElementById(id);
-        if (!el) {
-            console.warn(`Counter element ${id} not found`);
-            return;
-        }
-        let current = parseInt(el.textContent) || 0;
-        const duration = 800; // ms
-        const increment = (target - current) / (duration / 16);
-        
-        const timer = setInterval(() => {
-            current += increment;
-            const currentEl = document.getElementById(id); // Re-fetch to be safe
-            if (!currentEl) {
-                clearInterval(timer);
-                return;
-            }
-            if ((increment > 0 && current >= target) || (increment < 0 && current <= target)) {
-                currentEl.textContent = target;
-                clearInterval(timer);
-            } else {
-                currentEl.textContent = Math.floor(current);
-            }
-        }, 16);
-    }
-
-    // ----- 3. Broadcast Management -----
-    if (sendBroadcastBtn) {
+    // 2. Broadcast Sending
+    if (sendBroadcastBtn && broadcastInput) {
         sendBroadcastBtn.addEventListener('click', async () => {
             const message = broadcastInput.value.trim();
             if (!message) {
@@ -116,6 +69,7 @@ function initAdmin() {
             }
 
             sendBroadcastBtn.disabled = true;
+            const originalHTML = sendBroadcastBtn.innerHTML;
             sendBroadcastBtn.innerHTML = '<span class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>';
 
             try {
@@ -128,157 +82,22 @@ function initAdmin() {
                 
                 showToast('Announcement broadcasted!', 'success');
                 broadcastInput.value = '';
-                loadCurrentBroadcast();
             } catch (err) {
+                console.error('Broadcast failed:', err);
                 showToast('Failed to broadcast', 'error');
             } finally {
                 sendBroadcastBtn.disabled = false;
-                sendBroadcastBtn.innerHTML = '<span class="material-symbols-outlined text-sm">send</span> Publish Broadcast';
+                sendBroadcastBtn.innerHTML = originalHTML;
             }
         });
     }
 
-    async function loadCurrentBroadcast() {
-        if (!currentBroadcastEl) return;
-        try {
-            const doc = await db.collection('system').doc('broadcast').get();
-            if (doc.exists && doc.data().active) {
-                const data = doc.data();
-                currentBroadcastEl.innerHTML = `
-                    <div class="w-full flex justify-between items-start admin-card p-6 border-error/10">
-                        <div class="space-y-2">
-                            <div class="flex items-center gap-2">
-                                <span class="w-2 h-2 bg-error rounded-full animate-pulse"></span>
-                                <span class="text-[10px] font-bold uppercase text-error tracking-tighter">Live Broadcast</span>
-                            </div>
-                            <p class="text-on-surface leading-relaxed text-base font-medium">${escapeHTML(data.message)}</p>
-                            <div class="flex items-center gap-2 text-[10px] text-on-surface-variant/40 font-bold">
-                                <span class="material-symbols-outlined text-xs">schedule</span>
-                                ${data.timestamp ? formatTimestamp(data.timestamp) : 'Just now'}
-                            </div>
-                        </div>
-                        <button class="w-10 h-10 rounded-xl bg-error/5 text-error hover:bg-error/10 transition-all flex items-center justify-center shadow-sm" id="killBroadcastBtn">
-                            <span class="material-symbols-outlined">cancel</span>
-                        </button>
-                    </div>
-                `;
-                document.getElementById('killBroadcastBtn').addEventListener('click', deactivateBroadcast);
-            } else {
-                currentBroadcastEl.innerHTML = `
-                    <div class="text-center opacity-30 italic flex flex-col items-center gap-2">
-                        <span class="material-symbols-outlined text-4xl">notifications_off</span>
-                        <span>No active announcements.</span>
-                    </div>
-                `;
-            }
-        } catch (e) { console.error(e); }
-    }
-
-    async function deactivateBroadcast() {
-        if (!confirm('End this broadcast for all users?')) return;
-        try {
-            await db.collection('system').doc('broadcast').update({ active: false });
-            showToast('Announcement retracted', 'info');
-            loadCurrentBroadcast();
-        } catch (e) { showToast('Action failed', 'error'); }
-    }
-
-    // ----- 4. Feedback Dashboard -----
-    async function loadAdminFeedback() {
-        if (!feedbackList) return;
-        feedbackList.innerHTML = '<div class="py-20 flex justify-center"><div class="w-10 h-10 border-4 border-primary/10 border-t-primary rounded-full animate-spin"></div></div>';
-        
-        try {
-            const snapshot = await db.collection('feedback').orderBy('timestamp', 'desc').get();
-            if (snapshot.empty) {
-                feedbackList.innerHTML = `
-                    <div class="py-20 text-center text-primary/20 italic text-sm flex flex-col items-center gap-4">
-                        <span class="material-symbols-outlined text-6xl opacity-10">inbox</span>
-                        No voices heard yet.
-                    </div>`;
-                return;
-            }
-
-            feedbackList.innerHTML = '';
-            snapshot.docs.forEach(doc => {
-                const data = doc.data();
-                const item = document.createElement('div');
-                item.className = 'admin-card p-6 space-y-4';
-                item.innerHTML = `
-                    <div class="flex justify-between items-center">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold shadow-sm">
-                                ${(data.username || '?').charAt(0).toUpperCase()}
-                            </div>
-                            <div>
-                                <p class="font-bold text-on-surface text-sm">${data.username || 'Anonymous Citizen'}</p>
-                                <p class="text-[10px] text-on-surface-variant/40 font-bold uppercase tracking-wider">${data.timestamp ? formatTimestamp(data.timestamp) : ''}</p>
-                            </div>
-                        </div>
-                        <button class="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant/30 hover:bg-error/10 hover:text-error transition-all" onclick="deleteFeedback('${doc.id}')">
-                            <span class="material-symbols-outlined text-sm">delete</span>
-                        </button>
-                    </div>
-                    <div class="bg-surface-container-low/50 p-5 rounded-2xl border border-outline-variant/5">
-                        <p class="text-sm text-on-surface leading-relaxed whitespace-pre-wrap">${escapeHTML(data.message)}</p>
-                    </div>
-                `;
-                feedbackList.appendChild(item);
-            });
-        } catch (e) { console.error(e); }
-    }
-
-    // ----- 5. User Directory -----
-    async function loadAdminUsers() {
-        if (!userList) return;
-        userList.innerHTML = '<tr><td colspan="4" class="py-20 text-center"><div class="w-10 h-10 border-4 border-primary/10 border-t-primary rounded-full animate-spin mx-auto"></div></td></tr>';
-        
-        try {
-            const snapshot = await db.collection('users').orderBy('createdAt', 'desc').limit(100).get();
-            renderUserTable(snapshot.docs);
-        } catch (e) { console.error(e); }
-    }
-
-    function renderUserTable(docs) {
-        userList.innerHTML = '';
-        docs.forEach(doc => {
-            const data = doc.data();
-            const tr = document.createElement('tr');
-            tr.className = 'group transition-all hover:bg-primary/5';
-            tr.innerHTML = `
-                <td class="px-8 py-5">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold shadow-sm">
-                            ${(data.username || '?').charAt(0).toUpperCase()}
-                        </div>
-                        <div>
-                            <p class="font-bold text-on-surface text-sm">${data.username || 'Unknown'}</p>
-                            <p class="text-[10px] text-on-surface-variant/40 font-bold uppercase tracking-wider">${data.email || 'Citizen of ENotepad'}</p>
-                        </div>
-                    </div>
-                </td>
-                <td class="px-8 py-5">
-                    <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${data.role === 'admin' ? 'bg-error/10 text-error' : 'bg-success/10 text-success'}">
-                        ${data.role || 'Member'}
-                    </span>
-                </td>
-                <td class="px-8 py-5 text-on-surface-variant/60 font-medium">
-                    ${data.createdAt ? data.createdAt.toDate().toLocaleDateString() : '—'}
-                </td>
-                <td class="px-8 py-5 text-right">
-                    <button class="w-9 h-9 rounded-xl bg-surface-container-low text-on-surface-variant/30 hover:bg-primary/10 hover:text-primary transition-all flex items-center justify-center ml-auto">
-                        <span class="material-symbols-outlined text-lg">more_vert</span>
-                    </button>
-                </td>
-            `;
-            userList.appendChild(tr);
-        });
-    }
-
-    // Search filter
+    // 3. User Search
     if (userSearch) {
         userSearch.addEventListener('input', (e) => {
             const q = e.target.value.toLowerCase();
+            const userList = document.getElementById('adminUserList');
+            if (!userList) return;
             const rows = userList.querySelectorAll('tr');
             rows.forEach(row => {
                 const text = row.textContent.toLowerCase();
@@ -289,75 +108,218 @@ function initAdmin() {
 
     // Initial Overview Stat Load
     loadAdminStats();
+    initCurrentBroadcastListener();
+    
     window.adminInitialized = true;
     console.log('🛡️ Admin Command Center Fully Initialized');
 }
 
 // ============================================================
-// GLOBAL FUNCTIONS (Exposed for User Feedback Submission)
+// DATA LOADING FUNCTIONS (Global Scope)
 // ============================================================
 
-function initBroadcastListener() {
-    db.collection('system').doc('broadcast').onSnapshot(doc => {
-        if (doc.exists) {
-            const data = doc.data();
-            const lastRead = localStorage.getItem('last_announcement_id');
-            const announcementId = data.timestamp ? data.timestamp.toMillis().toString() : 'new';
-            
-            if (data.active && announcementId !== lastRead) {
-                showBroadcastPopup(data.message, announcementId);
-            }
-        }
-    });
-}
-
-function showBroadcastPopup(message, id) {
-    const existing = document.getElementById('broadcastOverlay');
-    if (existing) existing.remove();
-
-    const overlay = document.createElement('div');
-    overlay.className = 'fixed inset-0 z-[11000] flex items-center justify-center p-6 bg-black/40 backdrop-blur-md animate-fade-in';
-    overlay.id = 'broadcastOverlay';
-    overlay.innerHTML = `
-        <div class="relative w-full max-w-sm bg-surface-container-lowest rounded-[40px] editorial-shadow editorial-border overflow-hidden animate-spring-up">
-            <div class="p-10 text-center space-y-8">
-                <div class="w-24 h-24 mx-auto bg-error/10 rounded-[30px] flex items-center justify-center text-error rotate-12">
-                    <span class="material-symbols-outlined text-5xl">campaign</span>
-                </div>
-                <div class="space-y-3">
-                    <h3 class="font-body text-3xl italic text-primary leading-tight">System Notice</h3>
-                    <p class="text-sm text-on-surface-variant leading-relaxed px-2 font-medium">${escapeHTML(message)}</p>
-                </div>
-                <button class="w-full py-5 bg-primary text-on-primary rounded-full font-bold text-sm shadow-2xl hover:bg-primary-dim transition-all active:scale-[0.96]" id="ackAnnouncement">
-                    Confirm Receipt
-                </button>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(overlay);
-
-    overlay.querySelector('#ackAnnouncement').addEventListener('click', () => {
-        localStorage.setItem('last_announcement_id', id);
-        overlay.classList.add('opacity-0', 'scale-90');
-        overlay.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
-        setTimeout(() => overlay.remove(), 400);
-    });
-}
-
-async function sendFeedback(message) {
-    const user = getCurrentUser();
+async function loadAdminStats() {
     try {
-        await db.collection('feedback').add({
-            username: user ? user.username : 'Guest Citizen',
-            message: message,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-            status: 'new'
+        const [usersSnap, sharesSnap, feedbackSnap, roomsSnap] = await Promise.all([
+            db.collection('users').get(),
+            db.collection('shares').get(),
+            db.collection('feedback').get(), // Get all for total items count
+            db.collection('convo_rooms').get()
+        ]);
+
+        const stats = {
+            users: usersSnap.size,
+            notes: sharesSnap.size,
+            feedback: feedbackSnap.size,
+            rooms: roomsSnap.size
+        };
+
+        // Update UI with animation
+        animateCounter('adminStatUsers', stats.users);
+        animateCounter('adminStatNotes', stats.notes);
+        animateCounter('adminStatFeedback', stats.feedback);
+        animateCounter('adminStatRooms', stats.rooms);
+        animateCounter('adminDetailRooms', stats.rooms);
+
+    } catch (e) {
+        console.error('Stats load failed:', e);
+    }
+}
+
+function animateCounter(id, target) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    let current = parseInt(el.textContent) || 0;
+    if (current === target) return;
+    
+    const duration = 800;
+    const startTime = performance.now();
+    const startValue = current;
+
+    function update(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const easeProgress = 1 - Math.pow(1 - progress, 3); // Ease out cubic
+        
+        const nextValue = Math.floor(startValue + (target - startValue) * easeProgress);
+        el.textContent = nextValue;
+
+        if (progress < 1) {
+            requestAnimationFrame(update);
+        } else {
+            el.textContent = target;
+        }
+    }
+    requestAnimationFrame(update);
+}
+
+function initCurrentBroadcastListener() {
+    if (broadcastSnapshotListener) return; // Prevent multiple listeners
+
+    const container = document.getElementById('adminCurrentBroadcast');
+    if (!container) return;
+
+    broadcastSnapshotListener = db.collection('system').doc('broadcast').onSnapshot(doc => {
+        if (!doc.exists || !doc.data().active) {
+            container.innerHTML = `
+                <div class="bg-[#1e2230] p-12 rounded-[32px] border border-white/5 flex flex-col items-center justify-center text-center space-y-3">
+                    <span class="material-symbols-outlined text-4xl text-white/5">notifications_off</span>
+                    <p class="text-white/20 italic text-sm">No active announcements currently broadcasting.</p>
+                </div>
+            `;
+            return;
+        }
+
+        const data = doc.data();
+        container.innerHTML = `
+            <div class="bg-[#1e2230] p-8 rounded-[32px] border border-white/10 space-y-6 animate-editorialFadeIn relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-6">
+                     <span class="flex h-2 w-2">
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-error opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-2 w-2 bg-error"></span>
+                    </span>
+                </div>
+                <div class="flex justify-between items-start">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 bg-error/10 rounded-full flex items-center justify-center text-error shadow-inner">
+                            <span class="material-symbols-outlined text-xl">campaign</span>
+                        </div>
+                        <div>
+                            <p class="text-[10px] uppercase tracking-[0.2em] text-white/30 font-bold">Live Dispatch</p>
+                            <p class="text-[10px] text-white/10 uppercase tracking-widest font-bold">${data.timestamp ? formatTimestamp(data.timestamp) : 'Just now'}</p>
+                        </div>
+                    </div>
+                    <button class="w-10 h-10 rounded-xl bg-white/5 text-white/20 hover:text-error hover:bg-error/10 transition-all flex items-center justify-center border border-white/5" onclick="deactivateBroadcast()">
+                        <span class="material-symbols-outlined text-lg">cancel</span>
+                    </button>
+                </div>
+                <div class="bg-black/20 p-6 rounded-2xl border border-white/5">
+                    <p class="text-white/80 italic leading-relaxed text-sm">"${escapeHTML(data.message)}"</p>
+                </div>
+            </div>
+        `;
+    }, err => {
+        console.error('Broadcast listener failed:', err);
+    });
+}
+
+async function deactivateBroadcast() {
+    if (!confirm('Retract this announcement from all users?')) return;
+    try {
+        await db.collection('system').doc('broadcast').update({ active: false });
+        showToast('Broadcast terminated', 'info');
+    } catch (e) { 
+        console.error('Deactivation failed:', e);
+        showToast('Operation failed', 'error'); 
+    }
+}
+
+async function loadAdminFeedback() {
+    const feedbackList = document.getElementById('adminFeedbackListExpanded');
+    if (!feedbackList) return;
+    feedbackList.innerHTML = '<div class="py-20 flex justify-center col-span-full"><div class="w-12 h-12 border-4 border-white/5 border-t-white/20 rounded-full animate-spin"></div></div>';
+    
+    try {
+        const snapshot = await db.collection('feedback').orderBy('timestamp', 'desc').get();
+        if (snapshot.empty) {
+            feedbackList.innerHTML = `
+                <div class="py-20 text-center text-white/10 italic text-sm flex flex-col items-center gap-4 col-span-full w-full">
+                    <span class="material-symbols-outlined text-6xl opacity-10">inbox</span>
+                    The citizens are currently silent.
+                </div>`;
+            return;
+        }
+
+        feedbackList.innerHTML = '';
+        snapshot.docs.forEach(doc => {
+            const data = doc.data();
+            const item = document.createElement('div');
+            item.className = 'bg-[#1e2230] p-8 rounded-[32px] border border-white/5 space-y-6 editorial-shadow group hover:border-white/10 transition-all';
+            item.innerHTML = `
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-white/40 font-bold border border-white/5">
+                            ${(data.username || '?').charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                            <p class="font-bold text-white/90 text-sm">${data.username || 'Anonymous Citizen'}</p>
+                            <p class="text-[10px] text-white/20 font-bold uppercase tracking-[0.2em]">${data.timestamp ? formatTimestamp(data.timestamp) : 'Moment ago'}</p>
+                        </div>
+                    </div>
+                    <button class="w-10 h-10 rounded-xl flex items-center justify-center text-white/10 hover:bg-error/10 hover:text-error transition-all border border-transparent hover:border-error/20" onclick="deleteFeedback('${doc.id}')">
+                        <span class="material-symbols-outlined text-lg">delete</span>
+                    </button>
+                </div>
+                <div class="bg-black/20 p-6 rounded-2xl border border-white/5 group-hover:border-white/10 transition-all">
+                    <p class="text-sm text-white/70 leading-relaxed whitespace-pre-wrap font-medium">${escapeHTML(data.message)}</p>
+                </div>
+            `;
+            feedbackList.appendChild(item);
         });
-        showToast('Feedback transmitted successfully', 'success');
-        return true;
-    } catch (err) {
-        showToast('Transmission failed', 'error');
-        return false;
+    } catch (e) { 
+        console.error('Feedback load failed:', e);
+        feedbackList.innerHTML = '<div class="py-20 text-center text-error/50">Connection to voice cluster lost.</div>';
+    }
+}
+
+async function loadAdminUsers() {
+    const userList = document.getElementById('adminUserList');
+    if (!userList) return;
+    userList.innerHTML = '<tr><td colspan="3" class="py-20 text-center"><div class="w-10 h-10 border-4 border-white/5 border-t-white/20 rounded-full animate-spin mx-auto"></div></td></tr>';
+    
+    try {
+        const snapshot = await db.collection('users').orderBy('createdAt', 'desc').limit(100).get();
+        userList.innerHTML = '';
+        snapshot.docs.forEach(doc => {
+            const data = doc.data();
+            const tr = document.createElement('tr');
+            tr.className = 'hover:bg-white/2 transition-colors border-b border-white/5 last:border-0';
+            tr.innerHTML = `
+                <td class="px-8 py-5">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/40 font-bold border border-white/5">
+                            ${(data.username || '?').charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                            <p class="font-bold text-white/90 text-sm">${data.username || 'Unknown'}</p>
+                            <p class="text-[10px] text-white/20 font-bold uppercase tracking-wider">${data.email || 'Citizen'}</p>
+                        </div>
+                    </div>
+                </td>
+                <td class="px-8 py-5">
+                    <span class="px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-[0.2em] ${data.role === 'admin' ? 'bg-error/10 text-error/80' : 'bg-white/5 text-white/30'}">
+                        ${data.role || 'Member'}
+                    </span>
+                </td>
+                <td class="px-8 py-5 text-right text-white/20 font-bold uppercase tracking-widest text-[9px]">
+                    ${data.createdAt && data.createdAt.toDate ? data.createdAt.toDate().toLocaleDateString() : '—'}
+                </td>
+            `;
+            userList.appendChild(tr);
+        });
+    } catch (e) { 
+        console.error('User load failed:', e);
+        userList.innerHTML = '<tr><td colspan="3" class="py-10 text-center text-error/50 font-bold">Failed to decrypt citizen records.</td></tr>';
     }
 }
 
@@ -367,15 +329,62 @@ async function deleteFeedback(id) {
         await db.collection('feedback').doc(id).delete();
         showToast('Feedback archived', 'info');
         loadAdminFeedback();
-        // Update stats badge
-        const badge = document.getElementById('adminFeedbackBadge');
-        if (badge) {
-            const current = parseInt(badge.textContent) - 1;
-            if (current > 0) badge.textContent = current;
-            else badge.classList.add('hidden');
-        }
-    } catch (e) { showToast('Operation failed', 'error'); }
+        loadAdminStats();
+    } catch (e) { 
+        console.error('Deletion failed:', e);
+        showToast('Operation failed', 'error'); 
+    }
 }
+
+function initBroadcastListener() {
+    db.collection('system').doc('broadcast').onSnapshot(doc => {
+        if (doc.exists) {
+            const data = doc.data();
+            const lastRead = localStorage.getItem('last_announcement_id');
+            const announcementId = data.timestamp ? data.timestamp.toMillis().toString() : 'new';
+            
+            if (data.active && announcementId !== lastRead) {
+                if (window.showBroadcastModal) {
+                    window.showBroadcastModal({ ...data, id: announcementId });
+                }
+            }
+        }
+    });
+}
+
+function showBroadcastModal(data) {
+    const overlay = document.getElementById('broadcastModalOverlay');
+    const box = document.getElementById('broadcastModalBox');
+    const msgEl = document.getElementById('broadcastModalMessage');
+    const dateEl = document.getElementById('broadcastModalDate');
+
+    if (!overlay || !box || !msgEl || !dateEl) return;
+
+    msgEl.textContent = data.message;
+    dateEl.textContent = data.timestamp ? formatTimestamp(data.timestamp) : 'Just now';
+
+    overlay.removeAttribute('data-hidden');
+    requestAnimationFrame(() => {
+        box.style.transform = 'scale(1)';
+        box.style.opacity = '1';
+    });
+
+    const dismiss = () => {
+        box.style.transform = 'scale(0.92)';
+        box.style.opacity = '0';
+        setTimeout(() => overlay.setAttribute('data-hidden', 'true'), 280);
+        localStorage.setItem('last_announcement_id', data.id);
+    };
+
+    const dismissBtn = document.getElementById('broadcastModalDismiss');
+    const closeBtn = document.getElementById('broadcastModalClose');
+    
+    if (dismissBtn) dismissBtn.onclick = dismiss;
+    if (closeBtn) closeBtn.onclick = dismiss;
+    overlay.onclick = (e) => { if (e.target === overlay) dismiss(); };
+}
+
+window.showBroadcastModal = showBroadcastModal;
 
 function escapeHTML(str) {
     const div = document.createElement('div');

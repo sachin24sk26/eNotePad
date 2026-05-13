@@ -730,6 +730,56 @@
   background: linear-gradient(135deg, #fff5f5 0%, #fff1f1 100%);
 }
 
+/* ---------- Admin Dashboard v3.0 (Dark Premium) ---------- */
+#panelAdmin {
+  background: #0f111a;
+  color-scheme: dark;
+}
+
+.admin-tab-btn {
+  color: rgba(255, 255, 255, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.admin-tab-btn.active {
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.admin-tab-btn:hover:not(.active) {
+  color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.admin-table thead {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.admin-table tbody tr {
+  transition: background 0.2s ease;
+}
+
+.admin-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* Override existing admin-card for the new dark theme */
+#panelAdmin .admin-card {
+  background: #1e2230;
+  border-color: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+#panelAdmin .text-primary {
+  color: #ffffff !important;
+}
+
+#panelAdmin .text-on-surface-variant {
+  color: rgba(255, 255, 255, 0.4) !important;
+}
+
 /* Admin Specific Dark Mode Overrides */
 .dark .admin-card {
   background: #1e2230;
