@@ -287,6 +287,24 @@ function initAuth() {
     if (sidebarInfo) sidebarInfo.removeAttribute('data-hidden');
     if (sidebarLinks) sidebarLinks.removeAttribute('data-hidden');
 
+    // Update Profile Card Badge
+    const roleContainer = document.getElementById('userRoleContainer');
+    const roleText = document.getElementById('userRoleText');
+    const sidebarRole = document.getElementById('sidebarUserRole');
+
+    if (isAdmin) {
+      if (roleContainer) {
+        roleContainer.classList.add('text-error', 'font-bold');
+      }
+      if (roleText) {
+        roleText.textContent = 'System Administrator';
+      }
+      if (sidebarRole) {
+        sidebarRole.textContent = 'System Administrator';
+        sidebarRole.classList.add('text-error', 'font-bold');
+      }
+    }
+
     if (isAdmin && sidebarAdmin) {
       sidebarAdmin.style.display = 'flex';
     }
@@ -331,18 +349,25 @@ function initAuth() {
         const data = userDoc.data();
         if (data.createdAt) {
           const joinDate = data.createdAt.toDate();
-          document.getElementById('userJoinDate').textContent = joinDate.toLocaleDateString('en-US', {
-            month: 'short', year: 'numeric'
-          });
+          const joinDateEl = document.getElementById('userJoinDate');
+          if (joinDateEl) {
+            joinDateEl.textContent = joinDate.toLocaleDateString('en-US', {
+              month: 'short', year: 'numeric'
+            });
+          }
         }
       }
 
       const historySnap = await db.collection('users').doc(username).collection('history').get();
       const savedSnap = await db.collection('users').doc(username).collection('savedNotes').get();
 
-      document.getElementById('statShared').textContent = historySnap.size;
-      document.getElementById('statSaved').textContent = savedSnap.size;
-      document.getElementById('statTotal').textContent = historySnap.size + savedSnap.size;
+      const statShared = document.getElementById('statShared');
+      const statSaved = document.getElementById('statSaved');
+      const statTotal = document.getElementById('statTotal');
+
+      if (statShared) statShared.textContent = historySnap.size;
+      if (statSaved) statSaved.textContent = savedSnap.size;
+      if (statTotal) statTotal.textContent = historySnap.size + savedSnap.size;
 
       const sidebarBadge = document.getElementById('sidebarSavedCount');
       if (sidebarBadge) sidebarBadge.textContent = savedSnap.size > 0 ? savedSnap.size : '';
@@ -367,9 +392,13 @@ function initAuth() {
     const badge = document.getElementById('savedCount');
     try {
       const snap = await db.collection('users').doc(username).collection('savedNotes').orderBy('createdAt', 'desc').get();
-      if (snap.empty) { empty.style.display = ''; badge.textContent = '0 notes'; return; }
-      empty.style.display = 'none';
-      badge.textContent = `${snap.size} note${snap.size !== 1 ? 's' : ''}`;
+      if (snap.empty) { 
+        if (empty) empty.style.display = ''; 
+        if (badge) badge.textContent = '0 notes'; 
+        return; 
+      }
+      if (empty) empty.style.display = 'none';
+      if (badge) badge.textContent = `${snap.size} note${snap.size !== 1 ? 's' : ''}`;
       list.querySelectorAll('.saved-note-item').forEach(el => el.remove());
       snap.docs.forEach(doc => list.appendChild(createSavedNoteItem(doc.data(), doc.id, username)));
     } catch (e) { console.error('Saved notes load error:', e); }

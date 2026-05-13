@@ -21,24 +21,25 @@
 | Feature | Description |
 |---|---|
 | 📄 **Text Sharing** | Write and share plain text notes up to 10,000 characters |
-| 🔗 **Link Sharing** | Share URLs instantly across devices |
-| 🖼️ **Image Sharing** | Upload and share images via drag-and-drop or file picker |
+| 🔗 **Link Sharing** | Share multiple URLs instantly across devices |
+| 🖼️ **Image Sharing** | Upload and share images with automated compression |
 | 🔑 **Secret Code Access** | 6-character OTP-style code to retrieve shared content |
-| ⏳ **Auto-Expiry** | Content expires in 30 minutes or 1 hour |
-| 🌗 **Dark / Light Mode** | Full theme toggle with system-aware defaults |
-| 👤 **Account System** | Optional login/register with username & 4-digit PIN |
-| 💾 **Saved Notes** | Logged-in users can save and view note history |
-| 📱 **Responsive Design** | Desktop sidebar + mobile bottom navigation |
+| ⏳ **Auto-Expiry** | Content expires in 20 minutes for maximum privacy |
+| 🌗 **Dark / Light Mode** | State-of-the-art theme toggle with deep editorial palettes |
+| 🛡️ **Admin Command Center** | v3.0 Dashboard with real-time stats and broadcast controls |
+| 👤 **Account System** | Optional registration with username & 4-digit PIN |
+| 💾 **Saved Notes** | Logged-in users can save and categorize permanent notes |
+| 📱 **Responsive Design** | Bespoke sidebar for desktop + glassmorphic mobile nav |
 
 ---
 
 ## 🏗️ Tech Stack
 
 - **Frontend:** HTML5, Vanilla JavaScript (ES6+)
-- **Styling:** [Tailwind CSS](https://tailwindcss.com/) (CDN) + custom CSS design tokens
-- **Fonts:** [Inter](https://fonts.google.com/specimen/Inter) (UI) / [Newsreader](https://fonts.google.com/specimen/Newsreader) (body serif)
+- **Styling:** [Tailwind CSS](https://tailwindcss.com/) (v3) + Custom CSS Design Tokens
+- **Fonts:** [Inter](https://fonts.google.com/specimen/Inter) (UI) / [Newsreader](https://fonts.google.com/specimen/Newsreader) (Serif Body)
 - **Icons:** [Material Symbols Outlined](https://fonts.google.com/icons)
-- **Backend:** [Firebase](https://firebase.google.com/) (Firestore + Storage)
+- **Backend:** [Firebase](https://firebase.google.com/) (Firestore Compat SDK)
 
 ---
 
@@ -46,19 +47,20 @@
 
 ```
 eNotepad/
-├── index.html              # Main single-page application
+├── index.html              # Main Single-Page Application (SPA)
 ├── css/
-│   └── styles.css          # Custom CSS — editorial design system, dark mode, animations
+│   └── styles.css          # Design System — Dark mode, glassmorphism, animations
 ├── js/
-│   ├── firebase-config.js  # Firebase project configuration
-│   ├── utils.js            # Shared utilities (toast, theme toggle, helpers)
-│   ├── share.js            # Share panel logic (text, link, image upload)
-│   ├── access.js           # Access panel logic (code input, content fetch)
-│   ├── auth.js             # Account panel logic (login, register, PIN auth)
-│   └── app.js              # Main app initializer (tabs, sidebar, navigation)
+│   ├── firebase-config.js  # Firebase project initialization
+│   ├── utils.js            # Shared UI utilities and theme logic
+│   ├── share.js            # Content sharing & image upload module
+│   ├── access.js           # Content retrieval & code processing
+│   ├── auth.js             # User lifecycle & RBAC role management
+│   ├── admin.js            # Admin Command Center v3.0 logic
+│   └── app.js              # Application router and navigation sync
 ├── assets/
-│   └── favicon.svg         # App favicon
-└── _template/              # HTML template snippets
+│   └── favicon.svg         # Minimalist vector branding
+└── _template/              # Reusable UI component snippets
 ```
 
 ---
@@ -111,16 +113,26 @@ Then open `http://localhost:8000` in your browser.
 
 ---
 
-## 🎨 Design System
+## 🎨 Design System: The Command Center v3.0
 
-eNotePad uses a custom **Tactile Editorial** design language:
+eNotePad uses a custom **Tactile Editorial** design language, recently upgraded for the Admin Panel:
 
-- **Paper grain overlay** for a tactile, printed-paper feel
-- **Material Design 3** inspired color palette with surface tinting
-- **Serif + Sans-serif** type pairing (Newsreader × Inter)
-- **Smooth micro-animations** on interactions (code reveal, button presses, tab transitions)
-- **Glassmorphism** on mobile navigation bar
-- **OTP-style code input** boxes for an elevated UX
+- **Premium Admin Interface**: A glassmorphic dashboard with 1400px maximum width for professional administration.
+- **Dynamic Stats**: High-end gradient-backed stat cards with lifting hover animations.
+- **Real-time Broadcasts**: Global announcement system with instant push notification logic.
+- **Editorial Dark Mode**: Hand-tuned color palettes (using HSL-tailored shades) for zero eye strain.
+- **Tactile Elements**: Paper-grain overlays and serif typography for a high-end stationery feel.
+
+---
+
+## 🛡️ Administrative Controls (RBAC)
+
+The platform includes an advanced **Admin Command Center** accessible only to verified roles:
+
+- **Global Overview**: Real-time monitoring of user registrations and note generation.
+- **Announcements**: Push system-wide messages that appear instantly on all user devices.
+- **User Feedback**: Centralized hub to review and manage citizen feedback.
+- **User Directory**: Searchable registry of all active accounts with status indicators.
 
 ---
 

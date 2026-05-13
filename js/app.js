@@ -115,6 +115,7 @@ function initFeedback() {
   });
 }
 
+
 /**
  * Show/hide sidebar based on viewport width.
  */
@@ -199,7 +200,7 @@ function initNavigation() {
    * Switch to a tab and sync all navigation elements.
    */
   function switchTab(tabName) {
-    // Update panels — guard against null (e.g. panelAdmin may not exist for non-admins)
+    // Update panels — guard against null
     Object.keys(panels).forEach(key => {
       if (panels[key]) {
         panels[key].setAttribute('data-active', key === tabName ? 'true' : 'false');
