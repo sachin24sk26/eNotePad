@@ -978,13 +978,312 @@ function initFileManager() {
     }
   });
 
-  // Deselect on background click
-  document.addEventListener('click', e => {
-    if (!e.target.closest('.fm-card') && !e.target.closest('#fmContextMenu')) {
-      selectedItem = null;
+  // ─── Button Bindings & Missing Modals ───────────────────────────────
+
+  // Toolbar
+  if (fmNewFileBtn) fmNewFileBtn.addEventListener('click', () => showNewItemModal('file'));
+  if (fmNewFolderBtn) fmNewFolderBtn.addEventListener('click', () => showNewItemModal('folder'));
+  
+  if (fmImportBtn && fmImportInput) {
+    fmImportBtn.addEventListener('click', () => fmImportInput.click());
+    fmImportInput.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const text = await file.text();
+      const ext = file.name.split('.').pop().toLowerCase();
+      let type = 'note';
+      if (ext === 'html' || ext === 'htm') type = 'link'; // Just an example mapping
+      
+      try {
+        await db.collection('users').doc(currentUser).collection('files').add({
+          name: file.name.replace(/\.[^/.]+$/, ""),
+          type: type,
+          content: text,
+          folderId: currentFolderId,
+          isPinned: false,
+          category: '',
+          tags: [],
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        toast('File imported successfully', 'success');
+      } catch (err) {
+        toast('Import failed', 'error');
+      }
+      fmImportInput.value = ''; // reset
+    });
+  }
+
+  // Inline Editor
+  if (fmEditorCloseBtn) {
+    fmEditorCloseBtn.addEventListener('click', () => {
+      fmEditorPane.classList.remove('open');
+      openFileId = null;
+    });
+  }
+  if (fmEditorSaveBtn) {
+    fmEditorSaveBtn.addEventListener('click', async () => {
+      if (!openFileId) return;
+      const newName = fmEditorTitle.value.trim() || 'Untitled';
+      const newContent = fmEditorContent.innerText;
+      fmEditorSaveBtn.innerHTML = '<span class="material-symbols-outlined spin">sync</span> Saving...';
+      try {
+        await db.collection('users').doc(currentUser).collection('files').doc(openFileId).update({
+          name: newName,
+          content: newContent,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        toast('File saved', 'success');
+        // keep editor open or close it? Let's keep it open
+      } catch (err) {
+        toast('Failed to save file', 'error');
+      } finally {
+        fmEditorSaveBtn.innerHTML = '<span class="material-symbols-outlined">save</span> Save';
+      }
+    });
+  }
+
+  // Modals Implementation
+  function openModal(id) {
+    const m = document.getElementById(id);
+    if (m) {
+      m.style.display = 'flex';
+      setTimeout(() => m.classList.add('open'), 10);
     }
-    if (!e.target.closest('#fmContextMenu')) closeContextMenu();
+  }
+  function closeModal(id) {
+    const m = document.getElementById(id);
+    if (m) {
+      m.classList.remove('open');
+      setTimeout(() => m.style.display = 'none', 200);
+    }
+  }
+
+  // New Item
+  let newItemType = 'file';
+  function showNewItemModal(type) {
+    newItemType = type;
+    document.getElementById('fmNewItemTitle').textContent = type === 'file' ? 'New File' : 'New Folder';
+    document.getElementById('fmFileTypeGroup').style.display = type === 'file' ? 'flex' : 'none';
+    document.getElementById('fmNewItemName').value = '';
+    openModal('fmNewItemModal');
+    setTimeout(() => document.getElementById('fmNewItemName').focus(), 50);
+  }
+  
+  const btnCancelNew = document.getElementById('fmNewItemCancel');
+  const btnConfirmNew = document.getElementById('fmNewItemConfirm');
+  if (btnCancelNew) btnCancelNew.addEventListener('click', () => closeModal('fmNewItemModal'));
+  if (btnConfirmNew) btnConfirmNew.addEventListener('click', async () => {
+    const nameInput = document.getElementById('fmNewItemName');
+    const name = nameInput.value.trim() || (newItemType === 'file' ? 'Untitled File' : 'New Folder');
+    let fType = 'note';
+    if (newItemType === 'file') {
+      const checked = document.querySelector('input[name="fmFileType"]:checked');
+      if (checked) fType = checked.value;
+    }
+    
+    try {
+      btnConfirmNew.disabled = true;
+      if (newItemType === 'folder') {
+        await db.collection('users').doc(currentUser).collection('folders').add({
+          name: name,
+          parentId: currentFolderId,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      } else {
+        await db.collection('users').doc(currentUser).collection('files').add({
+          name: name,
+          type: fType,
+          content: '',
+          folderId: currentFolderId,
+          isPinned: false,
+          category: '',
+          tags: [],
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      }
+      closeModal('fmNewItemModal');
+      toast(newItemType === 'folder' ? 'Folder created' : 'File created', 'success');
+    } catch (err) {
+      toast('Failed to create item', 'error');
+    } finally {
+      btnConfirmNew.disabled = false;
+    }
+  });
+
+  // Rename
+  let renameTarget = null;
+  function showRenameModal(id, type, currentName) {
+    renameTarget = { id, type };
+    document.getElementById('fmRenameInput').value = currentName;
+    openModal('fmRenameModal');
+    setTimeout(() => document.getElementById('fmRenameInput').select(), 50);
+  }
+  const btnCancelRen = document.getElementById('fmRenameCancel');
+  const btnConfirmRen = document.getElementById('fmRenameConfirm');
+  if (btnCancelRen) btnCancelRen.addEventListener('click', () => closeModal('fmRenameModal'));
+  if (btnConfirmRen) btnConfirmRen.addEventListener('click', async () => {
+    if (!renameTarget) return;
+    const newName = document.getElementById('fmRenameInput').value.trim();
+    if (!newName) return;
+    try {
+      btnConfirmRen.disabled = true;
+      const coll = renameTarget.type === 'file' ? 'files' : 'folders';
+      await db.collection('users').doc(currentUser).collection(coll).doc(renameTarget.id).update({
+        name: newName,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      closeModal('fmRenameModal');
+      toast('Renamed', 'success');
+    } catch (err) {
+      toast('Failed to rename', 'error');
+    } finally {
+      btnConfirmRen.disabled = false;
+    }
+  });
+
+  // Delete
+  let deleteTarget = null;
+  function showDeleteConfirm(id, type, name) {
+    deleteTarget = { id, type };
+    const span = document.getElementById('fmDeleteName');
+    if (span) span.textContent = name;
+    openModal('fmDeleteConfirm');
+  }
+  const btnCancelDel = document.getElementById('fmDeleteCancel');
+  const btnConfirmDel = document.getElementById('fmDeleteBtn');
+  if (btnCancelDel) btnCancelDel.addEventListener('click', () => closeModal('fmDeleteConfirm'));
+  if (btnConfirmDel) btnConfirmDel.addEventListener('click', async () => {
+    if (!deleteTarget) return;
+    try {
+      btnConfirmDel.disabled = true;
+      const coll = deleteTarget.type === 'file' ? 'files' : 'folders';
+      await db.collection('users').doc(currentUser).collection(coll).doc(deleteTarget.id).delete();
+      closeModal('fmDeleteConfirm');
+      toast('Item deleted', 'success');
+    } catch (err) {
+      toast('Failed to delete', 'error');
+    } finally {
+      btnConfirmDel.disabled = false;
+    }
+  });
+
+  // Move
+  let moveTarget = null;
+  function showMoveModal(id, type) {
+    moveTarget = { id, type };
+    const list = document.getElementById('fmMoveList');
+    list.innerHTML = '';
+    
+    // Add root
+    const rootBtn = document.createElement('button');
+    rootBtn.className = 'fm-move-option';
+    rootBtn.innerHTML = `<span class="material-symbols-outlined">home</span> My Files (Root)`;
+    rootBtn.onclick = () => performMove(null);
+    list.appendChild(rootBtn);
+
+    // Recursively build folders
+    function buildMoveTree(parentId, depth) {
+      allFolders.filter(f => (f.parentId || null) === parentId).forEach(f => {
+        // Skip moving a folder into itself
+        if (moveTarget.type === 'folder' && f.id === moveTarget.id) return;
+        const btn = document.createElement('button');
+        btn.className = 'fm-move-option';
+        btn.style.paddingLeft = (12 + depth * 16) + 'px';
+        btn.innerHTML = `<span class="material-symbols-outlined">folder</span> ${f.name}`;
+        btn.onclick = () => performMove(f.id);
+        list.appendChild(btn);
+        buildMoveTree(f.id, depth + 1);
+      });
+    }
+    buildMoveTree(null, 1);
+    openModal('fmMoveModal');
+  }
+  async function performMove(targetFolderId) {
+    if (!moveTarget) return;
+    try {
+      const coll = moveTarget.type === 'file' ? 'files' : 'folders';
+      const updateData = moveTarget.type === 'file' ? { folderId: targetFolderId } : { parentId: targetFolderId };
+      await db.collection('users').doc(currentUser).collection(coll).doc(moveTarget.id).update(updateData);
+      closeModal('fmMoveModal');
+      toast('Moved successfully', 'success');
+    } catch(err) {
+      toast('Failed to move', 'error');
+    }
+  }
+  const btnCancelMove = document.getElementById('fmMoveCancel');
+  if (btnCancelMove) btnCancelMove.addEventListener('click', () => closeModal('fmMoveModal'));
+
+  // Duplicate
+  async function duplicateItem(id, type) {
+    try {
+      const coll = type === 'file' ? 'files' : 'folders';
+      const doc = await db.collection('users').doc(currentUser).collection(coll).doc(id).get();
+      if (!doc.exists) return;
+      const data = doc.data();
+      data.name = data.name + ' (Copy)';
+      data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+      data.updatedAt = firebase.firestore.FieldValue.serverTimestamp();
+      await db.collection('users').doc(currentUser).collection(coll).add(data);
+      toast('Duplicated', 'success');
+    } catch (err) {
+      toast('Failed to duplicate', 'error');
+    }
+  }
+
+  // Toggle Pin
+  async function togglePin(id) {
+    try {
+      const docRef = db.collection('users').doc(currentUser).collection('files').doc(id);
+      const doc = await docRef.get();
+      if (doc.exists) {
+        await docRef.update({ isPinned: !doc.data().isPinned });
+      }
+    } catch (err) {
+      toast('Failed to pin/unpin', 'error');
+    }
+  }
+
+  // Open File (Inline Editor)
+  function openFile(id) {
+    const file = allFiles.find(f => f.id === id);
+    if (!file) return;
+    openFileId = id;
+    fmEditorTitle.value = file.name || '';
+    fmEditorContent.innerText = file.content || '';
+    fmEditorPane.classList.add('open');
+  }
+
+  // Export
+  function exportFile(id, format) {
+    const file = allFiles.find(f => f.id === id);
+    if (!file) return;
+    const blob = new Blob([file.content || ''], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${file.name}.${format}`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  // Utility toast
+  function toast(msg, type='info') {
+    if (typeof showToast === 'function') showToast(msg, type);
+    else console.log(`Toast (${type}): ${msg}`);
+  }
+
+  // Close modals on backdrop click
+  document.querySelectorAll('.fm-modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', e => {
+      if (e.target.classList.contains('absolute') && e.target.classList.contains('inset-0')) {
+        closeModal(overlay.id);
+      }
+    });
   });
 
   console.log('✅ FileManager initialized');
+
 }

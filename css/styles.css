@@ -2790,8 +2790,8 @@ select.appearance-none {
 
 /* ── Dark Mode ─────────────────────────────────────────────── */
 .dark #sectionFiles,
-.dark .fm-layout { background: #1a1d1a; }
-.dark .fm-toolbar { background: #1e211e; border-color: rgba(255,255,255,0.06); }
+.dark .fm-layout { /* Inherit from bg-surface-container-lowest */ }
+.dark .fm-toolbar { border-color: rgba(255,255,255,0.06); }
 .dark .fm-toolbar-btn { color: rgba(255,255,255,0.5); }
 .dark .fm-toolbar-btn:hover { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.85); }
 .dark .fm-toolbar-btn.primary { background: #516070; color: #f4f8ff; }
@@ -2805,23 +2805,23 @@ select.appearance-none {
 .dark .fm-tree-item { color: rgba(255,255,255,0.4); }
 .dark .fm-tree-item:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.8); }
 .dark .fm-tree-item.active { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.9); }
-.dark .fm-card { background: #262a26; border-color: rgba(255,255,255,0.07); }
-.dark .fm-card:hover { border-color: rgba(255,255,255,0.18); box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
-.dark .fm-card.selected { border-color: rgba(81,96,112,0.7); background: rgba(81,96,112,0.12); }
+.dark .fm-card { background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.07); }
+.dark .fm-card:hover { border-color: rgba(255,255,255,0.18); box-shadow: 0 4px 16px rgba(0,0,0,0.3); background: rgba(255,255,255,0.05); }
+.dark .fm-card.selected { border-color: rgba(81,96,112,0.7); background: rgba(81,96,112,0.15); }
 .dark .fm-card-name { color: rgba(255,255,255,0.85); }
 .dark .fm-card-preview { color: rgba(255,255,255,0.35); }
 .dark .fm-card-info { color: rgba(255,255,255,0.25); }
-.dark #fmContextMenu { background: #262a26; border-color: rgba(255,255,255,0.08); }
+.dark #fmContextMenu { background: #1e2230; border-color: rgba(255,255,255,0.08); }
 .dark .fm-ctx-item { color: rgba(255,255,255,0.7); }
 .dark .fm-ctx-item:hover { background: rgba(255,255,255,0.07); }
 .dark .fm-ctx-item .material-symbols-outlined { color: rgba(255,255,255,0.4); }
-.dark .fm-ctx-submenu { background: #262a26; border-color: rgba(255,255,255,0.08); }
+.dark .fm-ctx-submenu { background: #1e2230; border-color: rgba(255,255,255,0.08); }
 .dark .fm-ctx-separator { background: rgba(255,255,255,0.08); }
-.dark #fmEditorPane { background: #1a1d1a; border-color: rgba(255,255,255,0.06); }
+.dark #fmEditorPane { background: rgba(255,255,255,0.02); border-color: rgba(255,255,255,0.06); }
 .dark .fm-editor-header { background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.06); }
 .dark #fmEditorTitle { color: rgba(255,255,255,0.85); }
 .dark #fmEditorContent { color: rgba(255,255,255,0.8); }
-.dark .fm-modal-box { background: #262a26; }
+.dark .fm-modal-box { background: #1e2230; }
 .dark .fm-modal-title { color: rgba(255,255,255,0.85); }
 .dark .fm-modal-input { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); color: rgba(255,255,255,0.8); }
 .dark .fm-modal-input:focus { background: rgba(255,255,255,0.08); }
