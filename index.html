@@ -1391,8 +1391,55 @@
   </div>
 
 
+  <!-- ===== Save to Folder Modal ===== -->
+  <div id="saveFolderModal" style="display:none; position:fixed; inset:0; z-index:10050; align-items:center; justify-content:center; padding:20px;">
+    <!-- Backdrop -->
+    <div id="saveFolderBackdrop" style="position:absolute; inset:0; background:rgba(0,0,0,0.55); backdrop-filter:blur(6px);"></div>
+    <!-- Box -->
+    <div class="sfm-box" style="position:relative; z-index:1;">
+      <!-- Header -->
+      <div class="sfm-header">
+        <div class="sfm-header-icon">
+          <span class="material-symbols-outlined sfm-type-icon" id="saveFolderTypeIcon">edit_note</span>
+        </div>
+        <div class="sfm-header-text">
+          <p class="sfm-eyebrow">Save Note to</p>
+          <h3 class="sfm-title" id="saveFolderNotePreview">Untitled Note</h3>
+        </div>
+      </div>
+
+      <!-- Folder list -->
+      <p class="sfm-section-label">Choose a destination folder</p>
+      <div class="sfm-folder-list" id="saveFolderList">
+        <!-- populated by JS -->
+      </div>
+
+      <!-- New folder row -->
+      <div class="sfm-new-folder-row" id="saveFolderNewRow" style="display:none;">
+        <span class="material-symbols-outlined sfm-folder-icon" style="color:#516070">create_new_folder</span>
+        <input type="text" class="sfm-new-folder-input" id="saveFolderNewName" placeholder="New folder name…" maxlength="80" />
+      </div>
+
+      <!-- Footer -->
+      <div class="sfm-footer">
+        <button class="sfm-btn sfm-btn-add" id="saveFolderAddBtn" type="button">
+          <span class="material-symbols-outlined" style="font-size:15px">create_new_folder</span>
+          New Folder
+        </button>
+        <div class="sfm-footer-actions">
+          <button class="sfm-btn sfm-btn-cancel" id="saveFolderCancelBtn" type="button">Cancel</button>
+          <button class="sfm-btn sfm-btn-save" id="saveFolderConfirmBtn" type="button">
+            <span class="material-symbols-outlined" style="font-size:15px">save</span>
+            Save Here
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ===== File Manager Context Menu ===== -->
   <div id="fmContextMenu"></div>
+
 
   <!-- ===== FM Modal: New File/Folder ===== -->
   <div class="fm-modal-overlay" id="fmNewItemModal">

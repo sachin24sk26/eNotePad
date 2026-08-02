@@ -242,7 +242,7 @@ function initShare() {
     }
   }
 
-  // ----- Save Button (logged-in: permanent save with title + category) -----
+  // ----- Save Button — open folder-picker modal -----
   saveBtn.addEventListener('click', async (e) => {
     e.preventDefault();
     let content = getContent();
@@ -254,54 +254,189 @@ function initShare() {
       return;
     }
 
-    saveBtn.classList.add('btn-loading');
-    saveBtn.disabled = true;
-
-    try {
-      const noteId = generateCode(8);
-      const title = noteTitle ? noteTitle.value.trim() : '';
-      const category = noteCategory ? noteCategory.value : '';
-
-      if (selectedType === 'image') content = await uploadImage(noteId);
-
-      const preview = title || (selectedType === 'image' ? '🖼️ Image' : (Array.isArray(content) ? content.join(', ') : content).substring(0, 100));
-
-      await db.collection('users').doc(currentUser.username)
-        .collection('savedNotes').doc(noteId)
-        .set({
-          type: selectedType,
-          content: content,
-          title: title,
-          category: category,
-          preview: preview,
-          noteId: noteId,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-
-      // Add to history
-      await db.collection('users').doc(currentUser.username)
-        .collection('history').doc(noteId)
-        .set({
-          type: selectedType,
-          preview: preview,
-          code: noteId,
-          saved: true,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-
-      showToast('Note saved to your account! 📌', 'success');
-      resetShareForm();
-
-      if (typeof window.refreshHistory === 'function') window.refreshHistory();
-
-    } catch (error) {
-      console.error('Save error:', error);
-      showToast('Failed to save note.', 'error');
-    } finally {
-      saveBtn.classList.remove('btn-loading');
-      saveBtn.disabled = false;
+    // If image, compress first (needed for preview in modal title)
+    let resolvedContent = content;
+    if (selectedType === 'image') {
+      saveBtn.classList.add('btn-loading');
+      saveBtn.disabled = true;
+      try {
+        resolvedContent = await uploadImage('preview');
+      } catch(e) {
+        showToast('Image processing failed', 'error');
+      } finally {
+        saveBtn.classList.remove('btn-loading');
+        saveBtn.disabled = false;
+      }
     }
+
+    const noteTitle = document.getElementById('noteTitle');
+    const noteCategory = document.getElementById('noteCategory');
+    const title = noteTitle ? noteTitle.value.trim() : '';
+    const category = noteCategory ? noteCategory.value : '';
+
+    // Open folder picker modal, then on confirm do the actual save
+    openSaveFolderModal({
+      noteType: selectedType,
+      content: resolvedContent,
+      title: title,
+      category: category,
+      username: currentUser.username,
+      onConfirm: async (folderId, folderName) => {
+        saveBtn.classList.add('btn-loading');
+        saveBtn.disabled = true;
+        try {
+          const noteId = generateCode(8);
+          const preview = title || (selectedType === 'image' ? '🖼️ Image' : (Array.isArray(resolvedContent) ? resolvedContent.join(', ') : resolvedContent).substring(0, 100));
+
+          // Save to File Manager (users/{u}/files)
+          if (typeof window.saveNoteToFileManager === 'function') {
+            await window.saveNoteToFileManager({ title, category, noteType: selectedType, content: resolvedContent }, folderId);
+          }
+
+          // Also save to savedNotes (backward compat for Saved tab)
+          await db.collection('users').doc(currentUser.username)
+            .collection('savedNotes').doc(noteId)
+            .set({ type: selectedType, content: resolvedContent, title, category, preview, noteId, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+
+          // History entry
+          await db.collection('users').doc(currentUser.username)
+            .collection('history').doc(noteId)
+            .set({ type: selectedType, preview, code: noteId, saved: true, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+
+          const dest = folderName ? `"${folderName}"` : 'My Files';
+          showToast(`Note saved to ${dest}! 📁`, 'success');
+          resetShareForm();
+          if (typeof window.refreshHistory === 'function') window.refreshHistory();
+        } catch (error) {
+          console.error('Save error:', error);
+          showToast('Failed to save note.', 'error');
+        } finally {
+          saveBtn.classList.remove('btn-loading');
+          saveBtn.disabled = false;
+        }
+      }
+    });
   });
+
+  // ----- Folder Picker Modal logic -----
+  function openSaveFolderModal({ noteType, title, onConfirm }) {
+    const modal = document.getElementById('saveFolderModal');
+    if (!modal) {
+      // Fallback: no modal, save to root
+      onConfirm(null, null);
+      return;
+    }
+
+    // Populate folder list
+    const list = document.getElementById('saveFolderList');
+    const newFolderInput = document.getElementById('saveFolderNewName');
+    const newFolderRow = document.getElementById('saveFolderNewRow');
+    const addFolderBtn = document.getElementById('saveFolderAddBtn');
+    const confirmBtn = document.getElementById('saveFolderConfirmBtn');
+    const cancelBtn = document.getElementById('saveFolderCancelBtn');
+    const backdrop = document.getElementById('saveFolderBackdrop');
+    const notePreview = document.getElementById('saveFolderNotePreview');
+    const typeIconEl = document.getElementById('saveFolderTypeIcon');
+
+    if (notePreview) notePreview.textContent = title || `Untitled ${noteType}`;
+    if (typeIconEl) {
+      const icons = { text: 'edit_note', link: 'link', image: 'image' };
+      typeIconEl.textContent = icons[noteType] || 'description';
+    }
+
+    // Build folder options
+    const folders = (typeof window.getFolderList === 'function') ? window.getFolderList() : [];
+    list.innerHTML = '';
+    let selectedFolderId = null;
+    let selectedFolderName = null;
+
+    function buildFolderItem(id, name, depth, icon) {
+      const item = document.createElement('button');
+      item.type = 'button';
+      item.className = 'sfm-folder-item';
+      item.style.paddingLeft = (16 + depth * 18) + 'px';
+      item.dataset.fid = id || '';
+      item.dataset.fname = name;
+      item.innerHTML = `<span class="material-symbols-outlined sfm-folder-icon">${icon || 'folder'}</span><span>${escSFM(name)}</span>`;
+      item.addEventListener('click', () => {
+        list.querySelectorAll('.sfm-folder-item').forEach(i => i.classList.remove('selected'));
+        item.classList.add('selected');
+        selectedFolderId = id || null;
+        selectedFolderName = id ? name : null;
+      });
+      list.appendChild(item);
+    }
+
+    function buildLevel(parentId, depth) {
+      folders.filter(f => (f.parentId || null) === parentId).forEach(f => {
+        buildFolderItem(f.id, f.name, depth, 'folder');
+        buildLevel(f.id, depth + 1);
+      });
+    }
+
+    buildFolderItem(null, 'My Files (Root)', 0, 'home');
+    buildLevel(null, 1);
+
+    // Auto-select root
+    if (list.firstChild) list.firstChild.classList.add('selected');
+
+    // New folder toggle
+    if (newFolderRow) newFolderRow.style.display = 'none';
+    if (newFolderInput) newFolderInput.value = '';
+    if (addFolderBtn) {
+      addFolderBtn.onclick = () => {
+        if (newFolderRow) newFolderRow.style.display = newFolderRow.style.display === 'none' ? 'flex' : 'none';
+        if (newFolderInput && newFolderRow.style.display !== 'none') setTimeout(() => newFolderInput.focus(), 80);
+      };
+    }
+
+    modal.style.display = 'flex';
+    setTimeout(() => modal.classList.add('sfm-open'), 10);
+
+    function closeModal() {
+      modal.classList.remove('sfm-open');
+      setTimeout(() => { modal.style.display = 'none'; }, 280);
+    }
+
+    if (cancelBtn) cancelBtn.onclick = closeModal;
+    if (backdrop) backdrop.onclick = closeModal;
+
+    if (confirmBtn) {
+      confirmBtn.onclick = async () => {
+        // If new folder name entered, create it first
+        const newName = newFolderInput ? newFolderInput.value.trim() : '';
+        if (newName && newFolderRow && newFolderRow.style.display !== 'none') {
+          try {
+            if (!window.db || !getCurrentUser()) throw new Error('Not logged in');
+            const user = getCurrentUser();
+            const ref = await db.collection('users').doc(user.username).collection('folders').add({
+              name: newName,
+              parentId: null,
+              createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+              updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            selectedFolderId = ref.id;
+            selectedFolderName = newName;
+          } catch(e) {
+            showToast('Could not create folder: ' + e.message, 'error');
+            return;
+          }
+        }
+        closeModal();
+        onConfirm(selectedFolderId, selectedFolderName);
+      };
+    }
+
+    // Escape key
+    const escHandler = (e) => { if (e.key === 'Escape') { closeModal(); document.removeEventListener('keydown', escHandler); } };
+    document.addEventListener('keydown', escHandler);
+  }
+
+  function escSFM(str) {
+    return (str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+
 
   // ----- Display Code -----
   function displayCode(code) {

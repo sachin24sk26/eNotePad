@@ -58,6 +58,35 @@ function initFileManager() {
     }
   };
 
+  // ─── Expose folder list for external use (e.g. Save to Folder modal) ─
+  window.getFolderList = function() {
+    return allFolders.slice(); // shallow copy
+  };
+
+  // ─── Expose save-to-file-manager for share.js ─────────────────────────
+  window.saveNoteToFileManager = async function(noteData, folderId) {
+    if (!currentUser || !window.db) return false;
+    try {
+      await db.collection('users').doc(currentUser).collection('files').add({
+        name: noteData.title || 'Untitled Note',
+        type: noteData.noteType || 'note',
+        content: noteData.content || '',
+        folderId: folderId || null,
+        isPinned: false,
+        category: noteData.category || '',
+        tags: [],
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      return true;
+    } catch(e) {
+      console.error('saveNoteToFileManager error:', e);
+      return false;
+    }
+  };
+
+
+
   // ─── Auth integration: driven entirely by fileManagerRefresh() ──────────
   // getCurrentUser() is NOT a global function — we rely on auth.js calling
   // window.fileManagerRefresh(username) after sign-in / sign-out.
