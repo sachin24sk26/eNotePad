@@ -12,14 +12,34 @@ const firebaseConfig = {
   appId: "1:608459725551:web:b47c42f53fbe51d84b991a"
 };
 
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
+let db;
+if (typeof firebase === 'undefined') {
+  console.error('🔥 Firebase SDK not loaded. Check your internet connection or ad blocker.');
+  alert('Firebase SDK failed to load. Please check your connection.');
+} else {
+  try {
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
 
+    // Export Firestore, Storage, and Auth references for use in other modules
+    db = firebase.firestore();
+    window.db = db; // Ensure global accessibility
+    // const storage = firebase.storage();
+    // window.storage = storage;
 
+    console.log("🔥 Firebase initialized successfully");
 
+    // Optional: Test connection to catch missing rules or invalid project
+    db.collection('system').limit(1).get()
+      .then(() => console.log("🔥 Firestore connection established."))
+      .catch(e => {
+        console.error("🔥 Firestore connection/permission error:", e);
+        if (e.code === 'permission-denied') {
+          console.warn("⚠️ Your Firestore Security Rules are blocking access. Please update them in the Firebase Console.");
+        }
+      });
 
-// Export Firestore, Storage, and Auth references for use in other modules
-const db = firebase.firestore();
-const storage = firebase.storage();
-
-console.log("🔥 Firebase initialized successfully");
+  } catch (error) {
+    console.error("🔥 Firebase initialization error:", error);
+  }
+}

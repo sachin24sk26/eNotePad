@@ -92,7 +92,7 @@
     };
   </script>
 
-  <link rel="stylesheet" href="css/styles.css?v=1.3" />
+  <link rel="stylesheet" href="css/styles.css?v=1.6" />
 </head>
 <body class="bg-background text-on-surface font-label min-h-screen relative overflow-x-hidden">
 
@@ -146,245 +146,514 @@
   <div class="flex min-h-screen">
 
     <!-- ========== SIDEBAR (Desktop) ========== -->
-    <aside class="sidebar-aside flex-col w-64 h-screen p-4 space-y-4 bg-surface-container-low rounded-r-2xl fixed left-0 top-0 z-40 transition-all duration-300 ease-out" id="sidebar">
+    <aside class="sidebar-aside flex-col w-60 h-screen p-3 bg-surface-container-low rounded-r-3xl fixed left-0 top-0 z-40 transition-all duration-300 ease-out flex" id="sidebar">
+
       <!-- Branding -->
-      <div class="flex flex-col gap-1 px-4 py-6">
-        <span class="text-xs uppercase tracking-widest text-primary/50 font-bold">The Curator</span>
-        <span class="font-body italic text-xl text-primary leading-tight">Your Digital Ink</span>
+      <div class="px-4 py-5 mb-1">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-primary/15 flex items-center justify-center flex-shrink-0">
+            <span class="material-symbols-outlined text-primary text-base">edit_note</span>
+          </div>
+          <div>
+            <span class="font-body italic text-base text-primary leading-none block">eNotePad</span>
+            <span class="text-[9px] uppercase tracking-widest text-primary/40 font-bold">Digital Curator</span>
+          </div>
+        </div>
       </div>
 
       <!-- Sidebar Navigation -->
-      <nav class="flex-1 space-y-1 px-2" id="sidebarNav">
-        <button class="sidebar-nav-btn active w-full flex items-center gap-3 px-4 py-3 bg-white shadow-sm rounded-lg text-primary font-medium transition-transform hover:translate-x-1" data-tab="share" id="sidebarShare">
-          <span class="material-symbols-outlined">ios_share</span>
+      <nav class="flex-1 space-y-0.5 px-1" id="sidebarNav">
+        <button class="sidebar-nav-btn active w-full flex items-center gap-3 px-4 py-2.5 bg-white shadow-sm rounded-xl text-primary font-semibold transition-all text-sm" data-tab="share" id="sidebarShare">
+          <span class="material-symbols-outlined text-lg">edit_note</span>
           <span>Notes</span>
         </button>
-        <button class="sidebar-nav-btn w-full flex items-center gap-3 px-4 py-3 text-primary/70 hover:text-primary transition-transform hover:translate-x-1 rounded-lg" data-tab="access" id="sidebarAccess">
-          <span class="material-symbols-outlined">key</span>
+        <button class="sidebar-nav-btn w-full flex items-center gap-3 px-4 py-2.5 text-primary/60 hover:text-primary hover:bg-white/60 transition-all rounded-xl text-sm" data-tab="access" id="sidebarAccess">
+          <span class="material-symbols-outlined text-lg">key</span>
           <span>Access</span>
         </button>
-        <button class="sidebar-nav-btn w-full flex items-center gap-3 px-4 py-3 text-primary/70 hover:text-primary transition-transform hover:translate-x-1 rounded-lg" data-tab="account" id="sidebarAccount">
-          <span class="material-symbols-outlined">person</span>
+        <button class="sidebar-nav-btn w-full flex items-center gap-3 px-4 py-2.5 text-primary/60 hover:text-primary hover:bg-white/60 transition-all rounded-xl text-sm" data-tab="account" id="sidebarAccount">
+          <span class="material-symbols-outlined text-lg">person</span>
           <span>Account</span>
         </button>
-        <button class="w-full flex items-center gap-3 px-4 py-3 text-primary/70 hover:text-primary transition-transform hover:translate-x-1 rounded-lg" onclick="window.open('convo_room/index.html', '_blank')">
-          <span class="material-symbols-outlined">forum</span>
+        <button class="w-full flex items-center gap-3 px-4 py-2.5 text-primary/60 hover:text-primary hover:bg-white/60 transition-all rounded-xl text-sm" onclick="window.open('convo_room/index.html', '_blank')">
+          <span class="material-symbols-outlined text-lg">forum</span>
           <span>Convo Room</span>
         </button>
-        <button class="sidebar-nav-btn w-full flex items-center gap-3 px-4 py-3 text-error/70 hover:text-error transition-transform hover:translate-x-1 rounded-lg" data-tab="admin" id="sidebarAdmin" style="display: none;">
-          <span class="material-symbols-outlined">admin_panel_settings</span>
+        <button class="sidebar-nav-btn w-full flex items-center gap-3 px-4 py-2.5 text-error/60 hover:text-error hover:bg-error/5 transition-all rounded-xl text-sm" data-tab="admin" id="sidebarAdmin" style="display: none;">
+          <span class="material-symbols-outlined text-lg">admin_panel_settings</span>
           <span>Admin Panel</span>
         </button>
 
-
-        <!-- Logged-in Quick Links (hidden when guest) -->
+        <!-- Logged-in Quick Links -->
         <div id="sidebarLoggedInLinks" data-hidden="true">
-          <div class="my-3 border-t border-outline-variant/15"></div>
-          <p class="text-[10px] uppercase tracking-widest text-primary/30 font-bold px-4 mb-1">Your Library</p>
-          <button class="sidebar-quick-link w-full flex items-center gap-3 px-4 py-2.5 text-primary/60 hover:text-primary hover:bg-white/50 transition-all rounded-lg text-sm" data-sidebar-action="recent">
-            <span class="material-symbols-outlined text-lg">schedule</span>
+          <div class="my-3 mx-3 border-t border-outline-variant/15"></div>
+          <p class="text-[9px] uppercase tracking-widest text-primary/30 font-bold px-4 mb-1">Your Library</p>
+          <button class="sidebar-quick-link w-full flex items-center gap-3 px-4 py-2 text-primary/55 hover:text-primary hover:bg-white/50 transition-all rounded-xl text-sm" data-sidebar-action="recent">
+            <span class="material-symbols-outlined text-base">schedule</span>
             <span>Recent Activity</span>
           </button>
-          <button class="sidebar-quick-link w-full flex items-center gap-3 px-4 py-2.5 text-primary/60 hover:text-primary hover:bg-white/50 transition-all rounded-lg text-sm" data-sidebar-action="saved">
-            <span class="material-symbols-outlined text-lg">bookmark</span>
+          <button class="sidebar-quick-link w-full flex items-center gap-3 px-4 py-2 text-primary/55 hover:text-primary hover:bg-white/50 transition-all rounded-xl text-sm" data-sidebar-action="saved">
+            <span class="material-symbols-outlined text-base">bookmark</span>
             <span>Saved Notes</span>
-            <span class="ml-auto text-[10px] font-bold bg-primary-container/40 text-primary rounded-full px-2 py-0.5" id="sidebarSavedCount"></span>
+            <span class="ml-auto text-[9px] font-bold bg-primary/10 text-primary rounded-full px-2 py-0.5" id="sidebarSavedCount"></span>
           </button>
-          <button class="sidebar-quick-link w-full flex items-center gap-3 px-4 py-2.5 text-primary/60 hover:text-primary hover:bg-white/50 transition-all rounded-lg text-sm" data-sidebar-action="settings">
-            <span class="material-symbols-outlined text-lg">settings</span>
+          <button class="sidebar-quick-link w-full flex items-center gap-3 px-4 py-2 text-primary/55 hover:text-primary hover:bg-white/50 transition-all rounded-xl text-sm" data-sidebar-action="settings">
+            <span class="material-symbols-outlined text-base">settings</span>
             <span>Settings</span>
+          </button>
+          <button class="sidebar-quick-link w-full flex items-center gap-3 px-4 py-2 text-primary/55 hover:text-primary hover:bg-white/50 transition-all rounded-xl text-sm" data-sidebar-action="files">
+            <span class="material-symbols-outlined text-base">folder_open</span>
+            <span>My Files</span>
           </button>
         </div>
       </nav>
 
       <!-- Sidebar Footer -->
-      <div class="mt-auto pt-4 px-2 space-y-2">
-        <!-- Feedback to Developer -->
-        <button class="w-full flex items-center gap-3 px-4 py-2.5 text-primary/50 hover:text-primary hover:bg-white/40 transition-all rounded-xl text-sm group" id="sidebarFeedbackBtn">
-          <span class="material-symbols-outlined text-lg group-hover:scale-110 transition-transform">chat_bubble_outline</span>
+      <div class="pt-3 px-1 space-y-1.5">
+        <button class="w-full flex items-center gap-3 px-4 py-2 text-primary/40 hover:text-primary hover:bg-white/40 transition-all rounded-xl text-xs group" id="sidebarFeedbackBtn">
+          <span class="material-symbols-outlined text-base group-hover:scale-110 transition-transform">chat_bubble_outline</span>
           <span class="flex-1 text-left">Feedback to Dev</span>
-          <span class="text-[9px] font-bold uppercase tracking-widest bg-primary/10 text-primary/60 px-2 py-0.5 rounded-full">Dev</span>
+          <span class="text-[8px] font-bold uppercase tracking-widest bg-primary/8 text-primary/50 px-1.5 py-0.5 rounded-full">Dev</span>
         </button>
 
-
-        <button class="w-full py-4 bg-primary text-on-primary rounded-full font-semibold shadow-lg hover:bg-primary-dim transition-all active:scale-[0.98]" id="newNoteBtn">
+        <button class="w-full py-3 bg-primary text-on-primary rounded-2xl font-semibold text-sm shadow-lg hover:bg-primary-dim transition-all active:scale-[0.98] flex items-center justify-center gap-2" id="newNoteBtn">
+          <span class="material-symbols-outlined text-base">add</span>
           New Note
         </button>
-        <!-- User Profile (shown when logged in) -->
-        <div class="flex items-center gap-3 mt-4 p-3 bg-white/40 rounded-xl cursor-pointer hover:bg-white/60 transition-all" id="sidebarUserInfo" data-hidden="true">
-          <div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-primary font-bold text-lg" id="sidebarUserAvatar"></div>
+
+        <!-- User Profile -->
+        <div class="flex items-center gap-2.5 p-2.5 bg-white/40 rounded-2xl cursor-pointer hover:bg-white/60 transition-all" id="sidebarUserInfo" data-hidden="true">
+          <div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-primary font-bold text-sm flex-shrink-0" id="sidebarUserAvatar"></div>
           <div class="flex flex-col flex-1 min-w-0">
             <span class="text-sm font-bold text-on-surface truncate" id="sidebarUserName"></span>
-            <span class="text-[10px] text-on-surface-variant" id="sidebarUserRole">Member</span>
+            <span class="text-[9px] text-on-surface-variant" id="sidebarUserRole">Member</span>
           </div>
-          <span class="material-symbols-outlined text-primary/30 text-lg">chevron_right</span>
+          <span class="material-symbols-outlined text-primary/30 text-base">chevron_right</span>
         </div>
       </div>
     </aside>
 
     <!-- ========== MAIN CONTENT ========== -->
-    <main class="flex-1 md:ml-64 flex flex-col min-h-screen">
+    <main class="flex-1 md:ml-60 flex flex-col min-h-screen">
 
       <!-- Top App Bar -->
-      <header class="bg-background sticky top-0 z-30">
-        <div class="flex justify-between items-center w-full px-6 py-4 max-w-5xl mx-auto">
-          <div class="flex items-center gap-8">
-            <span class="text-2xl font-body italic text-primary">eNotePad</span>
-            <nav class="hidden sm:flex items-center gap-6">
-              <a class="topnav-link active text-primary font-bold border-b-2 border-primary pb-1" href="#" data-tab="share" id="topnavShare">Notes</a>
-              <a class="topnav-link text-primary/60 hover:bg-surface-container-low transition-colors px-2 py-1 rounded" href="#" data-tab="access" id="topnavAccess">Access</a>
-              <a class="topnav-link text-primary/60 hover:bg-surface-container-low transition-colors px-2 py-1 rounded" href="#" data-tab="account" id="topnavAccount">Account</a>
-              <a class="topnav-link text-primary/60 hover:bg-surface-container-low transition-colors px-2 py-1 rounded" href="convo_room/index.html" target="_blank">Convo Room</a>
+      <header class="bg-background/95 sticky top-0 z-30 backdrop-blur-sm" style="border-bottom:1px solid rgba(175,179,172,0.1);">
+        <div class="flex justify-between items-center w-full px-6 py-3.5 max-w-4xl mx-auto">
+          <div class="flex items-center gap-6">
+            <span class="text-xl font-body italic text-primary">eNotePad</span>
+            <nav class="hidden sm:flex items-center gap-1">
+              <a class="topnav-link text-sm px-3 py-1.5 rounded-lg font-semibold transition-all" href="#" data-tab="share" id="topnavShare">Notes</a>
+              <a class="topnav-link text-sm px-3 py-1.5 rounded-lg font-medium transition-all" href="#" data-tab="access" id="topnavAccess">Access</a>
+              <a class="topnav-link text-sm px-3 py-1.5 rounded-lg font-medium transition-all" href="#" data-tab="account" id="topnavAccount">Account</a>
+              <a class="topnav-link text-sm px-3 py-1.5 rounded-lg font-medium transition-all" href="convo_room/index.html" target="_blank">Convo Room</a>
             </nav>
           </div>
-          <div class="flex items-center gap-4">
-            <button class="p-2 text-primary hover:bg-surface-container-low rounded-full transition-all active:scale-[0.98]" id="themeToggle" aria-label="Toggle theme">
-              <span class="material-symbols-outlined theme-icon-dark">dark_mode</span>
-              <span class="material-symbols-outlined theme-icon-light">light_mode</span>
+          <div class="flex items-center gap-2">
+            <button class="theme-toggle-btn flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all active:scale-[0.97]" id="themeToggle" aria-label="Toggle theme">
+              <span class="material-symbols-outlined text-base theme-icon-dark">dark_mode</span>
+              <span class="material-symbols-outlined text-base theme-icon-light">light_mode</span>
+              <span class="theme-toggle-label text-xs font-semibold theme-label-dark">Dark</span>
+              <span class="theme-toggle-label text-xs font-semibold theme-label-light">Light</span>
             </button>
           </div>
         </div>
       </header>
 
       <!-- ========== PANELS ========== -->
-      <section class="flex-1 flex items-start justify-center p-6 md:p-12">
-        <div class="w-full max-w-2xl">
+      <section class="flex-1 flex items-start justify-center p-4 md:p-8">
+        <div class="w-full max-w-2xl space-y-4">
 
           <!-- ===== SHARE PANEL ===== -->
           <div class="tab-panel" id="panelShare" data-active="true">
-            <div class="bg-surface-container-lowest rounded-xl editorial-shadow overflow-hidden relative editorial-border">
 
-              <!-- Tab Selector (Share/Access inline) -->
-              <div class="flex bg-surface-container-low p-1 mx-6 mt-6 rounded-xl" id="inlineTabBar">
-                <button class="inline-tab flex-1 py-3 px-4 rounded-lg bg-white shadow-sm text-primary font-bold transition-all" data-tab="share">
-                  Share
-                </button>
-                <button class="inline-tab flex-1 py-3 px-4 rounded-lg text-primary/60 hover:text-primary transition-all" data-tab="access">
-                  Access
-                </button>
+            <!-- Type Selector — outside the card, at top -->
+            <div class="flex gap-2 mb-4" id="typeSelector">
+              <button class="type-btn active flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-2xl bg-primary text-on-primary font-semibold transition-all text-sm shadow-sm" data-type="text">
+                <span class="material-symbols-outlined text-base">edit_note</span> Text
+              </button>
+              <button class="type-btn flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-2xl bg-surface-container text-primary/60 hover:bg-surface-container-high hover:text-primary transition-all text-sm" data-type="link">
+                <span class="material-symbols-outlined text-base">link</span> Link
+              </button>
+              <button class="type-btn flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-2xl bg-surface-container text-primary/60 hover:bg-surface-container-high hover:text-primary transition-all text-sm" data-type="image">
+                <span class="material-symbols-outlined text-base">image</span> Image
+              </button>
+            </div>
+
+            <!-- Main Card -->
+            <div class="bg-surface rounded-[20px] editorial-shadow overflow-hidden editorial-border">
+
+              <!-- Note Meta (title + category for logged-in save) -->
+              <div id="noteMeta" data-hidden="true" class="px-5 pt-5 pb-0">
+                <div class="flex gap-3 p-4 bg-surface-container-low rounded-2xl">
+                  <div class="flex-1">
+                    <label class="text-[10px] uppercase tracking-widest font-bold block mb-1" style="color:rgba(81,96,112,0.55);">Title</label>
+                    <input type="text" class="w-full bg-transparent border-none rounded-md focus:ring-0 text-on-surface font-semibold text-sm outline-none" style="color:#a41d65;" placeholder="Give your note a title…" id="noteTitle" maxlength="100" autocomplete="off" />
+                  </div>
+                  <div class="w-px" style="background:rgba(175,179,172,0.2);"></div>
+                  <div class="w-32 flex-shrink-0">
+                    <label for="noteCategory" class="text-[10px] uppercase tracking-widest font-bold block mb-1" style="color:rgba(81,96,112,0.55);">Category</label>
+                    <select class="w-full bg-transparent border-none rounded-md focus:ring-0 text-on-surface font-medium text-sm appearance-none cursor-pointer outline-none" style="color:#5a10b3;" id="noteCategory">
+                      <option value="">None</option>
+                      <option value="personal">📝 Personal</option>
+                      <option value="work">💼 Work</option>
+                      <option value="ideas">💡 Ideas</option>
+                      <option value="code">🖥️ Code</option>
+                      <option value="links">🔗 Links</option>
+                      <option value="important">⭐ Important</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <br>
+
+              <!-- Rich Text Editor -->
+              <div id="editorFullscreenWrapper" class="relative">
+
+                <!-- Formatting Toolbar -->
+                <div class="editor-toolbar-container" id="editorToolbar">
+                  <!-- Primary Row: Most Used -->
+                  <div class="editor-toolbar-row toolbar-primary">
+                    <!-- Text Style -->
+                    <div class="toolbar-group">
+                      <button class="toolbar-btn" data-cmd="bold" title="Bold (Ctrl+B)"><span class="material-symbols-outlined">format_bold</span></button>
+                      <button class="toolbar-btn" data-cmd="italic" title="Italic (Ctrl+I)"><span class="material-symbols-outlined">format_italic</span></button>
+                      <button class="toolbar-btn" data-cmd="underline" title="Underline (Ctrl+U)"><span class="material-symbols-outlined">format_underlined</span></button>
+                      <button class="toolbar-btn" data-cmd="strikeThrough" title="Strikethrough"><span class="material-symbols-outlined">strikethrough_s</span></button>
+                    </div>
+                    <div class="toolbar-divider"></div>
+
+                    <!-- Font & Size -->
+                    <div class="toolbar-group">
+                      <div class="toolbar-dropdown-wrap">
+                        <button class="toolbar-btn has-caret" data-cmd="fontFamily" title="Font Family"><span class="material-symbols-outlined">font_download</span></button>
+                        <div class="editor-dropdown" id="fontFamilyDropdown">
+                          <button class="dropdown-item" data-font="Newsreader, serif" style="font-family:'Newsreader',serif">Newsreader (Serif)</button>
+                          <button class="dropdown-item" data-font="Inter, sans-serif" style="font-family:'Inter',sans-serif">Inter (Sans)</button>
+                          <button class="dropdown-item" data-font="'Courier New', monospace" style="font-family:'Courier New',monospace">Courier (Mono)</button>
+                          <button class="dropdown-item" data-font="Georgia, serif" style="font-family:Georgia,serif">Georgia</button>
+                          <button class="dropdown-item" data-font="system-ui, sans-serif" style="font-family:system-ui">System Default</button>
+                        </div>
+                      </div>
+                      <div class="toolbar-dropdown-wrap">
+                        <button class="toolbar-btn has-caret" data-cmd="fontSize" title="Font Size"><span class="material-symbols-outlined">format_size</span></button>
+                        <div class="editor-dropdown" id="fontSizeDropdown">
+                          <button class="dropdown-item" data-size="2">Small</button>
+                          <button class="dropdown-item" data-size="3">Normal</button>
+                          <button class="dropdown-item" data-size="5">Large</button>
+                          <button class="dropdown-item" data-size="7">Extra Large</button>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="toolbar-divider"></div>
+
+                    <!-- Colors -->
+                    <div class="toolbar-group">
+                      <div class="toolbar-dropdown-wrap">
+                        <button class="toolbar-btn" data-cmd="foreColor" title="Text Color"><span class="material-symbols-outlined">format_color_text</span></button>
+                        <div class="editor-dropdown color-dropdown" id="textColorDropdown">
+                          <div class="color-grid">
+                            <button class="color-swatch" data-color="#2e3640" style="background:#2e3640" title="Default"></button>
+                            <button class="color-swatch" data-color="#c62828" style="background:#c62828" title="Red"></button>
+                            <button class="color-swatch" data-color="#d84315" style="background:#d84315" title="Orange"></button>
+                            <button class="color-swatch" data-color="#f9a825" style="background:#f9a825" title="Yellow"></button>
+                            <button class="color-swatch" data-color="#2e7d32" style="background:#2e7d32" title="Green"></button>
+                            <button class="color-swatch" data-color="#1565c0" style="background:#1565c0" title="Blue"></button>
+                            <button class="color-swatch" data-color="#6a1b9a" style="background:#6a1b9a" title="Purple"></button>
+                            <button class="color-swatch" data-color="#ad1457" style="background:#ad1457" title="Pink"></button>
+                            <button class="color-swatch" data-color="#00838f" style="background:#00838f" title="Teal"></button>
+                            <button class="color-swatch" data-color="#4e342e" style="background:#4e342e" title="Brown"></button>
+                            <button class="color-swatch" data-color="#546e7a" style="background:#546e7a" title="Slate"></button>
+                            <button class="color-swatch" data-color="#212121" style="background:#212121" title="Black"></button>
+                          </div>
+                          <div class="custom-color-row">
+                            <label class="custom-color-label">Custom</label>
+                            <input type="color" class="custom-color-input" value="#516070" />
+                          </div>
+                        </div>
+                      </div>
+                      <div class="toolbar-dropdown-wrap">
+                        <button class="toolbar-btn" data-cmd="hiliteColor" title="Highlight"><span class="material-symbols-outlined">format_ink_highlighter</span></button>
+                        <div class="editor-dropdown color-dropdown" id="highlightColorDropdown">
+                          <div class="color-grid">
+                            <button class="color-swatch" data-color="transparent" title="None" style="background:repeating-conic-gradient(#ccc 0% 25%, transparent 0% 50%) 50%/12px 12px"></button>
+                            <button class="color-swatch" data-color="#fff9c4" style="background:#fff9c4" title="Yellow"></button>
+                            <button class="color-swatch" data-color="#c8e6c9" style="background:#c8e6c9" title="Green"></button>
+                            <button class="color-swatch" data-color="#bbdefb" style="background:#bbdefb" title="Blue"></button>
+                            <button class="color-swatch" data-color="#f8bbd0" style="background:#f8bbd0" title="Pink"></button>
+                            <button class="color-swatch" data-color="#ffe0b2" style="background:#ffe0b2" title="Orange"></button>
+                            <button class="color-swatch" data-color="#e1bee7" style="background:#e1bee7" title="Purple"></button>
+                            <button class="color-swatch" data-color="#d7ccc8" style="background:#d7ccc8" title="Brown"></button>
+                            <button class="color-swatch" data-color="#cfd8dc" style="background:#cfd8dc" title="Grey"></button>
+                            <button class="color-swatch" data-color="#ffcdd2" style="background:#ffcdd2" title="Red"></button>
+                            <button class="color-swatch" data-color="#b2dfdb" style="background:#b2dfdb" title="Teal"></button>
+                            <button class="color-swatch" data-color="#fff3e0" style="background:#fff3e0" title="Cream"></button>
+                          </div>
+                          <div class="custom-color-row">
+                            <label class="custom-color-label">Custom</label>
+                            <input type="color" class="custom-color-input" value="#fff9c4" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="toolbar-divider"></div>
+
+                    <!-- Structure -->
+                    <div class="toolbar-group">
+                      <div class="toolbar-dropdown-wrap">
+                        <button class="toolbar-btn has-caret" data-cmd="heading" title="Heading"><span class="material-symbols-outlined">title</span></button>
+                        <div class="editor-dropdown" id="headingDropdown">
+                          <button class="dropdown-item heading-h1" data-heading="h1">Heading 1</button>
+                          <button class="dropdown-item heading-h2" data-heading="h2">Heading 2</button>
+                          <button class="dropdown-item heading-h3" data-heading="h3">Heading 3</button>
+                          <button class="dropdown-item" data-heading="p">Normal Text</button>
+                        </div>
+                      </div>
+                      <button class="toolbar-btn" data-cmd="insertUnorderedList" title="Bullet List"><span class="material-symbols-outlined">format_list_bulleted</span></button>
+                      <button class="toolbar-btn" data-cmd="insertOrderedList" title="Numbered List"><span class="material-symbols-outlined">format_list_numbered</span></button>
+                      <button class="toolbar-btn" data-cmd="checklist" title="Checklist"><span class="material-symbols-outlined">checklist</span></button>
+                    </div>
+                    <div class="toolbar-divider"></div>
+
+                    <!-- Undo/Redo -->
+                    <div class="toolbar-group">
+                      <button class="toolbar-btn" data-cmd="undo" title="Undo (Ctrl+Z)"><span class="material-symbols-outlined">undo</span></button>
+                      <button class="toolbar-btn" data-cmd="redo" title="Redo (Ctrl+Y)"><span class="material-symbols-outlined">redo</span></button>
+                    </div>
+
+                    <!-- Toggle secondary row -->
+                    <div class="toolbar-spacer"></div>
+                    <button class="toolbar-btn toolbar-expand-btn" id="toggleSecondaryToolbar" title="More tools">
+                      <span class="material-symbols-outlined">expand_more</span>
+                    </button>
+                  </div>
+
+                  <!-- Secondary Row: Advanced Tools (collapsible) -->
+                  <div class="editor-toolbar-row toolbar-secondary" id="secondaryToolbar" data-hidden="true">
+                    <!-- Quote, Code, HR -->
+                    <div class="toolbar-group">
+                      <button class="toolbar-btn" data-cmd="formatBlock" title="Block Quote" onclick="event.preventDefault(); document.getElementById('richEditor').focus(); document.execCommand('formatBlock', false, '<blockquote>')"><span class="material-symbols-outlined">format_quote</span></button>
+                      <button class="toolbar-btn" data-cmd="codeBlock" title="Code Block"><span class="material-symbols-outlined">code_blocks</span></button>
+                      <button class="toolbar-btn" data-cmd="inlineCode" title="Inline Code"><span class="material-symbols-outlined">code</span></button>
+                      <button class="toolbar-btn" data-cmd="insertHR" title="Horizontal Rule"><span class="material-symbols-outlined">horizontal_rule</span></button>
+                    </div>
+                    <div class="toolbar-divider"></div>
+
+                    <!-- Alignment -->
+                    <div class="toolbar-group">
+                      <button class="toolbar-btn" data-cmd="justifyLeft" title="Align Left"><span class="material-symbols-outlined">format_align_left</span></button>
+                      <button class="toolbar-btn" data-cmd="justifyCenter" title="Align Center"><span class="material-symbols-outlined">format_align_center</span></button>
+                      <button class="toolbar-btn" data-cmd="justifyRight" title="Align Right"><span class="material-symbols-outlined">format_align_right</span></button>
+                      <button class="toolbar-btn" data-cmd="indent" title="Indent"><span class="material-symbols-outlined">format_indent_increase</span></button>
+                      <button class="toolbar-btn" data-cmd="outdent" title="Outdent"><span class="material-symbols-outlined">format_indent_decrease</span></button>
+                    </div>
+                    <div class="toolbar-divider"></div>
+
+                    <!-- Media -->
+                    <div class="toolbar-group">
+                      <button class="toolbar-btn" data-cmd="insertLink" title="Insert Link (Ctrl+L)"><span class="material-symbols-outlined">add_link</span></button>
+                      <button class="toolbar-btn" data-cmd="insertImage" title="Inline Image"><span class="material-symbols-outlined">add_photo_alternate</span></button>
+                      <div class="toolbar-dropdown-wrap">
+                        <button class="toolbar-btn" data-cmd="insertTable" title="Insert Table"><span class="material-symbols-outlined">table_chart</span></button>
+                        <div class="editor-dropdown table-dropdown" id="tableDropdown">
+                          <div class="table-grid">
+                            <div class="table-grid-cell" data-row="1" data-col="1"></div><div class="table-grid-cell" data-row="1" data-col="2"></div><div class="table-grid-cell" data-row="1" data-col="3"></div><div class="table-grid-cell" data-row="1" data-col="4"></div><div class="table-grid-cell" data-row="1" data-col="5"></div>
+                            <div class="table-grid-cell" data-row="2" data-col="1"></div><div class="table-grid-cell" data-row="2" data-col="2"></div><div class="table-grid-cell" data-row="2" data-col="3"></div><div class="table-grid-cell" data-row="2" data-col="4"></div><div class="table-grid-cell" data-row="2" data-col="5"></div>
+                            <div class="table-grid-cell" data-row="3" data-col="1"></div><div class="table-grid-cell" data-row="3" data-col="2"></div><div class="table-grid-cell" data-row="3" data-col="3"></div><div class="table-grid-cell" data-row="3" data-col="4"></div><div class="table-grid-cell" data-row="3" data-col="5"></div>
+                            <div class="table-grid-cell" data-row="4" data-col="1"></div><div class="table-grid-cell" data-row="4" data-col="2"></div><div class="table-grid-cell" data-row="4" data-col="3"></div><div class="table-grid-cell" data-row="4" data-col="4"></div><div class="table-grid-cell" data-row="4" data-col="5"></div>
+                            <div class="table-grid-cell" data-row="5" data-col="1"></div><div class="table-grid-cell" data-row="5" data-col="2"></div><div class="table-grid-cell" data-row="5" data-col="3"></div><div class="table-grid-cell" data-row="5" data-col="4"></div><div class="table-grid-cell" data-row="5" data-col="5"></div>
+                          </div>
+                          <p class="table-grid-label">0 × 0</p>
+                        </div>
+                      </div>
+                      <div class="toolbar-dropdown-wrap">
+                        <button class="toolbar-btn" data-cmd="emoji" title="Emoji"><span class="material-symbols-outlined">mood</span></button>
+                        <div class="editor-dropdown emoji-dropdown" id="emojiDropdown">
+                          <div class="emoji-grid">
+                            <button class="emoji-item">😀</button><button class="emoji-item">😂</button><button class="emoji-item">😍</button><button class="emoji-item">🤔</button>
+                            <button class="emoji-item">👍</button><button class="emoji-item">👎</button><button class="emoji-item">🎉</button><button class="emoji-item">🔥</button>
+                            <button class="emoji-item">❤️</button><button class="emoji-item">⭐</button><button class="emoji-item">✅</button><button class="emoji-item">❌</button>
+                            <button class="emoji-item">💡</button><button class="emoji-item">📝</button><button class="emoji-item">📌</button><button class="emoji-item">🚀</button>
+                            <button class="emoji-item">⚡</button><button class="emoji-item">🎯</button><button class="emoji-item">💬</button><button class="emoji-item">📎</button>
+                            <button class="emoji-item">🏆</button><button class="emoji-item">🔗</button><button class="emoji-item">📊</button><button class="emoji-item">🛠️</button>
+                            <button class="emoji-item">☕</button><button class="emoji-item">🌟</button><button class="emoji-item">💪</button><button class="emoji-item">🙏</button>
+                            <button class="emoji-item">👏</button><button class="emoji-item">😊</button><button class="emoji-item">🤝</button><button class="emoji-item">💻</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="toolbar-divider"></div>
+
+                    <!-- Utility -->
+                    <div class="toolbar-group">
+                      <button class="toolbar-btn" data-cmd="clearFormatting" title="Clear Formatting"><span class="material-symbols-outlined">format_clear</span></button>
+                      <button class="toolbar-btn" data-cmd="findReplace" title="Find & Replace (Ctrl+H)"><span class="material-symbols-outlined">find_replace</span></button>
+                      <button class="toolbar-btn" data-cmd="fullscreen" title="Focus Mode"><span class="material-symbols-outlined">fullscreen</span></button>
+                      <button class="toolbar-btn" data-cmd="print" title="Print / Export"><span class="material-symbols-outlined">print</span></button>
+                    </div>
+                    <div class="toolbar-divider"></div>
+
+                    <!-- Advanced -->
+                    <div class="toolbar-group">
+                      <button class="toolbar-btn" data-cmd="markdownToggle" title="Markdown"><span class="material-symbols-outlined">markdown</span></button>
+                      <button class="toolbar-btn" data-cmd="voiceInput" title="Voice Input"><span class="material-symbols-outlined">mic</span></button>
+                      <button class="toolbar-btn" data-cmd="textToSpeech" title="Read Aloud"><span class="material-symbols-outlined">record_voice_over</span></button>
+                      <div class="toolbar-dropdown-wrap">
+                        <button class="toolbar-btn has-caret" data-cmd="templates" title="Templates"><span class="material-symbols-outlined">description</span></button>
+                        <div class="editor-dropdown" id="templateDropdown">
+                          <button class="dropdown-item" data-template="meeting">📋 Meeting Notes</button>
+                          <button class="dropdown-item" data-template="todo">✅ To-Do List</button>
+                          <button class="dropdown-item" data-template="journal">📔 Journal Entry</button>
+                          <button class="dropdown-item" data-template="brainstorm">💡 Brainstorm</button>
+                        </div>
+                      </div>
+                      <button class="toolbar-btn" data-cmd="shortcuts" title="Shortcuts"><span class="material-symbols-outlined">keyboard</span></button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Find & Replace Panel -->
+                <div class="find-replace-panel" id="findReplacePanel" style="display:none">
+                  <input type="text" class="find-replace-input" id="findInput" placeholder="Find..." />
+                  <input type="text" class="find-replace-input" id="replaceInput" placeholder="Replace..." />
+                  <button class="find-replace-btn" id="findNextBtn" title="Find Next"><span class="material-symbols-outlined text-sm">search</span></button>
+                  <button class="find-replace-btn" id="replaceBtn" title="Replace"><span class="material-symbols-outlined text-sm">find_replace</span></button>
+                  <button class="find-replace-btn" id="replaceAllBtn" title="Replace All"><span class="material-symbols-outlined text-sm">swap_horiz</span></button>
+                  <button class="find-replace-btn" id="closeFindPanel" title="Close"><span class="material-symbols-outlined text-sm">close</span></button>
+                </div>
+
+                <!-- Editor Surface -->
+                <div class="relative px-5 py-5" id="inputText">
+                  <div contenteditable="true" class="rich-editor" id="richEditor" data-placeholder="Start writing your note here…" spellcheck="true"></div>
+                  <textarea class="markdown-textarea" id="markdownArea" style="display:none" placeholder="Write in Markdown..."></textarea>
+                </div>
+
+                <!-- Link Dialog -->
+                <div class="link-dialog-overlay" id="linkDialog" style="display:none">
+                  <div class="link-dialog">
+                    <p class="link-dialog-title">Insert Link</p>
+                    <input type="url" class="link-dialog-input" id="linkDialogUrl" placeholder="https://example.com" />
+                    <div class="link-dialog-actions">
+                      <button class="link-dialog-cancel" id="linkDialogCancel">Cancel</button>
+                      <button class="link-dialog-insert" id="linkDialogInsert">Insert</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Keyboard Shortcuts Panel -->
+                <div class="shortcuts-panel" id="shortcutsPanel" style="display:none">
+                  <div class="shortcuts-card">
+                    <div class="shortcuts-header">
+                      <h3>⌨️ Keyboard Shortcuts</h3>
+                      <button class="shortcuts-close" id="closeShortcutsPanel"><span class="material-symbols-outlined">close</span></button>
+                    </div>
+                    <div class="shortcuts-grid">
+                      <div class="shortcut-row"><kbd>Ctrl+B</kbd><span>Bold</span></div>
+                      <div class="shortcut-row"><kbd>Ctrl+I</kbd><span>Italic</span></div>
+                      <div class="shortcut-row"><kbd>Ctrl+U</kbd><span>Underline</span></div>
+                      <div class="shortcut-row"><kbd>Ctrl+Shift+S</kbd><span>Strikethrough</span></div>
+                      <div class="shortcut-row"><kbd>Ctrl+Shift+X</kbd><span>Inline Code</span></div>
+                      <div class="shortcut-row"><kbd>Ctrl+L</kbd><span>Insert Link</span></div>
+                      <div class="shortcut-row"><kbd>Ctrl+E</kbd><span>Center Align</span></div>
+                      <div class="shortcut-row"><kbd>Ctrl+H</kbd><span>Find & Replace</span></div>
+                      <div class="shortcut-row"><kbd>Ctrl+Shift+7</kbd><span>Numbered List</span></div>
+                      <div class="shortcut-row"><kbd>Ctrl+Shift+8</kbd><span>Bullet List</span></div>
+                      <div class="shortcut-row"><kbd>Ctrl+Z</kbd><span>Undo</span></div>
+                      <div class="shortcut-row"><kbd>Ctrl+Y</kbd><span>Redo</span></div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Hidden file input for inline images -->
+                <input type="file" accept="image/*" id="editorInlineImageInput" class="hidden" />
+
               </div>
 
-              <!-- Share Form -->
-              <div class="p-6 md:p-8 space-y-6" id="shareForm">
-
-                <!-- Content Type Selector -->
-                <div class="flex gap-2" id="typeSelector">
-                  <button class="type-btn active flex-1 flex items-center justify-center gap-2 py-3 px-3 rounded-lg bg-primary-container/40 text-primary font-medium transition-all text-sm" data-type="text">
-                    <span class="material-symbols-outlined text-lg">edit_note</span> Text
-                  </button>
-                  <button class="type-btn flex-1 flex items-center justify-center gap-2 py-3 px-3 rounded-lg text-primary/50 hover:bg-surface-container-low transition-all text-sm" data-type="link">
-                    <span class="material-symbols-outlined text-lg">link</span> Link
-                  </button>
-                  <button class="type-btn flex-1 flex items-center justify-center gap-2 py-3 px-3 rounded-lg text-primary/50 hover:bg-surface-container-low transition-all text-sm" data-type="image">
-                    <span class="material-symbols-outlined text-lg">image</span> Image
-                  </button>
-                </div>
-
-                <!-- Note Title & Category (shown for logged-in save) -->
-                <div id="noteMeta" data-hidden="true">
-                  <div class="flex gap-3">
-                    <div class="flex-1">
-                      <label class="text-[10px] uppercase tracking-widest text-primary/40 font-bold block mb-1.5">Title / Headline</label>
-                      <input type="text" class="w-full px-4 py-2.5 bg-surface-dim/30 rounded-xl border-none shadow-inner focus:ring-2 focus:ring-primary/20 text-on-surface font-semibold placeholder:text-outline-variant/40 text-sm" placeholder="Give your note a title..." id="noteTitle" maxlength="100" autocomplete="off" />
-                    </div>
-                    <div class="w-[140px]">
-                      <label for="noteCategory" class="text-[10px] uppercase tracking-widest text-primary/40 font-bold block mb-1.5">Category</label>
-                      <select class="w-full px-3 py-2.5 bg-surface-dim/30 rounded-xl border-none shadow-inner focus:ring-2 focus:ring-primary/20 text-on-surface font-medium text-sm appearance-none cursor-pointer" id="noteCategory">
-                        <option value="">None</option>
-                        <option value="personal">📝 Personal</option>
-                        <option value="work">💼 Work</option>
-                        <option value="ideas">💡 Ideas</option>
-                        <option value="code">🖥️ Code</option>
-                        <option value="links">🔗 Links</option>
-                        <option value="important">⭐ Important</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Text Input -->
-                <div class="relative" id="inputText">
-                  <textarea class="w-full min-h-[200px] bg-transparent border-none focus:ring-0 font-body text-xl leading-relaxed text-on-surface paper-lines resize-none placeholder:text-outline-variant/40 p-0" placeholder="Start writing your note or paste a link here..." id="shareTextArea" maxlength="10000"></textarea>
-                </div>
-
-                <!-- Link Input -->
-                <div class="relative space-y-3" id="inputLink" data-hidden="true">
-                  <div id="linkInputsContainer" class="space-y-3">
-                    <div class="flex items-center gap-3 p-4 bg-surface-dim/30 rounded-xl link-input-row">
-                      <span class="material-symbols-outlined text-primary/40">link</span>
-                      <input type="url" class="flex-1 bg-transparent border-none focus:ring-0 font-body text-lg text-on-surface placeholder:text-outline-variant/40 shareLinkInput" placeholder="https://example.com" />
-                      <button class="remove-link-btn text-error/60 hover:text-error transition-colors hidden" type="button" aria-label="Remove link">
-                        <span class="material-symbols-outlined">close</span>
-                      </button>
-                    </div>
-                  </div>
-                  <button type="button" class="flex items-center gap-2 text-sm text-primary font-semibold hover:bg-surface-container-low px-3 py-2 rounded-lg transition-colors" id="addLinkBtn">
-                    <span class="material-symbols-outlined text-base">add</span> Add another link
-                  </button>
-                </div>
-
-                <!-- Image Upload Dropzone -->
-                <div id="inputImage" data-hidden="true">
-                  <div class="group relative w-full h-40 border-2 border-dashed border-outline-variant/30 rounded-xl flex flex-col items-center justify-center bg-surface hover:bg-surface-container-low transition-colors cursor-pointer" id="dropzone">
-                    <span class="material-symbols-outlined text-4xl text-primary/40 group-hover:scale-110 transition-transform">add_photo_alternate</span>
-                    <p class="mt-2 text-sm text-on-surface-variant font-medium">Click or drag to upload an image</p>
-                    <input type="file" accept="image/*" id="imageFileInput" class="absolute inset-0 opacity-0 cursor-pointer" title="Click or drag to upload an image" />
-                  </div>
-                  <!-- Image Preview -->
-                  <div class="mt-4 relative" id="imagePreview" data-hidden="true">
-                    <img id="imagePreviewImg" alt="Preview" class="w-full max-h-[200px] object-contain rounded-xl shadow-md" />
-                    <button class="absolute top-2 right-2 w-8 h-8 bg-error text-on-error rounded-full flex items-center justify-center shadow-md hover:scale-110 transition-transform" id="removeImageBtn">
-                      <span class="material-symbols-outlined text-lg">close</span>
+              <!-- Link Input -->
+              <div class="relative px-5 py-5 space-y-3" id="inputLink" data-hidden="true">
+                <div id="linkInputsContainer" class="space-y-2">
+                  <div class="flex items-center gap-3 p-4 bg-surface-container-low rounded-2xl link-input-row">
+                    <span class="material-symbols-outlined text-primary/40 text-lg">link</span>
+                    <input type="url" class="flex-1 bg-transparent border-none rounded-md focus:ring-0 font-body text-base text-on-surface placeholder:text-outline-variant/40 outline-none shareLinkInput" placeholder="https://example.com" style="color: #1063c9;"/>
+                    <button class="remove-link-btn text-error/50 hover:text-error transition-colors hidden" type="button" aria-label="Remove link">
+                      <span class="material-symbols-outlined text-base">close</span>
                     </button>
                   </div>
                 </div>
+                <button type="button" class="border-2 border-dashed border-primary-container/40 flex items-center gap-1.5 text-sm text-primary/60 font-semibold hover:text-primary px-3 py-1.5 rounded-xl transition-colors hover:bg-surface-container-low" id="addLinkBtn">
+                  <span class="material-symbols-outlined text-base">add</span> Add another link
+                </button>
+              </div>
 
-                <!-- Auto-Erase Notice -->
-                <div class="flex items-center gap-3">
-                  <span class="material-symbols-outlined text-primary/40 text-lg">timer</span>
-                  <span class="text-sm text-on-surface-variant font-medium">Auto-erases in <strong class="text-primary">20 min</strong></span>
-                  <span class="ml-auto text-[10px] text-primary/40 font-medium flex items-center gap-1"><span class="material-symbols-outlined text-xs">info</span>For privacy</span>
+              <!-- Image Upload Dropzone -->
+              <div class="px-5 py-5" id="inputImage" data-hidden="true">
+                <div class="group relative w-full h-40 border-2 border-dashed border-outline-variant/30 rounded-2xl flex flex-col items-center justify-center bg-surface-container-low/50 hover:bg-surface-container-low transition-colors cursor-pointer" id="dropzone">
+                  <span class="material-symbols-outlined text-4xl text-primary/30 group-hover:scale-110 group-hover:text-primary/50 transition-all">add_photo_alternate</span>
+                  <p class="mt-2 text-sm text-on-surface-variant font-medium">Click or drag to upload an image</p>
+                  <p class="text-xs text-on-surface-variant/50 mt-1">JPEG, PNG, WebP</p>
+                  <input type="file" accept="image/*" id="imageFileInput" class="absolute inset-0 opacity-0 cursor-pointer" title="Upload image" />
                 </div>
-
-                <!-- Action Buttons -->
-                <div class="flex justify-center items-center gap-3 pt-2">
-                  <!-- Logged-out: single Share button -->
-                  <button class="px-12 py-4 bg-primary text-on-primary rounded-full font-bold text-lg shadow-xl hover:bg-primary-dim transition-all active:scale-[0.98] flex items-center gap-3" id="shareBtn">
-                    <span>Share Content</span>
-                    <span class="material-symbols-outlined">send</span>
-                  </button>
-
-                  <!-- Logged-in: Share icon + Save main button -->
-                  <button class="w-14 h-14 bg-surface-container-high text-primary rounded-full font-semibold shadow-md hover:bg-surface-container-highest transition-all active:scale-[0.95] flex items-center justify-center" id="shareIconBtn" data-hidden="true" title="Share with code">
-                    <span class="material-symbols-outlined text-xl">ios_share</span>
-                  </button>
-                  <button class="px-12 py-4 bg-primary text-on-primary rounded-full font-bold text-lg shadow-xl hover:bg-primary-dim transition-all active:scale-[0.98] flex items-center gap-3" id="saveBtn" data-hidden="true">
-                    <span>Save Note</span>
-                    <span class="material-symbols-outlined">bookmark</span>
+                <div class="mt-3 relative" id="imagePreview" data-hidden="true">
+                  <img id="imagePreviewImg" alt="Preview" class="w-full max-h-[200px] object-contain rounded-xl shadow-md" />
+                  <button class="absolute top-2 right-2 w-7 h-7 bg-error text-on-error rounded-full flex items-center justify-center shadow-md hover:scale-110 transition-transform" id="removeImageBtn">
+                    <span class="material-symbols-outlined text-base">close</span>
                   </button>
                 </div>
               </div>
 
-              <!-- Code Display (after share) -->
-              <div class="p-6 md:p-8 text-center space-y-4" id="codeDisplay" data-hidden="true">
-                <div class="w-16 h-16 mx-auto bg-tertiary-container rounded-full flex items-center justify-center mb-2">
-                  <span class="material-symbols-outlined text-3xl text-on-tertiary-container">check_circle</span>
+              <!-- Bottom Bar: Timer + Stats + Actions -->
+              <div class="px-5 pb-5 pt-4 mt-2 flex items-center gap-3 flex-wrap" style="border-top:1px solid rgba(175,179,172,0.10);">
+                <div class="flex items-center gap-1.5 text-xs font-medium" style="color:rgba(81,96,112,0.55);">
+                  <span class="material-symbols-outlined text-sm" style="color:rgba(33, 173, 12, 0.595);">timer</span>
+                  <span>Auto-erases in <strong style="color:#516070;">20 min</strong></span>
                 </div>
-                <p class="text-xs uppercase tracking-widest text-primary/50 font-bold">Your Secret Code</p>
-                <p class="font-headline text-5xl font-bold tracking-[0.3em] text-primary code-reveal" id="codeValue"></p>
-                <p class="text-sm text-on-surface-variant" id="codeExpiry"></p>
-                <button class="inline-flex items-center gap-2 px-8 py-3 bg-primary text-on-primary rounded-full font-semibold shadow-lg hover:bg-primary-dim transition-all active:scale-[0.98]" id="codeCopyBtn">
-                  <span class="material-symbols-outlined text-lg">content_copy</span>
-                  <span id="codeCopyText">Copy Code</span>
+                <div class="editor-stats flex items-center gap-3 text-[10px] font-semibold tracking-wide" style="color:rgba(81,96,112,0.4);">
+                  <span><span id="editorWordCount">0</span> words</span>
+                  <span>·</span>
+                  <span><span id="editorCharCount">0</span> chars</span>
+                  <span>·</span>
+                  <span id="editorReadTime">~1 min read</span>
+                </div>
+                <span class="flex-1"></span>
+
+                <!-- Guest: Share button -->
+                <button class="px-6 py-2.5 bg-primary text-on-primary rounded-full font-bold text-sm shadow-md hover:bg-primary-dim transition-all active:scale-[0.98] flex items-center gap-2" id="shareBtn">
+                  <span class="material-symbols-outlined text-base">send</span>
+                  Share
                 </button>
-                <div class="pt-2">
-                  <button class="text-sm text-primary/60 hover:text-primary font-medium transition-colors" id="shareAnotherBtn">
-                    ← Share another
-                  </button>
-                </div>
+
+                <!-- Logged-in: Share icon + Save -->
+                <button class="w-10 h-10 bg-surface-container text-primary rounded-full font-semibold hover:bg-surface-container-high transition-all active:scale-[0.95] flex items-center justify-center" id="shareIconBtn" data-hidden="true" title="Share with code">
+                  <span class="material-symbols-outlined text-base">ios_share</span>
+                </button>
+                <button class="px-6 py-2.5 bg-primary text-on-primary rounded-full font-bold text-sm shadow-md hover:bg-primary-dim transition-all active:scale-[0.98] flex items-center gap-2" id="saveBtn" data-hidden="true">
+                  <span class="material-symbols-outlined text-base">bookmark</span>
+                  Save Note
+                </button>
               </div>
 
             </div>
+
+            <!-- Code Display (after share) -->
+            <div class="bg-surface rounded-[20px] editorial-shadow editorial-border p-8 text-center space-y-5 mt-0" id="codeDisplay" data-hidden="true">
+              <div class="w-14 h-14 mx-auto bg-primary/10 rounded-full flex items-center justify-center">
+                <span class="material-symbols-outlined text-2xl text-primary">check_circle</span>
+              </div>
+              <div>
+                <p class="text-[10px] uppercase tracking-widest text-primary/50 font-bold mb-2">Your Secret Code</p>
+                <p class="font-headline text-5xl font-bold tracking-[0.3em] text-primary code-reveal" id="codeValue"></p>
+                <p class="text-sm text-on-surface-variant mt-2" id="codeExpiry"></p>
+              </div>
+              <button class="inline-flex items-center gap-2 px-8 py-3 bg-primary text-on-primary rounded-full font-semibold shadow-lg hover:bg-primary-dim transition-all active:scale-[0.98]" id="codeCopyBtn">
+                <span class="material-symbols-outlined text-lg">content_copy</span>
+                <span id="codeCopyText">Copy Code</span>
+              </button>
+              <div>
+                <button class="text-sm text-primary/50 hover:text-primary font-medium transition-colors" id="shareAnotherBtn">
+                  ← Share another
+                </button>
+              </div>
+            </div>
+
           </div>
 
           <!-- ===== ACCESS PANEL ===== -->
@@ -577,6 +846,9 @@
                 <button class="account-tab flex-1 py-2.5 px-3 rounded-lg text-primary/60 hover:text-primary transition-all text-sm flex items-center justify-center gap-1.5" data-account-tab="settings">
                   <span class="material-symbols-outlined text-base">settings</span> Settings
                 </button>
+                <button class="account-tab flex-1 py-2.5 px-3 rounded-lg text-primary/60 hover:text-primary transition-all text-sm flex items-center justify-center gap-1.5" data-account-tab="files">
+                  <span class="material-symbols-outlined text-base">folder_open</span> Files
+                </button>
               </div>
 
               <!-- RECENT HISTORY Section -->
@@ -721,6 +993,83 @@
                   </div>
                 </div>
               </div>
+
+              <!-- ===== FILES SECTION ===== -->
+              <div class="account-section" id="sectionFiles" data-account-active="false">
+
+                <!-- Toolbar -->
+                <div class="fm-toolbar bg-surface-container-lowest rounded-t-xl" style="border:1px solid rgba(175,179,172,0.15); border-bottom:none;">
+                  <button class="fm-toolbar-btn primary" id="fmNewFileBtn">
+                    <span class="material-symbols-outlined">add</span>
+                    <span>New File</span>
+                  </button>
+                  <button class="fm-toolbar-btn" id="fmNewFolderBtn">
+                    <span class="material-symbols-outlined">create_new_folder</span>
+                    <span>New Folder</span>
+                  </button>
+                  <div class="fm-toolbar-sep"></div>
+                  <button class="fm-toolbar-btn" id="fmImportBtn">
+                    <span class="material-symbols-outlined">upload_file</span>
+                    <span>Import</span>
+                  </button>
+                  <input type="file" id="fmImportInput" class="hidden" accept=".txt,.html,.htm,.md" />
+                  <div class="fm-toolbar-spacer"></div>
+                  <!-- Search -->
+                  <div class="fm-search-wrap">
+                    <span class="material-symbols-outlined">search</span>
+                    <input type="text" class="fm-search-input" id="fmSearchInput" placeholder="Search files…" autocomplete="off" />
+                  </div>
+                  <!-- Sort -->
+                  <div class="fm-sort-wrap">
+                    <button class="fm-toolbar-btn" id="fmSortBtn">
+                      <span class="material-symbols-outlined">sort</span>
+                      <span class="fm-sort-label">Name</span>
+                    </button>
+                    <div class="fm-sort-dropdown" id="fmSortDropdown">
+                      <button data-sort="name"><span class="material-symbols-outlined">sort_by_alpha</span> Name</button>
+                      <button data-sort="date"><span class="material-symbols-outlined">schedule</span> Date</button>
+                      <button data-sort="type"><span class="material-symbols-outlined">category</span> Type</button>
+                    </div>
+                  </div>
+                  <!-- View toggle -->
+                  <button class="fm-toolbar-btn" id="fmViewToggle" title="Toggle view">
+                    <span class="material-symbols-outlined">view_list</span>
+                  </button>
+                </div>
+
+                <!-- Breadcrumb -->
+                <div class="fm-breadcrumb" id="fmBreadcrumb" style="border-left:1px solid rgba(175,179,172,0.15); border-right:1px solid rgba(175,179,172,0.15);"></div>
+
+                <!-- Main fm-layout -->
+                <div class="fm-layout" style="border:1px solid rgba(175,179,172,0.15); border-top:none; border-radius:0 0 16px 16px;">
+                  <!-- Tree sidebar -->
+                  <div class="fm-tree-sidebar">
+                    <p class="fm-tree-sidebar-title">Folders</p>
+                    <div id="fmTree"></div>
+                  </div>
+                  <!-- Main pane -->
+                  <div class="fm-main">
+                    <div class="fm-grid" id="fmGrid"></div>
+                    <!-- Inline editor pane -->
+                    <div id="fmEditorPane">
+                      <div class="fm-editor-header">
+                        <span class="material-symbols-outlined" style="font-size:16px;color:rgba(81,96,112,0.5)">edit_note</span>
+                        <input type="text" id="fmEditorTitle" placeholder="File name…" />
+                        <button class="fm-editor-close-btn" id="fmEditorCloseBtn">
+                          <span class="material-symbols-outlined">close</span>
+                          Close
+                        </button>
+                        <button class="fm-editor-save-btn" id="fmEditorSaveBtn">
+                          <span class="material-symbols-outlined">save</span>
+                          Save
+                        </button>
+                      </div>
+                      <div id="fmEditorContent" contenteditable="true" spellcheck="true"></div>
+                    </div>
+                  </div>
+                </div>
+
+              </div><!-- /sectionFiles -->
 
               <!-- Change PIN Modal (inline) -->
               <div class="bg-surface-container-lowest rounded-xl editorial-shadow editorial-border p-6" id="changePinModal" data-hidden="true">
@@ -997,6 +1346,171 @@
     </div>
   </div>
 
+  <!-- ========== EDIT NOTE MODAL OVERLAY ========== -->
+  <div id="editNoteModalOverlay" class="fixed inset-0 flex items-center justify-center p-4" style="display:none; z-index:9998; background:rgba(0,0,0,0.6); backdrop-filter:blur(6px);">
+    <div id="editNoteModalBox" class="bg-surface w-full max-w-lg rounded-[24px] editorial-shadow editorial-border flex flex-col overflow-hidden" style="max-height:92vh;">
+
+      <!-- Header -->
+      <div class="flex items-center justify-between px-6 pt-6 pb-4 flex-shrink-0" style="border-bottom:1px solid rgba(0,0,0,0.07);">
+        <div class="flex items-center gap-3">
+          <span id="editNoteHeaderIcon" class="material-symbols-outlined text-primary text-2xl">edit_note</span>
+          <div>
+            <h3 class="text-base font-bold text-on-surface leading-tight">Edit Note</h3>
+            <p id="editNoteTypeLabel" class="text-xs text-on-surface-variant mt-0.5"></p>
+          </div>
+        </div>
+        <button id="editNoteModalClose" class="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container transition-all">
+          <span class="material-symbols-outlined text-lg">close</span>
+        </button>
+      </div>
+
+      <!-- Body -->
+      <div class="overflow-y-auto flex-1 px-6 py-5 space-y-4">
+
+        <input type="hidden" id="editNoteId" />
+        <input type="hidden" id="editNoteUsername" />
+        <input type="hidden" id="editNoteType" />
+
+        <!-- Title -->
+        <div>
+          <label class="block text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-1.5">Title</label>
+          <input type="text" id="editNoteTitle"
+            class="w-full bg-surface-container text-on-surface rounded-xl px-4 py-3 text-sm border border-outline-variant/40 focus:border-primary/40 focus:bg-surface outline-none transition-all font-medium"
+            placeholder="Note title…" />
+        </div>
+
+        <!-- Category -->
+        <div>
+          <label class="block text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-1.5">Category / Tag</label>
+          <select id="editNoteCategory"
+            class="w-full bg-surface-container text-on-surface rounded-xl px-4 py-3 text-sm border border-outline-variant/40 focus:border-primary/40 outline-none transition-all appearance-none cursor-pointer">
+            <option value="">📂 Uncategorized</option>
+            <option value="personal">📝 Personal</option>
+            <option value="work">💼 Work</option>
+            <option value="ideas">💡 Ideas</option>
+            <option value="code">🖥️ Code</option>
+            <option value="links">🔗 Links</option>
+            <option value="important">⭐ Important</option>
+          </select>
+        </div>
+
+        <!-- Content textarea -->
+        <div id="editNoteContentContainer">
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="block text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Content</label>
+            <span id="editNoteCharCount" class="text-[10px] text-on-surface-variant/50 font-mono"></span>
+          </div>
+          <textarea id="editNoteContent" rows="9"
+            class="w-full bg-surface-container text-on-surface rounded-xl px-4 py-3 text-sm border border-outline-variant/40 focus:border-primary/40 focus:bg-surface outline-none transition-all resize-none leading-relaxed"
+            placeholder="Note content…"></textarea>
+        </div>
+
+        <!-- Image note message -->
+        <div id="editNoteImageInfo" style="display:none;" class="rounded-xl p-4 bg-surface-container border border-outline-variant/30 flex items-start gap-3">
+          <span class="material-symbols-outlined text-on-surface-variant text-lg mt-0.5">image</span>
+          <div>
+            <p class="text-sm font-medium text-on-surface">Image content cannot be edited</p>
+            <p class="text-xs text-on-surface-variant mt-0.5">You can still update the title and category above.</p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Footer -->
+      <div class="flex items-center justify-between px-6 py-4 flex-shrink-0" style="border-top:1px solid rgba(0,0,0,0.07);">
+        <button id="editNoteCancelBtn" class="px-5 py-2.5 rounded-full text-xs font-bold text-on-surface-variant hover:bg-surface-container transition-all">
+          Cancel
+        </button>
+        <button id="editNoteSaveBtn" class="bg-primary text-on-primary flex items-center gap-1.5 px-6 py-2.5 rounded-full text-xs font-bold hover:opacity-90 transition-all active:scale-95">
+          <span class="material-symbols-outlined text-sm">save</span>
+          Save Changes
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ===== File Manager Context Menu ===== -->
+  <div id="fmContextMenu"></div>
+
+  <!-- ===== FM Modal: New File/Folder ===== -->
+  <div class="fm-modal-overlay" id="fmNewItemModal">
+    <div class="absolute inset-0" id="fmNewItemBackdrop"></div>
+    <div class="fm-modal-box" style="position:relative;z-index:1">
+      <div class="fm-modal-header">
+        <span class="fm-modal-title" id="fmNewItemTitle">New File</span>
+      </div>
+      <div class="fm-modal-body">
+        <input type="text" class="fm-modal-input" id="fmNewItemName" placeholder="Enter name…" maxlength="120" autocomplete="off" />
+        <div class="fm-file-type-group" id="fmFileTypeGroup">
+          <label class="fm-file-type-label">
+            <input type="radio" name="fmFileType" value="note" checked />
+            <span class="material-symbols-outlined">edit_note</span> Note
+          </label>
+          <label class="fm-file-type-label">
+            <input type="radio" name="fmFileType" value="link" />
+            <span class="material-symbols-outlined">link</span> Link
+          </label>
+        </div>
+      </div>
+      <div class="fm-modal-footer">
+        <button class="fm-btn fm-btn-cancel" id="fmNewItemCancel">Cancel</button>
+        <button class="fm-btn fm-btn-primary" id="fmNewItemConfirm">Create</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== FM Modal: Rename ===== -->
+  <div class="fm-modal-overlay" id="fmRenameModal">
+    <div class="absolute inset-0" id="fmRenameBackdrop"></div>
+    <div class="fm-modal-box" style="position:relative;z-index:1">
+      <div class="fm-modal-header">
+        <span class="fm-modal-title">Rename</span>
+      </div>
+      <div class="fm-modal-body">
+        <input type="text" class="fm-modal-input" id="fmRenameInput" placeholder="New name…" maxlength="120" autocomplete="off" />
+      </div>
+      <div class="fm-modal-footer">
+        <button class="fm-btn fm-btn-cancel" id="fmRenameCancel">Cancel</button>
+        <button class="fm-btn fm-btn-primary" id="fmRenameConfirm">Rename</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== FM Modal: Delete Confirm ===== -->
+  <div class="fm-modal-overlay" id="fmDeleteConfirm">
+    <div class="absolute inset-0" id="fmDeleteBackdrop"></div>
+    <div class="fm-modal-box" style="position:relative;z-index:1">
+      <div class="fm-modal-header">
+        <span class="fm-modal-title">Delete Item</span>
+      </div>
+      <div class="fm-modal-body">
+        <p style="font-size:13px;color:rgba(81,96,112,0.7);line-height:1.5">Are you sure you want to permanently delete <strong id="fmDeleteItemName"></strong>? This cannot be undone.</p>
+      </div>
+      <div class="fm-modal-footer">
+        <button class="fm-btn fm-btn-cancel" id="fmDeleteCancel">Cancel</button>
+        <button class="fm-btn fm-btn-danger" id="fmDeleteConfirmBtn">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== FM Modal: Move To ===== -->
+  <div class="fm-modal-overlay" id="fmMoveModal">
+    <div class="absolute inset-0" id="fmMoveBackdrop"></div>
+    <div class="fm-modal-box" style="position:relative;z-index:1">
+      <div class="fm-modal-header">
+        <span class="fm-modal-title">Move to…</span>
+      </div>
+      <div class="fm-modal-body">
+        <div class="fm-move-tree" id="fmMoveTree"></div>
+      </div>
+      <div class="fm-modal-footer">
+        <button class="fm-btn fm-btn-cancel" id="fmMoveCancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ========== Firebase SDK (v9 Compat) ========== -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
@@ -1004,12 +1518,14 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
 
   <!-- App Scripts -->
-  <script src="js/firebase-config.js?v=3"></script>
-  <script src="js/utils.js?v=3"></script>
+  <script src="js/firebase-config.js?v=8"></script>
+  <script src="js/utils.js?v=8"></script>
   <script src="js/admin.js"></script>
-  <script src="js/share.js?v=3"></script>
-  <script src="js/access.js?v=3"></script>
-  <script src="js/auth.js?v=3"></script>
-  <script src="js/app.js?v=3"></script>
+  <script src="js/editor.js?v=1"></script>
+  <script src="js/share.js?v=8"></script>
+  <script src="js/access.js?v=8"></script>
+  <script src="js/auth.js?v=8"></script>
+  <script src="js/filemanager.js?v=2"></script>
+  <script src="js/app.js?v=8"></script>
 </body>
 </html>

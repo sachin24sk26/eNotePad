@@ -9,9 +9,11 @@ document.addEventListener('DOMContentLoaded', () => {
   initNavigation();
   initTheme();
   initSidebar();
+  initEditor();
   initShare();
   initAccess();
   initAuth();
+  initFileManager();
   initPeriodicCleanup();
   initBroadcastListener();
   initFeedback();
@@ -147,6 +149,15 @@ function initSidebar() {
   quickLinks.forEach(link => {
     link.addEventListener('click', () => {
       const action = link.dataset.sidebarAction;
+      if (action === 'files') {
+        // Navigate to Account tab and switch to Files sub-tab
+        if (typeof window.switchToTab === 'function') window.switchToTab('account');
+        setTimeout(() => {
+          const filesTab = document.querySelector('.account-tab[data-account-tab="files"]');
+          if (filesTab) filesTab.click();
+        }, 50);
+        return;
+      }
       // Navigate to Account tab and switch to the correct sub-tab
       if (typeof window.switchToTab === 'function') {
         window.switchToTab('account');

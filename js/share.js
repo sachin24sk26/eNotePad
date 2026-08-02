@@ -145,7 +145,7 @@ function initShare() {
   // ----- Get content from inputs -----
   function getContent() {
     if (selectedType === 'text') {
-      const content = document.getElementById('shareTextArea').value.trim();
+      const content = (typeof getEditorPlainText === 'function') ? getEditorPlainText() : '';
       if (!content) { showToast('Please enter some text', 'warning'); return null; }
       return content;
     } else if (selectedType === 'link') {
@@ -326,15 +326,15 @@ function initShare() {
 
   // ----- Reset Form -----
   function resetShareForm() {
-    document.getElementById('shareTextArea').value = '';
+    if (typeof clearEditor === 'function') clearEditor();
     const linkContainer = document.getElementById('linkInputsContainer');
     if (linkContainer) {
       linkContainer.innerHTML = `
-        <div class="flex items-center gap-3 p-4 bg-surface-dim/30 rounded-xl link-input-row">
-          <span class="material-symbols-outlined text-primary/40">link</span>
-          <input type="url" class="flex-1 bg-transparent border-none focus:ring-0 font-body text-lg text-on-surface placeholder:text-outline-variant/40 shareLinkInput" placeholder="https://example.com" />
-          <button class="remove-link-btn text-error/60 hover:text-error transition-colors hidden" type="button" aria-label="Remove link">
-            <span class="material-symbols-outlined">close</span>
+        <div class="flex items-center gap-3 p-4 bg-surface-container-low rounded-2xl link-input-row">
+          <span class="material-symbols-outlined text-primary/40 text-lg">link</span>
+          <input type="url" class="flex-1 bg-transparent border-none rounded-md focus:ring-0 font-body text-base text-on-surface placeholder:text-outline-variant/40 outline-none shareLinkInput" placeholder="https://example.com" style="color: #1063c9;"/>
+          <button class="remove-link-btn text-error/50 hover:text-error transition-colors hidden" type="button" aria-label="Remove link">
+            <span class="material-symbols-outlined text-base">close</span>
           </button>
         </div>
       `;

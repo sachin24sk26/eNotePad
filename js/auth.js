@@ -313,6 +313,11 @@ function initAuth() {
     loadHistory(username);
     loadSavedNotes(username);
 
+    // Refresh file manager for the logged-in user
+    if (typeof window.fileManagerRefresh === 'function') {
+      window.fileManagerRefresh(username);
+    }
+
     // Initialize Admin Features if admin
     if (isAdmin && typeof initAdmin === 'function') {
       initAdmin();
@@ -332,6 +337,11 @@ function initAuth() {
     if (sidebarLinks) sidebarLinks.setAttribute('data-hidden', 'true');
     if (sidebarAdmin) {
       sidebarAdmin.style.display = 'none';
+    }
+
+    // Stop file manager listeners
+    if (typeof window.fileManagerRefresh === 'function') {
+      window.fileManagerRefresh(null);
     }
 
     // Reset fields
@@ -433,7 +443,8 @@ function initAuth() {
     const typeIcons = { text: 'edit_note', link: 'link', image: 'image' };
     const icon = typeIcons[data.type] || 'description';
     const catLabel = data.category ? categoryLabels[data.category] || '' : '';
-    const snippet = data.content && data.content.length > 80 ? escapeHTML(data.content.substring(0, 80)) + '…' : (data.content ? escapeHTML(data.content) : '');
+    const snippetContent = Array.isArray(data.content) ? data.content.join(', ') : data.content;
+    const snippet = snippetContent && snippetContent.length > 80 ? escapeHTML(snippetContent.substring(0, 80)) + '…' : (snippetContent ? escapeHTML(snippetContent) : '');
     li.innerHTML = `
       <div class="saved-note-item-icon"><span class="material-symbols-outlined text-lg">${icon}</span></div>
       <div class="saved-note-item-content">
@@ -447,7 +458,11 @@ function initAuth() {
         <button class="saved-note-action delete"><span class="material-symbols-outlined text-base">delete</span></button>
       </div>
     `;
-    li.querySelector('.edit-action').addEventListener('click', (e) => { e.stopPropagation(); openEditModal(data, docId, username); });
+    li.querySelector('.edit-action').addEventListener('click', (e) => { 
+      e.stopPropagation(); 
+      console.log('Edit action clicked!', data, docId);
+      openEditModal(data, docId, username); 
+    });
     li.querySelector('.copy-action').addEventListener('click', async (e) => { e.stopPropagation(); if (data.content) { await copyToClipboard(data.content); showToast('Content copied!', 'success'); } });
     li.querySelector('.delete').addEventListener('click', async (e) => { e.stopPropagation(); if (confirm('Delete this note?')) await deleteNote(docId, username, li); });
     return li;
@@ -467,9 +482,9 @@ function initAuth() {
       const target = tab.dataset.accountTab;
       document.querySelectorAll('.account-tab').forEach(t => t.classList.remove('active'));
       tab.classList.add('active');
-      ['recent', 'saved', 'settings'].forEach(k => {
+      ['recent', 'saved', 'settings', 'files'].forEach(k => {
         const el = document.getElementById(`section${k.charAt(0).toUpperCase() + k.slice(1)}`);
-        el.setAttribute('data-account-active', k === target ? 'true' : 'false');
+        if (el) el.setAttribute('data-account-active', k === target ? 'true' : 'false');
       });
     });
   });
@@ -484,6 +499,148 @@ function initAuth() {
       });
     });
   });
+
+  // ----- Edit Note Modal -----
+  const editModalOverlay = document.getElementById('editNoteModalOverlay');
+  const editModalClose   = document.getElementById('editNoteModalClose');
+  const editCancelBtn    = document.getElementById('editNoteCancelBtn');
+  const editSaveBtn      = document.getElementById('editNoteSaveBtn');
+  const editCharCount    = document.getElementById('editNoteCharCount');
+  const editContentArea  = document.getElementById('editNoteContent');
+  const editTypeLabel    = document.getElementById('editNoteTypeLabel');
+
+  // Live char counter
+  if (editContentArea && editCharCount) {
+    editContentArea.addEventListener('input', () => {
+      const len = editContentArea.value.length;
+      editCharCount.textContent = len > 0 ? `${len} chars` : '';
+    });
+  }
+
+  window.openEditModal = function(data, docId, username) {
+    console.log('openEditModal called', { data, docId, username });
+
+    // Fill hidden tracking fields
+    document.getElementById('editNoteId').value       = docId;
+    document.getElementById('editNoteUsername').value = username;
+    document.getElementById('editNoteType').value     = data.type || 'text';
+
+    // Title: use title field, fallback to preview, fallback to content snippet
+    let titleValue = data.title || data.preview || '';
+    if (!titleValue && data.content) {
+      const raw = Array.isArray(data.content) ? data.content.join(', ') : data.content;
+      titleValue = raw.substring(0, 60);
+    }
+    document.getElementById('editNoteTitle').value = titleValue;
+
+    // Category
+    document.getElementById('editNoteCategory').value = data.category || '';
+
+    // Type label
+    const typeMap = { text: '📝 Text note', link: '🔗 Link note', image: '🖼️ Image note' };
+    if (editTypeLabel) editTypeLabel.textContent = typeMap[data.type] || '📝 Text note';
+
+    // Content vs image
+    const contentContainer = document.getElementById('editNoteContentContainer');
+    const imageInfo        = document.getElementById('editNoteImageInfo');
+
+    if (data.type === 'image') {
+      if (contentContainer) contentContainer.style.display = 'none';
+      if (imageInfo)        imageInfo.style.display = 'flex';
+    } else {
+      if (contentContainer) contentContainer.style.display = 'block';
+      if (imageInfo)        imageInfo.style.display = 'none';
+
+      let content = data.content || '';
+      if (Array.isArray(content)) content = content.join('\n');
+
+      if (editContentArea) {
+        editContentArea.value = content;
+        if (editCharCount) {
+          editCharCount.textContent = content.length > 0 ? `${content.length} chars` : '';
+        }
+      }
+    }
+
+    // Show modal
+    if (editModalOverlay) editModalOverlay.style.display = 'flex';
+
+    // Auto-focus title
+    setTimeout(() => {
+      const t = document.getElementById('editNoteTitle');
+      if (t) { t.focus(); t.select(); }
+    }, 60);
+  };
+
+  function closeEditModal() {
+    if (editModalOverlay) editModalOverlay.style.display = 'none';
+  }
+
+  if (editModalClose) editModalClose.addEventListener('click', closeEditModal);
+  if (editCancelBtn)  editCancelBtn.addEventListener('click', closeEditModal);
+
+  // Click backdrop to close
+  if (editModalOverlay) {
+    editModalOverlay.addEventListener('click', (e) => {
+      if (e.target === editModalOverlay) closeEditModal();
+    });
+  }
+
+  // Escape key to close
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && editModalOverlay && editModalOverlay.style.display !== 'none') {
+      closeEditModal();
+    }
+  });
+
+  // Save
+  if (editSaveBtn) {
+    editSaveBtn.addEventListener('click', async () => {
+      const docId    = document.getElementById('editNoteId').value;
+      const username = document.getElementById('editNoteUsername').value;
+      const type     = document.getElementById('editNoteType').value;
+      const newTitle = document.getElementById('editNoteTitle').value.trim();
+      const newCat   = document.getElementById('editNoteCategory').value;
+      const rawText  = editContentArea ? editContentArea.value : '';
+
+      if (!docId || !username) return;
+
+      editSaveBtn.disabled = true;
+      const origHTML = editSaveBtn.innerHTML;
+      editSaveBtn.innerHTML = '<span class="material-symbols-outlined text-sm" style="animation:spin 1s linear infinite">progress_activity</span> Saving…';
+
+      try {
+        const updateData = { title: newTitle, category: newCat };
+
+        if (type !== 'image') {
+          updateData.content = (type === 'link')
+            ? rawText.split('\n').map(l => l.trim()).filter(Boolean)
+            : rawText;
+        }
+
+        await db.collection('users').doc(username).collection('savedNotes').doc(docId).update(updateData);
+
+        // Sync history preview
+        try {
+          const previewSnippet = newTitle || (type === 'image'
+            ? '🖼️ Image'
+            : (Array.isArray(updateData.content) ? updateData.content.join(', ') : (updateData.content || '')).substring(0, 100));
+          await db.collection('users').doc(username).collection('history').doc(docId).update({ preview: previewSnippet });
+        } catch (_) {}
+
+        showToast('Note updated! ✅', 'success');
+        closeEditModal();
+        loadSavedNotes(username);
+
+      } catch (err) {
+        console.error('Edit save error:', err);
+        showToast('Could not save changes. Try again.', 'error');
+      } finally {
+        editSaveBtn.disabled = false;
+        editSaveBtn.innerHTML = origHTML;
+      }
+    });
+  }
 
   // ----- Helper Utils -----
   function escapeHTML(str) {
