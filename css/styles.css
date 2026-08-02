@@ -2789,8 +2789,8 @@ select.appearance-none {
 .fm-move-option .material-symbols-outlined { font-size: 15px; }
 
 /* ── Dark Mode ─────────────────────────────────────────────── */
-.dark #sectionFiles,
-.dark .fm-layout { /* Inherit from bg-surface-container-lowest */ }
+.dark #sectionFiles { /* Inherit from bg-surface-container-lowest */ }
+.dark .fm-layout { background: transparent; }
 .dark .fm-toolbar { border-color: rgba(255,255,255,0.06); }
 .dark .fm-toolbar-btn { color: rgba(255,255,255,0.5); }
 .dark .fm-toolbar-btn:hover { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.85); }
@@ -2801,7 +2801,7 @@ select.appearance-none {
 .dark .fm-crumb { color: rgba(255,255,255,0.4); }
 .dark .fm-crumb:hover { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.8); }
 .dark .fm-crumb.active { color: rgba(255,255,255,0.8); }
-.dark .fm-tree-sidebar { background: rgba(255,255,255,0.02); border-color: rgba(255,255,255,0.06); }
+.dark .fm-tree-sidebar { background: transparent; border-color: rgba(255,255,255,0.06); }
 .dark .fm-tree-item { color: rgba(255,255,255,0.4); }
 .dark .fm-tree-item:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.8); }
 .dark .fm-tree-item.active { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.9); }
