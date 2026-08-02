@@ -893,47 +893,7 @@
                 </ul>
               </div>
 
-              <!-- Edit Note Modal (inline) -->
-              <div class="bg-surface-container-lowest rounded-xl editorial-shadow editorial-border p-6" id="editNoteModal" data-hidden="true">
-                <div class="flex items-center justify-between mb-4">
-                  <h3 class="font-body text-lg italic text-primary">Edit Note</h3>
-                  <button class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-container-low transition-all" id="cancelEditBtn">
-                    <span class="material-symbols-outlined text-primary/40">close</span>
-                  </button>
-                </div>
-                <div class="space-y-4">
-                  <div class="flex gap-3">
-                    <div class="flex-1">
-                      <label for="editNoteTitle" class="text-[10px] uppercase tracking-widest text-primary/40 font-bold block mb-1.5">Title</label>
-                      <input type="text" class="w-full px-4 py-2.5 bg-surface-dim/30 rounded-xl border-none shadow-inner focus:ring-2 focus:ring-primary/20 text-on-surface font-semibold placeholder:text-outline-variant/40 text-sm" id="editNoteTitle" maxlength="100" />
-                    </div>
-                    <div class="w-[140px]">
-                      <label for="editNoteCategory" class="text-[10px] uppercase tracking-widest text-primary/40 font-bold block mb-1.5">Category</label>
-                      <select class="w-full px-3 py-2.5 bg-surface-dim/30 rounded-xl border-none shadow-inner focus:ring-2 focus:ring-primary/20 text-on-surface font-medium text-sm appearance-none cursor-pointer" id="editNoteCategory">
-                        <option value="">None</option>
-                        <option value="personal">📝 Personal</option>
-                        <option value="work">💼 Work</option>
-                        <option value="ideas">💡 Ideas</option>
-                        <option value="code">🖥️ Code</option>
-                        <option value="links">🔗 Links</option>
-                        <option value="important">⭐ Important</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div>
-                    <label for="editNoteContent" class="text-[10px] uppercase tracking-widest text-primary/40 font-bold block mb-1.5">Content</label>
-                    <textarea class="w-full min-h-[150px] px-4 py-3 bg-surface-dim/30 rounded-xl border-none shadow-inner focus:ring-2 focus:ring-primary/20 text-on-surface font-body text-base resize-none" id="editNoteContent"></textarea>
-                  </div>
-                  <input type="hidden" id="editNoteId" />
-                  <div class="flex gap-3 pt-1">
-                    <button class="flex-1 py-3 rounded-full text-sm font-semibold text-error bg-error/5 hover:bg-error/10 transition-all flex items-center justify-center gap-2" id="deleteFromEditBtn">
-                      <span class="material-symbols-outlined text-base">delete</span> Delete
-                    </button>
-                    <button class="flex-1 py-3 rounded-full text-sm font-semibold text-on-primary bg-primary hover:bg-primary-dim transition-all flex items-center justify-center gap-2" id="saveEditBtn">
-                      <span class="material-symbols-outlined text-base">check</span> Save Changes
-                    </button>
-                  </div>
-              </div>
+              <!-- Edit Note: handled by #editNoteModalOverlay overlay below -->
 
               <!-- SETTINGS Section -->
               <div class="account-section bg-surface-container-lowest rounded-xl editorial-shadow editorial-border" id="sectionSettings" data-account-active="false">

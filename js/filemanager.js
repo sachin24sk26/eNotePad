@@ -58,16 +58,9 @@ function initFileManager() {
     }
   };
 
-  // ─── Auth integration: pick up current user already logged in ─────────
-  try {
-    const existingUser = (typeof getCurrentUser === 'function') ? getCurrentUser() : null;
-    if (existingUser && existingUser.username) {
-      currentUser = existingUser.username;
-      startListeners();
-    }
-  } catch(e) {
-    console.warn('FileManager: could not get current user', e);
-  }
+  // ─── Auth integration: driven entirely by fileManagerRefresh() ──────────
+  // getCurrentUser() is NOT a global function — we rely on auth.js calling
+  // window.fileManagerRefresh(username) after sign-in / sign-out.
 
   // ─── Firestore Listeners ─────────────────────────────────────────────
   function startListeners() {
@@ -171,15 +164,30 @@ function initFileManager() {
         <span class="fm-tree-label">${escHtml(folder.name)}</span>
       `;
 
+      const subContainer = document.createElement('div');
+      subContainer.className = 'fm-tree-children';
+      renderTreeLevel(folder.id, subContainer, depth + 1);
+
+      // ── Chevron expand / collapse ──
+      const toggle = item.querySelector('.fm-tree-toggle');
+      if (toggle && hasChildren) {
+        let expanded = true; // start expanded
+        toggle.style.transition = 'transform 0.2s ease';
+        toggle.addEventListener('click', e => {
+          e.stopPropagation();
+          expanded = !expanded;
+          toggle.style.transform = expanded ? 'rotate(90deg)' : 'rotate(0deg)';
+          subContainer.style.display = expanded ? '' : 'none';
+        });
+        // Start with chevron indicating expanded
+        toggle.style.transform = 'rotate(90deg)';
+      }
+
       item.addEventListener('click', e => { e.stopPropagation(); navigateTo(folder.id); });
       item.addEventListener('contextmenu', e => showContextMenu(e, folder.id, 'folder'));
       setupDragEvents(item, folder.id, 'folder');
       setupDropTarget(item, folder.id);
       container.appendChild(item);
-
-      const subContainer = document.createElement('div');
-      subContainer.className = 'fm-tree-children';
-      renderTreeLevel(folder.id, subContainer, depth + 1);
       container.appendChild(subContainer);
     });
   }
@@ -189,6 +197,17 @@ function initFileManager() {
     if (!fmGrid) return;
     fmGrid.className = viewMode === 'grid' ? 'fm-grid' : 'fm-list';
     fmGrid.innerHTML = '';
+
+    // Show login prompt if no user is signed in
+    if (!currentUser) {
+      fmGrid.innerHTML = `
+        <div class="fm-empty fm-login-prompt">
+          <span class="material-symbols-outlined">lock_person</span>
+          <p>Please log in to access My Files.</p>
+          <p class="fm-empty-hint">Your personal file manager is available after signing in to your account.</p>
+        </div>`;
+      return;
+    }
 
     let folders = allFolders.filter(f => (f.parentId || null) === currentFolderId);
     let files = allFiles.filter(f => (f.folderId || null) === currentFolderId);
