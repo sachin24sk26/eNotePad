@@ -536,11 +536,21 @@ function initFileManager() {
 
     modal.style.display = 'flex';
 
-    document.getElementById('fmDeleteConfirmBtn').onclick = async () => {
+    const btn = document.getElementById('fmDeleteConfirmBtn');
+    btn.onclick = async (e) => {
+      e.preventDefault();
       modal.style.display = 'none';
-      await deleteItem(id, type);
+      try {
+        await deleteItem(id, type);
+      } catch (err) {
+        console.error('Error in deleteItem via onclick:', err);
+      }
     };
-    document.getElementById('fmDeleteCancel').onclick = () => (modal.style.display = 'none');
+    
+    document.getElementById('fmDeleteCancel').onclick = (e) => {
+      e.preventDefault();
+      modal.style.display = 'none';
+    };
     const bd = document.getElementById('fmDeleteBackdrop');
     if (bd) bd.onclick = () => (modal.style.display = 'none');
   }
@@ -632,7 +642,10 @@ function initFileManager() {
   }
 
   async function deleteItem(id, type) {
-    if (!currentUser) return;
+    if (!currentUser || !id) {
+      toast('Delete failed: Missing user or file ID', 'error');
+      return;
+    }
     try {
       if (type === 'folder') {
         await deleteFolderRecursive(id);
@@ -640,7 +653,9 @@ function initFileManager() {
         await db.collection('users').doc(currentUser).collection('files').doc(id).delete();
         if (openFileId === id) closeEditorPane();
       }
-      selectedItem = null;
+      if (selectedItem?.id === id) {
+        selectedItem = null;
+      }
       toast('Deleted', 'success');
     } catch(e) {
       toast('Delete failed: ' + e.message, 'error');

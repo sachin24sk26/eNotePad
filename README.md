@@ -57,6 +57,8 @@ eNotepad/
 │   ├── access.js           # Content retrieval & code processing
 │   ├── auth.js             # User lifecycle & RBAC role management
 │   ├── admin.js            # Admin Command Center v3.0 logic
+│   ├── editor.js           # Advanced text editing and formatting
+│   ├── filemanager.js      # File and media management system
 │   └── app.js              # Application router and navigation sync
 ├── assets/
 │   └── favicon.svg         # Minimalist vector branding
