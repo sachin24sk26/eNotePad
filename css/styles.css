@@ -3034,3 +3034,74 @@ select.appearance-none {
 .dark .sfm-btn-cancel { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.4); }
 .dark .sfm-btn-cancel:hover { color: rgba(255,255,255,0.75); }
 
+/* Sort dropdown positioning fix */
+.fm-sort-wrap {
+  position: relative;
+  display: inline-block;
+}
+
+.fm-sort-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  display: none;
+  flex-direction: column;
+  z-index: 100;
+  min-width: 120px;
+  overflow: hidden;
+  margin-top: 4px;
+}
+.fm-sort-dropdown.open { display: flex; }
+
+.fm-sort-dropdown button {
+  padding: 10px 16px;
+  border: none;
+  background: transparent;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #516070;
+  width: 100%;
+}
+.fm-sort-dropdown button:hover {
+  background: rgba(81,96,112,0.05);
+}
+
+.dark .fm-sort-dropdown { background: #262a26; border: 1px solid rgba(255,255,255,0.08); }
+.dark .fm-sort-dropdown button { color: rgba(255,255,255,0.6); }
+.dark .fm-sort-dropdown button:hover { background: rgba(255,255,255,0.07); }
+
+/* Fix search input overlapping icon and square edges */
+.fm-search-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.fm-search-wrap .material-symbols-outlined {
+  position: absolute;
+  left: 12px;
+  color: rgba(81,96,112,0.5);
+  pointer-events: none;
+  font-size: 18px;
+}
+.fm-search-input {
+  padding: 8px 16px 8px 36px;
+  border-radius: 999px;
+  border: 1px solid rgba(175,179,172,0.4);
+  background: white;
+  color: #2f342e;
+  font-size: 14px;
+  outline: none;
+  width: 100%;
+  transition: all 0.2s;
+}
+.fm-search-input:focus {
+  border-color: #516070;
+  box-shadow: 0 0 0 2px rgba(81,96,112,0.1);
+}

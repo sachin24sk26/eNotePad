@@ -305,3 +305,109 @@ function showEl(id) {
   const el = document.getElementById(id);
   if (el) el.removeAttribute('data-hidden');
 }
+
+/**
+ * Auto-logout due to inactivity (20 minutes).
+ * Shows a 60-second countdown warning at 19 minutes before signing out.
+ */
+(function initInactivityTimer() {
+  const WARN_AFTER_MS   = 19 * 60 * 1000; // Show warning at 19 min
+  const LOGOUT_AFTER_MS = 20 * 60 * 1000; // Sign out at 20 min
+  const COUNTDOWN_SECS  = 60;             // Warning countdown duration
+
+  let warnTimer = null;
+  let logoutTimer = null;
+  let countdownInterval = null;
+  let warningVisible = false;
+
+  // DOM refs are fetched after DOM ready
+  let warningEl   = null;
+  let countdownEl = null;
+
+  function isLoggedIn() {
+    return typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser;
+  }
+
+  function hideWarning() {
+    if (warningEl) warningEl.style.display = 'none';
+    warningVisible = false;
+    clearInterval(countdownInterval);
+  }
+
+  function showWarning() {
+    if (!isLoggedIn() || !warningEl) return;
+    warningEl.style.display = 'flex';
+    warningVisible = true;
+
+    let remaining = COUNTDOWN_SECS;
+    if (countdownEl) countdownEl.textContent = remaining;
+
+    clearInterval(countdownInterval);
+    countdownInterval = setInterval(() => {
+      remaining--;
+      if (countdownEl) countdownEl.textContent = remaining;
+      if (remaining <= 0) clearInterval(countdownInterval);
+    }, 1000);
+  }
+
+  function scheduleTimers() {
+    clearTimeout(warnTimer);
+    clearTimeout(logoutTimer);
+
+    warnTimer = setTimeout(() => {
+      if (isLoggedIn()) showWarning();
+    }, WARN_AFTER_MS);
+
+    logoutTimer = setTimeout(() => {
+      if (isLoggedIn()) {
+        hideWarning();
+        localStorage.removeItem('enotepad_session_token');
+        if (window.currentSessionUnsub) { window.currentSessionUnsub(); window.currentSessionUnsub = null; }
+        firebase.auth().signOut().then(() => {
+          if (typeof showToast === 'function') {
+            showToast('Signed out due to inactivity (20 min)', 'warning');
+          }
+        }).catch(console.error);
+      }
+    }, LOGOUT_AFTER_MS);
+  }
+
+  function resetTimers() {
+    if (warningVisible) hideWarning();
+    if (isLoggedIn()) scheduleTimers();
+  }
+
+  // Expose for auth module
+  window.resetInactivityTimer = resetTimers;
+  window.cancelInactivityTimer = () => {
+    clearTimeout(warnTimer);
+    clearTimeout(logoutTimer);
+    clearInterval(countdownInterval);
+    hideWarning();
+  };
+
+  // Attach activity listeners
+  const ACTIVITY_EVENTS = ['mousemove', 'keydown', 'scroll', 'click', 'touchstart', 'pointerdown'];
+  ACTIVITY_EVENTS.forEach(evt => {
+    window.addEventListener(evt, resetTimers, { passive: true });
+  });
+
+  // Initialise after DOM is ready (so we can find the elements)
+  document.addEventListener('DOMContentLoaded', () => {
+    warningEl   = document.getElementById('inactivityWarning');
+    countdownEl = document.getElementById('inactivityCountdown');
+    const stayBtn = document.getElementById('stayLoggedInBtn');
+
+    if (stayBtn) {
+      stayBtn.addEventListener('click', () => {
+        hideWarning();
+        scheduleTimers();
+      });
+    }
+
+    // Initial kick — start timer if user is already logged in on page load
+    setTimeout(() => {
+      if (isLoggedIn()) scheduleTimers();
+    }, 2500);
+  });
+})();

@@ -9,9 +9,12 @@ function initAuth() {
   const googleAuthBtn = document.getElementById('googleAuthBtn');
   const forgotPasswordBtn = document.getElementById('forgotPasswordBtn');
   const logoutBtn = document.getElementById('logoutBtn');
+  const logoutOtherBtn = document.getElementById('logoutOtherBtn');
   const usernameInput = document.getElementById('authUsername');
   const emailInput = document.getElementById('authEmail');
   const passwordInput = document.getElementById('authPassword');
+  const togglePasswordBtn = document.getElementById('togglePasswordBtn');
+  const togglePasswordIcon = document.getElementById('togglePasswordIcon');
   const usernameStatus = document.getElementById('usernameStatus');
   const usernameIcon = document.getElementById('usernameIcon');
 
@@ -49,15 +52,56 @@ function initAuth() {
           userProfile.role = 'admin';
         }
 
+        // Backfill email if missing for existing users
+        if (!userProfile.email && user.email) {
+          try {
+            await db.collection('users').doc(userProfile.username).update({ email: user.email });
+            userProfile.email = user.email;
+          } catch (e) {
+            console.warn('Could not backfill email:', e);
+          }
+        }
+
         console.log('User profile loaded:', userProfile.username, '| isAdmin:', isAdmin);
         setCurrentUser({ username: userProfile.username, email: user.email, uid: user.uid, role: userProfile.role });
+
+        // === Session Token Validation (Logout Other Devices) ===
+        // Only attach listener after a short delay to avoid race condition on first login
+        if (window.currentSessionUnsub) window.currentSessionUnsub();
+        let sessionListenerReady = false;
+        // Give the login flow 1.5s to write the session token before we start validating
+        setTimeout(() => { sessionListenerReady = true; }, 1500);
+
+        window.currentSessionUnsub = db.collection('users').doc(userProfile.username).onSnapshot(doc => {
+          if (!sessionListenerReady) return;
+          const data = doc.data();
+          if (data && data.sessionToken) {
+            const myToken = localStorage.getItem('enotepad_session_token');
+            if (myToken && myToken !== data.sessionToken) {
+              // Another device rotated the token — sign out this device
+              if (window.currentSessionUnsub) window.currentSessionUnsub();
+              firebase.auth().signOut().then(() => {
+                showToast('You were signed out from another device', 'warning');
+              });
+            }
+          }
+        });
+
         showLoggedInView(userProfile.username, isAdmin);
+        // Start inactivity timer now that user is signed in
+        if (typeof window.resetInactivityTimer === 'function') window.resetInactivityTimer();
       } else if (authMode !== 'register') {
         console.warn('User authenticated but no Firestore profile found for uid:', user.uid);
         // Don't call showLoggedOutView here — user is still authenticated, just missing a profile
       }
     } else {
-      // User is signed out
+      // User is signed out — clean up session subscription
+      if (window.currentSessionUnsub) {
+        window.currentSessionUnsub();
+        window.currentSessionUnsub = null;
+      }
+      // Cancel inactivity timer
+      if (typeof window.cancelInactivityTimer === 'function') window.cancelInactivityTimer();
       setCurrentUser(null);
       showLoggedOutView();
     }
@@ -137,6 +181,10 @@ function initAuth() {
       document.getElementById('authBtnText').textContent = 'Register';
       document.getElementById('authTogglePrefix').textContent = 'Already have an account?';
       authToggleLink.textContent = 'Login';
+      const emailLabel = document.querySelector('label[for="authEmail"]');
+      if (emailLabel) emailLabel.textContent = 'Email Address';
+      emailInput.placeholder = 'name@example.com';
+      emailInput.type = 'email';
       // Show username field
       document.getElementById('usernameFieldGroup').classList.remove('hidden');
     } else {
@@ -146,6 +194,10 @@ function initAuth() {
       document.getElementById('authBtnText').textContent = 'Login';
       document.getElementById('authTogglePrefix').textContent = "Don't have an account?";
       authToggleLink.textContent = 'Register';
+      const emailLabel = document.querySelector('label[for="authEmail"]');
+      if (emailLabel) emailLabel.textContent = 'Email or Username';
+      emailInput.placeholder = 'name@example.com or username';
+      emailInput.type = 'text';
       // Hide username field (login by email)
       document.getElementById('usernameFieldGroup').classList.add('hidden');
       updateUsernameUI(null);
@@ -155,9 +207,22 @@ function initAuth() {
   // Set initial state
   document.getElementById('usernameFieldGroup').classList.add('hidden');
 
+  // ----- Toggle Password Visibility -----
+  if (togglePasswordBtn && passwordInput && togglePasswordIcon) {
+    togglePasswordBtn.addEventListener('click', () => {
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        togglePasswordIcon.textContent = 'visibility_off';
+      } else {
+        passwordInput.type = 'password';
+        togglePasswordIcon.textContent = 'visibility';
+      }
+    });
+  }
+
   // ----- Auth Button -----
   authBtn.addEventListener('click', async () => {
-    const email = emailInput.value.trim();
+    let email = emailInput.value.trim();
     const password = passwordInput.value;
     const username = usernameInput.value.trim().toLowerCase();
 
@@ -183,14 +248,32 @@ function initAuth() {
     try {
       if (authMode === 'register') {
         const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
+        const newToken = generateSessionToken();
+        localStorage.setItem('enotepad_session_token', newToken);
         await db.collection('users').doc(username).set({
           username: username,
+          email: email,
           uid: userCredential.user.uid,
+          sessionToken: newToken,
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
         showToast('Welcome to eNotePad! 🎉', 'success');
       } else {
-        await firebase.auth().signInWithEmailAndPassword(email, password);
+        let loginEmail = email;
+        if (!loginEmail.includes('@')) {
+          loginEmail = loginEmail.toLowerCase();
+          const userDoc = await db.collection('users').doc(loginEmail).get();
+          if (userDoc.exists && userDoc.data().email) {
+            loginEmail = userDoc.data().email;
+          } else {
+            showToast('Username not found or missing email. Please login with email.', 'warning');
+            authBtn.classList.remove('btn-loading');
+            authBtn.disabled = false;
+            return;
+          }
+        }
+        await firebase.auth().signInWithEmailAndPassword(loginEmail, password);
+        // Token is registered after login in recordLoginSession
         showToast('Successfully logged in!', 'success');
       }
     } catch (error) {
@@ -208,29 +291,28 @@ function initAuth() {
     try {
       const result = await firebase.auth().signInWithPopup(provider);
       const user = result.user;
-      
       // Check if user already has a username
       const userProfile = await fetchUserProfileByUid(user.uid);
       if (!userProfile) {
-        // If new Google user, we need to prompt for a username
-        // Simplified: generate one from email or name
         const baseName = (user.displayName || user.email.split('@')[0]).replace(/\s+/g, '').toLowerCase().substring(0, 15);
         let finalUsername = baseName;
         let suffix = 1;
-        
-        // Ensure uniqueness
         while ((await db.collection('users').doc(finalUsername).get()).exists) {
           finalUsername = baseName + suffix;
           suffix++;
         }
-
+        const newToken = generateSessionToken();
+        localStorage.setItem('enotepad_session_token', newToken);
         await db.collection('users').doc(finalUsername).set({
           username: finalUsername,
+          email: user.email,
           uid: user.uid,
+          sessionToken: newToken,
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
         showToast(`Welcome, ${finalUsername}!`, 'success');
       }
+      // Token will be registered by recordLoginSession triggered from onAuthStateChanged
     } catch (error) {
       console.error('Google Auth error:', error);
       showToast('Google login failed', 'error');
@@ -255,13 +337,64 @@ function initAuth() {
 
   // ----- Logout -----
   logoutBtn.addEventListener('click', async () => {
-    try {
-      await firebase.auth().signOut();
-      showToast('Logged out successfully', 'success');
-    } catch (error) {
-      showToast('Logout failed', 'error');
-    }
+    showConfirmModal({
+      title: 'Sign Out',
+      message: 'Are you sure you want to log out from this device?',
+      icon: 'logout',
+      iconBg: 'rgba(159,64,61,0.08)',
+      iconColor: '#9f403d',
+      confirmText: 'Logout',
+      confirmClass: 'bg-error text-on-error hover:opacity-90',
+      onConfirm: async () => {
+        try {
+          localStorage.removeItem('enotepad_session_token');
+          if (window.currentSessionUnsub) { window.currentSessionUnsub(); window.currentSessionUnsub = null; }
+          await firebase.auth().signOut();
+          showToast('Logged out successfully', 'success');
+        } catch (error) {
+          showToast('Logout failed', 'error');
+        }
+      }
+    });
   });
+
+  // ----- Logout All Other Devices -----
+  function setupLogoutOtherBtns() {
+    if (logoutOtherBtn) {
+      logoutOtherBtn.addEventListener('click', () => rotateSessionToken());
+    }
+    const logoutAllSessionsBtn = document.getElementById('logoutAllSessionsBtn');
+    if (logoutAllSessionsBtn) {
+      logoutAllSessionsBtn.addEventListener('click', () => rotateSessionToken());
+    }
+  }
+  setupLogoutOtherBtns();
+
+  async function rotateSessionToken() {
+    showConfirmModal({
+      title: 'Logout Other Devices',
+      message: 'All other signed-in devices will be immediately logged out.',
+      icon: 'phonelink_erase',
+      iconBg: 'rgba(159,64,61,0.08)',
+      iconColor: '#9f403d',
+      confirmText: 'Logout Others',
+      confirmClass: 'bg-error text-on-error hover:opacity-90',
+      onConfirm: async () => {
+        const username = document.getElementById('userName').textContent.trim();
+        if (!username) return;
+        const newToken = generateSessionToken();
+        localStorage.setItem('enotepad_session_token', newToken);
+        try {
+          await db.collection('users').doc(username).update({ sessionToken: newToken });
+          showToast('✅ Other devices signed out', 'success');
+          loadActiveSessions(username);
+        } catch (error) {
+          console.error(error);
+          showToast('Failed to logout other devices', 'error');
+        }
+      }
+    });
+  }
 
   // =========================================================
   // UI MANAGEMENT
@@ -312,6 +445,7 @@ function initAuth() {
     loadUserProfile(username);
     loadHistory(username);
     loadSavedNotes(username);
+    recordLoginSession(username);
 
     // Refresh file manager for the logged-in user
     if (typeof window.fileManagerRefresh === 'function') {
@@ -391,8 +525,32 @@ function initAuth() {
       const snap = await db.collection('users').doc(username).collection('history').orderBy('createdAt', 'desc').limit(50).get();
       if (snap.empty) { empty.style.display = ''; return; }
       empty.style.display = 'none';
-      list.querySelectorAll('.note-item').forEach(el => el.remove());
-      snap.docs.forEach(doc => list.appendChild(createHistoryItem(doc.data(), doc.id)));
+      list.querySelectorAll('.note-item, .view-more-btn').forEach(el => el.remove());
+      
+      let count = 0;
+      snap.docs.forEach(doc => {
+        const item = createHistoryItem(doc.data(), doc.id);
+        if (count >= 5) {
+          item.style.display = 'none';
+          item.classList.add('hidden-history-item');
+        }
+        list.appendChild(item);
+        count++;
+      });
+      
+      if (count > 5) {
+        const btnLi = document.createElement('li');
+        btnLi.className = 'text-center mt-4 view-more-btn';
+        btnLi.innerHTML = `<button class="text-xs text-primary/70 hover:text-primary font-bold px-4 py-2 bg-primary-container/20 hover:bg-primary-container/40 rounded-full transition-colors">View More</button>`;
+        btnLi.addEventListener('click', () => {
+          list.querySelectorAll('.hidden-history-item').forEach(el => {
+            el.style.display = '';
+            el.classList.remove('hidden-history-item');
+          });
+          btnLi.remove();
+        });
+        list.appendChild(btnLi);
+      }
     } catch (e) { console.error('History load error:', e); }
   }
 
@@ -486,6 +644,16 @@ function initAuth() {
         const el = document.getElementById(`section${k.charAt(0).toUpperCase() + k.slice(1)}`);
         if (el) el.setAttribute('data-account-active', k === target ? 'true' : 'false');
       });
+      // Load session data when Settings tab opens
+      if (target === 'settings') {
+        const username = document.getElementById('userName').textContent.trim();
+        if (username && typeof window.loadActiveSessions === 'function') {
+          window.loadActiveSessions(username);
+        }
+        if (username && typeof window.loadLoginHistory === 'function') {
+          window.loadLoginHistory(username);
+        }
+      }
     });
   });
 
@@ -648,4 +816,297 @@ function initAuth() {
     div.textContent = str;
     return div.innerHTML;
   }
+
+  // =========================================================
+  // SESSION MANAGEMENT HELPERS
+  // =========================================================
+
+  /**
+   * Generate a cryptographically secure session token.
+   */
+  function generateSessionToken() {
+    const arr = new Uint8Array(24);
+    crypto.getRandomValues(arr);
+    return Array.from(arr, b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  /**
+   * Record this login as a session in Firestore.
+   * Also writes the session token to Firestore so other devices can detect it.
+   */
+  async function recordLoginSession(username) {
+    try {
+      const ua = navigator.userAgent;
+      const deviceInfo = parseUserAgent(ua);
+      const sessionId = generateSessionToken().slice(0, 16);
+
+      // Write a new session token to the user doc so this becomes the active session
+      let myToken = localStorage.getItem('enotepad_session_token');
+      if (!myToken) {
+        myToken = generateSessionToken();
+        localStorage.setItem('enotepad_session_token', myToken);
+        // Also update Firestore with this new token
+        await db.collection('users').doc(username).update({ sessionToken: myToken }).catch(() => {});
+      }
+
+      const sessionData = {
+        sessionId,
+        sessionToken: myToken,
+        device: deviceInfo.device,
+        browser: deviceInfo.browser,
+        os: deviceInfo.os,
+        loginAt: firebase.firestore.FieldValue.serverTimestamp(),
+        lastSeen: firebase.firestore.FieldValue.serverTimestamp(),
+        isActive: true,
+        userAgent: ua.substring(0, 200)
+      };
+
+      // Save sessionId so we can update lastSeen
+      localStorage.setItem('enotepad_session_id', sessionId);
+
+      await db.collection('users').doc(username)
+        .collection('sessions').doc(sessionId).set(sessionData);
+
+      console.log('📍 Session recorded:', sessionId);
+    } catch (e) {
+      console.warn('Session record failed (non-critical):', e.message);
+    }
+  }
+
+  /**
+   * Load and display active sessions in the Settings panel.
+   */
+  window.loadActiveSessions = async function loadActiveSessions(username) {
+    const container = document.getElementById('sessionsList');
+    if (!container) return;
+    container.innerHTML = `<div class="flex items-center justify-center py-6 text-on-surface-variant/40 text-sm"><span class="material-symbols-outlined text-lg mr-2" style="animation:spin 1s linear infinite">progress_activity</span> Loading…</div>`;
+
+    try {
+      const snap = await db.collection('users').doc(username)
+        .collection('sessions')
+        .where('isActive', '==', true)
+        .orderBy('lastSeen', 'desc')
+        .limit(10).get();
+
+      const mySessionId = localStorage.getItem('enotepad_session_id');
+      container.innerHTML = '';
+
+      if (snap.empty) {
+        container.innerHTML = `<p class="text-xs text-center py-4 text-on-surface-variant/50">No active sessions found.</p>`;
+        return;
+      }
+
+      snap.forEach(doc => {
+        const s = doc.data();
+        const isCurrentSession = s.sessionId === mySessionId;
+        const lastSeen = s.lastSeen ? formatTimestamp(s.lastSeen) : 'Unknown';
+        const loginAt = s.loginAt ? formatTimestamp(s.loginAt) : 'Unknown';
+        const deviceIcon = s.device === 'Mobile' ? 'smartphone' : s.device === 'Tablet' ? 'tablet' : 'computer';
+
+        const el = document.createElement('div');
+        el.className = `flex items-center justify-between p-3 rounded-xl transition-all ${
+          isCurrentSession
+            ? 'bg-primary/5 border border-primary/15'
+            : 'bg-surface-container hover:bg-surface-container-high'
+        }`;
+        el.innerHTML = `
+          <div class="flex items-center gap-3 min-w-0">
+            <div class="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 ${
+              isCurrentSession ? 'bg-primary/10 text-primary' : 'bg-surface-container-high text-on-surface-variant'
+            }">
+              <span class="material-symbols-outlined text-lg">${deviceIcon}</span>
+            </div>
+            <div class="min-w-0">
+              <div class="flex items-center gap-2 flex-wrap">
+                <p class="text-xs font-semibold text-on-surface truncate">${escapeHTML(s.browser)} on ${escapeHTML(s.os)}</p>
+                ${isCurrentSession ? '<span class="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 bg-primary/15 text-primary rounded-full">This device</span>' : ''}
+              </div>
+              <p class="text-[10px] text-on-surface-variant">${s.device} &bull; Signed in ${loginAt} &bull; Last seen ${lastSeen}</p>
+            </div>
+          </div>
+          ${!isCurrentSession ? `
+          <button class="session-logout-btn flex-shrink-0 ml-2 px-3 py-1.5 rounded-full text-[10px] font-bold text-error/70 bg-error/5 hover:bg-error/10 border border-error/10 transition-all" data-session-id="${s.sessionId}" data-username="${username}">
+            <span class="material-symbols-outlined text-sm">logout</span>
+          </button>` : ''}
+        `;
+        container.appendChild(el);
+      });
+
+      // Attach logout handlers to each session card
+      container.querySelectorAll('.session-logout-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const sid = btn.dataset.sessionId;
+          const uname = btn.dataset.username;
+          showConfirmModal({
+            title: 'Sign Out Device',
+            message: 'This device will be immediately signed out.',
+            icon: 'logout',
+            iconBg: 'rgba(159,64,61,0.08)',
+            iconColor: '#9f403d',
+            confirmText: 'Sign Out',
+            confirmClass: 'bg-error text-on-error hover:opacity-90',
+            onConfirm: async () => {
+              try {
+                // Rotate session token so that device gets signed out
+                const newToken = generateSessionToken();
+                localStorage.setItem('enotepad_session_token', newToken);
+                await db.collection('users').doc(uname).update({ sessionToken: newToken });
+                await db.collection('users').doc(uname).collection('sessions').doc(sid).update({ isActive: false });
+                showToast('Device signed out', 'success');
+                loadActiveSessions(uname);
+                loadLoginHistory(uname);
+              } catch (e) {
+                showToast('Failed to sign out device', 'error');
+              }
+            }
+          });
+        });
+      });
+
+    } catch (e) {
+      console.error('Load sessions error:', e);
+      container.innerHTML = `<p class="text-xs text-center py-4 text-error/60">Failed to load sessions. Check Firestore rules.</p>`;
+    }
+  };
+
+  /**
+   * Load and display login history (all sessions, including old ones).
+   */
+  window.loadLoginHistory = async function loadLoginHistory(username) {
+    const container = document.getElementById('loginHistoryList');
+    if (!container) return;
+    container.innerHTML = `<div class="flex items-center justify-center py-6 text-on-surface-variant/40 text-sm"><span class="material-symbols-outlined text-lg mr-2" style="animation:spin 1s linear infinite">progress_activity</span> Loading…</div>`;
+
+    try {
+      const snap = await db.collection('users').doc(username)
+        .collection('sessions')
+        .orderBy('loginAt', 'desc')
+        .limit(20).get();
+
+      const mySessionId = localStorage.getItem('enotepad_session_id');
+      container.innerHTML = '';
+
+      if (snap.empty) {
+        container.innerHTML = `<p class="text-xs text-center py-4 text-on-surface-variant/50">No login history found.</p>`;
+        return;
+      }
+
+      let count = 0;
+      snap.forEach(doc => {
+        const s = doc.data();
+        const isCurrentSession = s.sessionId === mySessionId;
+        const loginAt = s.loginAt ? formatTimestamp(s.loginAt) : 'Unknown';
+        const deviceIcon = s.device === 'Mobile' ? 'smartphone' : s.device === 'Tablet' ? 'tablet' : 'computer';
+        const statusColor = s.isActive ? 'text-green-500' : 'text-on-surface-variant/40';
+        const statusText = isCurrentSession ? 'Current' : s.isActive ? 'Active' : 'Ended';
+
+        const el = document.createElement('div');
+        el.className = 'flex items-center gap-3 p-3 rounded-xl bg-surface-container';
+        if (count >= 5) {
+          el.style.display = 'none';
+          el.classList.add('hidden-login-item');
+        }
+        el.innerHTML = `
+          <div class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center flex-shrink-0 text-on-surface-variant">
+            <span class="material-symbols-outlined text-base">${deviceIcon}</span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2">
+              <p class="text-xs font-semibold text-on-surface truncate">${escapeHTML(s.browser)} — ${escapeHTML(s.os)}</p>
+              <span class="text-[9px] font-bold uppercase ${statusColor}">${statusText}</span>
+            </div>
+            <p class="text-[10px] text-on-surface-variant">${s.device} &bull; Signed in ${loginAt}</p>
+          </div>
+        `;
+        container.appendChild(el);
+        count++;
+      });
+
+      if (count > 5) {
+        const btnWrapper = document.createElement('div');
+        btnWrapper.className = 'text-center mt-3';
+        btnWrapper.innerHTML = `<button class="text-xs text-primary/70 hover:text-primary font-bold px-4 py-2 bg-primary-container/20 hover:bg-primary-container/40 rounded-full transition-colors">View More</button>`;
+        btnWrapper.addEventListener('click', () => {
+          container.querySelectorAll('.hidden-login-item').forEach(el => {
+            el.style.display = 'flex';
+            el.classList.remove('hidden-login-item');
+          });
+          btnWrapper.remove();
+        });
+        container.appendChild(btnWrapper);
+      }
+    } catch (e) {
+      console.error('Load login history error:', e);
+      container.innerHTML = `<p class="text-xs text-center py-4 text-error/60">Failed to load login history.</p>`;
+    }
+  };
+
+  /**
+   * Parse a User-Agent string into readable device / browser / OS info.
+   */
+  function parseUserAgent(ua) {
+    let device = 'Desktop';
+    let os = 'Unknown OS';
+    let browser = 'Unknown Browser';
+
+    if (/Mobi|Android|iPhone|iPad|iPod/i.test(ua)) {
+      device = /iPad/i.test(ua) ? 'Tablet' : 'Mobile';
+    }
+
+    if (/Windows NT/i.test(ua)) os = 'Windows';
+    else if (/Mac OS X/i.test(ua)) os = /iPhone|iPad/i.test(ua) ? 'iOS' : 'macOS';
+    else if (/Android/i.test(ua)) os = 'Android';
+    else if (/Linux/i.test(ua)) os = 'Linux';
+    else if (/CrOS/i.test(ua)) os = 'ChromeOS';
+
+    if (/Edg\//i.test(ua)) browser = 'Edge';
+    else if (/OPR\//i.test(ua)) browser = 'Opera';
+    else if (/Chrome/i.test(ua)) browser = 'Chrome';
+    else if (/Safari/i.test(ua) && !/Chrome/i.test(ua)) browser = 'Safari';
+    else if (/Firefox/i.test(ua)) browser = 'Firefox';
+
+    return { device, os, browser };
+  }
+
+  /**
+   * Show a polished in-app confirmation modal (replaces native confirm()).
+   * @param {Object} opts - { title, message, icon, iconBg, iconColor, confirmText, confirmClass, onConfirm }
+   */
+  function showConfirmModal(opts) {
+    const modal = document.getElementById('confirmModal');
+    const titleEl = document.getElementById('confirmModalTitle');
+    const msgEl = document.getElementById('confirmModalMessage');
+    const iconEl = document.getElementById('confirmModalIcon');
+    const iconWrap = document.getElementById('confirmModalIconWrap');
+    const confirmBtn = document.getElementById('confirmModalConfirm');
+    const cancelBtn = document.getElementById('confirmModalCancel');
+    const backdrop = document.getElementById('confirmModalBackdrop');
+    if (!modal) return;
+
+    titleEl.textContent = opts.title || 'Confirm';
+    msgEl.textContent = opts.message || '';
+    iconEl.textContent = opts.icon || 'warning';
+    iconWrap.style.background = opts.iconBg || 'rgba(81,96,112,0.08)';
+    iconEl.style.color = opts.iconColor || '#516070';
+    confirmBtn.textContent = opts.confirmText || 'Confirm';
+    confirmBtn.className = `flex-1 py-3 rounded-2xl text-sm font-bold transition-all active:scale-[0.98] ${opts.confirmClass || 'bg-primary text-on-primary hover:bg-primary-dim'}`;
+
+    modal.style.display = 'flex';
+
+    // Clean up old listeners
+    const newConfirm = confirmBtn.cloneNode(true);
+    const newCancel = cancelBtn.cloneNode(true);
+    confirmBtn.parentNode.replaceChild(newConfirm, confirmBtn);
+    cancelBtn.parentNode.replaceChild(newCancel, cancelBtn);
+
+    // Re-apply text/class after clone
+    newConfirm.textContent = opts.confirmText || 'Confirm';
+    newConfirm.className = `flex-1 py-3 rounded-2xl text-sm font-bold transition-all active:scale-[0.98] ${opts.confirmClass || 'bg-primary text-on-primary hover:bg-primary-dim'}`;
+
+    const close = () => { modal.style.display = 'none'; };
+    newConfirm.addEventListener('click', () => { close(); opts.onConfirm && opts.onConfirm(); });
+    newCancel.addEventListener('click', close);
+    backdrop.addEventListener('click', close, { once: true });
+  }
+
 }
