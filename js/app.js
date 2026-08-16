@@ -361,20 +361,30 @@ function showEl(id) {
     logoutTimer = setTimeout(() => {
       if (isLoggedIn()) {
         hideWarning();
-        localStorage.removeItem('enotepad_session_token');
-        if (window.currentSessionUnsub) { window.currentSessionUnsub(); window.currentSessionUnsub = null; }
-        firebase.auth().signOut().then(() => {
-          if (typeof showToast === 'function') {
-            showToast('Signed out due to inactivity (20 min)', 'warning');
-          }
-        }).catch(console.error);
+        const terminate = typeof window.terminateCurrentSession === 'function'
+          ? window.terminateCurrentSession()
+          : Promise.resolve();
+
+        terminate.finally(() => {
+          if (window.currentSessionUnsub) { window.currentSessionUnsub(); window.currentSessionUnsub = null; }
+          firebase.auth().signOut().then(() => {
+            if (typeof showToast === 'function') {
+              showToast('Signed out due to inactivity (20 min)', 'warning');
+            }
+          }).catch(console.error);
+        });
       }
     }, LOGOUT_AFTER_MS);
   }
 
   function resetTimers() {
     if (warningVisible) hideWarning();
-    if (isLoggedIn()) scheduleTimers();
+    if (isLoggedIn()) {
+      scheduleTimers();
+      if (typeof window.updateSessionActivity === 'function') {
+        window.updateSessionActivity();
+      }
+    }
   }
 
   // Expose for auth module

@@ -461,22 +461,24 @@ function initFileManager() {
     const modal = document.getElementById('fmNewItemModal');
     if (!modal) { console.error('fmNewItemModal not found'); return; }
 
-    document.getElementById('fmNewItemTitle').textContent = type === 'folder' ? '📁 New Folder' : '📄 New File';
+    setElText('fmNewItemTitle', type === 'folder' ? '📁 New Folder' : '📄 New File');
     const input = document.getElementById('fmNewItemName');
-    input.value = prefillName;
+    if (input) input.value = prefillName;
 
     const ftg = document.getElementById('fmFileTypeGroup');
     if (ftg) ftg.style.display = type === 'file' ? 'flex' : 'none';
 
     // Show modal
     modal.style.display = 'flex';
-    setTimeout(() => input.focus(), 100);
+    if (input) setTimeout(() => input.focus(), 100);
 
     const doCreate = async () => {
-      const name = input.value.trim();
+      const name = input ? input.value.trim() : '';
       if (!name) {
-        input.style.borderColor = '#9f403d';
-        setTimeout(() => input.style.borderColor = '', 1500);
+        if (input) {
+          input.style.borderColor = '#9f403d';
+          setTimeout(() => input.style.borderColor = '', 1500);
+        }
         return;
       }
       modal.style.display = 'none';
@@ -489,12 +491,16 @@ function initFileManager() {
       }
     };
 
-    document.getElementById('fmNewItemConfirm').onclick = doCreate;
-    input.onkeydown = e => {
-      if (e.key === 'Enter') doCreate();
-      if (e.key === 'Escape') modal.style.display = 'none';
-    };
-    document.getElementById('fmNewItemCancel').onclick = () => (modal.style.display = 'none');
+    const confirmBtn = document.getElementById('fmNewItemConfirm');
+    if (confirmBtn) confirmBtn.onclick = doCreate;
+    if (input) {
+      input.onkeydown = e => {
+        if (e.key === 'Enter') doCreate();
+        if (e.key === 'Escape') modal.style.display = 'none';
+      };
+    }
+    const cancelBtn = document.getElementById('fmNewItemCancel');
+    if (cancelBtn) cancelBtn.onclick = () => (modal.style.display = 'none');
 
     const bd = document.getElementById('fmNewItemBackdrop');
     if (bd) bd.onclick = () => (modal.style.display = 'none');
@@ -506,23 +512,27 @@ function initFileManager() {
     const input = document.getElementById('fmRenameInput');
     if (!modal) return;
 
-    input.value = currentName;
+    if (input) input.value = currentName;
     modal.style.display = 'flex';
-    setTimeout(() => { input.focus(); input.select(); }, 100);
+    if (input) setTimeout(() => { input.focus(); input.select(); }, 100);
 
     const doRename = async () => {
-      const name = input.value.trim();
+      const name = input ? input.value.trim() : '';
       if (!name) return;
       modal.style.display = 'none';
       if (name !== currentName) await renameItem(id, type, name);
     };
 
-    document.getElementById('fmRenameConfirm').onclick = doRename;
-    input.onkeydown = e => {
-      if (e.key === 'Enter') doRename();
-      if (e.key === 'Escape') modal.style.display = 'none';
-    };
-    document.getElementById('fmRenameCancel').onclick = () => (modal.style.display = 'none');
+    const renConfirm = document.getElementById('fmRenameConfirm');
+    if (renConfirm) renConfirm.onclick = doRename;
+    if (input) {
+      input.onkeydown = e => {
+        if (e.key === 'Enter') doRename();
+        if (e.key === 'Escape') modal.style.display = 'none';
+      };
+    }
+    const renCancel = document.getElementById('fmRenameCancel');
+    if (renCancel) renCancel.onclick = () => (modal.style.display = 'none');
     const bd = document.getElementById('fmRenameBackdrop');
     if (bd) bd.onclick = () => (modal.style.display = 'none');
   }
@@ -537,20 +547,25 @@ function initFileManager() {
     modal.style.display = 'flex';
 
     const btn = document.getElementById('fmDeleteConfirmBtn');
-    btn.onclick = async (e) => {
-      e.preventDefault();
-      modal.style.display = 'none';
-      try {
-        await deleteItem(id, type);
-      } catch (err) {
-        console.error('Error in deleteItem via onclick:', err);
-      }
-    };
+    if (btn) {
+      btn.onclick = async (e) => {
+        e.preventDefault();
+        modal.style.display = 'none';
+        try {
+          await deleteItem(id, type);
+        } catch (err) {
+          console.error('Error in deleteItem via onclick:', err);
+        }
+      };
+    }
     
-    document.getElementById('fmDeleteCancel').onclick = (e) => {
-      e.preventDefault();
-      modal.style.display = 'none';
-    };
+    const delCancel = document.getElementById('fmDeleteCancel');
+    if (delCancel) {
+      delCancel.onclick = (e) => {
+        e.preventDefault();
+        modal.style.display = 'none';
+      };
+    }
     const bd = document.getElementById('fmDeleteBackdrop');
     if (bd) bd.onclick = () => (modal.style.display = 'none');
   }
@@ -585,7 +600,8 @@ function initFileManager() {
     renderLevel(null, 1);
 
     modal.style.display = 'flex';
-    document.getElementById('fmMoveCancel').onclick = () => (modal.style.display = 'none');
+    const moveCancel = document.getElementById('fmMoveCancel');
+    if (moveCancel) moveCancel.onclick = () => (modal.style.display = 'none');
     const bd = document.getElementById('fmMoveBackdrop');
     if (bd) bd.onclick = () => (modal.style.display = 'none');
   }
@@ -1073,163 +1089,6 @@ function initFileManager() {
       setTimeout(() => m.style.display = 'none', 200);
     }
   }
-
-  // New Item
-  let newItemType = 'file';
-  function showNewItemModal(type) {
-    newItemType = type;
-    document.getElementById('fmNewItemTitle').textContent = type === 'file' ? 'New File' : 'New Folder';
-    document.getElementById('fmFileTypeGroup').style.display = type === 'file' ? 'flex' : 'none';
-    document.getElementById('fmNewItemName').value = '';
-    openModal('fmNewItemModal');
-    setTimeout(() => document.getElementById('fmNewItemName').focus(), 50);
-  }
-  
-  const btnCancelNew = document.getElementById('fmNewItemCancel');
-  const btnConfirmNew = document.getElementById('fmNewItemConfirm');
-  if (btnCancelNew) btnCancelNew.addEventListener('click', () => closeModal('fmNewItemModal'));
-  if (btnConfirmNew) btnConfirmNew.addEventListener('click', async () => {
-    const nameInput = document.getElementById('fmNewItemName');
-    const name = nameInput.value.trim() || (newItemType === 'file' ? 'Untitled File' : 'New Folder');
-    let fType = 'note';
-    if (newItemType === 'file') {
-      const checked = document.querySelector('input[name="fmFileType"]:checked');
-      if (checked) fType = checked.value;
-    }
-    
-    try {
-      btnConfirmNew.disabled = true;
-      if (newItemType === 'folder') {
-        await db.collection('users').doc(currentUser).collection('folders').add({
-          name: name,
-          parentId: currentFolderId,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-      } else {
-        await db.collection('users').doc(currentUser).collection('files').add({
-          name: name,
-          type: fType,
-          content: '',
-          folderId: currentFolderId,
-          isPinned: false,
-          category: '',
-          tags: [],
-          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-      }
-      closeModal('fmNewItemModal');
-      toast(newItemType === 'folder' ? 'Folder created' : 'File created', 'success');
-    } catch (err) {
-      toast('Failed to create item', 'error');
-    } finally {
-      btnConfirmNew.disabled = false;
-    }
-  });
-
-  // Rename
-  let renameTarget = null;
-  function showRenameModal(id, type, currentName) {
-    renameTarget = { id, type };
-    document.getElementById('fmRenameInput').value = currentName;
-    openModal('fmRenameModal');
-    setTimeout(() => document.getElementById('fmRenameInput').select(), 50);
-  }
-  const btnCancelRen = document.getElementById('fmRenameCancel');
-  const btnConfirmRen = document.getElementById('fmRenameConfirm');
-  if (btnCancelRen) btnCancelRen.addEventListener('click', () => closeModal('fmRenameModal'));
-  if (btnConfirmRen) btnConfirmRen.addEventListener('click', async () => {
-    if (!renameTarget) return;
-    const newName = document.getElementById('fmRenameInput').value.trim();
-    if (!newName) return;
-    try {
-      btnConfirmRen.disabled = true;
-      const coll = renameTarget.type === 'file' ? 'files' : 'folders';
-      await db.collection('users').doc(currentUser).collection(coll).doc(renameTarget.id).update({
-        name: newName,
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
-      closeModal('fmRenameModal');
-      toast('Renamed', 'success');
-    } catch (err) {
-      toast('Failed to rename', 'error');
-    } finally {
-      btnConfirmRen.disabled = false;
-    }
-  });
-
-  // Delete
-  let deleteTarget = null;
-  function showDeleteConfirm(id, type, name) {
-    deleteTarget = { id, type };
-    const span = document.getElementById('fmDeleteName');
-    if (span) span.textContent = name;
-    openModal('fmDeleteConfirm');
-  }
-  const btnCancelDel = document.getElementById('fmDeleteCancel');
-  const btnConfirmDel = document.getElementById('fmDeleteBtn');
-  if (btnCancelDel) btnCancelDel.addEventListener('click', () => closeModal('fmDeleteConfirm'));
-  if (btnConfirmDel) btnConfirmDel.addEventListener('click', async () => {
-    if (!deleteTarget) return;
-    try {
-      btnConfirmDel.disabled = true;
-      const coll = deleteTarget.type === 'file' ? 'files' : 'folders';
-      await db.collection('users').doc(currentUser).collection(coll).doc(deleteTarget.id).delete();
-      closeModal('fmDeleteConfirm');
-      toast('Item deleted', 'success');
-    } catch (err) {
-      toast('Failed to delete', 'error');
-    } finally {
-      btnConfirmDel.disabled = false;
-    }
-  });
-
-  // Move
-  let moveTarget = null;
-  function showMoveModal(id, type) {
-    moveTarget = { id, type };
-    const list = document.getElementById('fmMoveList');
-    list.innerHTML = '';
-    
-    // Add root
-    const rootBtn = document.createElement('button');
-    rootBtn.className = 'fm-move-option';
-    rootBtn.innerHTML = `<span class="material-symbols-outlined">home</span> My Files (Root)`;
-    rootBtn.onclick = () => performMove(null);
-    list.appendChild(rootBtn);
-
-    // Recursively build folders
-    function buildMoveTree(parentId, depth) {
-      allFolders.filter(f => (f.parentId || null) === parentId).forEach(f => {
-        // Skip moving a folder into itself
-        if (moveTarget.type === 'folder' && f.id === moveTarget.id) return;
-        const btn = document.createElement('button');
-        btn.className = 'fm-move-option';
-        btn.style.paddingLeft = (12 + depth * 16) + 'px';
-        btn.innerHTML = `<span class="material-symbols-outlined">folder</span> ${f.name}`;
-        btn.onclick = () => performMove(f.id);
-        list.appendChild(btn);
-        buildMoveTree(f.id, depth + 1);
-      });
-    }
-    buildMoveTree(null, 1);
-    openModal('fmMoveModal');
-  }
-  async function performMove(targetFolderId) {
-    if (!moveTarget) return;
-    try {
-      const coll = moveTarget.type === 'file' ? 'files' : 'folders';
-      const updateData = moveTarget.type === 'file' ? { folderId: targetFolderId } : { parentId: targetFolderId };
-      await db.collection('users').doc(currentUser).collection(coll).doc(moveTarget.id).update(updateData);
-      closeModal('fmMoveModal');
-      toast('Moved successfully', 'success');
-    } catch(err) {
-      toast('Failed to move', 'error');
-    }
-  }
-  const btnCancelMove = document.getElementById('fmMoveCancel');
-  if (btnCancelMove) btnCancelMove.addEventListener('click', () => closeModal('fmMoveModal'));
 
   // Duplicate
   async function duplicateItem(id, type) {

@@ -165,47 +165,87 @@ function initAuth() {
     }
   }
 
-  usernameInput.addEventListener('input', (e) => {
-    if (authMode === 'register') {
-      const username = e.target.value.trim().toLowerCase();
-      checkUsername(username);
-    }
-  });
+  if (usernameInput) {
+    usernameInput.addEventListener('input', (e) => {
+      if (authMode === 'register') {
+        const username = e.target.value.trim().toLowerCase();
+        checkUsername(username);
+      }
+    });
+  }
 
-  // ----- Toggle Login/Register -----
-  authToggleLink.addEventListener('click', () => {
-    if (authMode === 'login') {
-      authMode = 'register';
-      document.getElementById('authTitle').textContent = 'Create Account';
-      document.getElementById('authSubtitle').textContent = 'Join the digital curation movement.';
-      document.getElementById('authBtnText').textContent = 'Register';
-      document.getElementById('authTogglePrefix').textContent = 'Already have an account?';
-      authToggleLink.textContent = 'Login';
-      const emailLabel = document.querySelector('label[for="authEmail"]');
+  // Form Submit & Enter key press support on auth inputs
+  const authFormElement = document.getElementById('authFormElement');
+  if (authFormElement) {
+    authFormElement.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (authBtn) authBtn.click();
+    });
+  }
+
+  const handleEnterKey = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (authBtn) authBtn.click();
+    }
+  };
+  if (emailInput) emailInput.addEventListener('keydown', handleEnterKey);
+  if (passwordInput) passwordInput.addEventListener('keydown', handleEnterKey);
+  if (usernameInput) usernameInput.addEventListener('keydown', handleEnterKey);
+
+  // ----- Toggle Login/Register Tabs & Modes -----
+  const authTabLogin = document.getElementById('authTabLogin');
+  const authTabRegister = document.getElementById('authTabRegister');
+
+  function switchAuthMode(targetMode) {
+    authMode = targetMode;
+    const unameGroup = document.getElementById('usernameFieldGroup');
+    const emailLabel = document.querySelector('label[for="authEmail"]');
+
+    if (authTabLogin && authTabRegister) {
+      authTabLogin.classList.toggle('active', authMode === 'login');
+      authTabRegister.classList.toggle('active', authMode === 'register');
+    }
+
+    if (authMode === 'register') {
+      setElText('authTitle', 'Create Account');
+      setElText('authSubtitle', 'Join the digital curation movement.');
+      setElText('authBtnText', 'Create Account');
+      setElText('authTogglePrefix', 'Already have an account?');
+      if (authToggleLink) authToggleLink.textContent = 'Sign In';
       if (emailLabel) emailLabel.textContent = 'Email Address';
-      emailInput.placeholder = 'name@example.com';
-      emailInput.type = 'email';
-      // Show username field
-      document.getElementById('usernameFieldGroup').classList.remove('hidden');
+      if (emailInput) {
+        emailInput.placeholder = 'name@example.com';
+        emailInput.type = 'email';
+      }
+      if (unameGroup) unameGroup.removeAttribute('data-hidden');
     } else {
-      authMode = 'login';
-      document.getElementById('authTitle').textContent = 'Welcome Back';
-      document.getElementById('authSubtitle').textContent = 'Access your digital editorial desk.';
-      document.getElementById('authBtnText').textContent = 'Login';
-      document.getElementById('authTogglePrefix').textContent = "Don't have an account?";
-      authToggleLink.textContent = 'Register';
-      const emailLabel = document.querySelector('label[for="authEmail"]');
+      setElText('authTitle', 'Welcome Back');
+      setElText('authSubtitle', 'Access your digital editorial desk.');
+      setElText('authBtnText', 'Sign In');
+      setElText('authTogglePrefix', "Don't have an account?");
+      if (authToggleLink) authToggleLink.textContent = 'Sign Up';
       if (emailLabel) emailLabel.textContent = 'Email or Username';
-      emailInput.placeholder = 'name@example.com or username';
-      emailInput.type = 'text';
-      // Hide username field (login by email)
-      document.getElementById('usernameFieldGroup').classList.add('hidden');
+      if (emailInput) {
+        emailInput.placeholder = 'name@example.com or username';
+        emailInput.type = 'text';
+      }
+      if (unameGroup) unameGroup.setAttribute('data-hidden', 'true');
       updateUsernameUI(null);
     }
-  });
+  }
+
+  if (authTabLogin) authTabLogin.addEventListener('click', () => switchAuthMode('login'));
+  if (authTabRegister) authTabRegister.addEventListener('click', () => switchAuthMode('register'));
+  if (authToggleLink) {
+    authToggleLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      switchAuthMode(authMode === 'login' ? 'register' : 'login');
+    });
+  }
 
   // Set initial state
-  document.getElementById('usernameFieldGroup').classList.add('hidden');
+  switchAuthMode('login');
 
   // ----- Toggle Password Visibility -----
   if (togglePasswordBtn && passwordInput && togglePasswordIcon) {
@@ -221,142 +261,160 @@ function initAuth() {
   }
 
   // ----- Auth Button -----
-  authBtn.addEventListener('click', async () => {
-    let email = emailInput.value.trim();
-    const password = passwordInput.value;
-    const username = usernameInput.value.trim().toLowerCase();
+  if (authBtn) {
+    authBtn.addEventListener('click', async () => {
+      let email = emailInput ? emailInput.value.trim() : '';
+      const password = passwordInput ? passwordInput.value : '';
+      const username = usernameInput ? usernameInput.value.trim().toLowerCase() : '';
 
-    if (!email || !password) {
-      showToast('Please fill in all fields', 'warning');
-      return;
-    }
-
-    if (authMode === 'register') {
-      if (username.length < 3) {
-        showToast('Username too short', 'warning');
+      if (!email || !password) {
+        showToast('Please fill in all fields', 'warning');
         return;
       }
-      if (!isUsernameAvailable) {
-        showToast('Please choose an available username', 'warning');
-        return;
-      }
-    }
 
-    authBtn.classList.add('btn-loading');
-    authBtn.disabled = true;
-
-    try {
       if (authMode === 'register') {
-        const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
-        const newToken = generateSessionToken();
-        localStorage.setItem('enotepad_session_token', newToken);
-        await db.collection('users').doc(username).set({
-          username: username,
-          email: email,
-          uid: userCredential.user.uid,
-          sessionToken: newToken,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        showToast('Welcome to eNotePad! 🎉', 'success');
-      } else {
-        let loginEmail = email;
-        if (!loginEmail.includes('@')) {
-          loginEmail = loginEmail.toLowerCase();
-          const userDoc = await db.collection('users').doc(loginEmail).get();
-          if (userDoc.exists && userDoc.data().email) {
-            loginEmail = userDoc.data().email;
-          } else {
-            showToast('Username not found or missing email. Please login with email.', 'warning');
-            authBtn.classList.remove('btn-loading');
-            authBtn.disabled = false;
-            return;
+        if (username.length < 3) {
+          showToast('Username must be at least 3 characters', 'warning');
+          return;
+        }
+        if (!isUsernameAvailable) {
+          showToast('Please choose an available username', 'warning');
+          return;
+        }
+      }
+
+      authBtn.classList.add('btn-loading');
+      authBtn.disabled = true;
+
+      try {
+        if (authMode === 'register') {
+          const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
+          const newToken = generateSessionToken();
+          localStorage.setItem('enotepad_session_token', newToken);
+          await db.collection('users').doc(username).set({
+            username: username,
+            email: email,
+            uid: userCredential.user.uid,
+            sessionToken: newToken,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+          showToast('Welcome to eNotePad! 🎉', 'success');
+        } else {
+          let loginEmail = email;
+          if (!loginEmail.includes('@')) {
+            loginEmail = loginEmail.toLowerCase();
+            const userDoc = await db.collection('users').doc(loginEmail).get();
+            if (userDoc.exists && userDoc.data() && userDoc.data().email) {
+              loginEmail = userDoc.data().email;
+            } else {
+              const querySnap = await db.collection('users').where('username', '==', loginEmail).limit(1).get();
+              if (!querySnap.empty && querySnap.docs[0].data() && querySnap.docs[0].data().email) {
+                loginEmail = querySnap.docs[0].data().email;
+              } else {
+                showToast('Username not found. Please check your username or login with your email address.', 'warning');
+                authBtn.classList.remove('btn-loading');
+                authBtn.disabled = false;
+                return;
+              }
+            }
           }
+          await firebase.auth().signInWithEmailAndPassword(loginEmail, password);
+          showToast('Successfully logged in!', 'success');
         }
-        await firebase.auth().signInWithEmailAndPassword(loginEmail, password);
-        // Token is registered after login in recordLoginSession
-        showToast('Successfully logged in!', 'success');
-      }
-    } catch (error) {
-      console.error('Auth error:', error);
-      showToast(error.message, 'error');
-    } finally {
-      authBtn.classList.remove('btn-loading');
-      authBtn.disabled = false;
-    }
-  });
-
-  // ----- Google Sign-In -----
-  googleAuthBtn.addEventListener('click', async () => {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    try {
-      const result = await firebase.auth().signInWithPopup(provider);
-      const user = result.user;
-      // Check if user already has a username
-      const userProfile = await fetchUserProfileByUid(user.uid);
-      if (!userProfile) {
-        const baseName = (user.displayName || user.email.split('@')[0]).replace(/\s+/g, '').toLowerCase().substring(0, 15);
-        let finalUsername = baseName;
-        let suffix = 1;
-        while ((await db.collection('users').doc(finalUsername).get()).exists) {
-          finalUsername = baseName + suffix;
-          suffix++;
+      } catch (error) {
+        console.error('Auth error:', error);
+        let errorMsg = error.message;
+        if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found' || error.code === 'auth/invalid-email') {
+          errorMsg = 'Incorrect username/email or password.';
+        } else if (error.code === 'auth/email-already-in-use') {
+          errorMsg = 'This email address is already registered. Please sign in instead.';
+        } else if (error.code === 'auth/weak-password') {
+          errorMsg = 'Password should be at least 6 characters.';
         }
-        const newToken = generateSessionToken();
-        localStorage.setItem('enotepad_session_token', newToken);
-        await db.collection('users').doc(finalUsername).set({
-          username: finalUsername,
-          email: user.email,
-          uid: user.uid,
-          sessionToken: newToken,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        showToast(`Welcome, ${finalUsername}!`, 'success');
-      }
-      // Token will be registered by recordLoginSession triggered from onAuthStateChanged
-    } catch (error) {
-      console.error('Google Auth error:', error);
-      showToast('Google login failed', 'error');
-    }
-  });
-
-  // ----- Forgot Password -----
-  forgotPasswordBtn.addEventListener('click', async () => {
-    const email = emailInput.value.trim();
-    if (!email) {
-      showToast('Enter your email first', 'warning');
-      return;
-    }
-    
-    try {
-      await firebase.auth().sendPasswordResetEmail(email);
-      showToast('Password reset link sent to your email!', 'success');
-    } catch (error) {
-      showToast(error.message, 'error');
-    }
-  });
-
-  // ----- Logout -----
-  logoutBtn.addEventListener('click', async () => {
-    showConfirmModal({
-      title: 'Sign Out',
-      message: 'Are you sure you want to log out from this device?',
-      icon: 'logout',
-      iconBg: 'rgba(159,64,61,0.08)',
-      iconColor: '#9f403d',
-      confirmText: 'Logout',
-      confirmClass: 'bg-error text-on-error hover:opacity-90',
-      onConfirm: async () => {
-        try {
-          localStorage.removeItem('enotepad_session_token');
-          if (window.currentSessionUnsub) { window.currentSessionUnsub(); window.currentSessionUnsub = null; }
-          await firebase.auth().signOut();
-          showToast('Logged out successfully', 'success');
-        } catch (error) {
-          showToast('Logout failed', 'error');
-        }
+        showToast(errorMsg, 'error');
+      } finally {
+        authBtn.classList.remove('btn-loading');
+        authBtn.disabled = false;
       }
     });
-  });
+  }
+
+  // ----- Google Sign-In -----
+  if (googleAuthBtn) {
+    googleAuthBtn.addEventListener('click', async () => {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      try {
+        const result = await firebase.auth().signInWithPopup(provider);
+        const user = result.user;
+        const userProfile = await fetchUserProfileByUid(user.uid);
+        if (!userProfile) {
+          const baseName = (user.displayName || user.email.split('@')[0]).replace(/\s+/g, '').toLowerCase().substring(0, 15);
+          let finalUsername = baseName;
+          let suffix = 1;
+          while ((await db.collection('users').doc(finalUsername).get()).exists) {
+            finalUsername = baseName + suffix;
+            suffix++;
+          }
+          const newToken = generateSessionToken();
+          localStorage.setItem('enotepad_session_token', newToken);
+          await db.collection('users').doc(finalUsername).set({
+            username: finalUsername,
+            email: user.email,
+            uid: user.uid,
+            sessionToken: newToken,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+          showToast(`Welcome, ${finalUsername}!`, 'success');
+        }
+      } catch (error) {
+        console.error('Google Auth error:', error);
+        showToast(error.message || 'Google login failed', 'error');
+      }
+    });
+  }
+
+  // ----- Forgot Password -----
+  if (forgotPasswordBtn) {
+    forgotPasswordBtn.addEventListener('click', async () => {
+      const email = emailInput ? emailInput.value.trim() : '';
+      if (!email) {
+        showToast('Enter your email first', 'warning');
+        return;
+      }
+      
+      try {
+        await firebase.auth().sendPasswordResetEmail(email);
+        showToast('Password reset link sent to your email!', 'success');
+      } catch (error) {
+        showToast(error.message, 'error');
+      }
+    });
+  }
+
+  // ----- Logout -----
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', async () => {
+      showConfirmModal({
+        title: 'Sign Out',
+        message: 'Are you sure you want to log out from this device?',
+        icon: 'logout',
+        iconBg: 'rgba(159,64,61,0.08)',
+        iconColor: '#9f403d',
+        confirmText: 'Logout',
+        confirmClass: 'bg-error text-on-error hover:opacity-90',
+        onConfirm: async () => {
+          try {
+            await terminateCurrentSession();
+            if (window.currentSessionUnsub) { window.currentSessionUnsub(); window.currentSessionUnsub = null; }
+            await firebase.auth().signOut();
+            showToast('Logged out successfully', 'success');
+          } catch (error) {
+            showToast('Logout failed', 'error');
+          }
+        }
+      });
+    });
+  }
 
   // ----- Logout All Other Devices -----
   function setupLogoutOtherBtns() {
@@ -380,14 +438,31 @@ function initAuth() {
       confirmText: 'Logout Others',
       confirmClass: 'bg-error text-on-error hover:opacity-90',
       onConfirm: async () => {
-        const username = document.getElementById('userName').textContent.trim();
+        const username = (getEl('userName')?.textContent || '').trim();
         if (!username) return;
         const newToken = generateSessionToken();
+        const currentSessionId = localStorage.getItem('enotepad_session_id');
         localStorage.setItem('enotepad_session_token', newToken);
         try {
           await db.collection('users').doc(username).update({ sessionToken: newToken });
+          
+          // Also mark all other sessions as inactive in the database
+          const sessionsRef = db.collection('users').doc(username).collection('sessions');
+          const activeSnap = await sessionsRef.where('isActive', '==', true).get();
+          
+          const batch = db.batch();
+          activeSnap.forEach(doc => {
+            if (doc.data().sessionId !== currentSessionId) {
+              batch.update(doc.ref, { isActive: false });
+            }
+          });
+          await batch.commit();
+
           showToast('✅ Other devices signed out', 'success');
           loadActiveSessions(username);
+          if (typeof window.loadLoginHistory === 'function') {
+            window.loadLoginHistory(username);
+          }
         } catch (error) {
           console.error(error);
           showToast('Failed to logout other devices', 'error');
@@ -402,28 +477,31 @@ function initAuth() {
 
   function showLoggedInView(username, isAdmin = false) {
     // Use data-hidden attribute (not CSS class) since CSS uses [data-hidden="true"] selector
-    document.getElementById('authCard').setAttribute('data-hidden', 'true');
-    document.getElementById('accountView').removeAttribute('data-hidden');
+    const authCard = getEl('authCard');
+    const accountView = getEl('accountView');
+    if (authCard) authCard.setAttribute('data-hidden', 'true');
+    if (accountView) accountView.removeAttribute('data-hidden');
 
-    document.getElementById('userAvatar').textContent = username.charAt(0).toUpperCase();
-    document.getElementById('userName').textContent = username;
+    const unameInitial = (username || '').charAt(0).toUpperCase();
+    setElText('userAvatar', unameInitial);
+    setElText('userName', username);
 
     // Update sidebar user info
-    const sidebarAvatar = document.getElementById('sidebarUserAvatar');
-    const sidebarName = document.getElementById('sidebarUserName');
-    const sidebarInfo = document.getElementById('sidebarUserInfo');
-    const sidebarLinks = document.getElementById('sidebarLoggedInLinks');
-    const sidebarAdmin = document.getElementById('sidebarAdmin');
+    const sidebarAvatar = getEl('sidebarUserAvatar');
+    const sidebarName = getEl('sidebarUserName');
+    const sidebarInfo = getEl('sidebarUserInfo');
+    const sidebarLinks = getEl('sidebarLoggedInLinks');
+    const sidebarAdmin = getEl('sidebarAdmin');
 
-    if (sidebarAvatar) sidebarAvatar.textContent = username.charAt(0).toUpperCase();
+    if (sidebarAvatar) sidebarAvatar.textContent = unameInitial;
     if (sidebarName) sidebarName.textContent = username;
     if (sidebarInfo) sidebarInfo.removeAttribute('data-hidden');
     if (sidebarLinks) sidebarLinks.removeAttribute('data-hidden');
 
     // Update Profile Card Badge
-    const roleContainer = document.getElementById('userRoleContainer');
-    const roleText = document.getElementById('userRoleText');
-    const sidebarRole = document.getElementById('sidebarUserRole');
+    const roleContainer = getEl('userRoleContainer');
+    const roleText = getEl('userRoleText');
+    const sidebarRole = getEl('sidebarUserRole');
 
     if (isAdmin) {
       if (roleContainer) {
@@ -460,8 +538,10 @@ function initAuth() {
 
   function showLoggedOutView() {
     // Use data-hidden attribute (not CSS class) since CSS uses [data-hidden="true"] selector
-    document.getElementById('authCard').removeAttribute('data-hidden');
-    document.getElementById('accountView').setAttribute('data-hidden', 'true');
+    const authCard = getEl('authCard');
+    const accountView = getEl('accountView');
+    if (authCard) authCard.removeAttribute('data-hidden');
+    if (accountView) accountView.setAttribute('data-hidden', 'true');
 
     const sidebarInfo = document.getElementById('sidebarUserInfo');
     const sidebarLinks = document.getElementById('sidebarLoggedInLinks');
@@ -478,10 +558,11 @@ function initAuth() {
       window.fileManagerRefresh(null);
     }
 
-    // Reset fields
+    // Reset fields & switch to login tab
     emailInput.value = '';
     passwordInput.value = '';
     usernameInput.value = '';
+    switchAuthMode('login');
     updateUsernameUI(null);
   }
 
@@ -646,7 +727,7 @@ function initAuth() {
       });
       // Load session data when Settings tab opens
       if (target === 'settings') {
-        const username = document.getElementById('userName').textContent.trim();
+        const username = (getEl('userName')?.textContent || '').trim();
         if (username && typeof window.loadActiveSessions === 'function') {
           window.loadActiveSessions(username);
         }
@@ -689,9 +770,9 @@ function initAuth() {
     console.log('openEditModal called', { data, docId, username });
 
     // Fill hidden tracking fields
-    document.getElementById('editNoteId').value       = docId;
-    document.getElementById('editNoteUsername').value = username;
-    document.getElementById('editNoteType').value     = data.type || 'text';
+    setElVal('editNoteId', docId);
+    setElVal('editNoteUsername', username);
+    setElVal('editNoteType', data.type || 'text');
 
     // Title: use title field, fallback to preview, fallback to content snippet
     let titleValue = data.title || data.preview || '';
@@ -699,10 +780,10 @@ function initAuth() {
       const raw = Array.isArray(data.content) ? data.content.join(', ') : data.content;
       titleValue = raw.substring(0, 60);
     }
-    document.getElementById('editNoteTitle').value = titleValue;
+    setElVal('editNoteTitle', titleValue);
 
     // Category
-    document.getElementById('editNoteCategory').value = data.category || '';
+    setElVal('editNoteCategory', data.category || '');
 
     // Type label
     const typeMap = { text: '📝 Text note', link: '🔗 Link note', image: '🖼️ Image note' };
@@ -764,11 +845,11 @@ function initAuth() {
   // Save
   if (editSaveBtn) {
     editSaveBtn.addEventListener('click', async () => {
-      const docId    = document.getElementById('editNoteId').value;
-      const username = document.getElementById('editNoteUsername').value;
-      const type     = document.getElementById('editNoteType').value;
-      const newTitle = document.getElementById('editNoteTitle').value.trim();
-      const newCat   = document.getElementById('editNoteCategory').value;
+      const docId    = getEl('editNoteId')?.value || '';
+      const username = getEl('editNoteUsername')?.value || '';
+      const type     = getEl('editNoteType')?.value || '';
+      const newTitle = (getEl('editNoteTitle')?.value || '').trim();
+      const newCat   = getEl('editNoteCategory')?.value || '';
       const rawText  = editContentArea ? editContentArea.value : '';
 
       if (!docId || !username) return;
@@ -838,6 +919,28 @@ function initAuth() {
     try {
       const ua = navigator.userAgent;
       const deviceInfo = parseUserAgent(ua);
+
+      // Check if we can reuse the existing session to avoid duplicate logging on page refresh
+      const existingSessionId = localStorage.getItem('enotepad_session_id');
+      const existingToken = localStorage.getItem('enotepad_session_token');
+
+      if (existingSessionId && existingToken) {
+        try {
+          const docRef = db.collection('users').doc(username).collection('sessions').doc(existingSessionId);
+          const doc = await docRef.get();
+          if (doc.exists && doc.data().isActive) {
+            // Reuse existing session!
+            await docRef.update({
+              lastSeen: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            console.log('📍 Session reused and updated lastSeen:', existingSessionId);
+            return;
+          }
+        } catch (e) {
+          console.warn('Failed to reuse session, creating a new one:', e);
+        }
+      }
+
       const sessionId = generateSessionToken().slice(0, 16);
 
       // Write a new session token to the user doc so this becomes the active session
@@ -881,22 +984,47 @@ function initAuth() {
     if (!container) return;
     container.innerHTML = `<div class="flex items-center justify-center py-6 text-on-surface-variant/40 text-sm"><span class="material-symbols-outlined text-lg mr-2" style="animation:spin 1s linear infinite">progress_activity</span> Loading…</div>`;
 
+    if (!username) {
+      container.innerHTML = `<p class="text-xs text-center py-4 text-on-surface-variant/50">Please log in to view active sessions.</p>`;
+      return;
+    }
+
     try {
-      const snap = await db.collection('users').doc(username)
-        .collection('sessions')
-        .where('isActive', '==', true)
-        .orderBy('lastSeen', 'desc')
-        .limit(10).get();
+      let snap;
+      try {
+        snap = await db.collection('users').doc(username)
+          .collection('sessions')
+          .orderBy('lastSeen', 'desc')
+          .limit(20).get();
+      } catch (orderErr) {
+        console.warn('orderBy lastSeen failed, fetching without orderBy:', orderErr);
+        snap = await db.collection('users').doc(username)
+          .collection('sessions')
+          .limit(30).get();
+      }
+        
+      const activeSessions = [];
+      snap.forEach(doc => {
+        if (doc.data().isActive === true) {
+          activeSessions.push(doc);
+        }
+      });
+
+      // Sort by lastSeen descending in JS (handles missing index or client-side fallback)
+      activeSessions.sort((a, b) => {
+        const getMs = (val) => val ? (val.toMillis ? val.toMillis() : new Date(val).getTime() || 0) : 0;
+        return getMs(b.data().lastSeen) - getMs(a.data().lastSeen);
+      });
 
       const mySessionId = localStorage.getItem('enotepad_session_id');
       container.innerHTML = '';
 
-      if (snap.empty) {
+      if (activeSessions.length === 0) {
         container.innerHTML = `<p class="text-xs text-center py-4 text-on-surface-variant/50">No active sessions found.</p>`;
         return;
       }
 
-      snap.forEach(doc => {
+      activeSessions.slice(0, 10).forEach(doc => {
         const s = doc.data();
         const isCurrentSession = s.sessionId === mySessionId;
         const lastSeen = s.lastSeen ? formatTimestamp(s.lastSeen) : 'Unknown';
@@ -918,10 +1046,10 @@ function initAuth() {
             </div>
             <div class="min-w-0">
               <div class="flex items-center gap-2 flex-wrap">
-                <p class="text-xs font-semibold text-on-surface truncate">${escapeHTML(s.browser)} on ${escapeHTML(s.os)}</p>
+                <p class="text-xs font-semibold text-on-surface truncate">${escapeHTML(s.browser || 'Browser')} on ${escapeHTML(s.os || 'OS')}</p>
                 ${isCurrentSession ? '<span class="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 bg-primary/15 text-primary rounded-full">This device</span>' : ''}
               </div>
-              <p class="text-[10px] text-on-surface-variant">${s.device} &bull; Signed in ${loginAt} &bull; Last seen ${lastSeen}</p>
+              <p class="text-[10px] text-on-surface-variant">${escapeHTML(s.device || 'Device')} &bull; Signed in ${loginAt} &bull; Last seen ${lastSeen}</p>
             </div>
           </div>
           ${!isCurrentSession ? `
@@ -965,7 +1093,11 @@ function initAuth() {
 
     } catch (e) {
       console.error('Load sessions error:', e);
-      container.innerHTML = `<p class="text-xs text-center py-4 text-error/60">Failed to load sessions. Check Firestore rules.</p>`;
+      let errMsg = 'Failed to load sessions. Check Firestore rules.';
+      if (e && e.code === 'permission-denied') {
+        errMsg = 'Permission denied by Firestore security rules.';
+      }
+      container.innerHTML = `<p class="text-xs text-center py-4 text-error/60">${errMsg}</p>`;
     }
   };
 
@@ -977,28 +1109,54 @@ function initAuth() {
     if (!container) return;
     container.innerHTML = `<div class="flex items-center justify-center py-6 text-on-surface-variant/40 text-sm"><span class="material-symbols-outlined text-lg mr-2" style="animation:spin 1s linear infinite">progress_activity</span> Loading…</div>`;
 
+    if (!username) {
+      container.innerHTML = `<p class="text-xs text-center py-4 text-on-surface-variant/50">Please log in to view login history.</p>`;
+      return;
+    }
+
     try {
-      const snap = await db.collection('users').doc(username)
-        .collection('sessions')
-        .orderBy('loginAt', 'desc')
-        .limit(20).get();
+      let snap;
+      try {
+        snap = await db.collection('users').doc(username)
+          .collection('sessions')
+          .orderBy('loginAt', 'desc')
+          .limit(20).get();
+      } catch (orderErr) {
+        console.warn('orderBy loginAt failed, fetching without orderBy:', orderErr);
+        snap = await db.collection('users').doc(username)
+          .collection('sessions')
+          .limit(30).get();
+      }
+
+      const docs = [];
+      snap.forEach(doc => docs.push(doc));
+      docs.sort((a, b) => {
+        const getMs = (val) => val ? (val.toMillis ? val.toMillis() : new Date(val).getTime() || 0) : 0;
+        return getMs(b.data().loginAt) - getMs(a.data().loginAt);
+      });
 
       const mySessionId = localStorage.getItem('enotepad_session_id');
       container.innerHTML = '';
 
-      if (snap.empty) {
+      if (docs.length === 0) {
         container.innerHTML = `<p class="text-xs text-center py-4 text-on-surface-variant/50">No login history found.</p>`;
         return;
       }
 
       let count = 0;
-      snap.forEach(doc => {
+      docs.forEach(doc => {
         const s = doc.data();
         const isCurrentSession = s.sessionId === mySessionId;
         const loginAt = s.loginAt ? formatTimestamp(s.loginAt) : 'Unknown';
         const deviceIcon = s.device === 'Mobile' ? 'smartphone' : s.device === 'Tablet' ? 'tablet' : 'computer';
         const statusColor = s.isActive ? 'text-green-500' : 'text-on-surface-variant/40';
         const statusText = isCurrentSession ? 'Current' : s.isActive ? 'Active' : 'Ended';
+
+        let durationText = '';
+        if (!s.isActive && s.loginAt && s.lastSeen) {
+          const dur = formatDuration(s.loginAt, s.lastSeen);
+          if (dur) durationText = ` &bull; Duration: ${dur}`;
+        }
 
         const el = document.createElement('div');
         el.className = 'flex items-center gap-3 p-3 rounded-xl bg-surface-container';
@@ -1012,10 +1170,10 @@ function initAuth() {
           </div>
           <div class="flex-1 min-w-0">
             <div class="flex items-center gap-2">
-              <p class="text-xs font-semibold text-on-surface truncate">${escapeHTML(s.browser)} — ${escapeHTML(s.os)}</p>
+              <p class="text-xs font-semibold text-on-surface truncate">${escapeHTML(s.browser || 'Browser')} — ${escapeHTML(s.os || 'OS')}</p>
               <span class="text-[9px] font-bold uppercase ${statusColor}">${statusText}</span>
             </div>
-            <p class="text-[10px] text-on-surface-variant">${s.device} &bull; Signed in ${loginAt}</p>
+            <p class="text-[10px] text-on-surface-variant">${escapeHTML(s.device || 'Device')} &bull; Signed in ${loginAt}${durationText}</p>
           </div>
         `;
         container.appendChild(el);
@@ -1107,6 +1265,81 @@ function initAuth() {
     newConfirm.addEventListener('click', () => { close(); opts.onConfirm && opts.onConfirm(); });
     newCancel.addEventListener('click', close);
     backdrop.addEventListener('click', close, { once: true });
+  }
+
+  /**
+   * Terminate the current session by marking it inactive in Firestore and clearing localStorage.
+   */
+  async function terminateCurrentSession() {
+    const user = getCurrentUser();
+    const username = user ? user.username : null;
+    const sessionId = localStorage.getItem('enotepad_session_id');
+
+    if (username && sessionId) {
+      try {
+        await db.collection('users').doc(username)
+          .collection('sessions').doc(sessionId)
+          .update({
+            isActive: false,
+            lastSeen: firebase.firestore.FieldValue.serverTimestamp()
+          });
+        console.log('📍 Current session terminated in Firestore:', sessionId);
+      } catch (e) {
+        console.warn('Could not mark current session inactive:', e);
+      }
+    }
+    localStorage.removeItem('enotepad_session_token');
+    localStorage.removeItem('enotepad_session_id');
+    setCurrentUser(null);
+  }
+  window.terminateCurrentSession = terminateCurrentSession;
+
+  /**
+   * Update the lastSeen field in Firestore for the current active session (throttled).
+   */
+  let lastActivityUpdate = 0;
+  window.updateSessionActivity = async function updateSessionActivity() {
+    const now = Date.now();
+    // Throttle to at most once every 3 minutes
+    if (now - lastActivityUpdate < 3 * 60 * 1000) return;
+
+    const user = getCurrentUser();
+    const username = user ? user.username : null;
+    const sessionId = localStorage.getItem('enotepad_session_id');
+
+    if (username && sessionId) {
+      lastActivityUpdate = now;
+      try {
+        await db.collection('users').doc(username)
+          .collection('sessions').doc(sessionId)
+          .update({
+            lastSeen: firebase.firestore.FieldValue.serverTimestamp()
+          });
+        console.log('📍 Session activity timestamp updated');
+      } catch (e) {
+        console.warn('Failed to update session activity:', e);
+      }
+    }
+  };
+
+  /**
+   * Helper to format the session duration.
+   */
+  function formatDuration(start, end) {
+    if (!start || !end) return '';
+    try {
+      const startTime = start.toDate ? start.toDate() : new Date(start);
+      const endTime = end.toDate ? end.toDate() : new Date(end);
+      const diffMs = endTime - startTime;
+      const diffMins = Math.round(diffMs / 60000);
+      if (diffMins < 1) return 'less than a min';
+      if (diffMins < 60) return `${diffMins} min`;
+      const diffHrs = Math.floor(diffMins / 60);
+      const remainingMins = diffMins % 60;
+      return remainingMins > 0 ? `${diffHrs}h ${remainingMins}m` : `${diffHrs}h`;
+    } catch (e) {
+      return '';
+    }
   }
 
 }

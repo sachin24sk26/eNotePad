@@ -318,3 +318,28 @@ async function cleanupExpiredShares() {
     console.warn('Cleanup skipped:', error.message);
   }
 }
+
+/**
+ * Safe element getter with optional error suppression
+ */
+function getEl(id) {
+  if (typeof id !== 'string') return id;
+  return document.getElementById(id);
+}
+
+/**
+ * Safe textContent setter
+ */
+function setElText(id, text) {
+  const el = getEl(id);
+  if (el) el.textContent = text;
+}
+
+/**
+ * Safe value setter
+ */
+function setElVal(id, val) {
+  const el = getEl(id);
+  if (el) el.value = val;
+}
+

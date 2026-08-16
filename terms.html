@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <meta name="description" content="eNotePad Terms of Service — Terms and conditions for using eNotePad digital curator and instant sharing services." />
+  <meta name="theme-color" id="themeColorMeta" content="#516070" />
+  <title>Terms of Service — eNotePad</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+  <!-- Google Fonts: Inter + Newsreader -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet" />
+
+  <!-- Material Symbols -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind Config -->
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary-dim": "#455464",
+            "on-tertiary": "#faf8ff",
+            "tertiary-fixed": "#d5dcfb",
+            "on-secondary-fixed": "#3e3f42",
+            "on-surface": "#2f342e",
+            "inverse-primary": "#daeafe",
+            "primary-fixed": "#d4e4f8",
+            "error": "#9f403d",
+            "on-tertiary-fixed": "#343b53",
+            "secondary-dim": "#525356",
+            "surface-container-low": "#f4f4ef",
+            "surface": "#faf9f5",
+            "surface-container-highest": "#e0e4dc",
+            "surface-tint": "#516070",
+            "inverse-surface": "#0d0f0d",
+            "on-secondary-container": "#505255",
+            "secondary-fixed-dim": "#d4d4d7",
+            "on-background": "#2f342e",
+            "error-container": "#fe8983",
+            "surface-bright": "#faf9f5",
+            "on-tertiary-container": "#474d67",
+            "on-surface-variant": "#5c605a",
+            "outline-variant": "#afb3ac",
+            "tertiary": "#575e78",
+            "tertiary-dim": "#4b526c",
+            "inverse-on-surface": "#9d9d9a",
+            "secondary-fixed": "#e2e2e5",
+            "on-error": "#fff7f6",
+            "on-primary": "#f4f8ff",
+            "primary": "#516070",
+            "outline": "#787c75",
+            "tertiary-fixed-dim": "#c7ceec",
+            "secondary": "#5e5f62",
+            "error-dim": "#4e0309",
+            "on-secondary-fixed-variant": "#5a5b5e",
+            "surface-variant": "#e0e4dc",
+            "on-tertiary-fixed-variant": "#505771",
+            "surface-container-lowest": "#ffffff",
+            "on-primary-fixed-variant": "#4e5d6d",
+            "on-secondary": "#f9f8fc",
+            "surface-container": "#edeee8",
+            "background": "#faf9f5",
+            "tertiary-container": "#d5dcfb",
+            "secondary-container": "#e2e2e5",
+            "on-error-container": "#752121",
+            "on-primary-container": "#445363",
+            "surface-container-high": "#e6e9e2",
+            "on-primary-fixed": "#324150",
+            "primary-fixed-dim": "#c6d6e9",
+            "primary-container": "#d4e4f8",
+            "surface-dim": "#d6dcd2"
+          },
+          borderRadius: {
+            DEFAULT: "0.25rem",
+            lg: "1rem",
+            xl: "1.5rem",
+            full: "9999px"
+          },
+          fontFamily: {
+            headline: ["Inter", "sans-serif"],
+            body: ["Newsreader", "serif"],
+            label: ["Inter", "sans-serif"]
+          }
+        }
+      }
+    };
+  </script>
+
+  <link rel="stylesheet" href="css/styles.css?v=1.6" />
+</head>
+<body class="bg-background text-on-surface font-label min-h-screen relative overflow-x-hidden flex flex-col">
+
+  <!-- Paper Grain Overlay -->
+  <div class="fixed inset-0 pointer-events-none paper-grain z-50"></div>
+
+  <!-- Header -->
+  <header class="bg-background/95 sticky top-0 z-30 backdrop-blur-sm border-b border-outline-variant/10">
+    <div class="flex justify-between items-center w-full px-6 py-3.5 max-w-5xl mx-auto">
+      <a href="index.html" class="flex items-center gap-2.5 group">
+        <div class="w-8 h-8 rounded-xl bg-primary/15 flex items-center justify-center text-primary group-hover:scale-105 transition-transform">
+          <span class="material-symbols-outlined text-base">edit_note</span>
+        </div>
+        <div>
+          <span class="font-body italic text-lg text-primary leading-none block">eNotePad</span>
+          <span class="text-[9px] uppercase tracking-widest text-primary/40 font-bold">Digital Curator</span>
+        </div>
+      </a>
+
+      <nav class="flex items-center gap-1 sm:gap-2">
+        <a href="index.html" class="text-xs sm:text-sm px-3 py-1.5 rounded-lg text-primary/60 hover:text-primary hover:bg-surface-container transition-all">Notes</a>
+        <a href="support.html" class="text-xs sm:text-sm px-3 py-1.5 rounded-lg text-primary/60 hover:text-primary hover:bg-surface-container transition-all">Support</a>
+        <a href="privacy.html" class="text-xs sm:text-sm px-3 py-1.5 rounded-lg text-primary/60 hover:text-primary hover:bg-surface-container transition-all">Privacy</a>
+        <a href="terms.html" class="text-xs sm:text-sm px-3 py-1.5 rounded-lg text-primary font-bold bg-primary/10">Terms</a>
+        
+        <button class="theme-toggle-btn ml-2 flex items-center gap-2 px-3 py-1.5 rounded-full border border-outline-variant/20 transition-all active:scale-[0.97]" id="themeToggle" aria-label="Toggle theme">
+          <span class="material-symbols-outlined text-base theme-icon-dark">dark_mode</span>
+          <span class="material-symbols-outlined text-base theme-icon-light">light_mode</span>
+          <span class="theme-toggle-label text-xs font-semibold theme-label-dark">Dark</span>
+          <span class="theme-toggle-label text-xs font-semibold theme-label-light">Light</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Content Container -->
+  <main class="flex-1 max-w-5xl w-full mx-auto px-6 py-10 md:py-14 space-y-10">
+
+    <!-- Hero Header -->
+    <div class="bg-surface rounded-3xl p-8 md:p-12 editorial-shadow editorial-border text-center relative overflow-hidden">
+      <div class="w-14 h-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mx-auto mb-4">
+        <span class="material-symbols-outlined text-2xl">gavel</span>
+      </div>
+      <span class="text-[10px] uppercase tracking-widest text-primary/50 font-bold bg-primary/8 px-3 py-1 rounded-full inline-block mb-3">User Agreement</span>
+      <h1 class="font-body italic text-3xl sm:text-4xl text-primary font-normal mb-3">Terms of Service</h1>
+      <p class="text-sm text-on-surface-variant max-w-2xl mx-auto leading-relaxed">
+        Please read these terms carefully before accessing or using eNotePad digital curator and instant sharing services.
+      </p>
+      <div class="mt-4 pt-4 border-t border-outline-variant/10 flex items-center justify-center gap-4 text-xs text-primary/40">
+        <span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">schedule</span> Effective Date: August 16, 2026</span>
+        <span>•</span>
+        <span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">article</span> Revision 2.4</span>
+      </div>
+    </div>
+
+    <!-- Main Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      
+      <!-- Sticky Navigation Sidebar -->
+      <aside class="lg:col-span-4 sticky top-24 space-y-3 hidden lg:block">
+        <div class="bg-surface-container-lowest p-5 rounded-2xl editorial-border editorial-shadow">
+          <p class="text-xs font-bold uppercase tracking-wider text-primary/50 mb-3 px-2">Table of Contents</p>
+          <nav class="space-y-1 text-sm">
+            <a href="#term-acceptance" class="block px-3 py-2 rounded-xl text-primary/70 hover:text-primary hover:bg-surface-container transition-all font-medium">1. Acceptance of Terms</a>
+            <a href="#term-service" class="block px-3 py-2 rounded-xl text-primary/70 hover:text-primary hover:bg-surface-container transition-all font-medium">2. Description of Service</a>
+            <a href="#term-conduct" class="block px-3 py-2 rounded-xl text-primary/70 hover:text-primary hover:bg-surface-container transition-all font-medium">3. User Conduct Rules</a>
+            <a href="#term-security" class="block px-3 py-2 rounded-xl text-primary/70 hover:text-primary hover:bg-surface-container transition-all font-medium">4. PIN & Code Security</a>
+            <a href="#term-ip" class="block px-3 py-2 rounded-xl text-primary/70 hover:text-primary hover:bg-surface-container transition-all font-medium">5. Intellectual Property</a>
+            <a href="#term-disclaimer" class="block px-3 py-2 rounded-xl text-primary/70 hover:text-primary hover:bg-surface-container transition-all font-medium">6. Disclaimer of Warranties</a>
+            <a href="#term-liability" class="block px-3 py-2 rounded-xl text-primary/70 hover:text-primary hover:bg-surface-container transition-all font-medium">7. Limitation of Liability</a>
+            <a href="#term-termination" class="block px-3 py-2 rounded-xl text-primary/70 hover:text-primary hover:bg-surface-container transition-all font-medium">8. Termination</a>
+            <a href="#term-law" class="block px-3 py-2 rounded-xl text-primary/70 hover:text-primary hover:bg-surface-container transition-all font-medium">9. Governing Law</a>
+          </nav>
+        </div>
+
+        <div class="bg-surface-container-low p-5 rounded-2xl border border-outline-variant/10 text-center space-y-2">
+          <span class="material-symbols-outlined text-primary text-xl">contact_support</span>
+          <h4 class="font-body text-sm italic text-primary">Need Clarification?</h4>
+          <p class="text-xs text-on-surface-variant/70">Contact our support team for any licensing or usage inquiries.</p>
+          <a href="support.html" class="inline-block px-4 py-2 bg-primary text-on-primary rounded-xl font-bold text-xs hover:bg-primary-dim transition-all">Support Desk</a>
+        </div>
+      </aside>
+
+      <!-- Content Column -->
+      <div class="lg:col-span-8 space-y-8">
+        
+        <!-- Section 1 -->
+        <section id="term-acceptance" class="bg-surface p-6 sm:p-8 rounded-3xl editorial-shadow editorial-border space-y-4">
+          <div class="flex items-center gap-3">
+            <span class="w-8 h-8 rounded-xl bg-primary/10 text-primary font-bold text-xs flex items-center justify-center">01</span>
+            <h2 class="font-body italic text-2xl text-primary">Acceptance of Terms</h2>
+          </div>
+          <p class="text-sm text-on-surface-variant leading-relaxed">
+            By accessing or using eNotePad ("Service"), including creating notes, retrieving content via secret code, participating in Convo Rooms, or registering an account, you agree to be legally bound by these Terms of Service. If you do not agree to all terms, you must immediately discontinue use of the platform.
+          </p>
+        </section>
+
+        <!-- Section 2 -->
+        <section id="term-service" class="bg-surface p-6 sm:p-8 rounded-3xl editorial-shadow editorial-border space-y-4">
+          <div class="flex items-center gap-3">
+            <span class="w-8 h-8 rounded-xl bg-primary/10 text-primary font-bold text-xs flex items-center justify-center">02</span>
+            <h2 class="font-body italic text-2xl text-primary">Description of Service</h2>
+          </div>
+          <p class="text-sm text-on-surface-variant leading-relaxed">
+            eNotePad is a digital curator platform providing:
+          </p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+            <div class="p-4 bg-surface-container-low rounded-2xl border border-outline-variant/10">
+              <span class="material-symbols-outlined text-primary text-lg mb-1">send_to_mobile</span>
+              <h4 class="font-bold text-sm text-primary">Secret Code Sharing</h4>
+              <p class="text-xs text-on-surface-variant">Instant text, link, and image transfers between devices without account creation.</p>
+            </div>
+            <div class="p-4 bg-surface-container-low rounded-2xl border border-outline-variant/10">
+              <span class="material-symbols-outlined text-primary text-lg mb-1">forum</span>
+              <h4 class="font-bold text-sm text-primary">Convo Rooms</h4>
+              <p class="text-xs text-on-surface-variant">Real-time collaborative workspaces for simultaneous multi-user note-taking.</p>
+            </div>
+            <div class="p-4 bg-surface-container-low rounded-2xl border border-outline-variant/10">
+              <span class="material-symbols-outlined text-primary text-lg mb-1">folder</span>
+              <h4 class="font-bold text-sm text-primary">File Manager</h4>
+              <p class="text-xs text-on-surface-variant">Personal document storage, categorization, and folder organization for registered users.</p>
+            </div>
+            <div class="p-4 bg-surface-container-low rounded-2xl border border-outline-variant/10">
+              <span class="material-symbols-outlined text-primary text-lg mb-1">security</span>
+              <h4 class="font-bold text-sm text-primary">Private PIN Protection</h4>
+              <p class="text-xs text-on-surface-variant">Custom security codes to prevent unauthorized access to sensitive notes.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section 3 -->
+        <section id="term-conduct" class="bg-surface p-6 sm:p-8 rounded-3xl editorial-shadow editorial-border space-y-4">
+          <div class="flex items-center gap-3">
+            <span class="w-8 h-8 rounded-xl bg-primary/10 text-primary font-bold text-xs flex items-center justify-center">03</span>
+            <h2 class="font-body italic text-2xl text-primary">User Conduct & Content Rules</h2>
+          </div>
+          <p class="text-sm text-on-surface-variant leading-relaxed">
+            You agree not to use eNotePad to upload, post, share, or store content that:
+          </p>
+          <ul class="space-y-2 text-xs sm:text-sm text-on-surface-variant">
+            <li class="flex items-start gap-2">
+              <span class="material-symbols-outlined text-error text-base flex-shrink-0 mt-0.5">block</span>
+              <span>Violates any local, national, or international law or regulation.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="material-symbols-outlined text-error text-base flex-shrink-0 mt-0.5">block</span>
+              <span>Contains malicious code, viruses, malware, or destructive payloads.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="material-symbols-outlined text-error text-base flex-shrink-0 mt-0.5">block</span>
+              <span>Infringes on intellectual property rights, trademarks, or copyrights of third parties.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="material-symbols-outlined text-error text-base flex-shrink-0 mt-0.5">block</span>
+              <span>Promotes harassment, hate speech, illegal exploitation, or automated spamming.</span>
+            </li>
+          </ul>
+        </section>
+
+        <!-- Section 4 -->
+        <section id="term-security" class="bg-surface p-6 sm:p-8 rounded-3xl editorial-shadow editorial-border space-y-4">
+          <div class="flex items-center gap-3">
+            <span class="w-8 h-8 rounded-xl bg-primary/10 text-primary font-bold text-xs flex items-center justify-center">04</span>
+            <h2 class="font-body italic text-2xl text-primary">PIN & Access Security</h2>
+          </div>
+          <p class="text-sm text-on-surface-variant leading-relaxed">
+            When you create a secret access code or secret PIN, you are solely responsible for maintaining its confidentiality. Anyone possessing your secret code or PIN will have access to the associated note. eNotePad is not responsible for unauthorized access resulting from shared or weak secret codes.
+          </p>
+        </section>
+
+        <!-- Section 5 -->
+        <section id="term-ip" class="bg-surface p-6 sm:p-8 rounded-3xl editorial-shadow editorial-border space-y-4">
+          <div class="flex items-center gap-3">
+            <span class="w-8 h-8 rounded-xl bg-primary/10 text-primary font-bold text-xs flex items-center justify-center">05</span>
+            <h2 class="font-body italic text-2xl text-primary">Intellectual Property & Ownership</h2>
+          </div>
+          <p class="text-sm text-on-surface-variant leading-relaxed">
+            <strong>Your Content:</strong> You retain full ownership of all notes, files, text, and images you create or upload to eNotePad. We claim no ownership over your submissions.<br/><br/>
+            <strong>Platform License:</strong> The eNotePad brand, user interface design, logo, tactile editorial components, and code are the exclusive property of eNotePad.
+          </p>
+        </section>
+
+        <!-- Section 6 -->
+        <section id="term-disclaimer" class="bg-surface p-6 sm:p-8 rounded-3xl editorial-shadow editorial-border space-y-4">
+          <div class="flex items-center gap-3">
+            <span class="w-8 h-8 rounded-xl bg-primary/10 text-primary font-bold text-xs flex items-center justify-center">06</span>
+            <h2 class="font-body italic text-2xl text-primary">Disclaimer of Warranties</h2>
+          </div>
+          <p class="text-sm text-on-surface-variant leading-relaxed">
+            eNotePad is provided on an <strong>"AS-IS"</strong> and <strong>"AS-AVAILABLE"</strong> basis without warranties of any kind, whether express or implied. We do not guarantee uninterrupted uptime, zero data loss, or error-free transmission. Users are advised to maintain independent backups of important documents.
+          </p>
+        </section>
+
+        <!-- Section 7 -->
+        <section id="term-liability" class="bg-surface p-6 sm:p-8 rounded-3xl editorial-shadow editorial-border space-y-4">
+          <div class="flex items-center gap-3">
+            <span class="w-8 h-8 rounded-xl bg-primary/10 text-primary font-bold text-xs flex items-center justify-center">07</span>
+            <h2 class="font-body italic text-2xl text-primary">Limitation of Liability</h2>
+          </div>
+          <p class="text-sm text-on-surface-variant leading-relaxed">
+            To the maximum extent permitted by applicable law, eNotePad and its developers shall not be liable for any indirect, incidental, special, consequential, or punitive damages resulting from your access to, use of, or inability to use the platform.
+          </p>
+        </section>
+
+        <!-- Section 8 -->
+        <section id="term-termination" class="bg-surface p-6 sm:p-8 rounded-3xl editorial-shadow editorial-border space-y-4">
+          <div class="flex items-center gap-3">
+            <span class="w-8 h-8 rounded-xl bg-primary/10 text-primary font-bold text-xs flex items-center justify-center">08</span>
+            <h2 class="font-body italic text-2xl text-primary">Account Termination</h2>
+          </div>
+          <p class="text-sm text-on-surface-variant leading-relaxed">
+            We reserve the right to suspend or terminate accounts or delete shared notes that violate our acceptable use policy or pose a security risk to the platform, without prior notice.
+          </p>
+        </section>
+
+        <!-- Section 9 -->
+        <section id="term-law" class="bg-surface p-6 sm:p-8 rounded-3xl editorial-shadow editorial-border space-y-4">
+          <div class="flex items-center gap-3">
+            <span class="w-8 h-8 rounded-xl bg-primary/10 text-primary font-bold text-xs flex items-center justify-center">09</span>
+            <h2 class="font-body italic text-2xl text-primary">Governing Law</h2>
+          </div>
+          <p class="text-sm text-on-surface-variant leading-relaxed">
+            These terms shall be governed by and construed in accordance with applicable laws, without regard to conflict of law principles.
+          </p>
+        </section>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="flex flex-col sm:flex-row justify-center items-center gap-4 py-8 w-full opacity-70 bg-transparent text-primary font-label text-sm border-t border-outline-variant/10 mt-10">
+    <span>© eNotePad — Digital Curator</span>
+    <div class="flex gap-4">
+      <a class="text-primary/60 hover:text-primary transition-colors underline-offset-4 hover:underline" href="privacy.html">Privacy</a>
+      <a class="text-primary/60 hover:text-primary transition-colors underline-offset-4 hover:underline font-bold" href="terms.html">Terms</a>
+      <a class="text-primary/60 hover:text-primary transition-colors underline-offset-4 hover:underline" href="support.html">Support</a>
+    </div>
+  </footer>
+
+  <!-- Theme Switching Script -->
+  <script>
+    (function() {
+      const savedTheme = localStorage.getItem('enotpad_theme') || 'light';
+      if (savedTheme === 'dark') {
+        document.documentElement.classList.add('dark');
+        document.documentElement.classList.remove('light');
+      } else {
+        document.documentElement.classList.add('light');
+        document.documentElement.classList.remove('dark');
+      }
+
+      const toggleBtn = document.getElementById('themeToggle');
+      if (toggleBtn) {
+        toggleBtn.addEventListener('click', function() {
+          const isDark = document.documentElement.classList.contains('dark');
+          if (isDark) {
+            document.documentElement.classList.remove('dark');
+            document.documentElement.classList.add('light');
+            localStorage.setItem('enotpad_theme', 'light');
+          } else {
+            document.documentElement.classList.remove('light');
+            document.documentElement.classList.add('dark');
+            localStorage.setItem('enotpad_theme', 'dark');
+          }
+        });
+      }
+    })();
+  </script>
+</body>
+</html>

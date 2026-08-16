@@ -98,6 +98,8 @@ function initAccess() {
     }
   }
 
+  const contentSaveBtn = document.getElementById('contentSaveBtn');
+
   function renderContent(data) {
     const resultContainer = document.getElementById('contentResult');
     const typeBadge = document.getElementById('contentTypeBadge');
@@ -148,31 +150,129 @@ function initAccess() {
       copyBtn.style.display = 'none';
     }
 
+    if (contentSaveBtn) {
+      contentSaveBtn.disabled = false;
+      contentSaveBtn.innerHTML = '<span class="material-symbols-outlined text-lg">bookmark_add</span> <span>Save Note</span>';
+    }
+
     showEl('contentResult');
-    resultContainer.dataset.content = data.content;
+    resultContainer.dataset.content = typeof data.content === 'string' ? data.content : JSON.stringify(data.content);
     resultContainer.dataset.type = data.type;
+    resultContainer.dataset.title = data.title || `Accessed ${data.type.charAt(0).toUpperCase() + data.type.slice(1)}`;
   }
 
-  contentCopyBtn.addEventListener('click', async () => {
-    const resultContainer = document.getElementById('contentResult');
-    const content = resultContainer.dataset.content;
-    if (!content) return;
+  if (contentCopyBtn) {
+    contentCopyBtn.addEventListener('click', async () => {
+      const resultContainer = document.getElementById('contentResult');
+      const content = resultContainer.dataset.content;
+      if (!content) return;
 
-    const success = await copyToClipboard(content);
-    if (success) {
-      contentCopyBtn.innerHTML = '<span class="material-symbols-outlined text-lg">check</span> Copied!';
-      showToast('Content copied!', 'success');
-      setTimeout(() => {
-        contentCopyBtn.innerHTML = '<span class="material-symbols-outlined text-lg">content_copy</span> Copy';
-      }, 2000);
-    }
-  });
+      const success = await copyToClipboard(content);
+      if (success) {
+        contentCopyBtn.innerHTML = '<span class="material-symbols-outlined text-lg">check</span> Copied!';
+        showToast('Content copied!', 'success');
+        setTimeout(() => {
+          contentCopyBtn.innerHTML = '<span class="material-symbols-outlined text-lg">content_copy</span> Copy';
+        }, 2000);
+      }
+    });
+  }
+
+  if (contentSaveBtn) {
+    contentSaveBtn.addEventListener('click', async () => {
+      const currentUser = getCurrentUser();
+      if (!currentUser) {
+        showToast('Please sign in to save accessed notes to your library.', 'warning');
+        if (typeof window.switchToTab === 'function') {
+          window.switchToTab('account');
+        }
+        return;
+      }
+
+      const resultContainer = document.getElementById('contentResult');
+      if (!resultContainer) return;
+      const type = resultContainer.dataset.type || 'text';
+      let content = resultContainer.dataset.content || '';
+      const title = resultContainer.dataset.title || `Accessed Note`;
+
+      const doSave = async (folderId, folderName) => {
+        contentSaveBtn.disabled = true;
+        contentSaveBtn.innerHTML = '<span class="material-symbols-outlined text-lg animate-spin">progress_activity</span> Saving…';
+
+        try {
+          const noteId = generateCode(8);
+          let resolvedContent = content;
+          try { resolvedContent = JSON.parse(content); } catch (e) {}
+
+          const preview = title || (type === 'image' ? '🖼️ Image' : (Array.isArray(resolvedContent) ? resolvedContent.join(', ') : resolvedContent).substring(0, 100));
+
+          // 1. Save to File Manager (users/{u}/files)
+          if (typeof window.saveNoteToFileManager === 'function') {
+            await window.saveNoteToFileManager({
+              title: title,
+              category: 'important',
+              noteType: type,
+              content: resolvedContent
+            }, folderId);
+          }
+
+          // 2. Save to savedNotes
+          await db.collection('users').doc(currentUser.username)
+            .collection('savedNotes').doc(noteId)
+            .set({
+              type: type,
+              content: resolvedContent,
+              title: title,
+              category: 'important',
+              preview: preview,
+              noteId: noteId,
+              createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+
+          // 3. Save to history
+          await db.collection('users').doc(currentUser.username)
+            .collection('history').doc(noteId)
+            .set({
+              type: type,
+              preview: preview,
+              code: noteId,
+              saved: true,
+              createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+
+          contentSaveBtn.innerHTML = '<span class="material-symbols-outlined text-lg">bookmark_added</span> Saved!';
+          const dest = folderName ? `"${folderName}"` : 'My Files';
+          showToast(`Note saved to ${dest}! 📁`, 'success');
+
+          if (typeof window.loadSavedNotes === 'function') window.loadSavedNotes(currentUser.username);
+          if (typeof window.fileManagerRefresh === 'function') window.fileManagerRefresh(currentUser.username);
+        } catch (err) {
+          console.error('Save accessed note error:', err);
+          showToast('Failed to save note.', 'error');
+          contentSaveBtn.disabled = false;
+          contentSaveBtn.innerHTML = '<span class="material-symbols-outlined text-lg">bookmark_add</span> Save Note';
+        }
+      };
+
+      if (typeof window.openSaveFolderModal === 'function') {
+        window.openSaveFolderModal({
+          noteType: type,
+          title: title,
+          onConfirm: doSave
+        });
+      } else {
+        await doSave(null, null);
+      }
+    });
+  }
 
   function showStatus(icon, text, type) {
-    document.getElementById('accessStatusIcon').textContent = icon;
-    document.getElementById('accessStatusText').textContent = text;
+    setElText('accessStatusIcon', icon);
+    setElText('accessStatusText', text);
     const statusEl = document.getElementById('accessStatus');
-    statusEl.className = `p-6 md:p-8 text-center status-${type}`;
+    if (statusEl) {
+      statusEl.className = `p-6 md:p-8 text-center status-${type}`;
+    }
     showEl('accessStatus');
   }
 }

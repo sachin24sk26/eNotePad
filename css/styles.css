@@ -67,6 +67,15 @@
   opacity: 1;
 }
 
+.account-section[data-account-active="false"] {
+  display: none !important;
+}
+
+.account-section[data-account-active="true"] {
+  animation: editorialFadeIn 0.4s ease;
+  opacity: 1;
+}
+
 @keyframes editorialFadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
@@ -298,6 +307,53 @@
 
 .mobile-nav-btn:not(.active) {
   color: rgba(81, 96, 112, 0.4);
+}
+
+/* ---------- Auth Segmented Tab Bar ---------- */
+.auth-tab-btn {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 0.75rem;
+}
+
+.auth-tab-btn.active {
+  background-color: #ffffff !important;
+  color: #1a202c !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08) !important;
+  font-weight: 700 !important;
+}
+
+.dark .auth-tab-btn.active {
+  background-color: #516070 !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4) !important;
+}
+
+.auth-tab-btn:not(.active) {
+  background-color: transparent !important;
+  color: rgba(81, 96, 112, 0.6) !important;
+  font-weight: 500 !important;
+}
+
+.dark .auth-tab-btn:not(.active) {
+  color: rgba(198, 214, 233, 0.6) !important;
+}
+
+.auth-tab-btn:not(.active):hover {
+  color: #516070 !important;
+}
+
+.dark .auth-tab-btn:not(.active):hover {
+  color: #ffffff !important;
+}
+
+.dark #googleAuthBtn {
+  background-color: #252a37 !important;
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+.dark #googleAuthBtn:hover {
+  background-color: #2e3444 !important;
 }
 
 /* ---------- Code Input Filled State ---------- */

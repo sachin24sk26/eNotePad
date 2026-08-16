@@ -73,9 +73,11 @@ function initEditor() {
       case 'insertLink':
         openLinkDialog();
         return;
-      case 'insertImage':
-        document.getElementById('editorInlineImageInput').click();
+      case 'insertImage': {
+        const inp = document.getElementById('editorInlineImageInput');
+        if (inp) inp.click();
         return;
+      }
       case 'insertTable':
         toggleDropdown('tableDropdown');
         return;
@@ -384,10 +386,16 @@ function initEditor() {
 
   if (closeFindPanel) {
     closeFindPanel.addEventListener('click', () => {
-      document.getElementById('findReplacePanel').style.display = 'none';
+      const panel = document.getElementById('findReplacePanel');
+      if (panel) panel.style.display = 'none';
       clearHighlights();
     });
   }
+
+  document.getElementById('closeShortcutsPanel')?.addEventListener('click', () => {
+    const panel = document.getElementById('shortcutsPanel');
+    if (panel) panel.style.display = 'none';
+  });
 
   if (findNextBtn && findInput) {
     findNextBtn.addEventListener('click', () => findNext());
@@ -596,7 +604,8 @@ function initEditor() {
   }
 
   document.getElementById('closeShortcutsPanel')?.addEventListener('click', () => {
-    document.getElementById('shortcutsPanel').style.display = 'none';
+    const panel = document.getElementById('shortcutsPanel');
+    if (panel) panel.style.display = 'none';
   });
 
   function updatePlaceholder() {

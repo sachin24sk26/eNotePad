@@ -128,7 +128,8 @@ function initShare() {
     selectedFile = file;
     const reader = new FileReader();
     reader.onload = (e) => {
-      document.getElementById('imagePreviewImg').src = e.target.result;
+      const img = document.getElementById('imagePreviewImg');
+      if (img) img.src = e.target.result;
       showEl('imagePreview');
       dropzone.style.display = 'none';
     };
@@ -436,25 +437,24 @@ function initShare() {
     return (str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
 
-
-
   // ----- Display Code -----
   function displayCode(code) {
     hideEl('shareForm');
-    document.getElementById('codeValue').textContent = code;
-    document.getElementById('codeExpiry').textContent = `Auto-erases in ${EXPIRY_MINUTES} minutes`;
+    setElText('codeValue', code);
+    setElText('codeExpiry', `Auto-erases in ${EXPIRY_MINUTES} minutes`);
     showEl('codeDisplay');
   }
 
   // ----- Copy Code -----
   codeCopyBtn.addEventListener('click', async () => {
-    const code = document.getElementById('codeValue').textContent;
+    const valEl = document.getElementById('codeValue');
+    const code = valEl ? valEl.textContent : '';
     const success = await copyToClipboard(code);
     if (success) {
-      document.getElementById('codeCopyText').textContent = 'Copied!';
+      setElText('codeCopyText', 'Copied!');
       showToast('Code copied to clipboard!', 'success');
       setTimeout(() => {
-        document.getElementById('codeCopyText').textContent = 'Copy Code';
+        setElText('codeCopyText', 'Copy Code');
       }, 2000);
     }
   });
@@ -488,4 +488,7 @@ function initShare() {
     if (hide) el.setAttribute('data-hidden', 'true');
     else el.removeAttribute('data-hidden');
   }
+
+  // Expose folder picker modal for other modules (e.g. Access tab save feature)
+  window.openSaveFolderModal = openSaveFolderModal;
 }

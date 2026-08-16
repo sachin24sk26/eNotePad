@@ -92,7 +92,7 @@
     };
   </script>
 
-  <link rel="stylesheet" href="css/styles.css?v=1.6" />
+  <link rel="stylesheet" href="css/styles.css?v=1.7" />
 </head>
 <body class="bg-background text-on-surface font-label min-h-screen relative overflow-x-hidden">
 
@@ -210,6 +210,11 @@
 
       <!-- Sidebar Footer -->
       <div class="pt-3 px-1 space-y-1.5">
+        <a href="support.html" class="w-full flex items-center gap-3 px-4 py-2 text-primary/40 hover:text-primary hover:bg-white/40 transition-all rounded-xl text-xs group">
+          <span class="material-symbols-outlined text-base group-hover:scale-110 transition-transform">support_agent</span>
+          <span class="flex-1 text-left">Help & Support</span>
+        </a>
+
         <button class="w-full flex items-center gap-3 px-4 py-2 text-primary/40 hover:text-primary hover:bg-white/40 transition-all rounded-xl text-xs group" id="sidebarFeedbackBtn">
           <span class="material-symbols-outlined text-base group-hover:scale-110 transition-transform">chat_bubble_outline</span>
           <span class="flex-1 text-left">Feedback to Dev</span>
@@ -701,9 +706,15 @@
                 <div class="bg-surface rounded-xl p-6 editorial-border">
                   <div class="flex items-center justify-between mb-4 pb-4 border-b border-outline-variant/15">
                     <span class="inline-flex items-center gap-2 px-3 py-1 text-xs font-semibold uppercase tracking-wider rounded-full bg-primary-container/40 text-primary" id="contentTypeBadge"></span>
-                    <button class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium text-primary hover:bg-surface-container-low transition-all" id="contentCopyBtn">
-                      <span class="material-symbols-outlined text-lg">content_copy</span> Copy
-                    </button>
+                    <div class="flex items-center gap-2">
+                      <button class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium text-primary hover:bg-surface-container-low transition-all" id="contentCopyBtn">
+                        <span class="material-symbols-outlined text-lg">content_copy</span> Copy
+                      </button>
+                      <button class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold bg-primary text-on-primary hover:bg-primary-dim transition-all shadow-sm active:scale-[0.98] cursor-pointer" id="contentSaveBtn" type="button">
+                        <span class="material-symbols-outlined text-lg">bookmark_add</span>
+                        <span id="contentSaveBtnText">Save Note</span>
+                      </button>
+                    </div>
                   </div>
                   <div id="contentBody"></div>
                 </div>
@@ -726,23 +737,36 @@
             <!-- Auth Card (shown when logged out) -->
             <div class="bg-surface-container-lowest rounded-xl editorial-shadow overflow-hidden editorial-border" id="authCard">
               <div class="p-6 md:p-8 space-y-6">
+
+                <!-- Sign In / Sign Up Segmented Tab Bar -->
+                <div class="flex bg-surface-container-low p-1.5 rounded-2xl" id="authTabBar">
+                  <button class="auth-tab-btn active flex-1 py-2.5 px-4 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2" id="authTabLogin" type="button">
+                    <span class="material-symbols-outlined text-base">login</span>
+                    <span>Sign In</span>
+                  </button>
+                  <button class="auth-tab-btn flex-1 py-2.5 px-4 rounded-xl text-sm font-medium transition-all flex items-center justify-center gap-2" id="authTabRegister" type="button">
+                    <span class="material-symbols-outlined text-base">person_add</span>
+                    <span>Sign Up</span>
+                  </button>
+                </div>
+
                 <div class="text-center space-y-2">
                   <div class="w-14 h-14 mx-auto bg-primary-container rounded-full flex items-center justify-center mb-2">
                     <span class="material-symbols-outlined text-2xl text-primary">lock</span>
                   </div>
-                  <h2 class="font-body text-2xl italic text-primary" id="authTitle">Login</h2>
-                  <p class="text-sm text-on-surface-variant" id="authSubtitle">Enter your username and 4-digit PIN to access your account.</p>
+                  <h2 class="font-body text-2xl italic text-primary" id="authTitle">Welcome Back</h2>
+                  <p class="text-sm text-on-surface-variant" id="authSubtitle">Access your digital editorial desk.</p>
                 </div>
 
-                <div class="space-y-4" id="authForm">
-                  <!-- Username (Used for display and linking) -->
-                  <div id="usernameFieldGroup">
+                <form id="authFormElement" action="#" onsubmit="return false;" class="space-y-4">
+                  <!-- Username (Used for Sign Up) -->
+                  <div id="usernameFieldGroup" data-hidden="true">
                     <div class="flex justify-between items-center mb-2">
                       <label class="text-xs uppercase tracking-widest text-primary/50 font-bold" for="authUsername">Username</label>
                       <span id="usernameStatus" class="text-[10px] font-bold uppercase tracking-tight hidden">Checking...</span>
                     </div>
                     <div class="relative">
-                      <input class="w-full px-4 py-3 bg-surface-dim/30 rounded-xl border-none shadow-inner focus:ring-2 focus:ring-primary/20 text-on-surface font-medium placeholder:text-outline-variant/40" type="text" id="authUsername" placeholder="Unique username" maxlength="20" autocomplete="off" />
+                      <input class="w-full px-4 py-3 bg-surface-dim/30 rounded-xl border-none shadow-inner focus:ring-2 focus:ring-primary/20 text-on-surface font-medium placeholder:text-outline-variant/40" type="text" id="authUsername" placeholder="Choose unique username" maxlength="20" autocomplete="username" />
                       <div id="usernameIcon" class="absolute right-4 top-1/2 -translate-y-1/2 hidden">
                         <span class="material-symbols-outlined text-sm"></span>
                       </div>
@@ -759,7 +783,7 @@
                   <div>
                     <div class="flex justify-between items-center mb-2">
                       <label class="text-xs uppercase tracking-widest text-primary/50 font-bold" for="authPassword">Password</label>
-                      <button id="forgotPasswordBtn" class="text-[10px] uppercase tracking-widest text-primary font-bold hover:underline bg-transparent border-none cursor-pointer">Forgot?</button>
+                      <button id="forgotPasswordBtn" type="button" class="text-[10px] uppercase tracking-widest text-primary font-bold hover:underline bg-transparent border-none cursor-pointer">Forgot?</button>
                     </div>
                     <div class="relative">
                       <input class="w-full px-4 py-3 pr-12 bg-surface-dim/30 rounded-xl border-none shadow-inner focus:ring-2 focus:ring-primary/20 text-on-surface font-medium placeholder:text-outline-variant/40" type="password" id="authPassword" placeholder="••••••••" autocomplete="current-password" />
@@ -771,9 +795,9 @@
 
                   <!-- Auth Button -->
                   <div class="flex flex-col gap-3 pt-2">
-                    <button class="w-full py-4 bg-primary text-on-primary rounded-full font-bold text-lg shadow-xl hover:bg-primary-dim transition-all active:scale-[0.98] flex items-center justify-center gap-3" id="authBtn">
+                    <button type="button" class="w-full py-4 bg-primary text-on-primary rounded-full font-bold text-lg shadow-xl hover:bg-primary-dim transition-all active:scale-[0.98] flex items-center justify-center gap-3 cursor-pointer" id="authBtn">
                       <span class="material-symbols-outlined">login</span>
-                      <span id="authBtnText">Login</span>
+                      <span id="authBtnText">Sign In</span>
                     </button>
 
                     <div class="flex items-center gap-4 my-1">
@@ -782,7 +806,7 @@
                       <div class="flex-1 h-px bg-outline-variant/20"></div>
                     </div>
 
-                    <button class="w-full py-3 bg-white text-primary rounded-full font-bold text-sm shadow-md border border-outline-variant/10 hover:bg-surface-container-low transition-all active:scale-[0.98] flex items-center justify-center gap-3" id="googleAuthBtn">
+                    <button type="button" class="w-full py-3 bg-white text-primary rounded-full font-bold text-sm shadow-md border border-outline-variant/10 hover:bg-surface-container-low transition-all active:scale-[0.98] flex items-center justify-center gap-3 cursor-pointer" id="googleAuthBtn">
                       <svg class="w-5 h-5" viewBox="0 0 24 24">
                         <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                         <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -796,9 +820,9 @@
                   <!-- Toggle Login/Register -->
                   <div class="text-center pt-2">
                     <span class="text-sm text-on-surface-variant" id="authTogglePrefix">Don't have an account?</span>
-                    <button class="text-sm text-primary font-bold hover:underline ml-1 bg-transparent border-none cursor-pointer" id="authToggleLink">Register</button>
+                    <button type="button" class="text-sm text-primary font-bold hover:underline ml-1 bg-transparent border-none cursor-pointer" id="authToggleLink">Sign Up</button>
                   </div>
-                </div>
+                </form>
               </div>
             </div>
 
@@ -1290,12 +1314,12 @@
       </div> <!-- /panelAdmin -->
 
       <!-- Footer -->
-      <footer class="flex justify-center items-center gap-6 py-8 w-full opacity-60 bg-transparent text-primary font-label text-sm">
+      <footer class="flex flex-col sm:flex-row justify-center items-center gap-4 py-8 w-full opacity-70 bg-transparent text-primary font-label text-sm">
         <span>© eNotePad — Digital Curator</span>
         <div class="flex gap-4">
-          <a class="text-primary/50 hover:text-primary transition-colors" href="#">Privacy</a>
-          <a class="text-primary/50 hover:text-primary transition-colors" href="#">Terms</a>
-          <a class="text-primary/50 hover:text-primary transition-colors" href="#">Support</a>
+          <a class="text-primary/60 hover:text-primary transition-colors underline-offset-4 hover:underline" href="privacy.html">Privacy</a>
+          <a class="text-primary/60 hover:text-primary transition-colors underline-offset-4 hover:underline" href="terms.html">Terms</a>
+          <a class="text-primary/60 hover:text-primary transition-colors underline-offset-4 hover:underline" href="support.html">Support</a>
         </div>
       </footer>
 
@@ -1608,14 +1632,14 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
 
   <!-- App Scripts -->
-  <script src="js/firebase-config.js?v=9"></script>
-  <script src="js/utils.js?v=9"></script>
-  <script src="js/admin.js?v=9"></script>
-  <script src="js/editor.js?v=9"></script>
-  <script src="js/share.js?v=9"></script>
-  <script src="js/access.js?v=9"></script>
-  <script src="js/auth.js?v=9"></script>
-  <script src="js/filemanager.js?v=9"></script>
-  <script src="js/app.js?v=9"></script>
+  <script src="js/firebase-config.js?v=11"></script>
+  <script src="js/utils.js?v=11"></script>
+  <script src="js/admin.js?v=11"></script>
+  <script src="js/editor.js?v=11"></script>
+  <script src="js/share.js?v=11"></script>
+  <script src="js/access.js?v=11"></script>
+  <script src="js/auth.js?v=11"></script>
+  <script src="js/filemanager.js?v=11"></script>
+  <script src="js/app.js?v=11"></script>
 </body>
 </html>

@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <meta name="description" content="eNotePad Privacy Policy — How we protect your notes, secret codes, and personal data." />
+  <meta name="theme-color" id="themeColorMeta" content="#516070" />
+  <title>Privacy Policy — eNotePad</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+  <!-- Google Fonts: Inter + Newsreader -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet" />
+
+  <!-- Material Symbols -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind Config -->
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary-dim": "#455464",
+            "on-tertiary": "#faf8ff",
+            "tertiary-fixed": "#d5dcfb",
+            "on-secondary-fixed": "#3e3f42",
+            "on-surface": "#2f342e",
+            "inverse-primary": "#daeafe",
+            "primary-fixed": "#d4e4f8",
+            "error": "#9f403d",
+            "on-tertiary-fixed": "#343b53",
+            "secondary-dim": "#525356",
+            "surface-container-low": "#f4f4ef",
+            "surface": "#faf9f5",
+            "surface-container-highest": "#e0e4dc",
+            "surface-tint": "#516070",
+            "inverse-surface": "#0d0f0d",
+            "on-secondary-container": "#505255",
+            "secondary-fixed-dim": "#d4d4d7",
+            "on-background": "#2f342e",
+            "error-container": "#fe8983",
+            "surface-bright": "#faf9f5",
+            "on-tertiary-container": "#474d67",
+            "on-surface-variant": "#5c605a",
+            "outline-variant": "#afb3ac",
+            "tertiary": "#575e78",
+            "tertiary-dim": "#4b526c",
+            "inverse-on-surface": "#9d9d9a",
+            "secondary-fixed": "#e2e2e5",
+            "on-error": "#fff7f6",
+            "on-primary": "#f4f8ff",
+            "primary": "#516070",
+            "outline": "#787c75",
+            "tertiary-fixed-dim": "#c7ceec",
+            "secondary": "#5e5f62",
+            "error-dim": "#4e0309",
+            "on-secondary-fixed-variant": "#5a5b5e",
+            "surface-variant": "#e0e4dc",
+            "on-tertiary-fixed-variant": "#505771",
+            "surface-container-lowest": "#ffffff",
+            "on-primary-fixed-variant": "#4e5d6d",
+            "on-secondary": "#f9f8fc",
+            "surface-container": "#edeee8",
+            "background": "#faf9f5",
+            "tertiary-container": "#d5dcfb",
+            "secondary-container": "#e2e2e5",
+            "on-error-container": "#752121",
+            "on-primary-container": "#445363",
+            "surface-container-high": "#e6e9e2",
+            "on-primary-fixed": "#324150",
+            "primary-fixed-dim": "#c6d6e9",
+            "primary-container": "#d4e4f8",
+            "surface-dim": "#d6dcd2"
+          },
+          borderRadius: {
+            DEFAULT: "0.25rem",
+            lg: "1rem",
+            xl: "1.5rem",
+            full: "9999px"
+          },
+          fontFamily: {
+            headline: ["Inter", "sans-serif"],
+            body: ["Newsreader", "serif"],
+            label: ["Inter", "sans-serif"]
+          }
+        }
+      }
+    };
+  </script>
+
+  <link rel="stylesheet" href="css/styles.css?v=1.6" />
+</head>
+<body class="bg-background text-on-surface font-label min-h-screen relative overflow-x-hidden flex flex-col">
+
+  <!-- Paper Grain Overlay -->
+  <div class="fixed inset-0 pointer-events-none paper-grain z-50"></div>
+
+  <!-- Header -->
+  <header class="bg-background/95 sticky top-0 z-30 backdrop-blur-sm border-b border-outline-variant/10">
+    <div class="flex justify-between items-center w-full px-6 py-3.5 max-w-5xl mx-auto">
+      <a href="index.html" class="flex items-center gap-2.5 group">
+        <div class="w-8 h-8 rounded-xl bg-primary/15 flex items-center justify-center text-primary group-hover:scale-105 transition-transform">
+          <span class="material-symbols-outlined text-base">edit_note</span>
+        </div>
+        <div>
+          <span class="font-body italic text-lg text-primary leading-none block">eNotePad</span>
+          <span class="text-[9px] uppercase tracking-widest text-primary/40 font-bold">Digital Curator</span>
+        </div>
+      </a>
+
+      <nav class="flex items-center gap-1 sm:gap-2">
+        <a href="index.html" class="text-xs sm:text-sm px-3 py-1.5 rounded-lg text-primary/60 hover:text-primary hover:bg-surface-container transition-all">Notes</a>
+        <a href="support.html" class="text-xs sm:text-sm px-3 py-1.5 rounded-lg text-primary/60 hover:text-primary hover:bg-surface-container transition-all">Support</a>
+        <a href="terms.html" class="text-xs sm:text-sm px-3 py-1.5 rounded-lg text-primary/60 hover:text-primary hover:bg-surface-container transition-all">Terms</a>
+        <a href="privacy.html" class="text-xs sm:text-sm px-3 py-1.5 rounded-lg text-primary font-bold bg-primary/10">Privacy</a>
+        
+        <button class="theme-toggle-btn ml-2 flex items-center gap-2 px-3 py-1.5 rounded-full border border-outline-variant/20 transition-all active:scale-[0.97]" id="themeToggle" aria-label="Toggle theme">
+          <span class="material-symbols-outlined text-base theme-icon-dark">dark_mode</span>
+          <span class="material-symbols-outlined text-base theme-icon-light">light_mode</span>
+          <span class="theme-toggle-label text-xs font-semibold theme-label-dark">Dark</span>
+          <span class="theme-toggle-label text-xs font-semibold theme-label-light">Light</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Content Container -->
+  <main class="flex-1 max-w-5xl w-full mx-auto px-6 py-10 md:py-14 space-y-10">
+
+    <!-- Hero Header -->
+    <div class="bg-surface rounded-3xl p-8 md:p-12 editorial-shadow editorial-border text-center relative overflow-hidden">
+      <div class="w-14 h-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mx-auto mb-4">
+        <span class="material-symbols-outlined text-2xl">shield_lock</span>
+      </div>
+      <span class="text-[10px] uppercase tracking-widest text-primary/50 font-bold bg-primary/8 px-3 py-1 rounded-full inline-block mb-3">Legal & Security</span>
+      <h1 class="font-body italic text-3xl sm:text-4xl text-primary font-normal mb-3">Privacy Policy</h1>
+      <p class="text-sm text-on-surface-variant max-w-2xl mx-auto leading-relaxed">
+        Your privacy is at the core of eNotePad. We believe instant sharing and digital note curation should be simple, safe, and transparent.
+      </p>
+      <div class="mt-4 pt-4 border-t border-outline-variant/10 flex items-center justify-center gap-4 text-xs text-primary/40">
+        <span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">schedule</span> Last Updated: August 16, 2026</span>
+        <span>•</span>
+        <span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">verified_user</span> Version 3.2</span>
+      </div>
+    </div>
+
+    <!-- Main Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      
+      <!-- Sticky Navigation Sidebar -->
+      <aside class="lg:col-span-4 sticky top-24 space-y-3 hidden lg:block">
+        <div class="bg-surface-container-lowest p-5 rounded-2xl editorial-border editorial-shadow">
+          <p class="text-xs font-bold uppercase tracking-wider text-primary/50 mb-3 px-2">Table of Contents</p>
+          <nav class="space-y-1 text-sm">
+            <a href="#info-collect" class="block px-3 py-2 rounded-xl text-primary/70 hover:text-primary hover:bg-surface-container transition-all font-medium">1. Information We Collect</a>
+            <a href="#info-use" class="block px-3 py-2 rounded-xl text-primary/70 hover:text-primary hover:bg-surface-container transition-all font-medium">2. How We Use Information</a>
+            <a href="#data-security" class="block px-3 py-2 rounded-xl text-primary/70 hover:text-primary hover:bg-surface-container transition-all font-medium">3. Data Security & Storage</a>
+            <a href="#third-parties" class="block px-3 py-2 rounded-xl text-primary/70 hover:text-primary hover:bg-surface-container transition-all font-medium">4. Third-Party Services</a>
+            <a href="#cookies" class="block px-3 py-2 rounded-xl text-primary/70 hover:text-primary hover:bg-surface-container transition-all font-medium">5. Local Storage & Cookies</a>
+            <a href="#data-rights" class="block px-3 py-2 rounded-xl text-primary/70 hover:text-primary hover:bg-surface-container transition-all font-medium">6. Your Rights & Deletion</a>
+            <a href="#contact" class="block px-3 py-2 rounded-xl text-primary/70 hover:text-primary hover:bg-surface-container transition-all font-medium">7. Contact Information</a>
+          </nav>
+        </div>
+
+        <div class="bg-primary/5 p-5 rounded-2xl border border-primary/10 text-center">
+          <span class="material-symbols-outlined text-primary text-2xl mb-1">help_outline</span>
+          <h4 class="font-body text-base italic text-primary">Have questions?</h4>
+          <p class="text-xs text-on-surface-variant/70 mb-3">Our support team is always here to assist you.</p>
+          <a href="support.html" class="inline-block w-full py-2 bg-primary text-on-primary rounded-xl font-bold text-xs hover:bg-primary-dim transition-all shadow-sm">Visit Support Center</a>
+        </div>
+      </aside>
+
+      <!-- Content Column -->
+      <div class="lg:col-span-8 space-y-8">
+        
+        <!-- Section 1 -->
+        <section id="info-collect" class="bg-surface p-6 sm:p-8 rounded-3xl editorial-shadow editorial-border space-y-4">
+          <div class="flex items-center gap-3">
+            <span class="w-8 h-8 rounded-xl bg-primary/10 text-primary font-bold text-xs flex items-center justify-center">01</span>
+            <h2 class="font-body italic text-2xl text-primary">Information We Collect</h2>
+          </div>
+          <p class="text-sm text-on-surface-variant leading-relaxed">
+            eNotePad operates on a privacy-first principle. We minimize the data collected to only what is strictly required to provide real-time note curation and cross-device sync.
+          </p>
+          <div class="space-y-3 pt-2">
+            <div class="p-4 rounded-2xl bg-surface-container-low border border-outline-variant/10">
+              <h3 class="font-bold text-sm text-primary flex items-center gap-2">
+                <span class="material-symbols-outlined text-base">sticky_note_2</span> Anonymous Notes & Shared Content
+              </h3>
+              <p class="text-xs text-on-surface-variant mt-1">
+                Content submitted via secret codes (text, links, images) is saved in our database to allow access across devices. No user registration is needed for anonymous sharing.
+              </p>
+            </div>
+            <div class="p-4 rounded-2xl bg-surface-container-low border border-outline-variant/10">
+              <h3 class="font-bold text-sm text-primary flex items-center gap-2">
+                <span class="material-symbols-outlined text-base">lock</span> Secret PIN Hashes & Access Tokens
+              </h3>
+              <p class="text-xs text-on-surface-variant mt-1">
+                Access PINs for private notes or accounts are cryptographically hashed before storage. We never store raw PINs or plaintext access keys.
+              </p>
+            </div>
+            <div class="p-4 rounded-2xl bg-surface-container-low border border-outline-variant/10">
+              <h3 class="font-bold text-sm text-primary flex items-center gap-2">
+                <span class="material-symbols-outlined text-base">account_circle</span> Optional Registered Accounts
+              </h3>
+              <p class="text-xs text-on-surface-variant mt-1">
+                If you create a personal account, we store your username, optional email address, and encrypted library preferences to allow personal file management.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section 2 -->
+        <section id="info-use" class="bg-surface p-6 sm:p-8 rounded-3xl editorial-shadow editorial-border space-y-4">
+          <div class="flex items-center gap-3">
+            <span class="w-8 h-8 rounded-xl bg-primary/10 text-primary font-bold text-xs flex items-center justify-center">02</span>
+            <h2 class="font-body italic text-2xl text-primary">How We Use Information</h2>
+          </div>
+          <p class="text-sm text-on-surface-variant leading-relaxed">
+            Collected data is strictly used to operate, optimize, and secure the eNotePad digital curator platform:
+          </p>
+          <ul class="space-y-2 text-xs sm:text-sm text-on-surface-variant">
+            <li class="flex items-start gap-2">
+              <span class="material-symbols-outlined text-primary text-base flex-shrink-0 mt-0.5">check_circle</span>
+              <span><strong>Instant Synchronization:</strong> Fetching and delivering notes using your secret code across phones, laptops, and tablets.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="material-symbols-outlined text-primary text-base flex-shrink-0 mt-0.5">check_circle</span>
+              <span><strong>Real-Time Convo Rooms:</strong> Enabling live collaborative sessions for note curation and instant communication.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="material-symbols-outlined text-primary text-base flex-shrink-0 mt-0.5">check_circle</span>
+              <span><strong>System Diagnostics:</strong> Monitoring server health, detecting spam or malicious abuse, and improving performance.</span>
+            </li>
+          </ul>
+        </section>
+
+        <!-- Section 3 -->
+        <section id="data-security" class="bg-surface p-6 sm:p-8 rounded-3xl editorial-shadow editorial-border space-y-4">
+          <div class="flex items-center gap-3">
+            <span class="w-8 h-8 rounded-xl bg-primary/10 text-primary font-bold text-xs flex items-center justify-center">03</span>
+            <h2 class="font-body italic text-2xl text-primary">Data Security & Protection</h2>
+          </div>
+          <p class="text-sm text-on-surface-variant leading-relaxed">
+            We implement industry-grade security measures to safeguard your information against unauthorized access, disclosure, or alteration:
+          </p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+            <div class="p-4 bg-surface-container-low rounded-2xl border border-outline-variant/10">
+              <span class="material-symbols-outlined text-primary mb-2">lock</span>
+              <h4 class="font-bold text-sm text-primary mb-1">Encrypted Transport</h4>
+              <p class="text-xs text-on-surface-variant">All connections are secured via HTTPS / TLS 1.3 protocol encryption in transit.</p>
+            </div>
+            <div class="p-4 bg-surface-container-low rounded-2xl border border-outline-variant/10">
+              <span class="material-symbols-outlined text-primary mb-2">database</span>
+              <h4 class="font-bold text-sm text-primary mb-1">Cloud Infrastructure</h4>
+              <p class="text-xs text-on-surface-variant">Hosted on Google Cloud / Firebase Firestore with strict access control security rules.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section 4 -->
+        <section id="third-parties" class="bg-surface p-6 sm:p-8 rounded-3xl editorial-shadow editorial-border space-y-4">
+          <div class="flex items-center gap-3">
+            <span class="w-8 h-8 rounded-xl bg-primary/10 text-primary font-bold text-xs flex items-center justify-center">04</span>
+            <h2 class="font-body italic text-2xl text-primary">Third-Party Services</h2>
+          </div>
+          <p class="text-sm text-on-surface-variant leading-relaxed">
+            We do <strong>NOT</strong> sell, trade, or monetize your personal data. We utilize trusted backend providers exclusively for app execution:
+          </p>
+          <div class="p-4 rounded-2xl bg-surface-container-low border border-outline-variant/10 text-xs text-on-surface-variant space-y-2">
+            <p><strong>• Google Firebase:</strong> Provides authentication, real-time database storage, and file hosting.</p>
+            <p><strong>• Google Fonts & CDNs:</strong> Delivers editorial typography and user interface assets efficiently.</p>
+          </div>
+        </section>
+
+        <!-- Section 5 -->
+        <section id="cookies" class="bg-surface p-6 sm:p-8 rounded-3xl editorial-shadow editorial-border space-y-4">
+          <div class="flex items-center gap-3">
+            <span class="w-8 h-8 rounded-xl bg-primary/10 text-primary font-bold text-xs flex items-center justify-center">05</span>
+            <h2 class="font-body italic text-2xl text-primary">Local Storage & Cookies</h2>
+          </div>
+          <p class="text-sm text-on-surface-variant leading-relaxed">
+            eNotePad uses Browser LocalStorage and SessionStorage to store your preferences (such as Light/Dark theme selection) and temporary secret code history locally on your device. We do not use third-party tracking cookies or advertising scripts.
+          </p>
+        </section>
+
+        <!-- Section 6 -->
+        <section id="data-rights" class="bg-surface p-6 sm:p-8 rounded-3xl editorial-shadow editorial-border space-y-4">
+          <div class="flex items-center gap-3">
+            <span class="w-8 h-8 rounded-xl bg-primary/10 text-primary font-bold text-xs flex items-center justify-center">06</span>
+            <h2 class="font-body italic text-2xl text-primary">Your Rights & Data Deletion</h2>
+          </div>
+          <p class="text-sm text-on-surface-variant leading-relaxed">
+            You retain full control over your content on eNotePad:
+          </p>
+          <ul class="space-y-2 text-xs sm:text-sm text-on-surface-variant">
+            <li class="flex items-start gap-2">
+              <span class="material-symbols-outlined text-primary text-base flex-shrink-0">delete_forever</span>
+              <span><strong>Instant Deletion:</strong> You can delete any note, secret code content, or uploaded file at any time directly through the app interface.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="material-symbols-outlined text-primary text-base flex-shrink-0">person_remove</span>
+              <span><strong>Account Purge:</strong> Registered users can permanently delete their account and associated data from the Account settings panel.</span>
+            </li>
+          </ul>
+        </section>
+
+        <!-- Section 7 -->
+        <section id="contact" class="bg-surface p-6 sm:p-8 rounded-3xl editorial-shadow editorial-border space-y-4">
+          <div class="flex items-center gap-3">
+            <span class="w-8 h-8 rounded-xl bg-primary/10 text-primary font-bold text-xs flex items-center justify-center">07</span>
+            <h2 class="font-body italic text-2xl text-primary">Contact Us</h2>
+          </div>
+          <p class="text-sm text-on-surface-variant leading-relaxed">
+            If you have questions regarding this Privacy Policy or wish to inquire about data privacy standards, please reach out through our support channel:
+          </p>
+          <div class="pt-2">
+            <a href="support.html" class="inline-flex items-center gap-2 px-5 py-3 bg-primary text-on-primary rounded-2xl font-bold text-xs hover:bg-primary-dim transition-all shadow-md">
+              <span class="material-symbols-outlined text-base">support_agent</span>
+              Contact Support Team
+            </a>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="flex flex-col sm:flex-row justify-center items-center gap-4 py-8 w-full opacity-70 bg-transparent text-primary font-label text-sm border-t border-outline-variant/10 mt-10">
+    <span>© eNotePad — Digital Curator</span>
+    <div class="flex gap-4">
+      <a class="text-primary/60 hover:text-primary transition-colors underline-offset-4 hover:underline font-bold" href="privacy.html">Privacy</a>
+      <a class="text-primary/60 hover:text-primary transition-colors underline-offset-4 hover:underline" href="terms.html">Terms</a>
+      <a class="text-primary/60 hover:text-primary transition-colors underline-offset-4 hover:underline" href="support.html">Support</a>
+    </div>
+  </footer>
+
+  <!-- Theme Switching Script -->
+  <script>
+    (function() {
+      const savedTheme = localStorage.getItem('enotpad_theme') || 'light';
+      if (savedTheme === 'dark') {
+        document.documentElement.classList.add('dark');
+        document.documentElement.classList.remove('light');
+      } else {
+        document.documentElement.classList.add('light');
+        document.documentElement.classList.remove('dark');
+      }
+
+      const toggleBtn = document.getElementById('themeToggle');
+      if (toggleBtn) {
+        toggleBtn.addEventListener('click', function() {
+          const isDark = document.documentElement.classList.contains('dark');
+          if (isDark) {
+            document.documentElement.classList.remove('dark');
+            document.documentElement.classList.add('light');
+            localStorage.setItem('enotpad_theme', 'light');
+          } else {
+            document.documentElement.classList.remove('light');
+            document.documentElement.classList.add('dark');
+            localStorage.setItem('enotpad_theme', 'dark');
+          }
+        });
+      }
+    })();
+  </script>
+</body>
+</html>
