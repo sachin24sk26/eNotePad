@@ -3161,3 +3161,218 @@ select.appearance-none {
   border-color: #516070;
   box-shadow: 0 0 0 2px rgba(81,96,112,0.1);
 }
+
+/* ============================================================
+   USERS FEATURE — Search, Profile Modal, Inbox, Send-to-user
+   ============================================================ */
+
+/* --- Spin animation --- */
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---- User Search Cards ---- */
+.user-search-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  background: var(--md-sys-color-surface, #fff);
+  border-radius: 18px;
+  border: 1px solid rgba(175,179,172,0.12);
+  box-shadow: 0 4px 16px rgba(47,52,46,0.05);
+  cursor: pointer;
+  transition: transform 0.18s, box-shadow 0.18s, background 0.18s;
+}
+.user-search-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(47,52,46,0.1);
+  background: var(--md-sys-color-surface-container-low, #f8f8f8);
+}
+.usc-avatar {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 18px;
+  color: #fff;
+  flex-shrink: 0;
+  transition: transform 0.15s;
+}
+.user-search-card:hover .usc-avatar { transform: scale(1.06); }
+.usc-info { flex: 1; min-width: 0; }
+.usc-name { font-weight: 700; font-size: 14px; color: var(--md-sys-color-on-surface, #1a1c18); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.usc-handle { font-size: 12px; color: var(--md-sys-color-on-surface-variant, #516070); }
+.usc-bio { font-size: 11px; color: var(--md-sys-color-on-surface-variant, #516070); opacity: 0.7; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.usc-actions { display: flex; gap: 6px; flex-shrink: 0; }
+.usc-follow-btn, .usc-profile-btn {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  border: none; background: rgba(81,96,112,0.07);
+  color: rgba(81,96,112,0.6);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all 0.2s;
+  font-size: 18px;
+}
+.usc-follow-btn:hover { background: rgba(81,96,112,0.14); color: rgba(81,96,112,1); }
+.usc-profile-btn:hover { background: rgba(81,96,112,0.14); }
+.usc-follow-btn.following { background: rgba(81,96,112,0.15); color: #27ae60; }
+
+.user-search-loading { text-align: center; padding: 32px; color: rgba(81,96,112,0.4); }
+.user-search-loading .material-symbols-outlined { animation: spin 1s linear infinite; font-size: 28px; }
+
+/* ---- Filter Buttons ---- */
+.user-filter-btn { transition: all 0.2s; }
+.user-filter-btn.active { background: var(--md-sys-color-primary, #516070) !important; color: #fff !important; }
+
+/* ---- User Profile Modal ---- */
+.upm-modal { transform: scale(0.95); opacity: 0; transition: transform 0.26s cubic-bezier(.34,1.56,.64,1), opacity 0.22s; }
+#userProfileModal.upm-open .upm-modal { transform: scale(1); opacity: 1; }
+
+.upm-header {
+  display: flex; align-items: flex-start; gap: 14px;
+  margin-bottom: 18px;
+  position: relative;
+}
+.upm-avatar {
+  width: 60px; height: 60px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 24px; color: #fff;
+  flex-shrink: 0;
+}
+.upm-header-info { flex: 1; min-width: 0; }
+.upm-display-name { font-weight: 800; font-size: 18px; color: var(--md-sys-color-on-surface, #1a1c18); }
+.upm-username { font-size: 13px; color: var(--md-sys-color-on-surface-variant, #516070); }
+.upm-bio { font-size: 12px; color: var(--md-sys-color-on-surface-variant, #516070); margin-top: 4px; opacity: 0.75; }
+.upm-join { font-size: 11px; margin-top: 4px; opacity: 0.5; }
+
+.upm-follow-btn, .upm-edit-profile-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border-radius: 999px;
+  font-weight: 700; font-size: 12px; cursor: pointer;
+  transition: all 0.2s; border: none;
+  position: absolute; top: 0; right: 0;
+}
+.upm-follow-btn { background: var(--md-sys-color-primary, #516070); color: #fff; }
+.upm-follow-btn:hover { opacity: 0.85; }
+.upm-follow-btn.following { background: rgba(81,96,112,0.12); color: #516070; }
+.upm-edit-profile-btn { background: rgba(81,96,112,0.1); color: #516070; }
+.upm-edit-profile-btn:hover { background: rgba(81,96,112,0.18); }
+
+.upm-stats {
+  display: flex; gap: 0;
+  border-radius: 14px; overflow: hidden;
+  border: 1px solid rgba(175,179,172,0.15);
+  margin-bottom: 16px;
+}
+.upm-stat {
+  flex: 1; text-align: center; padding: 12px 8px;
+  border-right: 1px solid rgba(175,179,172,0.15);
+}
+.upm-stat:last-child { border-right: none; }
+.upm-stat-value { font-weight: 800; font-size: 20px; color: var(--md-sys-color-primary, #516070); }
+.upm-stat-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(81,96,112,0.5); font-weight: 700; }
+
+.upm-actions { display: flex; gap: 10px; }
+.upm-action-btn {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 11px 16px; border-radius: 999px; border: none;
+  font-weight: 700; font-size: 12px; cursor: pointer; transition: all 0.2s;
+}
+.upm-send-btn { background: var(--md-sys-color-primary, #516070); color: #fff; }
+.upm-send-btn:hover { opacity: 0.85; }
+.upm-invite-btn { background: rgba(81,96,112,0.1); color: #516070; }
+.upm-invite-btn:hover { background: rgba(81,96,112,0.18); }
+
+.upm-loading { text-align: center; padding: 32px; color: rgba(81,96,112,0.4); }
+.upm-error { text-align: center; padding: 32px; color: rgba(159,64,61,0.6); font-size: 13px; }
+
+/* ---- Inbox Items ---- */
+.inbox-item {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(175,179,172,0.10);
+  background: var(--md-sys-color-surface, #fff);
+  cursor: pointer; transition: background 0.18s, box-shadow 0.18s;
+  position: relative;
+}
+.inbox-item:hover { background: var(--md-sys-color-surface-container-low, #f5f5f5); box-shadow: 0 2px 12px rgba(47,52,46,0.06); }
+.inbox-item-unread { background: rgba(81,96,112,0.05); border-color: rgba(81,96,112,0.15); }
+.inbox-item-unread .inbox-title { font-weight: 800; }
+
+.inbox-avatar {
+  width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 15px; color: #fff;
+}
+.inbox-content { flex: 1; min-width: 0; }
+.inbox-header-row { display: flex; align-items: center; gap: 8px; margin-bottom: 2px; }
+.inbox-from { font-weight: 700; font-size: 12px; color: var(--md-sys-color-primary, #516070); }
+.inbox-time { font-size: 10px; color: rgba(81,96,112,0.4); margin-left: auto; }
+.inbox-unread-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--md-sys-color-primary, #516070); flex-shrink: 0; }
+.inbox-title { font-size: 13px; font-weight: 600; color: var(--md-sys-color-on-surface, #1a1c18); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.inbox-preview { font-size: 11px; color: rgba(81,96,112,0.55); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px; }
+.inbox-actions { display: flex; flex-direction: column; gap: 4px; flex-shrink: 0; }
+.inbox-view-btn, .inbox-delete-btn {
+  width: 28px; height: 28px; border-radius: 8px; border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  background: transparent; color: rgba(81,96,112,0.4);
+  transition: all 0.15s; font-size: 16px;
+}
+.inbox-view-btn:hover { background: rgba(81,96,112,0.1); color: #516070; }
+.inbox-delete-btn:hover { background: rgba(159,64,61,0.1); color: #9f403d; }
+.inbox-loading { text-align: center; padding: 32px; color: rgba(81,96,112,0.35); }
+
+/* ---- Inbox Note Modal ---- */
+.inm-modal { transform: scale(0.95); opacity: 0; transition: transform 0.26s cubic-bezier(.34,1.56,.64,1), opacity 0.22s; }
+#inboxNoteModal.inm-open .inm-modal { transform: scale(1); opacity: 1; }
+
+/* ---- Send to User Panel ---- */
+.stu-autocomplete {
+  position: absolute; left: 0; right: 0;
+  top: calc(100% + 4px);
+  background: var(--md-sys-color-surface-container-low, #f8f8f8);
+  border: 1px solid rgba(175,179,172,0.2);
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(47,52,46,0.12);
+  z-index: 99;
+  overflow: hidden;
+}
+.stu-autocomplete-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; cursor: pointer;
+  transition: background 0.15s;
+}
+.stu-autocomplete-item:hover { background: rgba(81,96,112,0.08); }
+.stu-ac-avatar {
+  width: 30px; height: 30px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 12px; color: #fff; flex-shrink: 0;
+}
+.stu-ac-info { display: flex; flex-direction: column; gap: 1px; }
+.stu-ac-name { font-size: 13px; font-weight: 600; color: var(--md-sys-color-on-surface, #1a1c18); }
+.stu-ac-handle { font-size: 11px; color: rgba(81,96,112,0.55); }
+
+.send-to-user-toggle.active { background: rgba(81,96,112,0.15) !important; color: var(--md-sys-color-primary, #516070) !important; }
+
+/* ---- Avatar Color Swatches ---- */
+.avatar-color-swatch { outline: none; cursor: pointer; }
+.avatar-color-swatch.active {
+  box-shadow: 0 0 0 3px rgba(81,96,112,0.4), 0 0 0 5px var(--md-sys-color-surface, #fff);
+  transform: scale(1.2);
+}
+
+/* ---- Dark mode overrides for user feature components ---- */
+.dark .user-search-card { background: rgba(30,34,30,0.9); border-color: rgba(255,255,255,0.06); }
+.dark .user-search-card:hover { background: rgba(40,46,40,0.95); }
+.dark .usc-follow-btn, .dark .usc-profile-btn { background: rgba(198,214,233,0.07); color: rgba(198,214,233,0.5); }
+.dark .usc-follow-btn:hover, .dark .usc-profile-btn:hover { background: rgba(198,214,233,0.14); color: rgba(198,214,233,0.9); }
+.dark .inbox-item { background: rgba(30,34,30,0.9); border-color: rgba(255,255,255,0.05); }
+.dark .inbox-item:hover { background: rgba(40,46,40,0.95); }
+.dark .inbox-item-unread { background: rgba(81,96,112,0.12); border-color: rgba(198,214,233,0.12); }
+.dark .stu-autocomplete { background: #1e2226; border-color: rgba(255,255,255,0.08); }
+.dark .stu-autocomplete-item:hover { background: rgba(198,214,233,0.07); }
+.dark .upm-modal { background: #1e2226; }
+.dark .inm-modal { background: #1e2226; }
+
+/* ---- Tab panel visibility fix ---- */
+#panelSearch[data-active="false"] { display: none; }
+#panelSearch[data-active="true"] { display: block; }

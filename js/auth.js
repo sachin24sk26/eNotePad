@@ -298,6 +298,10 @@ function initAuth() {
             sessionToken: newToken,
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
           });
+          // Write to public search index
+          if (typeof window.writeUserSearchIndex === 'function') {
+            await window.writeUserSearchIndex(username, { displayName: username });
+          }
           showToast('Welcome to eNotePad! 🎉', 'success');
         } else {
           let loginEmail = email;
@@ -364,6 +368,10 @@ function initAuth() {
             sessionToken: newToken,
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
           });
+          // Write to public search index
+          if (typeof window.writeUserSearchIndex === 'function') {
+            await window.writeUserSearchIndex(finalUsername, { displayName: user.displayName || finalUsername });
+          }
           showToast(`Welcome, ${finalUsername}!`, 'success');
         }
       } catch (error) {
@@ -525,6 +533,15 @@ function initAuth() {
     loadSavedNotes(username);
     recordLoginSession(username);
 
+    // Load inbox badge (real-time listener)
+    if (typeof window.loadInboxBadge === 'function') {
+      window.loadInboxBadge(username);
+    }
+
+    // Show send-to-user button (logged-in only)
+    const stuWrapper = document.getElementById('sendToUserWrapper');
+    if (stuWrapper) stuWrapper.removeAttribute('data-hidden');
+
     // Refresh file manager for the logged-in user
     if (typeof window.fileManagerRefresh === 'function') {
       window.fileManagerRefresh(username);
@@ -533,6 +550,11 @@ function initAuth() {
     // Initialize Admin Features if admin
     if (isAdmin && typeof initAdmin === 'function') {
       initAdmin();
+    }
+
+    // Initialize profile settings panel
+    if (typeof window.initProfileSettings === 'function') {
+      window.initProfileSettings();
     }
   }
 
@@ -721,7 +743,7 @@ function initAuth() {
       const target = tab.dataset.accountTab;
       document.querySelectorAll('.account-tab').forEach(t => t.classList.remove('active'));
       tab.classList.add('active');
-      ['recent', 'saved', 'settings', 'files'].forEach(k => {
+      ['recent', 'saved', 'settings', 'files', 'inbox'].forEach(k => {
         const el = document.getElementById(`section${k.charAt(0).toUpperCase() + k.slice(1)}`);
         if (el) el.setAttribute('data-account-active', k === target ? 'true' : 'false');
       });
@@ -733,6 +755,13 @@ function initAuth() {
         }
         if (username && typeof window.loadLoginHistory === 'function') {
           window.loadLoginHistory(username);
+        }
+      }
+      // Load inbox when Inbox tab opens
+      if (target === 'inbox') {
+        const username = (getEl('userName')?.textContent || '').trim();
+        if (username && typeof window.loadInbox === 'function') {
+          window.loadInbox(username);
         }
       }
     });

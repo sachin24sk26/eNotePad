@@ -175,6 +175,10 @@
           <span class="material-symbols-outlined text-lg">person</span>
           <span>Account</span>
         </button>
+        <button class="sidebar-nav-btn w-full flex items-center gap-3 px-4 py-2.5 text-primary/60 hover:text-primary hover:bg-white/60 transition-all rounded-xl text-sm" data-tab="search" id="sidebarSearch">
+          <span class="material-symbols-outlined text-lg">group_search</span>
+          <span>Find Users</span>
+        </button>
         <button class="w-full flex items-center gap-3 px-4 py-2.5 text-primary/60 hover:text-primary hover:bg-white/60 transition-all rounded-xl text-sm" onclick="window.open('convo_room/index.html', '_blank')">
           <span class="material-symbols-outlined text-lg">forum</span>
           <span>Convo Room</span>
@@ -250,6 +254,9 @@
               <a class="topnav-link text-sm px-3 py-1.5 rounded-lg font-semibold transition-all" href="#" data-tab="share" id="topnavShare">Notes</a>
               <a class="topnav-link text-sm px-3 py-1.5 rounded-lg font-medium transition-all" href="#" data-tab="access" id="topnavAccess">Access</a>
               <a class="topnav-link text-sm px-3 py-1.5 rounded-lg font-medium transition-all" href="#" data-tab="account" id="topnavAccount">Account</a>
+              <a class="topnav-link text-sm px-3 py-1.5 rounded-lg font-medium transition-all" href="#" data-tab="search" id="topnavSearch">
+                <span class="material-symbols-outlined text-base align-middle" style="font-size:16px;">group_search</span>
+              </a>
               <a class="topnav-link text-sm px-3 py-1.5 rounded-lg font-medium transition-all" href="convo_room/index.html" target="_blank">Convo Room</a>
             </nav>
           </div>
@@ -620,6 +627,13 @@
                 </div>
                 <span class="flex-1"></span>
 
+                <!-- Send to @user toggle (logged-in only) -->
+                <div id="sendToUserWrapper" data-hidden="true" class="flex items-center gap-2">
+                  <button class="send-to-user-toggle w-10 h-10 bg-surface-container text-primary/60 rounded-full hover:bg-surface-container-high hover:text-primary transition-all flex items-center justify-center" id="sendToUserToggle" title="Send to @username">
+                    <span class="material-symbols-outlined text-base">alternate_email</span>
+                  </button>
+                </div>
+
                 <!-- Guest: Share button -->
                 <button class="px-6 py-2.5 bg-primary text-on-primary rounded-full font-bold text-sm shadow-md hover:bg-primary-dim transition-all active:scale-[0.98] flex items-center gap-2" id="shareBtn">
                   <span class="material-symbols-outlined text-base">send</span>
@@ -636,6 +650,22 @@
                 </button>
               </div>
 
+            </div>
+
+            <!-- Send to @user panel -->
+            <div id="sendToUserPanel" style="display:none" class="bg-surface rounded-[20px] editorial-shadow editorial-border p-5 mt-0">
+              <div class="flex items-center gap-2 mb-3">
+                <span class="material-symbols-outlined text-primary/50 text-base">alternate_email</span>
+                <span class="text-xs font-bold uppercase tracking-widest text-primary/50">Send directly to a user</span>
+              </div>
+              <div class="relative mb-3">
+                <input type="text" id="sendToUserInput" class="w-full pl-4 pr-4 py-3 bg-surface-container-low rounded-xl border border-outline-variant/20 text-sm text-on-surface placeholder:text-outline-variant/40 focus:outline-none focus:ring-2 focus:ring-primary/20" placeholder="@username" autocomplete="off" />
+                <div id="sendToUserAutocomplete" class="stu-autocomplete" style="display:none"></div>
+              </div>
+              <button id="sendToUserBtn" class="w-full py-3 bg-primary text-on-primary rounded-full font-bold text-sm hover:bg-primary-dim transition-all flex items-center justify-center gap-2">
+                <span class="material-symbols-outlined text-base">send</span>
+                Send Note
+              </button>
             </div>
 
             <!-- Code Display (after share) -->
@@ -881,6 +911,10 @@
                 <button class="account-tab flex-1 py-2.5 px-3 rounded-lg text-primary/60 hover:text-primary transition-all text-sm flex items-center justify-center gap-1.5" data-account-tab="saved">
                   <span class="material-symbols-outlined text-base">bookmark</span> Saved
                 </button>
+                <button class="account-tab relative flex-1 py-2.5 px-3 rounded-lg text-primary/60 hover:text-primary transition-all text-sm flex items-center justify-center gap-1.5" data-account-tab="inbox">
+                  <span class="material-symbols-outlined text-base">mail</span> Inbox
+                  <span class="inbox-badge absolute -top-1 -right-1 text-[9px] font-bold bg-error text-on-error rounded-full px-1.5 min-w-[18px] text-center" style="display:none"></span>
+                </button>
                 <button class="account-tab flex-1 py-2.5 px-3 rounded-lg text-primary/60 hover:text-primary transition-all text-sm flex items-center justify-center gap-1.5" data-account-tab="settings">
                   <span class="material-symbols-outlined text-base">settings</span> Settings
                 </button>
@@ -930,12 +964,53 @@
 
               <!-- Edit Note: handled by #editNoteModalOverlay overlay below -->
 
+              <!-- INBOX Section -->
+              <div class="account-section bg-surface-container-lowest rounded-xl editorial-shadow editorial-border p-6" id="sectionInbox" data-account-active="false">
+                <div class="flex items-center justify-between mb-4">
+                  <h2 class="font-body text-xl italic text-primary">Inbox</h2>
+                  <span class="text-xs text-on-surface-variant/60">Notes sent directly to you</span>
+                </div>
+                <div id="inboxList" class="space-y-2"></div>
+                <p id="inboxEmpty" class="text-center py-10 text-on-surface-variant/50 text-sm" style="display:none">
+                  <span class="material-symbols-outlined text-4xl text-primary/20 block mb-2">mail_outline</span>
+                  No messages yet. Ask someone to send you a note!
+                </p>
+              </div>
+
               <!-- SETTINGS Section -->
               <div class="account-section bg-surface-container-lowest rounded-xl editorial-shadow editorial-border" id="sectionSettings" data-account-active="false">
                 <!-- Account Settings -->
                 <div class="p-6 border-b border-outline-variant/10">
                   <h2 class="font-body text-xl italic text-primary mb-1">Account Settings</h2>
                   <p class="text-sm text-on-surface-variant mb-5">Manage your account preferences.</p>
+
+                  <!-- Profile Card -->
+                  <div class="p-5 bg-surface rounded-xl mb-4 border border-outline-variant/10">
+                    <p class="text-[10px] uppercase tracking-widest font-bold text-primary/40 mb-3">Public Profile</p>
+                    <div class="flex items-center gap-4 mb-4">
+                      <div class="w-14 h-14 rounded-full flex items-center justify-center font-bold text-2xl text-white cursor-pointer flex-shrink-0" id="profileAvatarPreview" style="background:hsl(215,55%,45%);">U</div>
+                      <div class="flex-1 space-y-2">
+                        <input type="text" id="profileDisplayName" maxlength="40" placeholder="Display name (optional)" class="w-full px-3 py-2 bg-surface-container rounded-lg border border-outline-variant/20 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                        <textarea id="profileBio" maxlength="120" rows="2" placeholder="Bio — 120 chars" class="w-full px-3 py-2 bg-surface-container rounded-lg border border-outline-variant/20 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none"></textarea>
+                      </div>
+                    </div>
+                    <div class="mb-3">
+                      <p class="text-[10px] uppercase tracking-widest font-bold text-primary/40 mb-2">Avatar Color</p>
+                      <div class="flex gap-2 flex-wrap">
+                        <button class="avatar-color-swatch w-7 h-7 rounded-full transition-all hover:scale-110" data-color="hsl(215,55%,45%)" style="background:hsl(215,55%,45%)" title="Blue"></button>
+                        <button class="avatar-color-swatch w-7 h-7 rounded-full transition-all hover:scale-110" data-color="hsl(160,50%,38%)" style="background:hsl(160,50%,38%)" title="Green"></button>
+                        <button class="avatar-color-swatch w-7 h-7 rounded-full transition-all hover:scale-110" data-color="hsl(280,45%,48%)" style="background:hsl(280,45%,48%)" title="Purple"></button>
+                        <button class="avatar-color-swatch w-7 h-7 rounded-full transition-all hover:scale-110" data-color="hsl(340,50%,45%)" style="background:hsl(340,50%,45%)" title="Pink"></button>
+                        <button class="avatar-color-swatch w-7 h-7 rounded-full transition-all hover:scale-110" data-color="hsl(30,60%,45%)" style="background:hsl(30,60%,45%)" title="Orange"></button>
+                        <button class="avatar-color-swatch w-7 h-7 rounded-full transition-all hover:scale-110" data-color="hsl(190,55%,40%)" style="background:hsl(190,55%,40%)" title="Teal"></button>
+                        <button class="avatar-color-swatch w-7 h-7 rounded-full transition-all hover:scale-110" data-color="hsl(310,45%,48%)" style="background:hsl(310,45%,48%)" title="Magenta"></button>
+                      </div>
+                    </div>
+                    <button id="saveProfileBtn" class="w-full py-2.5 bg-primary text-on-primary rounded-full font-bold text-sm hover:bg-primary-dim transition-all flex items-center justify-center gap-2">
+                      <span class="material-symbols-outlined text-base">save</span> Save Profile
+                    </button>
+                  </div>
+
                   <div class="space-y-4">
                     <div class="flex items-center justify-between p-4 bg-surface rounded-xl">
                       <div class="flex items-center gap-3">
@@ -1138,6 +1213,41 @@
         </div> <!-- /max-w-2xl -->
       </section>
 
+      <!-- ===== SEARCH PANEL ===== -->
+      <div class="tab-panel" id="panelSearch" data-active="false">
+        <div class="flex flex-col items-center p-4 md:p-8 max-w-2xl mx-auto w-full gap-5">
+
+          <!-- Header -->
+          <div class="text-center">
+            <h1 class="font-body text-3xl italic text-primary">Find People</h1>
+            <p class="text-sm text-on-surface-variant mt-1">Discover and connect by @username handle</p>
+          </div>
+
+          <!-- Search Bar -->
+          <div class="w-full relative">
+            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-primary/40 text-xl">search</span>
+            <input type="text" id="userSearchInput"
+              class="w-full pl-12 pr-5 py-4 bg-surface rounded-2xl editorial-shadow border border-outline-variant/15 text-on-surface text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-outline-variant/40"
+              placeholder="Search by @username or display name…"
+              autocomplete="off" />
+          </div>
+
+          <!-- Filter Chips -->
+          <div class="flex gap-2">
+            <button class="user-filter-btn active px-4 py-1.5 rounded-full text-xs font-semibold bg-primary text-on-primary transition-all" data-filter="all">All Users</button>
+            <button class="user-filter-btn px-4 py-1.5 rounded-full text-xs font-semibold bg-surface-container text-primary/60 hover:bg-surface-container-high transition-all" data-filter="following">Following</button>
+          </div>
+
+          <!-- Search Results -->
+          <div class="w-full space-y-2" id="userSearchResults"></div>
+          <p id="userSearchEmpty" class="text-center py-10 text-on-surface-variant/50 text-sm" style="display:none">
+            <span class="material-symbols-outlined text-4xl text-primary/20 block mb-2">person_search</span>
+            No users found. Try a different search.
+          </p>
+
+        </div>
+      </div><!-- /panelSearch -->
+
       <!-- ===== ADMIN PANEL (v3.0) ===== -->
       <div class="tab-panel flex justify-center p-6 md:p-12" id="panelAdmin" data-active="false">
         <div class="w-full max-w-6xl space-y-8">
@@ -1339,6 +1449,10 @@
     <button class="mobile-nav-btn flex flex-col items-center gap-1 text-primary/40" data-tab="account">
       <span class="material-symbols-outlined">person</span>
       <span class="text-[10px] font-bold uppercase tracking-tighter">Account</span>
+    </button>
+    <button class="mobile-nav-btn relative flex flex-col items-center gap-1 text-primary/40" data-tab="search">
+      <span class="material-symbols-outlined">group_search</span>
+      <span class="text-[10px] font-bold uppercase tracking-tighter">People</span>
     </button>
     <button class="flex flex-col items-center gap-1 text-primary/40" onclick="window.open('convo_room/index.html', '_blank')">
       <span class="material-symbols-outlined">forum</span>
@@ -1625,6 +1739,43 @@
     </div>
   </div>
 
+  <!-- ========== USER PROFILE MODAL ========== -->
+  <div id="userProfileModal" class="fixed inset-0 z-[9980] flex items-center justify-center p-4" style="display:none">
+    <div id="userProfileModalBackdrop" class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+    <div class="relative w-full max-w-sm bg-surface-container-lowest rounded-3xl editorial-shadow editorial-border overflow-hidden upm-modal">
+      <button id="userProfileModalClose" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-container transition-all text-on-surface-variant z-10">
+        <span class="material-symbols-outlined text-lg">close</span>
+      </button>
+      <div id="userProfileBody" class="p-6">
+        <div class="upm-loading text-center py-10"><span class="material-symbols-outlined text-3xl text-primary/30" style="animation:spin 1s linear infinite">progress_activity</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== INBOX NOTE MODAL ========== -->
+  <div id="inboxNoteModal" class="fixed inset-0 z-[9981] flex items-center justify-center p-4" style="display:none">
+    <div id="inboxNoteModalBackdrop" class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+    <div class="relative w-full max-w-lg bg-surface-container-lowest rounded-3xl editorial-shadow editorial-border flex flex-col overflow-hidden inm-modal" style="max-height:88vh">
+      <div class="flex items-center justify-between px-6 pt-6 pb-4 flex-shrink-0" style="border-bottom:1px solid rgba(175,179,172,0.12)">
+        <div>
+          <h3 class="text-base font-bold text-on-surface" id="inboxNoteModalTitle">Untitled Note</h3>
+          <p class="text-xs text-on-surface-variant mt-0.5" id="inboxNoteModalFrom"></p>
+        </div>
+        <button id="inboxNoteModalClose" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-container transition-all">
+          <span class="material-symbols-outlined text-lg">close</span>
+        </button>
+      </div>
+      <div class="flex-1 overflow-y-auto px-6 py-5">
+        <div id="inboxNoteModalBody" class="prose text-sm text-on-surface leading-relaxed"></div>
+      </div>
+      <div class="px-6 py-4 flex gap-3 flex-shrink-0" style="border-top:1px solid rgba(175,179,172,0.12)">
+        <button id="inboxNoteModalReply" class="flex-1 py-2.5 rounded-full text-sm font-semibold bg-primary text-on-primary hover:bg-primary-dim transition-all flex items-center justify-center gap-2">
+          <span class="material-symbols-outlined text-base">reply</span> Reply
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- ========== Firebase SDK (v9 Compat) ========== -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
@@ -1640,6 +1791,7 @@
   <script src="js/access.js?v=11"></script>
   <script src="js/auth.js?v=11"></script>
   <script src="js/filemanager.js?v=11"></script>
+  <script src="js/users.js?v=1"></script>
   <script src="js/app.js?v=11"></script>
 </body>
 </html>

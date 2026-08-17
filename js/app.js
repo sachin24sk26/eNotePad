@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initAccess();
   initAuth();
   initFileManager();
+  initUsers();
   initPeriodicCleanup();
   initBroadcastListener();
   initFeedback();
@@ -180,7 +181,8 @@ function initNavigation() {
     share: document.getElementById('panelShare'),
     access: document.getElementById('panelAccess'),
     account: document.getElementById('panelAccount'),
-    admin: document.getElementById('panelAdmin')
+    admin: document.getElementById('panelAdmin'),
+    search: document.getElementById('panelSearch')
   };
 
   const sidebarBtns = document.querySelectorAll('.sidebar-nav-btn');
