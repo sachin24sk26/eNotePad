@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initPeriodicCleanup();
   initBroadcastListener();
   initFeedback();
+  initGuestNudgeSystem();
   console.log('✨ eNotePad — Digital Curator initialized');
 });
 
@@ -137,10 +138,31 @@ function initSidebar() {
 
   // Sidebar user profile click → navigate to account tab
   const sidebarUserInfo = document.getElementById('sidebarUserInfo');
-  if (sidebarUserInfo) {
-    sidebarUserInfo.addEventListener('click', () => {
+  const sidebarLoggedOutBtn = document.getElementById('sidebarLoggedOutBtn');
+
+  const onProfileClick = () => {
+    if (typeof window.switchToTab === 'function') {
+      window.switchToTab('account');
+      setTimeout(() => {
+        const settingsTab = document.querySelector('.account-tab[data-account-tab="settings"]');
+        if (settingsTab) settingsTab.click();
+      }, 50);
+    }
+  };
+
+  if (sidebarUserInfo) sidebarUserInfo.addEventListener('click', onProfileClick);
+  if (sidebarLoggedOutBtn) sidebarLoggedOutBtn.addEventListener('click', onProfileClick);
+
+  // Top header left inbox button click → navigate to account tab and open inbox sub-tab
+  const topNavInboxBtn = document.getElementById('topNavInboxBtn');
+  if (topNavInboxBtn) {
+    topNavInboxBtn.addEventListener('click', () => {
       if (typeof window.switchToTab === 'function') {
         window.switchToTab('account');
+        setTimeout(() => {
+          const inboxTab = document.querySelector('.account-tab[data-account-tab="inbox"]');
+          if (inboxTab) inboxTab.click();
+        }, 50);
       }
     });
   }
@@ -423,3 +445,116 @@ function showEl(id) {
     }, 2500);
   });
 })();
+
+/**
+ * Guest Nudge & Notification System
+ * Periodically displays dynamic alerts to guest users encouraging sign up for productivity features.
+ */
+function initGuestNudgeSystem() {
+  const banner = document.getElementById('guestNudgeBanner');
+  const iconEl = document.getElementById('guestNudgeIcon');
+  const titleEl = document.getElementById('guestNudgeTitle');
+  const textEl = document.getElementById('guestNudgeText');
+  const btnLabelEl = document.getElementById('guestNudgeBtnLabel');
+  const closeBtn = document.getElementById('guestNudgeClose');
+  const actionBtn = document.getElementById('guestNudgeActionBtn');
+
+  if (!banner || !actionBtn) return;
+
+  const messages = [
+    {
+      icon: 'folder_open',
+      title: 'Organize into Custom Folders 📁',
+      text: 'Sign up for free to save your notes permanently and organize them into custom folders!',
+      btnText: 'Create Free Account'
+    },
+    {
+      icon: 'send',
+      title: 'Send Direct Messages to Anyone 📬',
+      text: 'Create an account to send direct notes and files to other members instantly!',
+      btnText: 'Sign Up Free'
+    },
+    {
+      icon: 'cloud_sync',
+      title: 'Never Lose Your Notes ☁️',
+      text: 'Guest notes auto-erase after 20 minutes. Register a free account to keep your notes forever!',
+      btnText: 'Save Notes Forever'
+    },
+    {
+      icon: 'workspace_premium',
+      title: 'Unlock Badges & Hashtags ✨',
+      text: 'Build your public profile, add custom hashtags, and show off your developer & creator badges!',
+      btnText: 'Claim Your Profile'
+    },
+    {
+      icon: 'forum',
+      title: 'Join Live Convo Rooms 💬',
+      text: 'Collaborate with friends in real-time encrypted conversation rooms!',
+      btnText: 'Join Rooms Free'
+    }
+  ];
+
+  let currentMsgIndex = 0;
+  let isDismissed = false;
+
+  function showNudge(force = false) {
+    const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+    if (user && !force) {
+      hideNudge();
+      return;
+    }
+    if (isDismissed && !force) return;
+
+    const msg = messages[currentMsgIndex];
+    if (iconEl) iconEl.textContent = msg.icon;
+    if (titleEl) titleEl.textContent = msg.title;
+    if (textEl) textEl.textContent = msg.text;
+    if (btnLabelEl) btnLabelEl.textContent = msg.btnText;
+
+    banner.style.display = 'block';
+    setTimeout(() => banner.classList.add('gnb-visible'), 20);
+
+    currentMsgIndex = (currentMsgIndex + 1) % messages.length;
+  }
+
+  function hideNudge() {
+    banner.classList.remove('gnb-visible');
+    setTimeout(() => {
+      if (!banner.classList.contains('gnb-visible')) {
+        banner.style.display = 'none';
+      }
+    }, 320);
+  }
+
+  if (closeBtn) {
+    closeBtn.addEventListener('click', () => {
+      hideNudge();
+      isDismissed = true;
+      setTimeout(() => { isDismissed = false; }, 30000);
+    });
+  }
+
+  actionBtn.addEventListener('click', () => {
+    hideNudge();
+    if (typeof window.switchToTab === 'function') {
+      window.switchToTab('account');
+      setTimeout(() => {
+        const signupTabBtn = document.querySelector('.auth-tab-btn[data-auth-tab="signup"]');
+        if (signupTabBtn) signupTabBtn.click();
+      }, 50);
+    }
+  });
+
+  // Initial nudge prompt after 1.5 seconds for guest users
+  setTimeout(showNudge, 1500);
+
+  // Rotate nudge message every 18 seconds
+  setInterval(showNudge, 18000);
+
+  window.hideGuestNudge = hideNudge;
+  window.triggerGuestNudge = (index) => {
+    if (typeof index === 'number') currentMsgIndex = index % messages.length;
+    isDismissed = false;
+    showNudge(true);
+  };
+}

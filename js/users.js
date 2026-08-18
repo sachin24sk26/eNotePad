@@ -27,8 +27,37 @@ function initUserSearch() {
   async function fetchAllUsers() {
     if (cachedUsers) return cachedUsers;
     try {
-      const snap = await db.collection('userSearch').where('isPublic', '==', true).limit(500).get();
-      cachedUsers = snap.docs.map(d => d.data());
+      const snap = await db.collection('userSearch').where('isPublic', '==', true).limit(500).get().catch(() => ({ docs: [] }));
+      let users = snap.docs.map(d => d.data());
+
+      // Fallback merge from main users collection to ensure no registered user is missing
+      const usersSnap = await db.collection('users').limit(500).get().catch(() => ({ docs: [] }));
+      const userMap = new Map();
+
+      users.forEach(u => { if (u && u.username) userMap.set(u.username, u); });
+
+      usersSnap.docs.forEach(d => {
+        const data = d.data();
+        const uname = d.id;
+        if (!userMap.has(uname)) {
+          userMap.set(uname, {
+            username: uname,
+            displayName: data.displayName || uname,
+            bio: data.bio || '',
+            avatarColor: data.avatarColor || generateAvatarColor(uname),
+            tags: data.tags || [],
+            isPublic: true
+          });
+        } else {
+          const existing = userMap.get(uname);
+          if (!existing.displayName) existing.displayName = data.displayName || uname;
+          if (!existing.bio) existing.bio = data.bio || '';
+          if (!existing.avatarColor) existing.avatarColor = data.avatarColor || generateAvatarColor(uname);
+          if (!existing.tags || existing.tags.length === 0) existing.tags = data.tags || [];
+        }
+      });
+
+      cachedUsers = Array.from(userMap.values());
       return cachedUsers;
     } catch (e) {
       console.warn('userSearch fetch error:', e);
@@ -39,18 +68,32 @@ function initUserSearch() {
   const doSearch = debounce(async (query) => {
     const q = (query || '').trim().toLowerCase().replace(/^@/, '');
     const currentUser = getCurrentUser();
+    const searchPrompt = document.getElementById('userSearchPrompt');
 
-    searchResults.innerHTML = `<div class="user-search-loading"><span class="material-symbols-outlined" style="animation:spin 1s linear infinite">progress_activity</span></div>`;
     if (searchEmpty) searchEmpty.style.display = 'none';
+
+    // If search query is empty and filter is 'all', show initial search prompt instead of listing all users directly
+    if (q.length === 0 && currentFilter === 'all') {
+      searchResults.innerHTML = '';
+      if (searchPrompt) searchPrompt.style.display = 'block';
+      return;
+    }
+
+    if (searchPrompt) searchPrompt.style.display = 'none';
+    searchResults.innerHTML = `<div class="user-search-loading"><span class="material-symbols-outlined" style="animation:spin 1s linear infinite">progress_activity</span></div>`;
 
     const all = await fetchAllUsers();
     let filtered = all;
 
     if (q.length > 0) {
-      filtered = all.filter(u =>
-        (u.username || '').toLowerCase().startsWith(q) ||
-        (u.displayName || '').toLowerCase().includes(q)
-      );
+      filtered = all.filter(u => {
+        const uName = (u.username || '').toLowerCase();
+        const dName = (u.displayName || '').toLowerCase();
+        const bio = (u.bio || '').toLowerCase();
+        const tagsStr = Array.isArray(u.tags) ? u.tags.join(' ').toLowerCase() : (u.tags || '').toLowerCase();
+
+        return uName.includes(q) || dName.includes(q) || bio.includes(q) || tagsStr.includes(q);
+      });
     }
 
     if (currentFilter === 'following' && currentUser) {
@@ -58,10 +101,6 @@ function initUserSearch() {
         .collection('following').get().catch(() => ({ docs: [] }));
       const followingIds = new Set(followingSnap.docs.map(d => d.id));
       filtered = filtered.filter(u => followingIds.has(u.username));
-    }
-
-    if (currentUser) {
-      filtered = filtered.filter(u => u.username !== currentUser.username);
     }
 
     searchResults.innerHTML = '';
@@ -72,7 +111,7 @@ function initUserSearch() {
     }
     if (searchEmpty) searchEmpty.style.display = 'none';
 
-    filtered.slice(0, 30).forEach(user => {
+    filtered.slice(0, 40).forEach(user => {
       const card = renderUserCard(user, currentUser);
       searchResults.appendChild(card);
     });
@@ -101,16 +140,20 @@ function renderUserCard(user, currentUser) {
   const initial = (user.displayName || user.username || '?').charAt(0).toUpperCase();
   const color = user.avatarColor || generateAvatarColor(user.username);
   const isLoggedIn = !!currentUser;
+  const isSelf = currentUser && currentUser.username === user.username;
 
   card.innerHTML = `
     <div class="usc-avatar" style="background:${color};">${initial}</div>
     <div class="usc-info">
-      <div class="usc-name">${escapeHTMLStr(user.displayName || user.username)}</div>
+      <div class="usc-name flex items-center gap-1.5">
+        <span>${escapeHTMLStr(user.displayName || user.username)}</span>
+        ${isSelf ? '<span class="usc-self-badge">You</span>' : ''}
+      </div>
       <div class="usc-handle">@${escapeHTMLStr(user.username)}</div>
       ${user.bio ? `<div class="usc-bio">${escapeHTMLStr(user.bio)}</div>` : ''}
     </div>
     <div class="usc-actions">
-      ${isLoggedIn ? `<button class="usc-follow-btn" data-username="${escapeHTMLStr(user.username)}">
+      ${isLoggedIn && !isSelf ? `<button class="usc-follow-btn" data-username="${escapeHTMLStr(user.username)}">
         <span class="material-symbols-outlined">person_add</span>
       </button>` : ''}
       <button class="usc-profile-btn" data-username="${escapeHTMLStr(user.username)}" title="View Profile">
@@ -119,7 +162,7 @@ function renderUserCard(user, currentUser) {
     </div>
   `;
 
-  if (isLoggedIn) {
+  if (isLoggedIn && !isSelf) {
     const followBtn = card.querySelector('.usc-follow-btn');
     updateFollowButtonState(followBtn, currentUser.username, user.username);
     followBtn.addEventListener('click', async (e) => {
@@ -187,8 +230,8 @@ window.openUserProfile = async function openUserProfile(username) {
     const displayName = data.displayName || searchData.displayName || username;
     const joinDate = data.createdAt ? data.createdAt.toDate().toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : '—';
 
-    const [histSnap, savedSnap] = await Promise.all([
-      db.collection('users').doc(username).collection('history').get().catch(() => ({ size: 0 })),
+    const [followingSnap, savedSnap] = await Promise.all([
+      db.collection('users').doc(username).collection('following').get().catch(() => ({ size: 0 })),
       db.collection('users').doc(username).collection('savedNotes').get().catch(() => ({ size: 0 }))
     ]);
 
@@ -196,42 +239,145 @@ window.openUserProfile = async function openUserProfile(username) {
     const isOwnProfile = currentUser && currentUser.username === username;
     const isLoggedIn = !!currentUser;
 
+    let tags = [];
+    if (data.tags && Array.isArray(data.tags) && data.tags.length > 0) {
+      tags = data.tags;
+    } else if (typeof data.tags === 'string' && data.tags.trim().length > 0) {
+      tags = data.tags.split(/[\s,]+/).filter(Boolean);
+    } else {
+      if (username.toLowerCase().includes('sachin') || bio.toLowerCase().includes('developer')) {
+        tags = ['#developer', '#founder', '#enotepad', '#tech', '#creator'];
+      } else {
+        tags = ['#curator', '#enotepad', '#digitalNotes', '#creative', '#notes'];
+      }
+    }
+
+    let roleBadge = '';
+    if (username.toLowerCase().includes('sachin') || bio.toLowerCase().includes('developer')) {
+      roleBadge = `<span class="upm-role-badge dev"><span class="material-symbols-outlined text-xs">code</span> Developer & Founder</span>`;
+    } else if ((data.followersCount || 0) > 5) {
+      roleBadge = `<span class="upm-role-badge pro"><span class="material-symbols-outlined text-xs">verified</span> Top Curator</span>`;
+    } else {
+      roleBadge = `<span class="upm-role-badge member"><span class="material-symbols-outlined text-xs">workspace_premium</span> Member</span>`;
+    }
+
     if (body) {
       body.innerHTML = `
-        <div class="upm-header">
-          <div class="upm-avatar" style="background:${color};">${initial}</div>
-          <div class="upm-header-info">
-            <div class="upm-display-name">${escapeHTMLStr(displayName)}</div>
-            <div class="upm-username">@${escapeHTMLStr(username)}</div>
-            ${bio ? `<div class="upm-bio">${escapeHTMLStr(bio)}</div>` : ''}
-            <div class="upm-join">Joined ${joinDate}</div>
+        <div class="upm-card-container">
+          <div class="upm-banner" style="background: linear-gradient(135deg, ${color} 0%, #1e2230 100%);">
+            <div class="upm-banner-pattern"></div>
           </div>
-          ${isLoggedIn && !isOwnProfile ? `
-          <button class="upm-follow-btn" id="upmFollowBtn" data-username="${escapeHTMLStr(username)}">
-            <span class="material-symbols-outlined">person_add</span>
-            <span>Follow</span>
-          </button>` : ''}
-          ${isOwnProfile ? `
-          <button class="upm-edit-profile-btn" id="upmEditProfileBtn">
-            <span class="material-symbols-outlined">edit</span>
-            <span>Edit Profile</span>
-          </button>` : ''}
+          <div class="upm-body-content">
+            <div class="upm-avatar-row">
+              <div class="upm-avatar-wrap">
+                <div class="upm-avatar" style="background:${color};">${initial}</div>
+                <span class="upm-status-dot" title="Active User"></span>
+              </div>
+              <div class="upm-header-actions">
+                ${isLoggedIn && !isOwnProfile ? `
+                <button class="upm-follow-btn" id="upmFollowBtn" data-username="${escapeHTMLStr(username)}">
+                  <span class="material-symbols-outlined text-sm">person_add</span>
+                  <span>Follow</span>
+                </button>` : ''}
+                ${isOwnProfile ? `
+                <button class="upm-edit-profile-btn" id="upmEditProfileBtn">
+                  <span class="material-symbols-outlined text-sm">edit</span>
+                  <span>Edit Profile</span>
+                </button>` : ''}
+                <button class="upm-share-btn" id="upmShareProfileBtn" title="Share Profile">
+                  <span class="material-symbols-outlined text-sm">share</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="upm-user-identity">
+              <div class="flex items-center gap-2 flex-wrap mb-1">
+                <h2 class="upm-display-name">${escapeHTMLStr(displayName)}</h2>
+                ${roleBadge}
+              </div>
+              <div class="upm-username">@${escapeHTMLStr(username)}</div>
+              <div class="upm-join"><span class="material-symbols-outlined text-xs align-middle mr-1">calendar_month</span>Joined ${joinDate}</div>
+            </div>
+
+            ${bio ? `
+            <div class="upm-bio-box">
+              <span class="material-symbols-outlined upm-bio-icon">format_quote</span>
+              <p class="upm-bio-text">${escapeHTMLStr(bio)}</p>
+            </div>` : ''}
+
+            <div class="upm-tags-section">
+              <div class="upm-section-label">INTERESTS & HASHTAGS</div>
+              <div class="upm-tags-list">
+                ${tags.map(t => {
+                  const tagStr = t.startsWith('#') ? t : `#${t}`;
+                  return `<span class="upm-tag" data-tag="${escapeHTMLStr(tagStr)}">${escapeHTMLStr(tagStr)}</span>`;
+                }).join('')}
+              </div>
+            </div>
+
+            <div class="upm-stats">
+              <div class="upm-stat">
+                <span class="material-symbols-outlined upm-stat-icon">person_add</span>
+                <div class="upm-stat-value" id="upmFollowingCount">${data.followingCount || followingSnap.size || 0}</div>
+                <div class="upm-stat-label">Following</div>
+              </div>
+              <div class="upm-stat">
+                <span class="material-symbols-outlined upm-stat-icon">bookmark</span>
+                <div class="upm-stat-value">${savedSnap.size}</div>
+                <div class="upm-stat-label">Saved</div>
+              </div>
+              <div class="upm-stat">
+                <span class="material-symbols-outlined upm-stat-icon">group</span>
+                <div class="upm-stat-value" id="upmFollowersCount">${data.followersCount || 0}</div>
+                <div class="upm-stat-label">Followers</div>
+              </div>
+            </div>
+
+            ${isLoggedIn && !isOwnProfile ? `
+            <div class="upm-actions">
+              <button class="upm-action-btn upm-send-btn" id="upmSendNoteBtn">
+                <span class="material-symbols-outlined">send</span><span>Send Note</span>
+              </button>
+              <button class="upm-action-btn upm-invite-btn" id="upmInviteRoomBtn">
+                <span class="material-symbols-outlined">forum</span><span>Invite to Room</span>
+              </button>
+            </div>` : ''}
+          </div>
         </div>
-        <div class="upm-stats">
-          <div class="upm-stat"><div class="upm-stat-value">${histSnap.size}</div><div class="upm-stat-label">Shared</div></div>
-          <div class="upm-stat"><div class="upm-stat-value">${savedSnap.size}</div><div class="upm-stat-label">Saved</div></div>
-          <div class="upm-stat"><div class="upm-stat-value" id="upmFollowersCount">${data.followersCount || 0}</div><div class="upm-stat-label">Followers</div></div>
-        </div>
-        ${isLoggedIn && !isOwnProfile ? `
-        <div class="upm-actions">
-          <button class="upm-action-btn upm-send-btn" id="upmSendNoteBtn">
-            <span class="material-symbols-outlined">send</span><span>Send a Note</span>
-          </button>
-          <button class="upm-action-btn upm-invite-btn" id="upmInviteRoomBtn">
-            <span class="material-symbols-outlined">forum</span><span>Invite to Room</span>
-          </button>
-        </div>` : ''}
       `;
+
+      const shareBtn = body.querySelector('#upmShareProfileBtn');
+      if (shareBtn) {
+        shareBtn.addEventListener('click', async () => {
+          const origin = (window.location.origin && window.location.origin !== 'null') ? window.location.origin : window.location.href.split('index.html')[0];
+          const profileUrl = `${origin}/index.html?user=${encodeURIComponent(username)}`;
+          const shareData = {
+            title: `${displayName} (@${username}) on eNotePad`,
+            text: `Check out @${username}'s profile on eNotePad!`,
+            url: profileUrl
+          };
+
+          // Web Share API on file:// protocol crashes Chromium with RESULT_CODE_KILLED_BAD_MESSAGE
+          const isHttp = window.location.protocol.startsWith('http');
+          let shared = false;
+
+          if (isHttp && typeof navigator.share === 'function') {
+            try {
+              if (!navigator.canShare || navigator.canShare(shareData)) {
+                await navigator.share(shareData);
+                shared = true;
+              }
+            } catch (err) {
+              if (err.name === 'AbortError') return;
+            }
+          }
+
+          if (!shared) {
+            const ok = await copyToClipboard(profileUrl);
+            if (ok) showToast('Profile link copied! 🔗', 'success');
+          }
+        });
+      }
 
       const followBtn = body.querySelector('#upmFollowBtn');
       if (followBtn && currentUser) {
@@ -528,6 +674,7 @@ function createInboxItem(data, docId, username) {
     </div>
     <div class="inbox-actions">
       <button class="inbox-view-btn" title="View"><span class="material-symbols-outlined">open_in_full</span></button>
+      <button class="inbox-save-btn" title="Save to Folder"><span class="material-symbols-outlined">folder_open</span></button>
       <button class="inbox-delete-btn" title="Delete"><span class="material-symbols-outlined">delete</span></button>
     </div>`;
 
@@ -545,6 +692,14 @@ function createInboxItem(data, docId, username) {
     e.stopPropagation();
     openInboxNoteModal(data, docId, username);
   });
+
+  const saveBtn = item.querySelector('.inbox-save-btn');
+  if (saveBtn) {
+    saveBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      saveInboxNoteToFolder(data);
+    });
+  }
 
   item.querySelector('.inbox-delete-btn').addEventListener('click', async (e) => {
     e.stopPropagation();
@@ -566,6 +721,37 @@ function createInboxItem(data, docId, username) {
   return item;
 }
 
+function saveInboxNoteToFolder(noteData) {
+  if (typeof window.openSaveFolderModal === 'function') {
+    window.openSaveFolderModal({
+      noteType: 'text',
+      title: noteData.title || `Note from @${noteData.from || 'user'}`,
+      onConfirm: async (folderId, folderName) => {
+        try {
+          const content = noteData.content || noteData.plainText || '';
+          if (typeof window.saveNoteToFileManager === 'function') {
+            await window.saveNoteToFileManager({
+              title: noteData.title || `Note from @${noteData.from || 'user'}`,
+              category: 'inbox',
+              noteType: 'text',
+              content: content
+            }, folderId);
+            const dest = folderName ? `"${folderName}"` : 'My Files';
+            showToast(`Note saved to ${dest}! 📁`, 'success');
+          } else {
+            showToast('File manager unavailable', 'error');
+          }
+        } catch (err) {
+          console.error('saveInboxNoteToFolder error:', err);
+          showToast('Failed to save note to folder', 'error');
+        }
+      }
+    });
+  } else {
+    showToast('Save folder dialog unavailable', 'error');
+  }
+}
+
 function openInboxNoteModal(data, docId, username) {
   const modal = document.getElementById('inboxNoteModal');
   if (!modal) return;
@@ -582,6 +768,14 @@ function openInboxNoteModal(data, docId, username) {
     } else {
       bodyEl.textContent = content;
     }
+  }
+
+  const saveBtn = document.getElementById('inboxNoteModalSave');
+  if (saveBtn) {
+    saveBtn.onclick = () => {
+      closeInboxNoteModal();
+      saveInboxNoteToFolder(data);
+    };
   }
 
   const replyBtn = document.getElementById('inboxNoteModalReply');
@@ -630,27 +824,33 @@ function updateInboxBadge(count) {
 
 window.writeUserSearchIndex = async function writeUserSearchIndex(username, fields = {}) {
   try {
-    await db.collection('userSearch').doc(username).set({
+    const payload = {
       username,
       displayName: fields.displayName || username,
       bio: fields.bio || '',
       avatarColor: fields.avatarColor || generateAvatarColor(username),
       isPublic: fields.isPublic !== false,
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    }, { merge: true });
+    };
+    if (fields.tags) payload.tags = fields.tags;
+
+    await db.collection('userSearch').doc(username).set(payload, { merge: true });
   } catch (e) {
     console.warn('writeUserSearchIndex error:', e);
   }
 };
 
 // ============================================================
-// SECTION 8 — PROFILE SETTINGS (display name, bio, avatar)
+// SECTION 8 — PROFILE SETTINGS (display name, bio, avatar, tags)
 // ============================================================
+
+let isProfileSettingsInitialized = false;
 
 window.initProfileSettings = function initProfileSettings() {
   const saveProfileBtn = document.getElementById('saveProfileBtn');
   const displayNameInput = document.getElementById('profileDisplayName');
   const bioInput = document.getElementById('profileBio');
+  const tagsInput = document.getElementById('profileTags');
   const avatarColorBtns = document.querySelectorAll('.avatar-color-swatch');
   const previewAvatar = document.getElementById('profileAvatarPreview');
 
@@ -664,13 +864,25 @@ window.initProfileSettings = function initProfileSettings() {
     const d = doc.data();
     if (displayNameInput) displayNameInput.value = d.displayName || '';
     if (bioInput) bioInput.value = d.bio || '';
+    if (tagsInput) {
+      if (Array.isArray(d.tags) && d.tags.length > 0) {
+        tagsInput.value = d.tags.join(' ');
+      } else if (typeof d.tags === 'string') {
+        tagsInput.value = d.tags;
+      } else {
+        tagsInput.value = '';
+      }
+    }
     selectedColor = d.avatarColor || generateAvatarColor(currentUser.username);
     if (previewAvatar) {
       previewAvatar.style.background = selectedColor;
       previewAvatar.textContent = (d.displayName || currentUser.username).charAt(0).toUpperCase();
     }
     avatarColorBtns.forEach(btn => btn.classList.toggle('active', btn.dataset.color === selectedColor));
-  }).catch(() => {});
+  }).catch(e => console.warn('initProfileSettings load error:', e));
+
+  if (isProfileSettingsInitialized) return;
+  isProfileSettingsInitialized = true;
 
   avatarColorBtns.forEach(btn => {
     btn.addEventListener('click', () => {
@@ -690,20 +902,37 @@ window.initProfileSettings = function initProfileSettings() {
 
   if (saveProfileBtn) {
     saveProfileBtn.addEventListener('click', async () => {
+      const activeUser = getCurrentUser();
+      if (!activeUser) {
+        showToast('Please sign in to save profile', 'error');
+        return;
+      }
+
       const displayName = displayNameInput ? displayNameInput.value.trim() : '';
       const bio = bioInput ? bioInput.value.trim() : '';
-      const avatarColor = selectedColor || generateAvatarColor(currentUser.username);
+      const tagsRaw = tagsInput ? tagsInput.value.trim() : '';
+      const tags = tagsRaw.split(/[\s,]+/).filter(Boolean).map(t => t.startsWith('#') ? t : `#${t}`);
+      const avatarColor = selectedColor || generateAvatarColor(activeUser.username);
 
       saveProfileBtn.classList.add('btn-loading');
       saveProfileBtn.disabled = true;
 
       try {
-        await db.collection('users').doc(currentUser.username).update({ displayName, bio, avatarColor });
-        await window.writeUserSearchIndex(currentUser.username, { displayName, bio, avatarColor });
+        await db.collection('users').doc(activeUser.username).set({
+          displayName,
+          bio,
+          tags,
+          avatarColor,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+
+        await window.writeUserSearchIndex(activeUser.username, { displayName, bio, tags, avatarColor });
+
+        if (tagsInput) tagsInput.value = tags.join(' ');
 
         const avatarEl = document.getElementById('userAvatar');
         const sidebarAvatarEl = document.getElementById('sidebarUserAvatar');
-        const initial = (displayName || currentUser.username).charAt(0).toUpperCase();
+        const initial = (displayName || activeUser.username).charAt(0).toUpperCase();
         if (avatarEl) { avatarEl.textContent = initial; avatarEl.style.background = avatarColor; }
         if (sidebarAvatarEl) { sidebarAvatarEl.textContent = initial; sidebarAvatarEl.style.background = avatarColor; }
 

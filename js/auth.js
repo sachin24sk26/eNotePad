@@ -505,6 +505,12 @@ function initAuth() {
     if (sidebarName) sidebarName.textContent = username;
     if (sidebarInfo) sidebarInfo.removeAttribute('data-hidden');
     if (sidebarLinks) sidebarLinks.removeAttribute('data-hidden');
+    const sidebarLoggedOutBtn = document.getElementById('sidebarLoggedOutBtn');
+    if (sidebarLoggedOutBtn) sidebarLoggedOutBtn.setAttribute('data-hidden', 'true');
+
+    if (typeof window.hideGuestNudge === 'function') {
+      window.hideGuestNudge();
+    }
 
     // Update Profile Card Badge
     const roleContainer = getEl('userRoleContainer');
@@ -571,6 +577,8 @@ function initAuth() {
 
     if (sidebarInfo) sidebarInfo.setAttribute('data-hidden', 'true');
     if (sidebarLinks) sidebarLinks.setAttribute('data-hidden', 'true');
+    const sidebarLoggedOutBtn = document.getElementById('sidebarLoggedOutBtn');
+    if (sidebarLoggedOutBtn) sidebarLoggedOutBtn.removeAttribute('data-hidden');
     if (sidebarAdmin) {
       sidebarAdmin.style.display = 'none';
     }
@@ -605,16 +613,17 @@ function initAuth() {
         }
       }
 
-      const historySnap = await db.collection('users').doc(username).collection('history').get();
-      const savedSnap = await db.collection('users').doc(username).collection('savedNotes').get();
+      const followingSnap = await db.collection('users').doc(username).collection('following').get().catch(() => ({ size: 0 }));
+      const savedSnap = await db.collection('users').doc(username).collection('savedNotes').get().catch(() => ({ size: 0 }));
 
-      const statShared = document.getElementById('statShared');
+      const statFollowing = document.getElementById('statFollowing');
       const statSaved = document.getElementById('statSaved');
       const statTotal = document.getElementById('statTotal');
 
-      if (statShared) statShared.textContent = historySnap.size;
+      const followingCount = userData.followingCount || followingSnap.size || 0;
+      if (statFollowing) statFollowing.textContent = followingCount;
       if (statSaved) statSaved.textContent = savedSnap.size;
-      if (statTotal) statTotal.textContent = historySnap.size + savedSnap.size;
+      if (statTotal) statTotal.textContent = followingCount + savedSnap.size + (userData.followersCount || 0);
 
       const sidebarBadge = document.getElementById('sidebarSavedCount');
       if (sidebarBadge) sidebarBadge.textContent = savedSnap.size > 0 ? savedSnap.size : '';
