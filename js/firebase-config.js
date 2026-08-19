@@ -1,6 +1,7 @@
 // ============================================================
 // Firebase Configuration — eNotePad
 // Using Firebase compat SDK loaded via CDN in index.html
+// Optimized: persistence, connection monitoring, latency tracking
 // ============================================================
 
 const firebaseConfig = {
@@ -13,6 +14,15 @@ const firebaseConfig = {
 };
 
 let db;
+
+// Connection state tracker — used by admin panel for real health metrics
+window.firebaseConnectionState = {
+  connected: false,
+  lastPingMs: null,
+  lastChecked: null,
+  persistence: false
+};
+
 if (typeof firebase === 'undefined') {
   console.error('🔥 Firebase SDK not loaded. Check your internet connection or ad blocker.');
   alert('Firebase SDK failed to load. Please check your connection.');
@@ -21,23 +31,63 @@ if (typeof firebase === 'undefined') {
     // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
 
-    // Export Firestore, Storage, and Auth references for use in other modules
+    // Export Firestore reference
     db = firebase.firestore();
-    window.db = db; // Ensure global accessibility
-    // const storage = firebase.storage();
-    // window.storage = storage;
+    window.db = db;
+
+    // Enable offline persistence for caching & reduced reads
+    db.enablePersistence({ synchronizeTabs: true })
+      .then(() => {
+        console.log('🔥 Firestore persistence enabled (offline cache active)');
+        window.firebaseConnectionState.persistence = true;
+      })
+      .catch(err => {
+        if (err.code === 'failed-precondition') {
+          console.warn('🔥 Persistence failed: multiple tabs open. Cache will still work per-tab.');
+        } else if (err.code === 'unimplemented') {
+          console.warn('🔥 Persistence not supported in this browser.');
+        } else {
+          console.warn('🔥 Persistence error:', err);
+        }
+      });
 
     console.log("🔥 Firebase initialized successfully");
 
-    // Optional: Test connection to catch missing rules or invalid project
-    db.collection('system').limit(1).get()
-      .then(() => console.log("🔥 Firestore connection established."))
-      .catch(e => {
-        console.error("🔥 Firestore connection/permission error:", e);
+    // Connection health monitor — measures actual Firestore latency
+    async function measureFirestoreLatency() {
+      try {
+        const start = performance.now();
+        await db.collection('system').doc('ping').get({ source: 'server' });
+        const latency = Math.round(performance.now() - start);
+        window.firebaseConnectionState.connected = true;
+        window.firebaseConnectionState.lastPingMs = latency;
+        window.firebaseConnectionState.lastChecked = new Date();
+        return latency;
+      } catch (e) {
+        window.firebaseConnectionState.connected = false;
+        window.firebaseConnectionState.lastPingMs = null;
+        window.firebaseConnectionState.lastChecked = new Date();
+
         if (e.code === 'permission-denied') {
-          console.warn("⚠️ Your Firestore Security Rules are blocking access. Please update them in the Firebase Console.");
+          // Still connected, just no permissions for this doc
+          window.firebaseConnectionState.connected = true;
+          window.firebaseConnectionState.lastPingMs = 0;
+        }
+        return null;
+      }
+    }
+
+    // Initial connection check (delayed to not block page load)
+    setTimeout(() => {
+      measureFirestoreLatency().then(ms => {
+        if (ms !== null) {
+          console.log(`🔥 Firestore connected (${ms}ms latency)`);
         }
       });
+    }, 2000);
+
+    // Expose for admin panel
+    window.measureFirestoreLatency = measureFirestoreLatency;
 
   } catch (error) {
     console.error("🔥 Firebase initialization error:", error);

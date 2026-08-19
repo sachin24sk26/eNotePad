@@ -79,7 +79,7 @@
                 </button>
                 <button id="authBtn" class="flex items-center gap-2 px-4 py-1.5 rounded-full bg-surface-container border border-outline-variant/30 text-sm font-medium hover:bg-surface-container-low transition-colors" onclick="window.location.href='../index.html'">
                     <span class="material-symbols-outlined text-[18px]">account_circle</span>
-                    <span id="headerUsername">Guest (Requires Code)</span>
+                    <span id="headerUsername">Guest (Click to Log In)</span>
                 </button>
             </div>
         </div>
@@ -112,9 +112,15 @@
                         </div>
 
                         <input id="roomCodeInput" class="bg-surface-container-low editorial-border rounded-lg py-3 px-6 text-center text-xl font-bold tracking-widest focus:ring-2 focus:ring-primary/20 w-full font-sans uppercase code-input-box" placeholder="Enter Code" type="text" maxlength="6" autocomplete="off"/>
-                        <div id="loginWarning" class="hidden w-full bg-error-container/20 text-error p-3 rounded-lg text-xs text-left mb-2">
-                            <span class="font-bold flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">warning</span> Login Required</span>
-                            This room already has 2 anonymous guests. You must log in via eNotePad to join.
+                        
+                        <div id="loginWarning" class="hidden w-full bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-300 p-4 rounded-xl text-xs text-left space-y-2">
+                            <div class="font-bold flex items-center gap-1.5 text-sm">
+                                <span class="material-symbols-outlined text-base">warning</span> Anonymous Guest Limit Reached
+                            </div>
+                            <p class="text-on-surface-variant text-[11px] leading-relaxed">This room already has 2 anonymous guests. Please log in via your eNotePad account to join as a verified member!</p>
+                            <a href="../index.html" class="inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-on-primary font-bold text-xs rounded-xl hover:bg-primary-dim transition-all shadow-sm">
+                                <span class="material-symbols-outlined text-sm">login</span> Log In via eNotePad
+                            </a>
                         </div>
 
                         <button id="joinRoomBtn" class="w-full bg-primary text-on-primary font-bold px-4 py-3 rounded-xl text-lg hover:bg-primary-dim transition-all shadow-md active:scale-95">
@@ -129,37 +135,78 @@
         <div id="streamView" class="hidden flex-1 flex flex-col w-full h-full relative" style="height: calc(100vh - 73px);">
             
             <!-- Stream Header -->
-            <div class="px-8 py-4 flex items-center justify-between bg-surface z-10 border-b editorial-border">
-                <div>
-                    <h1 class="text-2xl font-serif italic text-on-surface flex items-center gap-2">
-                        <span class="material-symbols-outlined text-primary text-xl">lock</span>
-                        #stream-<span id="currentRoomCodeDisplay">...</span>
-                    </h1>
-                    <p class="text-xs font-sans text-on-surface-variant tracking-wide" id="participantsCountDisplay">1 participant online</p>
+            <div class="px-6 md:px-8 py-4 flex items-center justify-between bg-surface-container-lowest z-10 border-b border-outline-variant/15 shadow-sm flex-wrap gap-2">
+                <div class="flex items-center gap-3">
+                    <div>
+                        <h1 class="text-xl md:text-2xl font-serif italic text-on-surface flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary text-xl">lock</span>
+                            #stream-<span id="currentRoomCodeDisplay">...</span>
+                        </h1>
+                        <div class="flex items-center gap-2 mt-0.5">
+                            <p class="text-xs font-sans text-on-surface-variant tracking-wide flex items-center gap-1" id="participantsCountDisplay">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> 1 participant online
+                            </p>
+                            <span class="text-outline-variant/40">·</span>
+                            <div class="flex items-center gap-1 text-[11px] font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20" id="roomTimerBadge">
+                                <span class="material-symbols-outlined text-xs">timer</span>
+                                <span id="roomTimerCountdown">20:00</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <button id="leaveRoomBtn" class="px-4 py-1.5 rounded-full border border-error/50 text-error text-sm font-sans flex items-center gap-2 hover:bg-error/5 transition-all shadow-sm">
-                    <span class="material-symbols-outlined text-sm">logout</span>
-                    Leave
-                </button>
+
+                <div class="flex items-center gap-2">
+                    <button id="shareInviteBtn" class="px-3.5 py-1.5 rounded-full bg-primary/10 hover:bg-primary/20 text-primary text-xs font-bold font-sans flex items-center gap-1.5 transition-all shadow-sm active:scale-95" title="Copy Invite Link">
+                        <span class="material-symbols-outlined text-sm">share</span>
+                        <span>Invite</span>
+                    </button>
+                    <button id="leaveRoomBtn" class="px-4 py-1.5 rounded-full border border-error/40 text-error text-xs font-bold font-sans flex items-center gap-1.5 hover:bg-error/10 transition-all shadow-sm active:scale-95">
+                        <span class="material-symbols-outlined text-sm">logout</span>
+                        <span>Leave</span>
+                    </button>
+                </div>
             </div>
 
             <!-- Scrollable Messages Area -->
-            <div id="messagesContainer" class="flex-1 overflow-y-auto px-6 md:px-12 py-8 space-y-6 pb-32">
-                <!-- Messages will be injected here -->
+            <div id="messagesContainer" class="flex-1 overflow-y-auto px-4 md:px-12 py-6 space-y-5 pb-36 relative">
+                <!-- Messages injected dynamically -->
             </div>
 
+            <!-- Scroll To Bottom Floating Button -->
+            <button id="scrollToBottomBtn" class="absolute bottom-28 right-8 z-20 w-10 h-10 rounded-full bg-primary text-on-primary shadow-xl border border-white/20 flex items-center justify-center transition-all opacity-0 pointer-events-none transform translate-y-2 hover:scale-105 active:scale-95" title="Scroll to latest messages">
+                <span class="material-symbols-outlined text-lg">arrow_downward</span>
+            </button>
+
             <!-- Enhanced Input Area (The Writing Desk) -->
-            <div class="absolute bottom-0 left-0 right-0 p-6 bg-surface border-t editorial-border z-10">
-                <div class="max-w-4xl mx-auto bg-surface-container-low code-input-box rounded-2xl shadow-[0_-8px_40px_rgba(0,0,0,0.12)] editorial-border p-2 flex items-center gap-2">
-                    <button id="attachBtn" class="w-10 h-10 flex items-center justify-center rounded-xl text-primary/60 hover:text-primary hover:bg-surface-container-low transition-colors" title="Attach Image or File">
+            <div class="absolute bottom-0 left-0 right-0 p-4 md:p-6 bg-surface-container-lowest border-t border-outline-variant/15 z-10 space-y-2 shadow-lg">
+                <!-- Live Typing Indicator -->
+                <div id="typingIndicator" class="text-xs text-on-surface-variant/70 italic px-2 flex items-center gap-1.5 min-h-[18px]" style="display:none">
+                    <span class="w-1.5 h-1.5 rounded-full bg-primary animate-ping"></span>
+                    <span id="typingIndicatorText">Someone is typing...</span>
+                </div>
+
+                <!-- Quick Reaction Emoji Bar -->
+                <div class="flex items-center gap-1.5 px-2 overflow-x-auto no-scrollbar" id="quickEmojiBar">
+                    <span class="text-[10px] uppercase font-bold tracking-wider text-on-surface-variant/50 mr-1 flex-shrink-0">Quick React:</span>
+                    <button class="quick-emoji-btn text-base px-2 py-1 rounded-lg hover:bg-surface-container-low transition-transform active:scale-125" data-emoji="👍">👍</button>
+                    <button class="quick-emoji-btn text-base px-2 py-1 rounded-lg hover:bg-surface-container-low transition-transform active:scale-125" data-emoji="❤️">❤️</button>
+                    <button class="quick-emoji-btn text-base px-2 py-1 rounded-lg hover:bg-surface-container-low transition-transform active:scale-125" data-emoji="😂">😂</button>
+                    <button class="quick-emoji-btn text-base px-2 py-1 rounded-lg hover:bg-surface-container-low transition-transform active:scale-125" data-emoji="🔥">🔥</button>
+                    <button class="quick-emoji-btn text-base px-2 py-1 rounded-lg hover:bg-surface-container-low transition-transform active:scale-125" data-emoji="🎉">🎉</button>
+                    <button class="quick-emoji-btn text-base px-2 py-1 rounded-lg hover:bg-surface-container-low transition-transform active:scale-125" data-emoji="💡">💡</button>
+                    <button class="quick-emoji-btn text-base px-2 py-1 rounded-lg hover:bg-surface-container-low transition-transform active:scale-125" data-emoji="📌">📌</button>
+                </div>
+
+                <div class="max-w-4xl mx-auto bg-surface-container-low rounded-2xl border border-outline-variant/15 p-2 flex items-center gap-2 shadow-inner">
+                    <button id="attachBtn" class="w-10 h-10 flex items-center justify-center rounded-xl text-primary/70 hover:text-primary hover:bg-surface-container-high transition-colors flex-shrink-0" title="Attach Image or File (Max 2MB)">
                         <span class="material-symbols-outlined">attach_file</span>
                     </button>
                     <input type="file" id="fileInput" class="hidden" />
 
-                    <textarea id="messageInput" class="flex-1 bg-transparent border-none focus:ring-0 font-serif text-lg py-3 px-2 resize-none h-[52px] max-h-[120px] placeholder:text-outline-variant" placeholder="Draft your message..."></textarea>
+                    <textarea id="messageInput" class="flex-1 bg-transparent border-none focus:ring-0 font-serif text-base md:text-lg py-2.5 px-2 resize-none h-[48px] max-h-[120px] text-on-surface placeholder:text-on-surface-variant/40 outline-none" placeholder="Draft your message..."></textarea>
                     
-                    <button id="sendBtn" class="bg-primary text-on-primary w-12 h-12 flex items-center justify-center rounded-xl hover:bg-primary-dim shadow-lg editorial-border transition-transform active:scale-95 disabled:opacity-50 shrink-0">
-                        <span class="material-symbols-outlined">send</span>
+                    <button id="sendBtn" class="bg-primary text-on-primary w-11 h-11 flex items-center justify-center rounded-xl hover:bg-primary-dim shadow-md transition-transform active:scale-95 disabled:opacity-50 flex-shrink-0">
+                        <span class="material-symbols-outlined text-lg">send</span>
                     </button>
                 </div>
             </div>
@@ -178,6 +225,6 @@
     <script src="../js/utils.js"></script>
     
     <!-- Convo Logic -->
-    <script src="./js/convo.js"></script>
+    <script src="./js/convo.js?v=2"></script>
 </body>
 </html>

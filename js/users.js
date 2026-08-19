@@ -17,11 +17,17 @@ function initUserSearch() {
   const searchInput = document.getElementById('userSearchInput');
   const searchResults = document.getElementById('userSearchResults');
   const searchEmpty = document.getElementById('userSearchEmpty');
+  const clearBtn = document.getElementById('clearUserSearchBtn');
+  const statsRow = document.getElementById('userSearchStatsRow');
+  const countLabel = document.getElementById('userSearchCountLabel');
+  const refreshBtn = document.getElementById('refreshUsersBtn');
+  const searchPrompt = document.getElementById('userSearchPrompt');
+  const featuredGrid = document.getElementById('featuredCuratorsGrid');
   const filterBtns = document.querySelectorAll('.user-filter-btn');
 
   if (!searchInput || !searchResults) return;
 
-  let currentFilter = 'all';
+  let currentFilter = 'discover';
   let cachedUsers = null;
 
   async function fetchAllUsers() {
@@ -46,6 +52,8 @@ function initUserSearch() {
             bio: data.bio || '',
             avatarColor: data.avatarColor || generateAvatarColor(uname),
             tags: data.tags || [],
+            followersCount: data.followersCount || 0,
+            followingCount: data.followingCount || 0,
             isPublic: true
           });
         } else {
@@ -54,6 +62,7 @@ function initUserSearch() {
           if (!existing.bio) existing.bio = data.bio || '';
           if (!existing.avatarColor) existing.avatarColor = data.avatarColor || generateAvatarColor(uname);
           if (!existing.tags || existing.tags.length === 0) existing.tags = data.tags || [];
+          if (data.followersCount) existing.followersCount = data.followersCount;
         }
       });
 
@@ -65,24 +74,45 @@ function initUserSearch() {
     }
   }
 
+  function toggleClearButton() {
+    if (clearBtn) {
+      clearBtn.classList.toggle('hidden', !searchInput.value.trim());
+    }
+  }
+
   const doSearch = debounce(async (query) => {
     const q = (query || '').trim().toLowerCase().replace(/^@/, '');
     const currentUser = getCurrentUser();
-    const searchPrompt = document.getElementById('userSearchPrompt');
 
+    toggleClearButton();
     if (searchEmpty) searchEmpty.style.display = 'none';
 
-    // If search query is empty and filter is 'all', show initial search prompt instead of listing all users directly
-    if (q.length === 0 && currentFilter === 'all') {
-      searchResults.innerHTML = '';
+    const all = await fetchAllUsers();
+
+    // Render Featured Curators when on Discover tab and query is empty
+    if (q.length === 0 && currentFilter === 'discover') {
       if (searchPrompt) searchPrompt.style.display = 'block';
+      if (statsRow) statsRow.style.display = 'none';
+      searchResults.innerHTML = '';
+
+      if (featuredGrid) {
+        featuredGrid.innerHTML = '';
+        const featured = all.filter(u => {
+          const uname = (u.username || '').toLowerCase();
+          const bio = (u.bio || '').toLowerCase();
+          return uname.includes('sachin') || bio.includes('developer') || bio.includes('founder') || (u.followersCount || 0) > 0;
+        });
+        const listToRender = featured.length > 0 ? featured : all.slice(0, 6);
+        listToRender.forEach(user => {
+          featuredGrid.appendChild(renderUserCard(user, currentUser));
+        });
+      }
       return;
     }
 
     if (searchPrompt) searchPrompt.style.display = 'none';
     searchResults.innerHTML = `<div class="user-search-loading"><span class="material-symbols-outlined" style="animation:spin 1s linear infinite">progress_activity</span></div>`;
 
-    const all = await fetchAllUsers();
     let filtered = all;
 
     if (q.length > 0) {
@@ -96,7 +126,13 @@ function initUserSearch() {
       });
     }
 
-    if (currentFilter === 'following' && currentUser) {
+    if (currentFilter === 'suggested') {
+      filtered = filtered.filter(u => {
+        const uname = (u.username || '').toLowerCase();
+        const bio = (u.bio || '').toLowerCase();
+        return uname.includes('sachin') || bio.includes('developer') || bio.includes('founder') || (u.followersCount || 0) > 0;
+      });
+    } else if (currentFilter === 'following' && currentUser) {
       const followingSnap = await db.collection('users').doc(currentUser.username)
         .collection('following').get().catch(() => ({ docs: [] }));
       const followingIds = new Set(followingSnap.docs.map(d => d.id));
@@ -105,8 +141,13 @@ function initUserSearch() {
 
     searchResults.innerHTML = '';
 
+    if (statsRow) {
+      statsRow.style.display = 'flex';
+      if (countLabel) countLabel.textContent = `${filtered.length} member${filtered.length === 1 ? '' : 's'} found`;
+    }
+
     if (filtered.length === 0) {
-      if (searchEmpty) searchEmpty.style.display = '';
+      if (searchEmpty) searchEmpty.style.display = 'block';
       return;
     }
     if (searchEmpty) searchEmpty.style.display = 'none';
@@ -115,48 +156,99 @@ function initUserSearch() {
       const card = renderUserCard(user, currentUser);
       searchResults.appendChild(card);
     });
-  }, 300);
+  }, 250);
 
   searchInput.addEventListener('input', e => doSearch(e.target.value));
-  searchInput.addEventListener('focus', () => { if (!searchInput.value) doSearch(''); });
+  searchInput.addEventListener('focus', () => { if (!searchInput.value && currentFilter !== 'discover') doSearch(''); });
+
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      toggleClearButton();
+      doSearch('');
+      searchInput.focus();
+    });
+  }
+
+  if (refreshBtn) {
+    refreshBtn.addEventListener('click', () => {
+      cachedUsers = null;
+      doSearch(searchInput.value);
+      if (typeof showToast === 'function') showToast('Refreshed members list 🔄', 'info');
+    });
+  }
 
   filterBtns.forEach(btn => {
     btn.addEventListener('click', () => {
-      filterBtns.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      currentFilter = btn.dataset.filter || 'all';
+      filterBtns.forEach(b => {
+        b.classList.remove('active', 'bg-primary', 'text-on-primary', 'shadow-sm');
+        b.classList.add('bg-surface-container-low', 'text-on-surface-variant');
+      });
+      btn.classList.add('active', 'bg-primary', 'text-on-primary', 'shadow-sm');
+      btn.classList.remove('bg-surface-container-low', 'text-on-surface-variant');
+      currentFilter = btn.dataset.filter || 'discover';
       doSearch(searchInput.value);
     });
   });
 
   window.refreshUserSearch = () => { cachedUsers = null; doSearch(searchInput.value); };
+  window.filterUsersByTag = (tag) => {
+    if (typeof window.switchToTab === 'function') window.switchToTab('search');
+    searchInput.value = tag;
+    doSearch(tag);
+  };
+
   doSearch('');
 }
 
 function renderUserCard(user, currentUser) {
   const card = document.createElement('div');
-  card.className = 'user-search-card';
+  card.className = 'user-search-card group transition-all';
 
   const initial = (user.displayName || user.username || '?').charAt(0).toUpperCase();
   const color = user.avatarColor || generateAvatarColor(user.username);
   const isLoggedIn = !!currentUser;
   const isSelf = currentUser && currentUser.username === user.username;
 
+  let tagsList = [];
+  if (Array.isArray(user.tags)) {
+    tagsList = user.tags.slice(0, 3);
+  } else if (typeof user.tags === 'string' && user.tags.trim()) {
+    tagsList = user.tags.split(/[\s,]+/).filter(Boolean).slice(0, 3);
+  }
+
   card.innerHTML = `
-    <div class="usc-avatar" style="background:${color};">${initial}</div>
+    <div class="usc-avatar shadow-sm" style="background:${color};">${initial}</div>
     <div class="usc-info">
-      <div class="usc-name flex items-center gap-1.5">
+      <div class="usc-name flex items-center gap-1.5 flex-wrap">
         <span>${escapeHTMLStr(user.displayName || user.username)}</span>
         ${isSelf ? '<span class="usc-self-badge">You</span>' : ''}
+        ${user.username.toLowerCase().includes('sachin') ? '<span class="text-[9px] px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-500 font-bold border border-indigo-500/20">DEV</span>' : ''}
       </div>
       <div class="usc-handle">@${escapeHTMLStr(user.username)}</div>
       ${user.bio ? `<div class="usc-bio">${escapeHTMLStr(user.bio)}</div>` : ''}
+      ${tagsList.length > 0 ? `
+        <div class="flex items-center gap-1 mt-1.5 flex-wrap">
+          ${tagsList.map(t => {
+            const tagStr = t.startsWith('#') ? t : `#${t}`;
+            return `<span class="usc-tag-chip" data-tag="${escapeHTMLStr(tagStr)}">${escapeHTMLStr(tagStr)}</span>`;
+          }).join('')}
+        </div>
+      ` : ''}
     </div>
-    <div class="usc-actions">
-      ${isLoggedIn && !isSelf ? `<button class="usc-follow-btn" data-username="${escapeHTMLStr(user.username)}">
-        <span class="material-symbols-outlined">person_add</span>
-      </button>` : ''}
-      <button class="usc-profile-btn" data-username="${escapeHTMLStr(user.username)}" title="View Profile">
+    <div class="usc-actions flex items-center gap-1.5">
+      ${isLoggedIn && !isSelf ? `
+        <button class="usc-follow-btn" data-username="${escapeHTMLStr(user.username)}" title="Follow / Unfollow">
+          <span class="material-symbols-outlined">person_add</span>
+        </button>
+        <button class="usc-dm-btn w-8 h-8 rounded-full bg-surface-container-low hover:bg-surface-container-high border border-outline-variant/15 text-on-surface-variant hover:text-primary transition-all flex items-center justify-center text-sm" data-username="${escapeHTMLStr(user.username)}" title="Send Note to @${escapeHTMLStr(user.username)}">
+          <span class="material-symbols-outlined text-base">alternate_email</span>
+        </button>
+      ` : ''}
+      <button class="usc-share-btn w-8 h-8 rounded-full bg-surface-container-low hover:bg-surface-container-high border border-outline-variant/15 text-on-surface-variant hover:text-primary transition-all flex items-center justify-center text-sm" data-username="${escapeHTMLStr(user.username)}" title="Share Profile">
+        <span class="material-symbols-outlined text-base">share</span>
+      </button>
+      <button class="usc-profile-btn" data-username="${escapeHTMLStr(user.username)}" title="View Full Profile">
         <span class="material-symbols-outlined">open_in_new</span>
       </button>
     </div>
@@ -169,7 +261,34 @@ function renderUserCard(user, currentUser) {
       e.stopPropagation();
       await toggleFollow(currentUser.username, user.username, followBtn);
     });
+
+    const dmBtn = card.querySelector('.usc-dm-btn');
+    if (dmBtn) {
+      dmBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (typeof openSendToUserPanel === 'function') openSendToUserPanel(user.username);
+      });
+    }
   }
+
+  const shareBtn = card.querySelector('.usc-share-btn');
+  if (shareBtn) {
+    shareBtn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const origin = (window.location.origin && window.location.origin !== 'null') ? window.location.origin : window.location.href.split('index.html')[0];
+      const profileUrl = `${origin}/index.html?user=${encodeURIComponent(user.username)}`;
+      const ok = await copyToClipboard(profileUrl);
+      if (ok && typeof showToast === 'function') showToast(`Copied @${user.username}'s profile link! 🔗`, 'success');
+    });
+  }
+
+  card.querySelectorAll('.usc-tag-chip').forEach(chip => {
+    chip.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const tag = chip.dataset.tag;
+      if (tag && window.filterUsersByTag) window.filterUsersByTag(tag);
+    });
+  });
 
   card.querySelector('.usc-profile-btn').addEventListener('click', (e) => {
     e.stopPropagation();

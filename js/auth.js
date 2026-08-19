@@ -102,6 +102,8 @@ function initAuth() {
       }
       // Cancel inactivity timer
       if (typeof window.cancelInactivityTimer === 'function') window.cancelInactivityTimer();
+      // Clean up admin listeners to prevent memory leaks
+      if (typeof window.cleanupAdminListeners === 'function') window.cleanupAdminListeners();
       setCurrentUser(null);
       showLoggedOutView();
     }
