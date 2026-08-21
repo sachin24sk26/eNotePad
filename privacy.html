@@ -366,6 +366,31 @@
             localStorage.setItem('enotpad_theme', 'dark');
           }
         });
+      // Header Scroll Reveal
+      const header = document.querySelector('header');
+      if (header) {
+        let lastScrollY = window.scrollY;
+        let ticking = false;
+        window.addEventListener('scroll', function() {
+          if (!ticking) {
+            window.requestAnimationFrame(function() {
+              const currentScrollY = window.scrollY;
+              if (currentScrollY > 40) {
+                header.classList.add('header-scrolled');
+                if (currentScrollY > lastScrollY && currentScrollY - lastScrollY > 6) {
+                  header.classList.add('-translate-y-full');
+                } else if (lastScrollY - currentScrollY > 4) {
+                  header.classList.remove('-translate-y-full');
+                }
+              } else {
+                header.classList.remove('-translate-y-full', 'header-scrolled');
+              }
+              lastScrollY = currentScrollY;
+              ticking = false;
+            });
+            ticking = true;
+          }
+        }, { passive: true });
       }
     })();
   </script>

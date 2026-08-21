@@ -24,23 +24,42 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /**
- * Sticky Top Header Navigation Bar.
- * Keeps top navbar pinned and visible at top, adding blur & elevation shadow when page is scrolled.
+ * Auto-Revealing Top Header Navigation Bar for all pages.
+ * Hides header when scrolling down, reveals top navbar when scrolling UP.
  */
 function initHeaderScroll() {
-  const header = document.getElementById('topAppBar');
+  const header = document.getElementById('topAppBar') || document.querySelector('header');
   if (!header) return;
 
-  const handleScroll = () => {
-    if (window.scrollY > 10) {
-      header.classList.add('header-scrolled');
-    } else {
-      header.classList.remove('header-scrolled');
-    }
-  };
+  let lastScrollY = window.scrollY;
+  let ticking = false;
 
-  window.addEventListener('scroll', handleScroll, { passive: true });
-  handleScroll();
+  window.addEventListener('scroll', () => {
+    if (!ticking) {
+      window.requestAnimationFrame(() => {
+        const currentScrollY = window.scrollY;
+
+        // If scrolled past initial top margin threshold
+        if (currentScrollY > 40) {
+          header.classList.add('header-scrolled');
+          if (currentScrollY > lastScrollY && currentScrollY - lastScrollY > 6) {
+            // Scrolling DOWN -> hide top header navbar
+            header.classList.add('-translate-y-full');
+          } else if (lastScrollY - currentScrollY > 4) {
+            // Scrolling UP -> reveal top header navbar
+            header.classList.remove('-translate-y-full');
+          }
+        } else {
+          // Near top of page -> reveal top header navbar without shadow
+          header.classList.remove('-translate-y-full', 'header-scrolled');
+        }
+
+        lastScrollY = currentScrollY;
+        ticking = false;
+      });
+      ticking = true;
+    }
+  }, { passive: true });
 }
 
 /**
