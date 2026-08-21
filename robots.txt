@@ -2,5 +2,5 @@ User-agent: *
 Allow: /
 Disallow: /scratch/
 
-# Google Search Console Sitemap
-Sitemap: https://sachin24sk26.github.io/eNotePad/sitemap.xml
+# Google Search Console Sitemap for https://enotepad.vercel.app/
+Sitemap: https://enotepad.vercel.app/sitemap.xml
