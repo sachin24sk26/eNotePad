@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /scratch/
+
+# Google Search Console Sitemap
+Sitemap: https://sachin24sk26.github.io/eNotePad/sitemap.xml
