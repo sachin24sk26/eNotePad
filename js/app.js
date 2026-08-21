@@ -7,6 +7,7 @@
 
 document.addEventListener('DOMContentLoaded', () => {
   initNavigation();
+  initHeaderScroll();
   initTheme();
   initSidebar();
   initEditor();
@@ -21,6 +22,26 @@ document.addEventListener('DOMContentLoaded', () => {
   initGuestNudgeSystem();
   console.log('✨ eNotePad — Digital Curator initialized');
 });
+
+/**
+ * Sticky Top Header Navigation Bar.
+ * Keeps top navbar pinned and visible at top, adding blur & elevation shadow when page is scrolled.
+ */
+function initHeaderScroll() {
+  const header = document.getElementById('topAppBar');
+  if (!header) return;
+
+  const handleScroll = () => {
+    if (window.scrollY > 10) {
+      header.classList.add('header-scrolled');
+    } else {
+      header.classList.remove('header-scrolled');
+    }
+  };
+
+  window.addEventListener('scroll', handleScroll, { passive: true });
+  handleScroll();
+}
 
 /**
  * Feedback Modal — works for all users (guest + logged in).
