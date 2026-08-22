@@ -472,7 +472,7 @@ function initShare() {
       linkContainer.innerHTML = `
         <div class="flex items-center gap-3 p-4 bg-surface-container-low rounded-2xl link-input-row">
           <span class="material-symbols-outlined text-primary/40 text-lg">link</span>
-          <input type="url" class="flex-1 border-none rounded-md focus:ring-0 font-body text-base placeholder:text-outline-variant/40 outline-none shareLinkInput" placeholder="https://example.com" style="color: #1063c9; background-color: #f0f0f0;"/>
+          <input type="url" class="flex-1 border-none rounded-md focus:ring-0 font-body text-base placeholder:text-outline-variant/40 outline-none shareLinkInput" placeholder="https://example.com" />
           <button class="remove-link-btn text-error/50 hover:text-error transition-colors hidden" type="button" aria-label="Remove link">
             <span class="material-symbols-outlined text-base">close</span>
           </button>

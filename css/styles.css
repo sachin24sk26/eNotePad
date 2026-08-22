@@ -1829,7 +1829,16 @@ select.appearance-none {
 
 .shareLinkInput {
   color: #1063c9;
-  background-color: #f0f0f0;
+  background-color: transparent !important;
+}
+
+.dark .shareLinkInput {
+  color: #93c5fd;
+  background-color: transparent !important;
+}
+
+.dark .shareLinkInput::placeholder {
+  color: rgba(147, 197, 253, 0.4);
 }
 
 /* ---------- Rich Editor Surface ---------- */
