@@ -3,10 +3,44 @@
 <head>
   <meta charset="utf-8" />
   <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-  <meta name="description" content="eNotePad Privacy Policy — How we protect your notes, secret codes, and personal data." />
+  <meta name="description" content="eNotePad Privacy Policy — Learn how we protect your notes, secret codes, and personal data with privacy-first standards." />
+  <meta name="keywords" content="eNotePad privacy policy, data security, secret code privacy, encrypted notes, digital curator privacy" />
+  <meta name="author" content="eNotePad — Digital Curator" />
+  <meta name="robots" content="index, follow, max-image-preview:large" />
   <meta name="theme-color" id="themeColorMeta" content="#516070" />
   <title>Privacy Policy — eNotePad</title>
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="canonical" href="https://enotepad.vercel.app/privacy.html" />
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://enotepad.vercel.app/privacy.html" />
+  <meta property="og:title" content="Privacy Policy — eNotePad" />
+  <meta property="og:description" content="Learn how eNotePad protects your privacy, anonymous notes, secret codes, and personal data." />
+  <meta property="og:image" content="https://enotepad.vercel.app/assets/favicon.svg" />
+  <meta property="og:site_name" content="eNotePad" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Privacy Policy — eNotePad" />
+  <meta name="twitter:description" content="Learn how eNotePad protects your privacy, anonymous notes, secret codes, and personal data." />
+  <meta name="twitter:image" content="https://enotepad.vercel.app/assets/favicon.svg" />
+
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Privacy Policy — eNotePad",
+    "url": "https://enotepad.vercel.app/privacy.html",
+    "description": "Privacy policy and data protection standards for eNotePad digital curator and instant sharing service.",
+    "publisher": {
+      "@type": "Organization",
+      "name": "eNotePad",
+      "url": "https://enotepad.vercel.app/"
+    }
+  }
+  </script>
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
@@ -114,9 +148,9 @@
 
       <nav class="flex items-center gap-1 sm:gap-2">
         <a href="index.html" class="text-xs sm:text-sm px-3 py-1.5 rounded-lg text-primary/60 hover:text-primary hover:bg-surface-container transition-all">Notes</a>
-        <a href="support.html" class="text-xs sm:text-sm px-3 py-1.5 rounded-lg text-primary/60 hover:text-primary hover:bg-surface-container transition-all">Support</a>
-        <a href="terms.html" class="text-xs sm:text-sm px-3 py-1.5 rounded-lg text-primary/60 hover:text-primary hover:bg-surface-container transition-all">Terms</a>
         <a href="privacy.html" class="text-xs sm:text-sm px-3 py-1.5 rounded-lg text-primary font-bold bg-primary/10">Privacy</a>
+        <a href="terms.html" class="text-xs sm:text-sm px-3 py-1.5 rounded-lg text-primary/60 hover:text-primary hover:bg-surface-container transition-all">Terms</a>
+        <a href="support.html" class="text-xs sm:text-sm px-3 py-1.5 rounded-lg text-primary/60 hover:text-primary hover:bg-surface-container transition-all">Support</a>
         
         <button class="theme-toggle-btn ml-2 flex items-center gap-2 px-3 py-1.5 rounded-full border border-outline-variant/20 transition-all active:scale-[0.97]" id="themeToggle" aria-label="Toggle theme">
           <span class="material-symbols-outlined text-base theme-icon-dark">dark_mode</span>
@@ -158,11 +192,11 @@
           <nav class="space-y-1 text-sm">
             <a href="#info-collect" class="block px-3 py-2 rounded-xl text-primary/70 hover:text-primary hover:bg-surface-container transition-all font-medium">1. Information We Collect</a>
             <a href="#info-use" class="block px-3 py-2 rounded-xl text-primary/70 hover:text-primary hover:bg-surface-container transition-all font-medium">2. How We Use Information</a>
-            <a href="#data-security" class="block px-3 py-2 rounded-xl text-primary/70 hover:text-primary hover:bg-surface-container transition-all font-medium">3. Data Security & Storage</a>
+            <a href="#data-security" class="block px-3 py-2 rounded-xl text-primary/70 hover:text-primary hover:bg-surface-container transition-all font-medium">3. Data Security & Protection</a>
             <a href="#third-parties" class="block px-3 py-2 rounded-xl text-primary/70 hover:text-primary hover:bg-surface-container transition-all font-medium">4. Third-Party Services</a>
             <a href="#cookies" class="block px-3 py-2 rounded-xl text-primary/70 hover:text-primary hover:bg-surface-container transition-all font-medium">5. Local Storage & Cookies</a>
-            <a href="#data-rights" class="block px-3 py-2 rounded-xl text-primary/70 hover:text-primary hover:bg-surface-container transition-all font-medium">6. Your Rights & Deletion</a>
-            <a href="#contact" class="block px-3 py-2 rounded-xl text-primary/70 hover:text-primary hover:bg-surface-container transition-all font-medium">7. Contact Information</a>
+            <a href="#data-rights" class="block px-3 py-2 rounded-xl text-primary/70 hover:text-primary hover:bg-surface-container transition-all font-medium">6. Your Rights & Data Deletion</a>
+            <a href="#contact" class="block px-3 py-2 rounded-xl text-primary/70 hover:text-primary hover:bg-surface-container transition-all font-medium">7. Contact Us</a>
           </nav>
         </div>
 
@@ -366,6 +400,8 @@
             localStorage.setItem('enotpad_theme', 'dark');
           }
         });
+      }
+
       // Header Scroll Reveal
       const header = document.querySelector('header');
       if (header) {

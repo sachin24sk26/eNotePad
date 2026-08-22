@@ -4,9 +4,43 @@
   <meta charset="utf-8" />
   <meta content="width=device-width, initial-scale=1.0" name="viewport" />
   <meta name="description" content="eNotePad Terms of Service — Terms and conditions for using eNotePad digital curator and instant sharing services." />
+  <meta name="keywords" content="eNotePad terms of service, user agreement, terms and conditions, legal agreement, eNotePad usage rules" />
+  <meta name="author" content="eNotePad — Digital Curator" />
+  <meta name="robots" content="index, follow, max-image-preview:large" />
   <meta name="theme-color" id="themeColorMeta" content="#516070" />
   <title>Terms of Service — eNotePad</title>
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="canonical" href="https://enotepad.vercel.app/terms.html" />
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://enotepad.vercel.app/terms.html" />
+  <meta property="og:title" content="Terms of Service — eNotePad" />
+  <meta property="og:description" content="Terms and conditions for accessing and using eNotePad digital curator and instant sharing services." />
+  <meta property="og:image" content="https://enotepad.vercel.app/assets/favicon.svg" />
+  <meta property="og:site_name" content="eNotePad" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Terms of Service — eNotePad" />
+  <meta name="twitter:description" content="Terms and conditions for accessing and using eNotePad digital curator and instant sharing services." />
+  <meta name="twitter:image" content="https://enotepad.vercel.app/assets/favicon.svg" />
+
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Terms of Service — eNotePad",
+    "url": "https://enotepad.vercel.app/terms.html",
+    "description": "Terms of service and user agreement for eNotePad digital curator and instant sharing service.",
+    "publisher": {
+      "@type": "Organization",
+      "name": "eNotePad",
+      "url": "https://enotepad.vercel.app/"
+    }
+  }
+  </script>
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
@@ -114,9 +148,9 @@
 
       <nav class="flex items-center gap-1 sm:gap-2">
         <a href="index.html" class="text-xs sm:text-sm px-3 py-1.5 rounded-lg text-primary/60 hover:text-primary hover:bg-surface-container transition-all">Notes</a>
-        <a href="support.html" class="text-xs sm:text-sm px-3 py-1.5 rounded-lg text-primary/60 hover:text-primary hover:bg-surface-container transition-all">Support</a>
         <a href="privacy.html" class="text-xs sm:text-sm px-3 py-1.5 rounded-lg text-primary/60 hover:text-primary hover:bg-surface-container transition-all">Privacy</a>
         <a href="terms.html" class="text-xs sm:text-sm px-3 py-1.5 rounded-lg text-primary font-bold bg-primary/10">Terms</a>
+        <a href="support.html" class="text-xs sm:text-sm px-3 py-1.5 rounded-lg text-primary/60 hover:text-primary hover:bg-surface-container transition-all">Support</a>
         
         <button class="theme-toggle-btn ml-2 flex items-center gap-2 px-3 py-1.5 rounded-full border border-outline-variant/20 transition-all active:scale-[0.97]" id="themeToggle" aria-label="Toggle theme">
           <span class="material-symbols-outlined text-base theme-icon-dark">dark_mode</span>
@@ -158,12 +192,12 @@
           <nav class="space-y-1 text-sm">
             <a href="#term-acceptance" class="block px-3 py-2 rounded-xl text-primary/70 hover:text-primary hover:bg-surface-container transition-all font-medium">1. Acceptance of Terms</a>
             <a href="#term-service" class="block px-3 py-2 rounded-xl text-primary/70 hover:text-primary hover:bg-surface-container transition-all font-medium">2. Description of Service</a>
-            <a href="#term-conduct" class="block px-3 py-2 rounded-xl text-primary/70 hover:text-primary hover:bg-surface-container transition-all font-medium">3. User Conduct Rules</a>
-            <a href="#term-security" class="block px-3 py-2 rounded-xl text-primary/70 hover:text-primary hover:bg-surface-container transition-all font-medium">4. PIN & Code Security</a>
-            <a href="#term-ip" class="block px-3 py-2 rounded-xl text-primary/70 hover:text-primary hover:bg-surface-container transition-all font-medium">5. Intellectual Property</a>
+            <a href="#term-conduct" class="block px-3 py-2 rounded-xl text-primary/70 hover:text-primary hover:bg-surface-container transition-all font-medium">3. User Conduct & Content Rules</a>
+            <a href="#term-security" class="block px-3 py-2 rounded-xl text-primary/70 hover:text-primary hover:bg-surface-container transition-all font-medium">4. PIN & Access Security</a>
+            <a href="#term-ip" class="block px-3 py-2 rounded-xl text-primary/70 hover:text-primary hover:bg-surface-container transition-all font-medium">5. Intellectual Property & Ownership</a>
             <a href="#term-disclaimer" class="block px-3 py-2 rounded-xl text-primary/70 hover:text-primary hover:bg-surface-container transition-all font-medium">6. Disclaimer of Warranties</a>
             <a href="#term-liability" class="block px-3 py-2 rounded-xl text-primary/70 hover:text-primary hover:bg-surface-container transition-all font-medium">7. Limitation of Liability</a>
-            <a href="#term-termination" class="block px-3 py-2 rounded-xl text-primary/70 hover:text-primary hover:bg-surface-container transition-all font-medium">8. Termination</a>
+            <a href="#term-termination" class="block px-3 py-2 rounded-xl text-primary/70 hover:text-primary hover:bg-surface-container transition-all font-medium">8. Account Termination</a>
             <a href="#term-law" class="block px-3 py-2 rounded-xl text-primary/70 hover:text-primary hover:bg-surface-container transition-all font-medium">9. Governing Law</a>
           </nav>
         </div>
@@ -359,6 +393,8 @@
             localStorage.setItem('enotpad_theme', 'dark');
           }
         });
+      }
+
       // Header Scroll Reveal
       const header = document.querySelector('header');
       if (header) {
