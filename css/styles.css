@@ -3854,7 +3854,13 @@ select.appearance-none {
   color: #ffffff !important;
 }
 
-/* Guest Nudge Banner Styling */
+/* Guest Nudge Banner — Shimmer animation */
+@keyframes gnbShimmer {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+/* Guest Nudge Banner — Visible state */
 #guestNudgeBanner.gnb-visible {
   display: block !important;
   opacity: 1 !important;
@@ -3862,27 +3868,35 @@ select.appearance-none {
   pointer-events: auto !important;
 }
 
-.dark #guestNudgeBanner {
-  background: rgba(22, 25, 33, 0.96) !important;
-  border-color: rgba(96, 165, 250, 0.25) !important;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+/* Guest Nudge Banner — Dark mode inner card */
+.dark #guestNudgeBanner > div:last-child {
+  background: rgba(18, 21, 30, 0.97) !important;
+  border-color: rgba(147, 197, 253, 0.12) !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 4px 16px rgba(0, 0, 0, 0.4) !important;
 }
 .dark #guestNudgeTitle {
-  color: #93c5fd !important;
+  color: #c6d6e9 !important;
 }
 .dark #guestNudgeText {
-  color: #cbd5e1 !important;
+  color: #94a3b8 !important;
 }
 .dark #guestNudgeIconWrap {
-  background: rgba(147, 197, 253, 0.12) !important;
-  color: #60a5fa !important;
+  background: rgba(147, 197, 253, 0.1) !important;
+  color: #93c5fd !important;
+  box-shadow: 0 0 0 1px rgba(147, 197, 253, 0.15) !important;
 }
 .dark #guestNudgeActionBtn {
-  background: #3a4856 !important;
-  color: #ffffff !important;
+  background: linear-gradient(135deg, #3a4856, #4b526c) !important;
+  color: #f0f4ff !important;
 }
 .dark #guestNudgeActionBtn:hover {
-  background: #4a5a6c !important;
+  background: linear-gradient(135deg, #4a5a6c, #575e78) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Guest Welcome Strip */
+#guestWelcomeStrip .material-symbols-outlined {
+  font-variation-settings: 'FILL' 1;
 }
 
 /* Account Card & Stats Dark Mode Overrides */

@@ -234,6 +234,11 @@ function initShare() {
       showToast('Shared! Auto-erases in 20 min ⏱️', 'success');
       resetShareForm();
 
+      // Guest milestone nudge — fires 2.5s after share to not collide with success toast
+      if (!getCurrentUser() && typeof window.showGuestMilestoneToast === 'function') {
+        setTimeout(() => window.showGuestMilestoneToast('note_shared'), 2500);
+      }
+
     } catch (error) {
       console.error('Share error:', error);
       showToast('Failed to share. Check your connection.', 'error');

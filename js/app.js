@@ -487,114 +487,266 @@ function showEl(id) {
 })();
 
 /**
- * Guest Nudge & Notification System
- * Periodically displays dynamic alerts to guest users encouraging sign up for productivity features.
+ * Guest Nudge & Notification System — Enhanced
+ * Non-intrusive, attractive prompts for guest users to encourage sign-up.
+ * Includes: rotating bottom-card, welcome strip, milestone toasts.
  */
 function initGuestNudgeSystem() {
-  const banner = document.getElementById('guestNudgeBanner');
-  const iconEl = document.getElementById('guestNudgeIcon');
-  const titleEl = document.getElementById('guestNudgeTitle');
-  const textEl = document.getElementById('guestNudgeText');
-  const btnLabelEl = document.getElementById('guestNudgeBtnLabel');
-  const closeBtn = document.getElementById('guestNudgeClose');
-  const actionBtn = document.getElementById('guestNudgeActionBtn');
+  // ── Helper: is user logged in? ──────────────────────────────────
+  const isGuest = () => {
+    const u = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+    return !u;
+  };
 
-  if (!banner || !actionBtn) return;
+  if (!isGuest()) return; // Bail immediately if already logged in
+
+  // ── 1. ROTATING BOTTOM-RIGHT NUDGE CARD ─────────────────────────
+  const banner     = document.getElementById('guestNudgeBanner');
+  const iconEl     = document.getElementById('guestNudgeIcon');
+  const titleEl    = document.getElementById('guestNudgeTitle');
+  const textEl     = document.getElementById('guestNudgeText');
+  const btnLabelEl = document.getElementById('guestNudgeBtnLabel');
+  const closeBtn   = document.getElementById('guestNudgeClose');
+  const actionBtn  = document.getElementById('guestNudgeActionBtn');
 
   const messages = [
     {
+      icon: 'cloud_sync',
+      title: '⏳ Your notes vanish in 20 min',
+      text: 'Guest notes auto-erase. Create a free account and keep your ideas safe — forever.',
+      btnText: 'Save Notes Forever',
+      color: '#516070'
+    },
+    {
       icon: 'folder_open',
-      title: 'Organize into Custom Folders 📁',
-      text: 'Sign up for free to save your notes permanently and organize them into custom folders!',
-      btnText: 'Create Free Account'
+      title: '📁 Organize with Custom Folders',
+      text: 'Sign up to categorize your notes into folders, tag them, and find anything instantly.',
+      btnText: 'Create Free Account',
+      color: '#516070'
     },
     {
       icon: 'send',
-      title: 'Send Direct Messages to Anyone 📬',
-      text: 'Create an account to send direct notes and files to other members instantly!',
-      btnText: 'Sign Up Free'
-    },
-    {
-      icon: 'cloud_sync',
-      title: 'Never Lose Your Notes ☁️',
-      text: 'Guest notes auto-erase after 20 minutes. Register a free account to keep your notes forever!',
-      btnText: 'Save Notes Forever'
+      title: '📬 Send Direct Notes to Anyone',
+      text: 'Registered users can DM notes, files, and images directly to other members.',
+      btnText: 'Join & Start Sharing',
+      color: '#516070'
     },
     {
       icon: 'workspace_premium',
-      title: 'Unlock Badges & Hashtags ✨',
-      text: 'Build your public profile, add custom hashtags, and show off your developer & creator badges!',
-      btnText: 'Claim Your Profile'
+      title: '✨ Earn Badges & Build a Profile',
+      text: 'Show off your creator or developer badge. Claim your public eNotePad profile — free.',
+      btnText: 'Claim My Profile',
+      color: '#516070'
     },
     {
       icon: 'forum',
-      title: 'Join Live Convo Rooms 💬',
-      text: 'Collaborate with friends in real-time encrypted conversation rooms!',
-      btnText: 'Join Rooms Free'
+      title: '💬 Join Live Convo Rooms',
+      text: 'Collaborate with friends in real-time encrypted rooms. Only 60 seconds to sign up.',
+      btnText: 'Join Rooms Free',
+      color: '#516070'
+    },
+    {
+      icon: 'history',
+      title: '🕐 Access Your Note History',
+      text: 'Members get a full history of all notes shared and received. Never lose track again.',
+      btnText: 'Get Note History',
+      color: '#516070'
     }
   ];
 
-  let currentMsgIndex = 0;
-  let isDismissed = false;
+  let cardMsgIndex = 0;
+  let cardDismissed = false;
+  let cardTimer = null;
 
-  function showNudge(force = false) {
-    const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
-    if (user && !force) {
-      hideNudge();
-      return;
+  function openSignup() {
+    if (typeof window.switchToTab === 'function') {
+      window.switchToTab('account');
+      setTimeout(() => {
+        const signupTab = document.querySelector('.auth-tab-btn[data-auth-tab="signup"]');
+        if (signupTab) signupTab.click();
+      }, 60);
     }
-    if (isDismissed && !force) return;
+  }
 
-    const msg = messages[currentMsgIndex];
-    if (iconEl) iconEl.textContent = msg.icon;
-    if (titleEl) titleEl.textContent = msg.title;
-    if (textEl) textEl.textContent = msg.text;
+  function showCard(forceIndex) {
+    if (!banner || !isGuest()) return;
+    if (cardDismissed) return;
+
+    const idx = typeof forceIndex === 'number' ? forceIndex : cardMsgIndex;
+    const msg = messages[idx % messages.length];
+    cardMsgIndex = (idx + 1) % messages.length;
+
+    if (iconEl)     iconEl.textContent   = msg.icon;
+    if (titleEl)    titleEl.textContent  = msg.title;
+    if (textEl)     textEl.textContent   = msg.text;
     if (btnLabelEl) btnLabelEl.textContent = msg.btnText;
 
     banner.style.display = 'block';
-    setTimeout(() => banner.classList.add('gnb-visible'), 20);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => banner.classList.add('gnb-visible'));
+    });
 
-    currentMsgIndex = (currentMsgIndex + 1) % messages.length;
+    // Auto-hide after 9 seconds
+    clearTimeout(cardTimer);
+    cardTimer = setTimeout(hideCard, 9000);
   }
 
-  function hideNudge() {
+  function hideCard() {
+    if (!banner) return;
     banner.classList.remove('gnb-visible');
     setTimeout(() => {
-      if (!banner.classList.contains('gnb-visible')) {
-        banner.style.display = 'none';
-      }
-    }, 320);
+      if (!banner.classList.contains('gnb-visible')) banner.style.display = 'none';
+    }, 340);
   }
 
   if (closeBtn) {
     closeBtn.addEventListener('click', () => {
-      hideNudge();
-      isDismissed = true;
-      setTimeout(() => { isDismissed = false; }, 30000);
+      hideCard();
+      cardDismissed = true;
+      // Allow nudge again after 45 seconds
+      setTimeout(() => { cardDismissed = false; }, 45000);
     });
   }
 
-  actionBtn.addEventListener('click', () => {
-    hideNudge();
-    if (typeof window.switchToTab === 'function') {
-      window.switchToTab('account');
-      setTimeout(() => {
-        const signupTabBtn = document.querySelector('.auth-tab-btn[data-auth-tab="signup"]');
-        if (signupTabBtn) signupTabBtn.click();
-      }, 50);
+  if (actionBtn) {
+    actionBtn.addEventListener('click', () => { hideCard(); openSignup(); });
+  }
+
+  // First card after 2.5 seconds, then every 22 seconds
+  setTimeout(() => showCard(), 2500);
+  setInterval(() => { if (!cardDismissed) showCard(); }, 22000);
+
+
+  // ── 2. TOP WELCOME STRIP (shows once per session) ────────────────
+  const sessionKey = 'enp_welcome_shown';
+  if (!sessionStorage.getItem(sessionKey)) {
+    sessionStorage.setItem(sessionKey, '1');
+    const strip = document.createElement('div');
+    strip.id = 'guestWelcomeStrip';
+    strip.innerHTML = `
+      <div class="flex items-center justify-between gap-3 max-w-5xl mx-auto px-4 py-2.5">
+        <div class="flex items-center gap-2 flex-1 min-w-0">
+          <span class="material-symbols-outlined text-base flex-shrink-0" style="color:inherit">auto_awesome</span>
+          <span class="text-xs font-semibold truncate">
+            <strong>Welcome to eNotePad!</strong> — You're using the free guest mode.
+            <span class="hidden sm:inline opacity-80">Sign up free to keep notes forever, use folders, and DM others.</span>
+          </span>
+        </div>
+        <div class="flex items-center gap-2 flex-shrink-0">
+          <button id="guestStripSignup" class="text-xs font-bold px-3 py-1 rounded-full border border-current/30 hover:bg-white/20 transition-all whitespace-nowrap">
+            Sign Up Free
+          </button>
+          <button id="guestStripClose" class="opacity-60 hover:opacity-100 transition-opacity p-0.5">
+            <span class="material-symbols-outlined text-sm">close</span>
+          </button>
+        </div>
+      </div>
+    `;
+    strip.style.cssText = `
+      position: fixed; top: 0; left: 0; right: 0; z-index: 99999;
+      background: linear-gradient(135deg, #516070 0%, #575e78 100%);
+      color: #f4f8ff; font-family: Inter, sans-serif;
+      transform: translateY(-100%); transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+    `;
+    document.body.appendChild(strip);
+
+    setTimeout(() => { strip.style.transform = 'translateY(0)'; }, 600);
+
+    const dismissStrip = () => {
+      strip.style.transform = 'translateY(-100%)';
+      setTimeout(() => strip.remove(), 400);
+    };
+
+    document.getElementById('guestStripClose')?.addEventListener('click', dismissStrip);
+    document.getElementById('guestStripSignup')?.addEventListener('click', () => {
+      dismissStrip();
+      openSignup();
+    });
+
+    // Auto-dismiss strip after 8 seconds
+    setTimeout(dismissStrip, 8000);
+  }
+
+
+  // ── 3. MILESTONE TOAST NUDGES (triggered by actions) ─────────────
+  const toastMessages = [
+    {
+      trigger: 'note_shared',
+      icon: 'celebration',
+      text: '🎉 Note shared! Sign up to track all your shares and build a history.',
+      btnText: 'Save My History'
+    },
+    {
+      trigger: 'note_typed',
+      icon: 'tips_and_updates',
+      text: '💡 Great idea! Register free to keep this note safe — guest notes expire in 20 min.',
+      btnText: 'Keep This Note'
+    },
+    {
+      trigger: 'code_accessed',
+      icon: 'lock_open',
+      text: '✅ Note retrieved! Members can organize received notes into folders automatically.',
+      btnText: 'Organize My Notes'
     }
-  });
+  ];
 
-  // Initial nudge prompt after 1.5 seconds for guest users
-  setTimeout(showNudge, 1500);
+  function showMilestoneToast(triggerName) {
+    if (!isGuest()) return;
+    const msg = toastMessages.find(m => m.trigger === triggerName);
+    if (!msg) return;
 
-  // Rotate nudge message every 18 seconds
-  setInterval(showNudge, 18000);
+    const toast = document.createElement('div');
+    toast.className = 'gnb-milestone-toast';
+    toast.innerHTML = `
+      <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--gnb-toast-bg,rgba(250,249,245,0.97));border:1px solid rgba(81,96,112,0.15);border-radius:16px;box-shadow:0 8px 24px rgba(47,52,46,0.14);max-width:320px;font-family:Inter,sans-serif;backdrop-filter:blur(12px);">
+        <span class="material-symbols-outlined" style="color:#516070;font-size:20px;flex-shrink:0">${msg.icon}</span>
+        <div style="flex:1;min-width:0">
+          <p style="font-size:11.5px;color:#2f342e;line-height:1.4;margin:0 0 7px">${msg.text}</p>
+          <button class="gnb-toast-action" style="font-size:10.5px;font-weight:700;color:#516070;background:rgba(81,96,112,0.1);border:none;padding:4px 10px;border-radius:8px;cursor:pointer;letter-spacing:0.02em">${msg.btnText}</button>
+        </div>
+        <button class="gnb-toast-close" style="color:rgba(47,52,46,0.3);background:none;border:none;cursor:pointer;font-size:18px;line-height:1;flex-shrink:0">×</button>
+      </div>
+    `;
+    toast.style.cssText = `
+      position:fixed; bottom:${banner && banner.style.display !== 'none' ? '160px' : '24px'}; left:50%;
+      transform:translateX(-50%) translateY(20px); opacity:0;
+      z-index:9960; transition:all 0.35s cubic-bezier(0.34,1.56,0.64,1);
+    `;
 
-  window.hideGuestNudge = hideNudge;
+    // Dark mode tweak
+    if (document.documentElement.classList.contains('dark')) {
+      toast.querySelector('div').style.background = 'rgba(22,25,33,0.97)';
+      toast.querySelector('p').style.color = '#cbd5e1';
+      toast.querySelector('.gnb-toast-action').style.color = '#93c5fd';
+      toast.querySelector('.gnb-toast-action').style.background = 'rgba(147,197,253,0.1)';
+      toast.querySelector('.gnb-toast-close').style.color = 'rgba(203,213,225,0.4)';
+    }
+
+    document.body.appendChild(toast);
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      toast.style.opacity = '1';
+      toast.style.transform = 'translateX(-50%) translateY(0)';
+    }));
+
+    const removeToast = () => {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateX(-50%) translateY(12px)';
+      setTimeout(() => toast.remove(), 340);
+    };
+
+    toast.querySelector('.gnb-toast-close').addEventListener('click', removeToast);
+    toast.querySelector('.gnb-toast-action').addEventListener('click', () => { removeToast(); openSignup(); });
+    setTimeout(removeToast, 7000);
+  }
+
+  // ── 4. EXPOSE GLOBALLY FOR OTHER MODULES ────────────────────────
+  window.hideGuestNudge = hideCard;
+  window.showGuestNudge = showCard;
+  window.showGuestMilestoneToast = showMilestoneToast;
+
+  // Expose for external trigger (e.g., after sharing a note)
   window.triggerGuestNudge = (index) => {
-    if (typeof index === 'number') currentMsgIndex = index % messages.length;
-    isDismissed = false;
-    showNudge(true);
+    cardDismissed = false;
+    showCard(typeof index === 'number' ? index : undefined);
   };
 }

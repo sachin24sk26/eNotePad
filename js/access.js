@@ -89,6 +89,11 @@ function initAccess() {
       renderContent(data);
       showToast('Content retrieved!', 'success');
 
+      // Guest milestone nudge — fires 3s after retrieval
+      if (!getCurrentUser() && typeof window.showGuestMilestoneToast === 'function') {
+        setTimeout(() => window.showGuestMilestoneToast('code_accessed'), 3000);
+      }
+
     } catch (error) {
       console.error('Fetch error:', error);
       showToast('Failed to fetch content.', 'error');
