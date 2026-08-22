@@ -487,9 +487,10 @@ function showEl(id) {
 })();
 
 /**
- * Guest Nudge & Notification System — Enhanced
- * Non-intrusive, attractive prompts for guest users to encourage sign-up.
- * Includes: rotating bottom-card, welcome strip, milestone toasts.
+ * Guest Nudge & Notification System — Enhanced & Interactive
+ * Non-intrusive, attractive prompts for guest users to encourage sign-up / log-in.
+ * Features: 15 dynamic spotlight messages, interval playback engine with progress bar,
+ * dual Sign Up / Sign In actions, guest alert modal dialog, and milestone toasts.
  */
 function initGuestNudgeSystem() {
   // ── Helper: is user logged in? ──────────────────────────────────
@@ -500,124 +501,364 @@ function initGuestNudgeSystem() {
 
   if (!isGuest()) return; // Bail immediately if already logged in
 
-  // ── 1. ROTATING BOTTOM-RIGHT NUDGE CARD ─────────────────────────
-  const banner     = document.getElementById('guestNudgeBanner');
-  const iconEl     = document.getElementById('guestNudgeIcon');
-  const titleEl    = document.getElementById('guestNudgeTitle');
-  const textEl     = document.getElementById('guestNudgeText');
-  const btnLabelEl = document.getElementById('guestNudgeBtnLabel');
-  const closeBtn   = document.getElementById('guestNudgeClose');
-  const actionBtn  = document.getElementById('guestNudgeActionBtn');
-
+  // ── 1. DYNAMIC SPOTLIGHT MESSAGES (15 VARIED TOPICS) ─────────────
   const messages = [
     {
+      badge: 'Preservation',
+      icon: 'timer',
+      title: '⏳ Guest notes vanish in 20 min',
+      text: 'Guest notes auto-expire soon! Create a free account to lock in your notes permanently and keep your ideas safe forever.',
+      btnText: 'Save Notes Forever'
+    },
+    {
+      badge: 'Cloud Sync',
       icon: 'cloud_sync',
-      title: '⏳ Your notes vanish in 20 min',
-      text: 'Guest notes auto-erase. Create a free account and keep your ideas safe — forever.',
-      btnText: 'Save Notes Forever',
-      color: '#516070'
+      title: '🚀 Access Notes Across All Devices',
+      text: 'Sync your notes seamlessly between your phone, tablet, and laptop. Access your desk anytime, anywhere.',
+      btnText: 'Enable Cloud Sync'
     },
     {
-      icon: 'folder_open',
-      title: '📁 Organize with Custom Folders',
-      text: 'Sign up to categorize your notes into folders, tag them, and find anything instantly.',
-      btnText: 'Create Free Account',
-      color: '#516070'
+      badge: 'Privacy & Security',
+      icon: 'lock_person',
+      title: '🔐 Passcode & PIN Note Locking',
+      text: 'Protect confidential notes from prying eyes! Member accounts get PIN code locking and encrypted storage.',
+      btnText: 'Lock My Notes'
     },
     {
-      icon: 'send',
-      title: '📬 Send Direct Notes to Anyone',
-      text: 'Registered users can DM notes, files, and images directly to other members.',
-      btnText: 'Join & Start Sharing',
-      color: '#516070'
+      badge: 'Organization',
+      icon: 'folder_managed',
+      title: '📁 Custom Folders & Smart Tags',
+      text: 'Stop lost scribbles! Categorize notes into custom folders, assign colorful tags, and filter instantly.',
+      btnText: 'Organize With Folders'
     },
     {
-      icon: 'workspace_premium',
-      title: '✨ Earn Badges & Build a Profile',
-      text: 'Show off your creator or developer badge. Claim your public eNotePad profile — free.',
-      btnText: 'Claim My Profile',
-      color: '#516070'
+      badge: 'Direct Messaging',
+      icon: 'mark_as_unread',
+      title: '📬 Direct Note DM & File Sharing',
+      text: 'Send notes, images, documents, and code snippets directly to other registered members in seconds.',
+      btnText: 'Start Direct Messaging'
     },
     {
+      badge: 'Live Rooms',
       icon: 'forum',
-      title: '💬 Join Live Convo Rooms',
-      text: 'Collaborate with friends in real-time encrypted rooms. Only 60 seconds to sign up.',
-      btnText: 'Join Rooms Free',
-      color: '#516070'
+      title: '💬 Real-Time Encrypted Convo Rooms',
+      text: 'Collaborate with friends in real-time encrypted rooms with live document sharing and instant messaging.',
+      btnText: 'Join Live Rooms'
     },
     {
-      icon: 'history',
-      title: '🕐 Access Your Note History',
-      text: 'Members get a full history of all notes shared and received. Never lose track again.',
-      btnText: 'Get Note History',
-      color: '#516070'
+      badge: 'Pro Profile',
+      icon: 'verified',
+      title: '✨ Claim Your @Username & Badge',
+      text: 'Get a personalized public bio page, custom avatar, and show off your verified creator profile badge.',
+      btnText: 'Claim My Profile'
+    },
+    {
+      badge: 'Customization',
+      icon: 'palette',
+      title: '🎨 Glassmorphism & Themes',
+      text: 'Personalize your workspace with dark mode, modern glassmorphism, and custom editorial typography.',
+      btnText: 'Unlock Custom Themes'
+    },
+    {
+      badge: 'Smart Search',
+      icon: 'search_insights',
+      title: '🔍 Instant Full-Text & Tag Search',
+      text: 'Find any past note, keyword, or code snippet in milliseconds with full-text fuzzy search.',
+      btnText: 'Enable Instant Search'
+    },
+    {
+      badge: 'Auto-Transfer',
+      icon: 'move_up',
+      title: '🛡️ Auto-Migrate Your Guest Notes',
+      text: 'Already typed notes today as a guest? Sign up now and we will automatically transfer them to your new account!',
+      btnText: 'Transfer Notes Now'
+    },
+    {
+      badge: 'Analytics',
+      icon: 'insights',
+      title: '📈 Detailed Writing Analytics',
+      text: 'Track your word count, reading time estimates, and productivity streaks with live writing stats.',
+      btnText: 'Track My Writing'
+    },
+    {
+      badge: 'Notifications',
+      icon: 'notifications_active',
+      title: '🔔 Real-Time Activity Alerts',
+      text: 'Get notified instantly when someone views, replies to, or interacts with your shared notes.',
+      btnText: 'Get Activity Alerts'
+    },
+    {
+      badge: 'Exporting',
+      icon: 'download_for_offline',
+      title: '📤 Export to PDF, HTML & Markdown',
+      text: 'Download your notes cleanly in Markdown, PDF, HTML, or raw text format with a single click.',
+      btnText: 'Export Notes Free'
+    },
+    {
+      badge: 'Public Bio',
+      icon: 'language',
+      title: '🌐 Share Your Public Portfolio',
+      text: 'Publish custom public bio links to showcase your articles, snippets, and notes with the world.',
+      btnText: 'Create Public Link'
+    },
+    {
+      badge: 'Note History',
+      icon: 'history_toggle_off',
+      title: '🕐 Complete Version History',
+      text: 'Never lose a revision again. Access full version history and restore previous note drafts easily.',
+      btnText: 'Unlock Note History'
     }
   ];
 
+  // ── 2. DOM ELEMENTS ───────────────────────────────────────────────
+  const banner       = document.getElementById('guestNudgeBanner');
+  const badgeWrap    = document.getElementById('guestNudgeBadge');
+  const badgeTextEl  = document.getElementById('guestNudgeBadgeText');
+  const counterEl    = document.getElementById('guestNudgeCounter');
+  const iconEl       = document.getElementById('guestNudgeIcon');
+  const iconWrapEl   = document.getElementById('guestNudgeIconWrap');
+  const titleEl      = document.getElementById('guestNudgeTitle');
+  const textEl       = document.getElementById('guestNudgeText');
+  const btnLabelEl   = document.getElementById('guestNudgeBtnLabel');
+  const actionBtn    = document.getElementById('guestNudgeActionBtn');
+  const loginBtn     = document.getElementById('guestNudgeLoginBtn');
+  const closeBtn     = document.getElementById('guestNudgeClose');
+  const prevBtn      = document.getElementById('guestNudgePrev');
+  const nextBtn      = document.getElementById('guestNudgeNext');
+  const progressBar  = document.getElementById('guestNudgeProgressBar');
+
   let cardMsgIndex = 0;
   let cardDismissed = false;
-  let cardTimer = null;
+  let isHovered = false;
+  let progressMs = 0;
+  const DISPLAY_DURATION_MS = 6000; // Snappy 6 seconds per spotlight message
+  const TICK_MS = 100;
+  let intervalTimer = null;
 
+  // ── 3. AUTH MODAL NAVIGATION HELPERS ──────────────────────────────
   function openSignup() {
     if (typeof window.switchToTab === 'function') {
       window.switchToTab('account');
       setTimeout(() => {
-        const signupTab = document.querySelector('.auth-tab-btn[data-auth-tab="signup"]');
+        const signupTab = document.getElementById('authTabRegister') || document.querySelector('.auth-tab-btn[data-auth-tab="signup"]');
         if (signupTab) signupTab.click();
-      }, 60);
+      }, 80);
     }
   }
 
-  function showCard(forceIndex) {
+  function openLogin() {
+    if (typeof window.switchToTab === 'function') {
+      window.switchToTab('account');
+      setTimeout(() => {
+        const loginTab = document.getElementById('authTabLogin') || document.querySelector('.auth-tab-btn[data-auth-tab="login"]');
+        if (loginTab) loginTab.click();
+      }, 80);
+    }
+  }
+
+  // ── 4. RENDER SPOTLIGHT MESSAGE & INTERVAL PLAYBACK ──────────────
+  function renderMessage(index) {
     if (!banner || !isGuest()) return;
-    if (cardDismissed) return;
+    const msg = messages[(index + messages.length) % messages.length];
+    cardMsgIndex = (index + messages.length) % messages.length;
 
-    const idx = typeof forceIndex === 'number' ? forceIndex : cardMsgIndex;
-    const msg = messages[idx % messages.length];
-    cardMsgIndex = (idx + 1) % messages.length;
+    // Smooth subtle fade out transition during content swap
+    if (iconWrapEl) iconWrapEl.style.opacity = '0.3';
+    if (titleEl) titleEl.style.opacity = '0.3';
+    if (textEl) textEl.style.opacity = '0.3';
 
-    if (iconEl)     iconEl.textContent   = msg.icon;
-    if (titleEl)    titleEl.textContent  = msg.title;
-    if (textEl)     textEl.textContent   = msg.text;
-    if (btnLabelEl) btnLabelEl.textContent = msg.btnText;
+    setTimeout(() => {
+      if (badgeTextEl) badgeTextEl.textContent = msg.badge;
+      if (counterEl)   counterEl.textContent   = `${cardMsgIndex + 1}/${messages.length}`;
+      if (iconEl)      iconEl.textContent      = msg.icon;
+      if (titleEl)     titleEl.textContent     = msg.title;
+      if (textEl)      textEl.textContent      = msg.text;
+      if (btnLabelEl)  btnLabelEl.textContent  = msg.btnText;
+
+      if (iconWrapEl) iconWrapEl.style.opacity = '1';
+      if (titleEl) titleEl.style.opacity = '1';
+      if (textEl) textEl.style.opacity = '1';
+    }, 100);
+
+    resetProgressBar();
+  }
+
+  function showCard(forceIndex) {
+    if (!banner || !isGuest() || cardDismissed) return;
+
+    if (typeof forceIndex === 'number') {
+      cardMsgIndex = forceIndex;
+    }
+    renderMessage(cardMsgIndex);
 
     banner.style.display = 'block';
     requestAnimationFrame(() => {
-      requestAnimationFrame(() => banner.classList.add('gnb-visible'));
+      requestAnimationFrame(() => {
+        banner.classList.add('gnb-visible');
+        if (typeof updateMilestoneContainerPosition === 'function') updateMilestoneContainerPosition();
+      });
     });
 
-    // Auto-hide after 9 seconds
-    clearTimeout(cardTimer);
-    cardTimer = setTimeout(hideCard, 9000);
+    startIntervalLoop();
   }
 
   function hideCard() {
     if (!banner) return;
+    stopIntervalLoop();
     banner.classList.remove('gnb-visible');
     setTimeout(() => {
       if (!banner.classList.contains('gnb-visible')) banner.style.display = 'none';
+      if (typeof updateMilestoneContainerPosition === 'function') updateMilestoneContainerPosition();
     }, 340);
+  }
+
+  function resetProgressBar() {
+    progressMs = 0;
+    if (progressBar) progressBar.style.width = '0%';
+  }
+
+  function startIntervalLoop() {
+    stopIntervalLoop();
+    intervalTimer = setInterval(() => {
+      if (isHovered || cardDismissed || !isGuest()) return;
+      progressMs += TICK_MS;
+      const pct = Math.min(100, (progressMs / DISPLAY_DURATION_MS) * 100);
+      if (progressBar) progressBar.style.width = `${pct}%`;
+
+      if (progressMs >= DISPLAY_DURATION_MS) {
+        progressMs = 0;
+        cardMsgIndex = (cardMsgIndex + 1) % messages.length;
+        renderMessage(cardMsgIndex);
+      }
+    }, TICK_MS);
+  }
+
+  function stopIntervalLoop() {
+    if (intervalTimer) {
+      clearInterval(intervalTimer);
+      intervalTimer = null;
+    }
+  }
+
+  // ── 5. EVENT LISTENERS ───────────────────────────────────────────
+  if (banner) {
+    banner.addEventListener('mouseenter', () => { isHovered = true; });
+    banner.addEventListener('mouseleave', () => { isHovered = false; });
   }
 
   if (closeBtn) {
     closeBtn.addEventListener('click', () => {
       hideCard();
       cardDismissed = true;
-      // Allow nudge again after 45 seconds
-      setTimeout(() => { cardDismissed = false; }, 45000);
+      // Resume interval playback after 30s snooze
+      setTimeout(() => {
+        cardDismissed = false;
+        showCard();
+      }, 30000);
+    });
+  }
+
+  if (prevBtn) {
+    prevBtn.addEventListener('click', () => {
+      cardMsgIndex = (cardMsgIndex - 1 + messages.length) % messages.length;
+      renderMessage(cardMsgIndex);
+    });
+  }
+
+  if (nextBtn) {
+    nextBtn.addEventListener('click', () => {
+      cardMsgIndex = (cardMsgIndex + 1) % messages.length;
+      renderMessage(cardMsgIndex);
     });
   }
 
   if (actionBtn) {
-    actionBtn.addEventListener('click', () => { hideCard(); openSignup(); });
+    actionBtn.addEventListener('click', () => {
+      hideCard();
+      openSignup();
+    });
   }
 
-  // First card after 2.5 seconds, then every 22 seconds
-  setTimeout(() => showCard(), 2500);
-  setInterval(() => { if (!cardDismissed) showCard(); }, 22000);
+  if (loginBtn) {
+    loginBtn.addEventListener('click', () => {
+      hideCard();
+      openLogin();
+    });
+  }
+
+  // Launch initial card after 1 second
+  setTimeout(() => showCard(0), 1000);
 
 
-  // ── 2. TOP WELCOME STRIP (shows once per session) ────────────────
+  // ── 6. GUEST ALERT MODAL DIALOG CONTROLLER ───────────────────────
+  const alertModal         = document.getElementById('guestAlertModal');
+  const alertModalIcon     = document.getElementById('guestAlertModalIcon');
+  const alertModalTitle    = document.getElementById('guestAlertModalTitle');
+  const alertModalText     = document.getElementById('guestAlertModalText');
+  const alertModalClose    = document.getElementById('guestAlertModalClose');
+  const alertModalSignup   = document.getElementById('guestAlertModalSignupBtn');
+  const alertModalLogin    = document.getElementById('guestAlertModalLoginBtn');
+  const alertModalSkip     = document.getElementById('guestAlertModalSkipBtn');
+
+  function showGuestAlertModal(opts = {}) {
+    if (!alertModal || !isGuest()) return;
+
+    if (opts.title && alertModalTitle) alertModalTitle.textContent = opts.title;
+    if (opts.text && alertModalText) alertModalText.textContent = opts.text;
+    if (opts.icon && alertModalIcon) alertModalIcon.textContent = opts.icon;
+
+    alertModal.style.display = 'flex';
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        alertModal.classList.remove('opacity-0', 'pointer-events-none');
+        alertModal.querySelector('div')?.classList.remove('scale-95');
+        alertModal.querySelector('div')?.classList.add('scale-100');
+      });
+    });
+  }
+
+  function hideGuestAlertModal() {
+    if (!alertModal) return;
+    alertModal.classList.add('opacity-0', 'pointer-events-none');
+    alertModal.querySelector('div')?.classList.remove('scale-100');
+    alertModal.querySelector('div')?.classList.add('scale-95');
+    setTimeout(() => {
+      alertModal.style.display = 'none';
+    }, 320);
+  }
+
+  if (alertModalClose) alertModalClose.addEventListener('click', hideGuestAlertModal);
+  if (alertModalSkip) alertModalSkip.addEventListener('click', hideGuestAlertModal);
+  if (alertModalSignup) {
+    alertModalSignup.addEventListener('click', () => {
+      hideGuestAlertModal();
+      openSignup();
+    });
+  }
+  if (alertModalLogin) {
+    alertModalLogin.addEventListener('click', () => {
+      hideGuestAlertModal();
+      openLogin();
+    });
+  }
+
+  // Trigger guest alert modal automatically after 2 minutes of guest session activity
+  const alertModalSessionKey = 'enp_guest_modal_shown';
+  if (!sessionStorage.getItem(alertModalSessionKey)) {
+    setTimeout(() => {
+      if (isGuest() && !sessionStorage.getItem(alertModalSessionKey)) {
+        sessionStorage.setItem(alertModalSessionKey, '1');
+        showGuestAlertModal({
+          title: 'Preserve Your Work — Create a Free Account',
+          text: 'You have been writing as a guest. Register free or sign in to permanently protect your notes, access custom folders, and direct message friends.',
+          icon: 'shield_lock'
+        });
+      }
+    }, 120000);
+  }
+
+
+  // ── 7. TOP WELCOME STRIP (shows once per session until dismissed) ───
   const sessionKey = 'enp_welcome_shown';
   if (!sessionStorage.getItem(sessionKey)) {
     sessionStorage.setItem(sessionKey, '1');
@@ -628,15 +869,18 @@ function initGuestNudgeSystem() {
         <div class="flex items-center gap-2 flex-1 min-w-0">
           <span class="material-symbols-outlined text-base flex-shrink-0" style="color:inherit">auto_awesome</span>
           <span class="text-xs font-semibold truncate">
-            <strong>Welcome to eNotePad!</strong> — You're using the free guest mode.
-            <span class="hidden sm:inline opacity-80">Sign up free to keep notes forever, use folders, and DM others.</span>
+            <strong>Welcome to eNotePad!</strong> — You're using free guest mode.
+            <span class="hidden sm:inline opacity-85">Sign up or sign in free to keep notes forever, use folders, and DM members.</span>
           </span>
         </div>
         <div class="flex items-center gap-2 flex-shrink-0">
           <button id="guestStripSignup" class="text-xs font-bold px-3 py-1 rounded-full border border-current/30 hover:bg-white/20 transition-all whitespace-nowrap">
             Sign Up Free
           </button>
-          <button id="guestStripClose" class="opacity-60 hover:opacity-100 transition-opacity p-0.5">
+          <button id="guestStripLogin" class="text-xs font-semibold px-2.5 py-1 rounded-full bg-white/10 hover:bg-white/20 transition-all whitespace-nowrap">
+            Sign In
+          </button>
+          <button id="guestStripClose" class="opacity-60 hover:opacity-100 transition-opacity p-0.5 ml-1" title="Dismiss header">
             <span class="material-symbols-outlined text-sm">close</span>
           </button>
         </div>
@@ -650,7 +894,7 @@ function initGuestNudgeSystem() {
     `;
     document.body.appendChild(strip);
 
-    setTimeout(() => { strip.style.transform = 'translateY(0)'; }, 600);
+    setTimeout(() => { strip.style.transform = 'translateY(0)'; }, 500);
 
     const dismissStrip = () => {
       strip.style.transform = 'translateY(-100%)';
@@ -662,89 +906,122 @@ function initGuestNudgeSystem() {
       dismissStrip();
       openSignup();
     });
-
-    // Auto-dismiss strip after 8 seconds
-    setTimeout(dismissStrip, 8000);
+    document.getElementById('guestStripLogin')?.addEventListener('click', () => {
+      dismissStrip();
+      openLogin();
+    });
   }
 
 
-  // ── 3. MILESTONE TOAST NUDGES (triggered by actions) ─────────────
+  // ── 8. MILESTONE TOAST NUDGES (STACKABLE MULTI-ALERT CONTAINER) ─
   const toastMessages = [
     {
       trigger: 'note_shared',
       icon: 'celebration',
-      text: '🎉 Note shared! Sign up to track all your shares and build a history.',
+      text: '🎉 Note shared! Create an account or sign in to track all your shared notes and view history.',
       btnText: 'Save My History'
     },
     {
       trigger: 'note_typed',
       icon: 'tips_and_updates',
-      text: '💡 Great idea! Register free to keep this note safe — guest notes expire in 20 min.',
-      btnText: 'Keep This Note'
+      text: '💡 Great idea! Register free to keep this note safe — guest notes auto-expire in 20 min.',
+      btnText: 'Keep Note Safe'
     },
     {
       trigger: 'code_accessed',
       icon: 'lock_open',
-      text: '✅ Note retrieved! Members can organize received notes into folders automatically.',
+      text: '✅ Note retrieved! Members can organize received notes into custom folders automatically.',
       btnText: 'Organize My Notes'
     }
   ];
+
+  function getMilestoneToastContainer() {
+    let container = document.getElementById('milestoneToastContainer');
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'milestoneToastContainer';
+      container.className = 'fixed left-5 z-[9960] flex flex-col-reverse gap-2.5 pointer-events-none max-w-[340px] w-[calc(100vw-2.5rem)] transition-all duration-300';
+      const bannerVisible = banner && banner.style.display !== 'none' && banner.classList.contains('gnb-visible');
+      container.style.bottom = bannerVisible ? '180px' : '24px';
+      document.body.appendChild(container);
+    }
+    return container;
+  }
+
+  function updateMilestoneContainerPosition() {
+    const container = document.getElementById('milestoneToastContainer');
+    if (container) {
+      const bannerVisible = banner && banner.style.display !== 'none' && banner.classList.contains('gnb-visible');
+      container.style.bottom = bannerVisible ? '180px' : '24px';
+    }
+  }
 
   function showMilestoneToast(triggerName) {
     if (!isGuest()) return;
     const msg = toastMessages.find(m => m.trigger === triggerName);
     if (!msg) return;
 
+    const container = getMilestoneToastContainer();
+    updateMilestoneContainerPosition();
+
     const toast = document.createElement('div');
-    toast.className = 'gnb-milestone-toast';
+    toast.className = 'gnb-milestone-toast pointer-events-auto transition-all duration-300 transform translate-y-4 opacity-0';
     toast.innerHTML = `
-      <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--gnb-toast-bg,rgba(250,249,245,0.97));border:1px solid rgba(81,96,112,0.15);border-radius:16px;box-shadow:0 8px 24px rgba(47,52,46,0.14);max-width:320px;font-family:Inter,sans-serif;backdrop-filter:blur(12px);">
+      <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--gnb-toast-bg,rgba(250,249,245,0.97));border:1px solid rgba(81,96,112,0.15);border-radius:16px;box-shadow:0 8px 24px rgba(47,52,46,0.14);width:100%;font-family:Inter,sans-serif;backdrop-filter:blur(12px);">
         <span class="material-symbols-outlined" style="color:#516070;font-size:20px;flex-shrink:0">${msg.icon}</span>
         <div style="flex:1;min-width:0">
           <p style="font-size:11.5px;color:#2f342e;line-height:1.4;margin:0 0 7px">${msg.text}</p>
-          <button class="gnb-toast-action" style="font-size:10.5px;font-weight:700;color:#516070;background:rgba(81,96,112,0.1);border:none;padding:4px 10px;border-radius:8px;cursor:pointer;letter-spacing:0.02em">${msg.btnText}</button>
+          <div style="display:flex;gap:6px;align-items:center">
+            <button class="gnb-toast-action" style="font-size:10.5px;font-weight:700;color:#516070;background:rgba(81,96,112,0.12);border:none;padding:4px 10px;border-radius:8px;cursor:pointer">${msg.btnText}</button>
+            <button class="gnb-toast-login" style="font-size:10px;font-weight:600;color:#516070;background:none;border:none;cursor:pointer;text-decoration:underline">Sign In</button>
+          </div>
         </div>
         <button class="gnb-toast-close" style="color:rgba(47,52,46,0.3);background:none;border:none;cursor:pointer;font-size:18px;line-height:1;flex-shrink:0">×</button>
       </div>
     `;
-    toast.style.cssText = `
-      position:fixed; bottom:${banner && banner.style.display !== 'none' ? '160px' : '24px'}; left:50%;
-      transform:translateX(-50%) translateY(20px); opacity:0;
-      z-index:9960; transition:all 0.35s cubic-bezier(0.34,1.56,0.64,1);
-    `;
 
-    // Dark mode tweak
+    // Dark mode styling
     if (document.documentElement.classList.contains('dark')) {
-      toast.querySelector('div').style.background = 'rgba(22,25,33,0.97)';
-      toast.querySelector('p').style.color = '#cbd5e1';
-      toast.querySelector('.gnb-toast-action').style.color = '#93c5fd';
-      toast.querySelector('.gnb-toast-action').style.background = 'rgba(147,197,253,0.1)';
-      toast.querySelector('.gnb-toast-close').style.color = 'rgba(203,213,225,0.4)';
+      const inner = toast.querySelector('div');
+      if (inner) inner.style.background = 'rgba(22,25,33,0.97)';
+      const p = toast.querySelector('p');
+      if (p) p.style.color = '#cbd5e1';
+      const act = toast.querySelector('.gnb-toast-action');
+      if (act) { act.style.color = '#93c5fd'; act.style.background = 'rgba(147,197,253,0.12)'; }
+      const log = toast.querySelector('.gnb-toast-login');
+      if (log) log.style.color = '#93c5fd';
+      const cls = toast.querySelector('.gnb-toast-close');
+      if (cls) cls.style.color = 'rgba(203,213,225,0.4)';
     }
 
-    document.body.appendChild(toast);
+    container.appendChild(toast);
     requestAnimationFrame(() => requestAnimationFrame(() => {
-      toast.style.opacity = '1';
-      toast.style.transform = 'translateX(-50%) translateY(0)';
+      toast.classList.remove('translate-y-4', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
     }));
 
     const removeToast = () => {
-      toast.style.opacity = '0';
-      toast.style.transform = 'translateX(-50%) translateY(12px)';
-      setTimeout(() => toast.remove(), 340);
+      toast.classList.remove('translate-y-0', 'opacity-100');
+      toast.classList.add('translate-y-4', 'opacity-0');
+      setTimeout(() => {
+        if (toast.parentNode) toast.remove();
+      }, 340);
     };
 
-    toast.querySelector('.gnb-toast-close').addEventListener('click', removeToast);
-    toast.querySelector('.gnb-toast-action').addEventListener('click', () => { removeToast(); openSignup(); });
-    setTimeout(removeToast, 7000);
+    toast.querySelector('.gnb-toast-close')?.addEventListener('click', removeToast);
+    toast.querySelector('.gnb-toast-action')?.addEventListener('click', () => { removeToast(); openSignup(); });
+    toast.querySelector('.gnb-toast-login')?.addEventListener('click', () => { removeToast(); openLogin(); });
+    setTimeout(removeToast, 8500);
   }
 
-  // ── 4. EXPOSE GLOBALLY FOR OTHER MODULES ────────────────────────
+  // ── 9. EXPOSE GLOBAL APIS ────────────────────────────────────────
   window.hideGuestNudge = hideCard;
   window.showGuestNudge = showCard;
+  window.nextGuestNudge = () => { renderMessage(cardMsgIndex + 1); };
+  window.prevGuestNudge = () => { renderMessage(cardMsgIndex - 1); };
+  window.showGuestAlertModal = showGuestAlertModal;
+  window.hideGuestAlertModal = hideGuestAlertModal;
   window.showGuestMilestoneToast = showMilestoneToast;
-
-  // Expose for external trigger (e.g., after sharing a note)
   window.triggerGuestNudge = (index) => {
     cardDismissed = false;
     showCard(typeof index === 'number' ? index : undefined);

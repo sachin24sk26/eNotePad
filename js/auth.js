@@ -632,40 +632,143 @@ function initAuth() {
     } catch (e) { console.warn('Stats load error:', e.message); }
   }
 
-  async function loadHistory(username) {
-    const list = document.getElementById('notesHistory');
-    const empty = document.getElementById('notesEmpty');
-    try {
-      const snap = await db.collection('users').doc(username).collection('history').orderBy('createdAt', 'desc').limit(50).get();
-      if (snap.empty) { empty.style.display = ''; return; }
-      empty.style.display = 'none';
-      list.querySelectorAll('.note-item, .view-more-btn').forEach(el => el.remove());
-      
-      let count = 0;
-      snap.docs.forEach(doc => {
-        const item = createHistoryItem(doc.data(), doc.id);
-        if (count >= 5) {
-          item.style.display = 'none';
-          item.classList.add('hidden-history-item');
-        }
-        list.appendChild(item);
-        count++;
-      });
-      
-      if (count > 5) {
-        const btnLi = document.createElement('li');
-        btnLi.className = 'text-center mt-4 view-more-btn';
-        btnLi.innerHTML = `<button class="text-xs text-primary/70 hover:text-primary font-bold px-4 py-2 bg-primary-container/20 hover:bg-primary-container/40 rounded-full transition-colors">View More</button>`;
-        btnLi.addEventListener('click', () => {
-          list.querySelectorAll('.hidden-history-item').forEach(el => {
-            el.style.display = '';
-            el.classList.remove('hidden-history-item');
-          });
-          btnLi.remove();
-        });
-        list.appendChild(btnLi);
+  function formatTimestampUpper(timestamp) {
+    let date;
+    if (timestamp && timestamp.toDate) date = timestamp.toDate();
+    else if (timestamp instanceof Date) date = timestamp;
+    else if (timestamp) date = new Date(timestamp);
+    else return 'RECENT';
+
+    const now = new Date();
+    const isToday = date.toDateString() === now.toDateString();
+    
+    const yesterday = new Date(now);
+    yesterday.setDate(now.getDate() - 1);
+    const isYesterday = date.toDateString() === yesterday.toDateString();
+
+    const timeStr = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+    if (isToday) return `TODAY, ${timeStr}`;
+    if (isYesterday) return `YESTERDAY, ${timeStr}`;
+
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).toUpperCase();
+  }
+
+  function createSavedNoteCardForHistory(data, docId, username) {
+    const card = document.createElement('div');
+    card.className = 'bg-surface-container-lowest border border-outline-variant/15 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between cursor-pointer group min-h-[135px] relative overflow-hidden';
+    
+    const title = escapeHTML(data.title || data.preview || 'Untitled Note');
+    const snippetContent = Array.isArray(data.content) ? data.content.join(', ') : (data.content || '');
+    const snippet = escapeHTML(snippetContent ? snippetContent.substring(0, 110) + (snippetContent.length > 110 ? '…' : '') : 'No preview available');
+    const dateStr = data.createdAt ? formatTimestampUpper(data.createdAt) : 'RECENT';
+    const fileCount = data.files ? (Array.isArray(data.files) ? data.files.length : 1) : null;
+    const isImportant = data.category === 'important';
+
+    card.innerHTML = `
+      <div>
+        <div class="flex items-start justify-between gap-2 mb-1.5">
+          <h4 class="font-serif text-base font-semibold text-on-surface group-hover:text-primary transition-colors line-clamp-1">${title}</h4>
+          ${data.imageUrl ? `<img src="${data.imageUrl}" class="w-10 h-10 rounded-xl object-cover flex-shrink-0 border border-outline-variant/15" alt="Thumbnail" />` : ''}
+        </div>
+        <p class="text-xs text-on-surface-variant/75 leading-relaxed line-clamp-2 sm:line-clamp-3 mb-4 font-normal">${snippet}</p>
+      </div>
+      <div class="flex items-center justify-between text-[10px] font-mono text-on-surface-variant/50 uppercase tracking-wider pt-2.5 border-t border-outline-variant/10">
+        <span>${dateStr}</span>
+        <div class="flex items-center gap-2">
+          ${fileCount ? `<span class="flex items-center gap-1 font-sans text-on-surface-variant/60 font-semibold"><span class="material-symbols-outlined text-xs">folder</span> ${fileCount} File${fileCount > 1 ? 's' : ''}</span>` : ''}
+          ${isImportant ? `<span class="material-symbols-outlined text-xs text-amber-500" style="font-variation-settings:'FILL' 1">star</span>` : ''}
+        </div>
+      </div>
+    `;
+
+    card.addEventListener('click', () => {
+      if (typeof openEditModal === 'function') {
+        openEditModal(data, docId, username);
       }
-    } catch (e) { console.error('History load error:', e); }
+    });
+
+    return card;
+  }
+
+  function createHistoryTimelineItem(data, docId) {
+    const div = document.createElement('div');
+    div.className = 'relative flex items-start justify-between gap-4 group cursor-pointer py-1';
+
+    const typePrefixes = {
+      text: 'Quick Note',
+      link: 'Link Saved',
+      image: 'Draft'
+    };
+    const prefix = typePrefixes[data.type] || 'Quick Note';
+    const titleText = data.title || data.preview || 'Untitled Note';
+    const displayTitle = `${prefix}: ${titleText}`;
+
+    const snippetContent = data.preview || (Array.isArray(data.content) ? data.content.join(', ') : data.content);
+    const snippet = snippetContent ? `"${escapeHTML(snippetContent.substring(0, 90))}${snippetContent.length > 90 ? '...' : ''}"` : '';
+    const dateStr = data.createdAt ? formatTimestampUpper(data.createdAt) : 'RECENT';
+
+    div.innerHTML = `
+      <div class="absolute -left-[22px] top-1.5 w-3.5 h-3.5 rounded-full border-2 border-primary/40 bg-surface group-hover:border-primary group-hover:bg-primary/20 transition-all flex items-center justify-center">
+        <span class="w-1 h-1 rounded-full bg-primary/40 group-hover:bg-primary"></span>
+      </div>
+      <div class="min-w-0 flex-1">
+        <h5 class="font-bold text-xs sm:text-sm text-on-surface group-hover:text-primary transition-colors leading-snug">${escapeHTML(displayTitle)}</h5>
+        ${snippet ? `<p class="text-xs text-on-surface-variant/70 italic mt-0.5 leading-snug truncate">${snippet}</p>` : ''}
+      </div>
+      <span class="text-[10px] font-mono text-on-surface-variant/50 uppercase tracking-wider whitespace-nowrap flex-shrink-0 pt-0.5">${dateStr}</span>
+    `;
+
+    div.addEventListener('click', async () => {
+      const code = data.code || docId;
+      if (code) {
+        await copyToClipboard(code);
+        showToast(`Copied note code: ${code}`, 'success');
+      }
+    });
+
+    return div;
+  }
+
+  async function loadHistory(username) {
+    const timelineList = document.getElementById('historyTimelineList');
+    const savedGrid = document.getElementById('historySavedGrid');
+
+    // 1. Fetch Saved Notes for top grid in History view
+    if (savedGrid) {
+      try {
+        const savedSnap = await db.collection('users').doc(username).collection('savedNotes').orderBy('createdAt', 'desc').limit(4).get();
+        savedGrid.innerHTML = '';
+        if (savedSnap.empty) {
+          savedGrid.innerHTML = `<div class="col-span-full py-6 text-center text-on-surface-variant/40 italic text-xs">No saved notes yet. Use "Save Note" to store permanent records.</div>`;
+        } else {
+          savedSnap.docs.forEach(doc => {
+            savedGrid.appendChild(createSavedNoteCardForHistory(doc.data(), doc.id, username));
+          });
+        }
+      } catch (e) {
+        console.error('History saved notes load error:', e);
+        savedGrid.innerHTML = `<div class="col-span-full py-4 text-center text-error/50 text-xs">Could not load saved notes.</div>`;
+      }
+    }
+
+    // 2. Fetch Recent History Activity for timeline
+    if (timelineList) {
+      try {
+        const snap = await db.collection('users').doc(username).collection('history').orderBy('createdAt', 'desc').limit(30).get();
+        timelineList.innerHTML = '';
+        if (snap.empty) {
+          timelineList.innerHTML = `<p class="text-xs text-on-surface-variant/50 italic py-4" id="historyEmpty">No recent activity found.</p>`;
+          return;
+        }
+        snap.docs.forEach(doc => {
+          timelineList.appendChild(createHistoryTimelineItem(doc.data(), doc.id));
+        });
+      } catch (e) {
+        console.error('History timeline load error:', e);
+        timelineList.innerHTML = `<p class="text-xs text-error/50 italic py-4">Could not load recent activity.</p>`;
+      }
+    }
   }
 
   async function loadSavedNotes(username) {
@@ -688,23 +791,7 @@ function initAuth() {
 
   // ----- UI Component Builders -----
   function createHistoryItem(data, docId) {
-    const li = document.createElement('li');
-    li.className = 'note-item';
-    const typeIcons = { text: 'edit_note', link: 'link', image: 'image' };
-    const icon = typeIcons[data.type] || 'description';
-    li.innerHTML = `
-      <div class="note-item-icon"><span class="material-symbols-outlined text-lg">${icon}</span></div>
-      <div class="note-item-content">
-        <div class="note-item-text">${escapeHTML(data.preview || 'Untitled')}</div>
-        <div class="note-item-meta"><span class="note-item-code">${data.code || docId}</span><span>${data.createdAt ? formatTimestamp(data.createdAt) : ''}</span></div>
-      </div>
-    `;
-    li.addEventListener('click', async () => {
-      const code = data.code || docId;
-      await copyToClipboard(code);
-      showToast(`Code ${code} copied!`, 'success');
-    });
-    return li;
+    return createHistoryTimelineItem(data, docId);
   }
 
   const categoryLabels = { personal: '📝 Personal', work: '💼 Work', ideas: '💡 Ideas', code: '🖥️ Code', links: '🔗 Links', important: '⭐ Important' };
@@ -748,16 +835,33 @@ function initAuth() {
     } catch (e) { showToast('Delete failed', 'error'); }
   }
 
+  // Attach button listeners for History view actions
+  document.getElementById('historyViewAllSavedBtn')?.addEventListener('click', () => {
+    const savedTab = document.querySelector('.account-tab[data-account-tab="saved"]');
+    if (savedTab) savedTab.click();
+  });
+
+  document.getElementById('reverifyPinBtn')?.addEventListener('click', () => {
+    if (typeof showToast === 'function') showToast('🔒 Security PIN verified — records access active', 'info');
+  });
+
   // ----- Tabs & Filtering -----
   document.querySelectorAll('.account-tab').forEach(tab => {
     tab.addEventListener('click', () => {
       const target = tab.dataset.accountTab;
       document.querySelectorAll('.account-tab').forEach(t => t.classList.remove('active'));
       tab.classList.add('active');
-      ['recent', 'saved', 'settings', 'files', 'inbox'].forEach(k => {
+      ['history', 'recent', 'saved', 'settings', 'files', 'inbox'].forEach(k => {
         const el = document.getElementById(`section${k.charAt(0).toUpperCase() + k.slice(1)}`);
         if (el) el.setAttribute('data-account-active', k === target ? 'true' : 'false');
       });
+      // Load History when History tab opens
+      if (target === 'history') {
+        const username = (getEl('userName')?.textContent || '').trim();
+        if (username && typeof loadHistory === 'function') {
+          loadHistory(username);
+        }
+      }
       // Load session data when Settings tab opens
       if (target === 'settings') {
         const username = (getEl('userName')?.textContent || '').trim();

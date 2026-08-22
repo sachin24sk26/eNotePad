@@ -69,30 +69,41 @@ async function copyToClipboard(text) {
  * @param {'success'|'error'|'warning'} type - Toast type
  */
 function showToast(message, type = 'success') {
-  const container = document.getElementById('toastContainer');
+  let container = document.getElementById('toastContainer');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'toastContainer';
+    container.className = 'fixed top-5 right-5 z-[9999] flex flex-col gap-2 pointer-events-none';
+    document.body.appendChild(container);
+  }
 
   // Icon mapping
   const icons = {
     success: '✅',
     error: '❌',
-    warning: '⚠️'
+    warning: '⚠️',
+    info: 'ℹ️'
   };
 
   // Create toast element
   const toast = document.createElement('div');
-  toast.className = `toast toast-${type}`;
+  toast.className = `toast toast-${type} pointer-events-auto shadow-xl transition-all duration-300`;
   toast.innerHTML = `
-    <span class="toast-icon">${icons[type]}</span>
+    <span class="toast-icon">${icons[type] || 'ℹ️'}</span>
     <span>${message}</span>
   `;
 
   container.appendChild(toast);
 
-  // Auto-remove after animation completes (4 seconds)
+  // Auto-remove with smooth exit animation after 4 seconds
   setTimeout(() => {
-    if (toast.parentNode) {
-      toast.remove();
-    }
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(100%)';
+    setTimeout(() => {
+      if (toast.parentNode) {
+        toast.remove();
+      }
+    }, 300);
   }, 4000);
 }
 

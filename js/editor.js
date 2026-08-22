@@ -638,6 +638,15 @@ function initEditor() {
     updateStats();
     updateToolbarState();
     scheduleDraftSave();
+
+    // Trigger guest milestone nudge on note typing
+    if (typeof window.showGuestMilestoneToast === 'function' && !sessionStorage.getItem('enp_nudge_typed_shown')) {
+      const text = editor.innerText ? editor.innerText.trim() : '';
+      if (text.length >= 25) {
+        sessionStorage.setItem('enp_nudge_typed_shown', '1');
+        window.showGuestMilestoneToast('note_typed');
+      }
+    }
   });
 
   // ─── Toolbar active states ───

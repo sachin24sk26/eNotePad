@@ -837,24 +837,55 @@ header.header-scrolled, #topAppBar.header-scrolled {
   background-color: #2f3c49;
 }
 
-/* Text colors */
-.dark .text-on-surface,
+/* Text colors - High Contrast Dark Mode */
+.dark .text-on-surface {
+  color: #f8fafc !important;
+}
+
 .dark .text-on-surface-variant {
-  color: #a0a8b4;
+  color: #cbd5e1 !important;
 }
 
 .dark .text-primary {
-  color: #c6d6e9;
+  color: #93c5fd !important;
+}
+
+.dark [class*="text-on-surface-variant/"] {
+  color: rgba(226, 232, 240, 0.85) !important;
+}
+
+.dark .text-on-surface-variant\/60,
+.dark .text-on-surface-variant\/50 {
+  color: rgba(148, 163, 184, 0.8) !important;
 }
 
 .dark .text-primary\/50,
 .dark .text-primary\/60,
 .dark .text-primary\/70 {
-  color: rgba(198, 214, 233, 0.5);
+  color: rgba(147, 197, 253, 0.8) !important;
 }
 
 .dark .text-primary\/40 {
-  color: rgba(198, 214, 233, 0.3);
+  color: rgba(147, 197, 253, 0.6) !important;
+}
+
+.dark #sectionHistory {
+  background-color: #131622 !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.dark #historyTimelineList::before {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+.dark #reverifyPinBtn {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  color: #f1f5f9 !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+.dark #reverifyPinBtn:hover {
+  background-color: rgba(255, 255, 255, 0.15) !important;
 }
 
 /* Primary container */
@@ -3901,6 +3932,27 @@ select.appearance-none {
 .dark #guestNudgeActionBtn:hover {
   background: linear-gradient(135deg, #4a5a6c, #575e78) !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+}
+.dark #guestNudgeBadge {
+  background: rgba(147, 197, 253, 0.12) !important;
+  color: #93c5fd !important;
+  border-color: rgba(147, 197, 253, 0.2) !important;
+}
+.dark #guestNudgeLoginBtn {
+  color: #93c5fd !important;
+}
+
+/* Guest Alert Modal — Dark mode overrides */
+.dark #guestAlertModal > div {
+  background: rgba(18, 21, 30, 0.98) !important;
+  border-color: rgba(147, 197, 253, 0.2) !important;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8) !important;
+}
+.dark #guestAlertModalTitle {
+  color: #f1f5f9 !important;
+}
+.dark #guestAlertModalText {
+  color: #94a3b8 !important;
 }
 
 /* Guest Welcome Strip */
