@@ -73,13 +73,28 @@ function initCustomCursor() {
   let outlineX = mouseX;
   let outlineY = mouseY;
   let isVisible = false;
+  let idleTimeout = null;
 
-  // Track mouse movement
-  window.addEventListener('mousemove', (e) => {
+  const hideCursor = () => {
+    isVisible = false;
+    cursorDot.style.opacity = '0';
+    cursorOutline.style.opacity = '0';
+  };
+
+  const showCursor = () => {
     if (!isVisible) {
       isVisible = true;
       cursorDot.style.opacity = '1';
       cursorOutline.style.opacity = '1';
+    }
+  };
+
+  // Track mouse movement
+  window.addEventListener('mousemove', (e) => {
+    clearTimeout(idleTimeout);
+
+    if (!isVisible) {
+      showCursor();
       outlineX = e.clientX;
       outlineY = e.clientY;
       console.log('✨ eNotePad Cursor Activated');
@@ -90,6 +105,14 @@ function initCustomCursor() {
     // The inner dot follows instantly
     cursorDot.style.left = `${mouseX}px`;
     cursorDot.style.top = `${mouseY}px`;
+
+    // Set timeout to hide cursor after 3 seconds of inactivity
+    idleTimeout = setTimeout(hideCursor, 3000);
+  });
+
+  document.addEventListener('mouseleave', () => {
+    clearTimeout(idleTimeout);
+    hideCursor();
   });
 
   // Smooth animation for the outline
