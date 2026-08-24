@@ -4411,3 +4411,82 @@ html, body, #guestWelcomeStrip {
   }
 }
 
+/* Custom Cursor Styles */
+@media (pointer: fine) {
+  body {
+    cursor: none; /* Hide default cursor */
+  }
+
+  /* Interactive elements should also hide cursor since we're using a custom one */
+  a, button, select, input, textarea, .clickable {
+    cursor: none !important;
+  }
+  
+  /* Show text cursor over text inputs explicitly to guide the user, or let custom cursor handle it */
+  input[type="text"], input[type="password"], textarea, [contenteditable="true"] {
+    cursor: none !important; 
+  }
+
+  .custom-cursor-dot {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 8px;
+    height: 8px;
+    background-color: var(--tw-prose-body, #516070); /* Primary dim color */
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 10000;
+    transition: width 0.2s, height 0.2s, background-color 0.2s;
+  }
+
+  .dark .custom-cursor-dot {
+    background-color: #daeafe; /* inverse-primary color for dark mode */
+  }
+
+  .custom-cursor-outline {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 40px;
+    height: 40px;
+    border: 1.5px solid rgba(81, 96, 112, 0.4);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 9999;
+    transition: width 0.15s, height 0.15s, background-color 0.15s, border-color 0.15s;
+    /* Smooth following effect is handled by JS requestAnimationFrame */
+  }
+
+  .dark .custom-cursor-outline {
+    border-color: rgba(218, 234, 254, 0.4);
+  }
+
+  /* Hover states for the cursor */
+  .custom-cursor-outline.hover {
+    width: 60px;
+    height: 60px;
+    background-color: rgba(81, 96, 112, 0.1);
+    border-color: rgba(81, 96, 112, 0.6);
+  }
+
+  .dark .custom-cursor-outline.hover {
+    background-color: rgba(218, 234, 254, 0.1);
+    border-color: rgba(218, 234, 254, 0.6);
+  }
+  
+  .custom-cursor-outline.text-hover {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px; /* Morph to a rectangle for text */
+    background-color: rgba(81, 96, 112, 0.05);
+    border-color: rgba(81, 96, 112, 0.3);
+  }
+  
+  .dark .custom-cursor-outline.text-hover {
+    background-color: rgba(218, 234, 254, 0.05);
+    border-color: rgba(218, 234, 254, 0.3);
+  }
+}

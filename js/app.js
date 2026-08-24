@@ -20,8 +20,115 @@ document.addEventListener('DOMContentLoaded', () => {
   initBroadcastListener();
   initFeedback();
   initGuestNudgeSystem();
+  initCustomCursor();
   console.log('✨ eNotePad — Digital Curator initialized');
 });
+
+/**
+ * Custom Creative Cursor Follower
+ */
+function initCustomCursor() {
+  // Only initialize on devices that have a fine pointer (mouse)
+  if (window.matchMedia("(any-pointer: coarse)").matches) return;
+
+  const cursorDot = document.getElementById('cursorDot');
+  const cursorOutline = document.getElementById('cursorOutline');
+  if (!cursorDot || !cursorOutline) return;
+
+  let mouseX = window.innerWidth / 2;
+  let mouseY = window.innerHeight / 2;
+  let outlineX = mouseX;
+  let outlineY = mouseY;
+  let isHovering = false;
+  let isTextHover = false;
+
+  // Track mouse movement
+  window.addEventListener('mousemove', (e) => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+    
+    // The inner dot follows instantly
+    cursorDot.style.left = `${mouseX}px`;
+    cursorDot.style.top = `${mouseY}px`;
+  });
+
+  // Smooth animation for the outline
+  function animateCursor() {
+    // Easing for smooth follow effect
+    let dx = mouseX - outlineX;
+    let dy = mouseY - outlineY;
+    outlineX += dx * 0.15;
+    outlineY += dy * 0.15;
+
+    cursorOutline.style.left = `${outlineX}px`;
+    cursorOutline.style.top = `${outlineY}px`;
+
+    requestAnimationFrame(animateCursor);
+  }
+  animateCursor();
+
+  // Add hover effects for interactive elements
+  const addHoverEffects = () => {
+    const interactables = document.querySelectorAll('a, button, select, .clickable, .account-tab, .sidebar-nav-btn');
+    const textInputs = document.querySelectorAll('input[type="text"], input[type="password"], textarea, [contenteditable="true"]');
+
+    interactables.forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        isHovering = true;
+        cursorOutline.classList.add('hover');
+      });
+      el.addEventListener('mouseleave', () => {
+        isHovering = false;
+        cursorOutline.classList.remove('hover');
+      });
+    });
+    
+    textInputs.forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        isTextHover = true;
+        cursorOutline.classList.add('text-hover');
+        cursorDot.style.opacity = '0'; // Hide dot when over text
+      });
+      el.addEventListener('mouseleave', () => {
+        isTextHover = false;
+        cursorOutline.classList.remove('text-hover');
+        cursorDot.style.opacity = '1';
+      });
+    });
+  };
+
+  addHoverEffects();
+  
+  // Re-run hover effects attachment when elements might be dynamically added
+  const observer = new MutationObserver((mutations) => {
+    let shouldUpdate = false;
+    for (let mutation of mutations) {
+      if (mutation.addedNodes.length > 0) {
+        shouldUpdate = true;
+        break;
+      }
+    }
+    if (shouldUpdate) {
+      // Remove old classes just in case
+      cursorOutline.classList.remove('hover', 'text-hover');
+      cursorDot.style.opacity = '1';
+      addHoverEffects();
+    }
+  });
+
+  observer.observe(document.body, { childList: true, subtree: true });
+
+  // Hide cursor when leaving window
+  document.addEventListener('mouseleave', () => {
+    cursorDot.style.display = 'none';
+    cursorOutline.style.display = 'none';
+  });
+  document.addEventListener('mouseenter', () => {
+    cursorDot.style.display = 'block';
+    cursorOutline.style.display = 'block';
+  });
+}
+
 
 /**
  * Auto-Revealing Top Header Navigation Bar for all pages.
