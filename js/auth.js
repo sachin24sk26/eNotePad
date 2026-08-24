@@ -524,7 +524,7 @@ function initAuth() {
         roleContainer.classList.add('text-error', 'font-bold');
       }
       if (roleText) {
-        roleText.textContent = 'System Administrator';
+        roleText.textContent = 'System Administrator • ';
       }
       if (sidebarRole) {
         sidebarRole.textContent = 'System Administrator';
@@ -656,7 +656,7 @@ function initAuth() {
 
   function createSavedNoteCardForHistory(data, docId, username) {
     const card = document.createElement('div');
-    card.className = 'bg-surface-container-lowest border border-outline-variant/15 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between cursor-pointer group min-h-[135px] relative overflow-hidden';
+    card.className = 'bg-surface-container-lowest border border-outline-variant/15 rounded-2xl p-4 sm:p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between cursor-pointer group min-h-[135px] relative overflow-hidden break-words min-w-0 w-full max-w-full';
     
     const title = escapeHTML(data.title || data.preview || 'Untitled Note');
     const snippetContent = Array.isArray(data.content) ? data.content.join(', ') : (data.content || '');
@@ -666,16 +666,16 @@ function initAuth() {
     const isImportant = data.category === 'important';
 
     card.innerHTML = `
-      <div>
-        <div class="flex items-start justify-between gap-2 mb-1.5">
-          <h4 class="font-serif text-base font-semibold text-on-surface group-hover:text-primary transition-colors line-clamp-1">${title}</h4>
-          ${data.imageUrl ? `<img src="${data.imageUrl}" class="w-10 h-10 rounded-xl object-cover flex-shrink-0 border border-outline-variant/15" alt="Thumbnail" />` : ''}
+      <div class="min-w-0 flex-1">
+        <div class="flex items-start justify-between gap-2 mb-1.5 min-w-0">
+          <h4 class="font-serif text-sm sm:text-base font-semibold text-on-surface group-hover:text-primary transition-colors line-clamp-1 break-words min-w-0 flex-1" style="display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word;overflow-wrap:anywhere;">${title}</h4>
+          ${data.imageUrl ? `<img src="${data.imageUrl}" class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl object-cover flex-shrink-0 border border-outline-variant/15" alt="Thumbnail" />` : ''}
         </div>
-        <p class="text-xs text-on-surface-variant/75 leading-relaxed line-clamp-2 sm:line-clamp-3 mb-4 font-normal">${snippet}</p>
+        <p class="text-xs text-on-surface-variant/75 leading-relaxed line-clamp-2 sm:line-clamp-3 mb-3.5 font-normal break-words min-w-0 overflow-hidden" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word;overflow-wrap:anywhere;">${snippet}</p>
       </div>
-      <div class="flex items-center justify-between text-[10px] font-mono text-on-surface-variant/50 uppercase tracking-wider pt-2.5 border-t border-outline-variant/10">
-        <span>${dateStr}</span>
-        <div class="flex items-center gap-2">
+      <div class="flex items-center justify-between text-[10px] font-mono text-on-surface-variant/50 uppercase tracking-wider pt-2.5 border-t border-outline-variant/10 min-w-0 flex-wrap gap-1">
+        <span class="truncate">${dateStr}</span>
+        <div class="flex items-center gap-2 flex-shrink-0">
           ${fileCount ? `<span class="flex items-center gap-1 font-sans text-on-surface-variant/60 font-semibold"><span class="material-symbols-outlined text-xs">folder</span> ${fileCount} File${fileCount > 1 ? 's' : ''}</span>` : ''}
           ${isImportant ? `<span class="material-symbols-outlined text-xs text-amber-500" style="font-variation-settings:'FILL' 1">star</span>` : ''}
         </div>
@@ -693,7 +693,7 @@ function initAuth() {
 
   function createHistoryTimelineItem(data, docId) {
     const div = document.createElement('div');
-    div.className = 'relative flex items-start justify-between gap-4 group cursor-pointer py-1';
+    div.className = 'relative flex items-start justify-between gap-2 sm:gap-4 group cursor-pointer py-1 min-w-0 w-full max-w-full';
 
     const typePrefixes = {
       text: 'Quick Note',
@@ -709,14 +709,14 @@ function initAuth() {
     const dateStr = data.createdAt ? formatTimestampUpper(data.createdAt) : 'RECENT';
 
     div.innerHTML = `
-      <div class="absolute -left-[22px] top-1.5 w-3.5 h-3.5 rounded-full border-2 border-primary/40 bg-surface group-hover:border-primary group-hover:bg-primary/20 transition-all flex items-center justify-center">
+      <div class="absolute -left-[19px] sm:-left-[22px] top-1.5 w-3.5 h-3.5 rounded-full border-2 border-primary/40 bg-surface group-hover:border-primary group-hover:bg-primary/20 transition-all flex items-center justify-center">
         <span class="w-1 h-1 rounded-full bg-primary/40 group-hover:bg-primary"></span>
       </div>
-      <div class="min-w-0 flex-1">
-        <h5 class="font-bold text-xs sm:text-sm text-on-surface group-hover:text-primary transition-colors leading-snug">${escapeHTML(displayTitle)}</h5>
-        ${snippet ? `<p class="text-xs text-on-surface-variant/70 italic mt-0.5 leading-snug truncate">${snippet}</p>` : ''}
+      <div class="min-w-0 flex-1 pr-1">
+        <h5 class="font-bold text-xs sm:text-sm text-on-surface group-hover:text-primary transition-colors leading-snug break-words">${escapeHTML(displayTitle)}</h5>
+        ${snippet ? `<p class="text-[11px] sm:text-xs text-on-surface-variant/70 italic mt-0.5 leading-snug truncate break-all">${snippet}</p>` : ''}
       </div>
-      <span class="text-[10px] font-mono text-on-surface-variant/50 uppercase tracking-wider whitespace-nowrap flex-shrink-0 pt-0.5">${dateStr}</span>
+      <span class="text-[8px] sm:text-[10px] font-mono text-on-surface-variant/50 uppercase tracking-tight whitespace-nowrap flex-shrink-0 pt-0.5 ml-1">${dateStr}</span>
     `;
 
     div.addEventListener('click', async () => {
@@ -806,15 +806,15 @@ function initAuth() {
     const snippet = snippetContent && snippetContent.length > 80 ? escapeHTML(snippetContent.substring(0, 80)) + '…' : (snippetContent ? escapeHTML(snippetContent) : '');
     li.innerHTML = `
       <div class="saved-note-item-icon"><span class="material-symbols-outlined text-lg">${icon}</span></div>
-      <div class="saved-note-item-content">
-        <div class="saved-note-item-text">${escapeHTML(data.title || data.preview || 'Untitled')}</div>
-        ${data.type !== 'image' && snippet ? `<div class="saved-note-item-snippet">${snippet}</div>` : ''}
-        <div class="saved-note-item-meta">${catLabel ? `<span class="saved-note-cat-badge">${catLabel}</span>` : ''}<span>${data.createdAt ? formatTimestamp(data.createdAt) : ''}</span></div>
+      <div class="saved-note-item-content min-w-0 flex-1 overflow-hidden">
+        <div class="saved-note-item-text truncate min-w-0">${escapeHTML(data.title || data.preview || 'Untitled')}</div>
+        ${data.type !== 'image' && snippet ? `<div class="saved-note-item-snippet truncate min-w-0">${snippet}</div>` : ''}
+        <div class="saved-note-item-meta flex items-center gap-1.5 flex-wrap min-w-0">${catLabel ? `<span class="saved-note-cat-badge flex-shrink-0">${catLabel}</span>` : ''}<span class="truncate min-w-0 text-[10px] sm:text-xs">${data.createdAt ? formatTimestamp(data.createdAt) : ''}</span></div>
       </div>
-      <div class="saved-note-item-actions">
-        <button class="saved-note-action edit-action"><span class="material-symbols-outlined text-base">edit</span></button>
-        <button class="saved-note-action copy-action"><span class="material-symbols-outlined text-base">content_copy</span></button>
-        <button class="saved-note-action delete"><span class="material-symbols-outlined text-base">delete</span></button>
+      <div class="saved-note-item-actions flex-shrink-0">
+        <button class="saved-note-action edit-action" title="Edit note"><span class="material-symbols-outlined text-base">edit</span></button>
+        <button class="saved-note-action copy-action" title="Copy content"><span class="material-symbols-outlined text-base">content_copy</span></button>
+        <button class="saved-note-action delete" title="Delete note"><span class="material-symbols-outlined text-base">delete</span></button>
       </div>
     `;
     li.querySelector('.edit-action').addEventListener('click', (e) => { 

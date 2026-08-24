@@ -865,29 +865,28 @@ function initGuestNudgeSystem() {
     const strip = document.createElement('div');
     strip.id = 'guestWelcomeStrip';
     strip.innerHTML = `
-      <div class="flex items-center justify-between gap-3 max-w-5xl mx-auto px-4 py-2.5">
-        <div class="flex items-center gap-2 flex-1 min-w-0">
-          <span class="material-symbols-outlined text-base flex-shrink-0" style="color:inherit">auto_awesome</span>
-          <span class="text-xs font-semibold truncate">
-            <strong>Welcome to eNotePad!</strong> — You're using free guest mode.
-            <span class="hidden sm:inline opacity-85">Sign up or sign in free to keep notes forever, use folders, and DM members.</span>
+      <div class="flex items-center justify-between gap-2 max-w-5xl mx-auto px-3 py-2 w-full min-w-0 overflow-hidden box-border">
+        <div class="flex items-center gap-1.5 flex-1 min-w-0">
+          <span class="material-symbols-outlined text-sm sm:text-base flex-shrink-0" style="color:inherit">auto_awesome</span>
+          <span class="text-[11px] sm:text-xs font-semibold truncate min-w-0">
+            <strong>eNotePad</strong> <span class="hidden sm:inline opacity-85">— Free Guest Mode. Sign up to keep notes forever!</span>
           </span>
         </div>
-        <div class="flex items-center gap-2 flex-shrink-0">
-          <button id="guestStripSignup" class="text-xs font-bold px-3 py-1 rounded-full border border-current/30 hover:bg-white/20 transition-all whitespace-nowrap">
-            Sign Up Free
+        <div class="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+          <button id="guestStripSignup" class="text-[10px] sm:text-xs font-bold px-2.5 py-1 rounded-full border border-current/30 hover:bg-white/20 transition-all whitespace-nowrap">
+            Sign Up
           </button>
-          <button id="guestStripLogin" class="text-xs font-semibold px-2.5 py-1 rounded-full bg-white/10 hover:bg-white/20 transition-all whitespace-nowrap">
+          <button id="guestStripLogin" class="text-[10px] sm:text-xs font-semibold px-2 py-1 rounded-full bg-white/10 hover:bg-white/20 transition-all whitespace-nowrap">
             Sign In
           </button>
-          <button id="guestStripClose" class="opacity-60 hover:opacity-100 transition-opacity p-0.5 ml-1" title="Dismiss header">
+          <button id="guestStripClose" class="opacity-60 hover:opacity-100 transition-opacity p-0.5 ml-0.5" title="Dismiss header">
             <span class="material-symbols-outlined text-sm">close</span>
           </button>
         </div>
       </div>
     `;
     strip.style.cssText = `
-      position: fixed; top: 0; left: 0; right: 0; z-index: 99999;
+      position: fixed; top: 0; left: 0; right: 0; width: 100vw; max-width: 100vw; box-sizing: border-box; overflow: hidden; z-index: 99999;
       background: linear-gradient(135deg, #516070 0%, #575e78 100%);
       color: #f4f8ff; font-family: Inter, sans-serif;
       transform: translateY(-100%); transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
