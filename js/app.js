@@ -28,22 +28,35 @@ document.addEventListener('DOMContentLoaded', () => {
  * Custom Creative Cursor Follower
  */
 function initCustomCursor() {
-  // Only initialize on devices that have a fine pointer (mouse)
-  if (window.matchMedia("(any-pointer: coarse)").matches) return;
-
   const cursorDot = document.getElementById('cursorDot');
   const cursorOutline = document.getElementById('cursorOutline');
   if (!cursorDot || !cursorOutline) return;
 
-  let mouseX = window.innerWidth / 2;
-  let mouseY = window.innerHeight / 2;
-  let outlineX = mouseX;
-  let outlineY = mouseY;
+  // Only initialize on devices where CSS will hide the cursor (primary pointer is fine/mouse)
+  if (!window.matchMedia("(pointer: fine)").matches) {
+    cursorDot.style.display = 'none';
+    cursorOutline.style.display = 'none';
+    return;
+  }
+
+  let mouseX = -100;
+  let mouseY = -100;
+  let outlineX = -100;
+  let outlineY = -100;
   let isHovering = false;
   let isTextHover = false;
+  let isVisible = false;
 
   // Track mouse movement
   window.addEventListener('mousemove', (e) => {
+    if (!isVisible) {
+      isVisible = true;
+      cursorDot.style.opacity = '1';
+      cursorOutline.style.opacity = '1';
+      // Snap outline to initial position on first move
+      outlineX = e.clientX;
+      outlineY = e.clientY;
+    }
     mouseX = e.clientX;
     mouseY = e.clientY;
     
@@ -120,12 +133,18 @@ function initCustomCursor() {
 
   // Hide cursor when leaving window
   document.addEventListener('mouseleave', () => {
-    cursorDot.style.display = 'none';
-    cursorOutline.style.display = 'none';
+    isVisible = false;
+    cursorDot.style.opacity = '0';
+    cursorOutline.style.opacity = '0';
   });
-  document.addEventListener('mouseenter', () => {
-    cursorDot.style.display = 'block';
-    cursorOutline.style.display = 'block';
+  document.addEventListener('mouseenter', (e) => {
+    isVisible = true;
+    cursorDot.style.opacity = '1';
+    cursorOutline.style.opacity = '1';
+    if (e.clientX && e.clientY) {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+    }
   });
 }
 
