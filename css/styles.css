@@ -4433,7 +4433,7 @@ html, body, #guestWelcomeStrip {
     left: 0;
     width: 8px;
     height: 8px;
-    background-color: var(--tw-prose-body, #516070); /* Primary dim color */
+    background-color: #516070; /* Primary dim color */
     border-radius: 50%;
     transform: translate(-50%, -50%);
     pointer-events: none;

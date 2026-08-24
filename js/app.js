@@ -39,12 +39,10 @@ function initCustomCursor() {
     return;
   }
 
-  let mouseX = -100;
-  let mouseY = -100;
-  let outlineX = -100;
-  let outlineY = -100;
-  let isHovering = false;
-  let isTextHover = false;
+  let mouseX = window.innerWidth / 2;
+  let mouseY = window.innerHeight / 2;
+  let outlineX = mouseX;
+  let outlineY = mouseY;
   let isVisible = false;
 
   // Track mouse movement
@@ -53,7 +51,6 @@ function initCustomCursor() {
       isVisible = true;
       cursorDot.style.opacity = '1';
       cursorOutline.style.opacity = '1';
-      // Snap outline to initial position on first move
       outlineX = e.clientX;
       outlineY = e.clientY;
     }
@@ -67,7 +64,6 @@ function initCustomCursor() {
 
   // Smooth animation for the outline
   function animateCursor() {
-    // Easing for smooth follow effect
     let dx = mouseX - outlineX;
     let dy = mouseY - outlineY;
     outlineX += dx * 0.15;
@@ -80,56 +76,34 @@ function initCustomCursor() {
   }
   animateCursor();
 
-  // Add hover effects for interactive elements
-  const addHoverEffects = () => {
-    const interactables = document.querySelectorAll('a, button, select, .clickable, .account-tab, .sidebar-nav-btn');
-    const textInputs = document.querySelectorAll('input[type="text"], input[type="password"], textarea, [contenteditable="true"]');
-
-    interactables.forEach(el => {
-      el.addEventListener('mouseenter', () => {
-        isHovering = true;
-        cursorOutline.classList.add('hover');
-      });
-      el.addEventListener('mouseleave', () => {
-        isHovering = false;
-        cursorOutline.classList.remove('hover');
-      });
-    });
+  // Use event delegation for hover effects to avoid attaching thousands of listeners or using MutationObserver
+  document.addEventListener('mouseover', (e) => {
+    if (!isVisible) return;
+    const target = e.target;
     
-    textInputs.forEach(el => {
-      el.addEventListener('mouseenter', () => {
-        isTextHover = true;
-        cursorOutline.classList.add('text-hover');
-        cursorDot.style.opacity = '0'; // Hide dot when over text
-      });
-      el.addEventListener('mouseleave', () => {
-        isTextHover = false;
-        cursorOutline.classList.remove('text-hover');
-        cursorDot.style.opacity = '1';
-      });
-    });
-  };
-
-  addHoverEffects();
-  
-  // Re-run hover effects attachment when elements might be dynamically added
-  const observer = new MutationObserver((mutations) => {
-    let shouldUpdate = false;
-    for (let mutation of mutations) {
-      if (mutation.addedNodes.length > 0) {
-        shouldUpdate = true;
-        break;
-      }
-    }
-    if (shouldUpdate) {
-      // Remove old classes just in case
-      cursorOutline.classList.remove('hover', 'text-hover');
-      cursorDot.style.opacity = '1';
-      addHoverEffects();
+    // Check if hovering over a text input
+    if (target.matches('input[type="text"], input[type="password"], textarea, [contenteditable="true"]')) {
+      cursorOutline.classList.add('text-hover');
+      cursorDot.style.opacity = '0';
+    } 
+    // Check if hovering over a button or link
+    else if (target.closest('a, button, select, .clickable, .account-tab, .sidebar-nav-btn')) {
+      cursorOutline.classList.add('hover');
     }
   });
 
-  observer.observe(document.body, { childList: true, subtree: true });
+  document.addEventListener('mouseout', (e) => {
+    if (!isVisible) return;
+    const target = e.target;
+    
+    if (target.matches('input[type="text"], input[type="password"], textarea, [contenteditable="true"]')) {
+      cursorOutline.classList.remove('text-hover');
+      cursorDot.style.opacity = '1';
+    } 
+    else if (target.closest('a, button, select, .clickable, .account-tab, .sidebar-nav-btn')) {
+      cursorOutline.classList.remove('hover');
+    }
+  });
 
   // Hide cursor when leaving window
   document.addEventListener('mouseleave', () => {
@@ -137,6 +111,7 @@ function initCustomCursor() {
     cursorDot.style.opacity = '0';
     cursorOutline.style.opacity = '0';
   });
+  
   document.addEventListener('mouseenter', (e) => {
     isVisible = true;
     cursorDot.style.opacity = '1';
