@@ -4420,15 +4420,14 @@ body.hide-native-cursor * {
 .custom-cursor-dot {
   width: 8px;
   height: 8px;
-  background-color: #516070; /* Primary dim color */
+  background-color: white; /* With difference blend mode, white perfectly inverts whatever is behind it! */
+  mix-blend-mode: difference;
   border-radius: 50%;
   transform: translate(-50%, -50%);
-  transition: width 0.2s, height 0.2s, background-color 0.2s;
+  transition: width 0.2s, height 0.2s, background-color 0.2s, opacity 0.2s;
 }
 
-  .dark .custom-cursor-dot {
-    background-color: #daeafe; /* inverse-primary color for dark mode */
-  }
+/* No dark mode override needed for dot because difference blend mode automatically adapts to any background! */
 
   .custom-cursor-outline {
     width: 40px;
@@ -4436,36 +4435,56 @@ body.hide-native-cursor * {
     border: 1.5px solid rgba(81, 96, 112, 0.4);
     border-radius: 50%;
     transform: translate(-50%, -50%);
-    transition: width 0.15s, height 0.15s, background-color 0.15s, border-color 0.15s;
+    box-shadow: 0 0 10px rgba(81, 96, 112, 0.05);
+    transition: width 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+                height 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+                background-color 0.2s, border-color 0.2s, border-radius 0.2s;
     /* Smooth following effect is handled by JS requestAnimationFrame */
   }
 
   .dark .custom-cursor-outline {
-    border-color: rgba(218, 234, 254, 0.4);
+    border-color: rgba(218, 234, 254, 0.3);
+    box-shadow: 0 0 10px rgba(218, 234, 254, 0.05);
+  }
+
+  @keyframes cursorPulse {
+    0% { box-shadow: 0 0 0 0 rgba(81, 96, 112, 0.3); }
+    70% { box-shadow: 0 0 0 15px rgba(81, 96, 112, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(81, 96, 112, 0); }
+  }
+
+  @keyframes cursorPulseDark {
+    0% { box-shadow: 0 0 0 0 rgba(218, 234, 254, 0.3); }
+    70% { box-shadow: 0 0 0 15px rgba(218, 234, 254, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(218, 234, 254, 0); }
   }
 
   /* Hover states for the cursor */
   .custom-cursor-outline.hover {
-    width: 60px;
-    height: 60px;
-    background-color: rgba(81, 96, 112, 0.1);
+    width: 55px;
+    height: 55px;
+    background-color: rgba(81, 96, 112, 0.08);
     border-color: rgba(81, 96, 112, 0.6);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    animation: cursorPulse 2s infinite ease-out;
   }
 
   .dark .custom-cursor-outline.hover {
-    background-color: rgba(218, 234, 254, 0.1);
+    background-color: rgba(218, 234, 254, 0.08);
     border-color: rgba(218, 234, 254, 0.6);
+    animation: cursorPulseDark 2s infinite ease-out;
   }
   
   .custom-cursor-outline.text-hover {
-    width: 60px;
-    height: 60px;
-    border-radius: 12px; /* Morph to a rectangle for text */
-    background-color: rgba(81, 96, 112, 0.05);
-    border-color: rgba(81, 96, 112, 0.3);
+    width: 4px;
+    height: 28px;
+    border-radius: 4px; /* Morph to an I-beam caret for text */
+    background-color: #516070;
+    border-color: transparent;
+    mix-blend-mode: difference; /* Makes the caret visible against selection highlighting */
   }
   
   .dark .custom-cursor-outline.text-hover {
-    background-color: rgba(218, 234, 254, 0.05);
-    border-color: rgba(218, 234, 254, 0.3);
+    background-color: #daeafe;
   }
