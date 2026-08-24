@@ -28,16 +28,45 @@ document.addEventListener('DOMContentLoaded', () => {
  * Custom Creative Cursor Follower
  */
 function initCustomCursor() {
-  const cursorDot = document.getElementById('cursorDot');
-  const cursorOutline = document.getElementById('cursorOutline');
-  if (!cursorDot || !cursorOutline) return;
-
-  // Only initialize on devices where CSS will hide the cursor (primary pointer is fine/mouse)
-  if (!window.matchMedia("(pointer: fine)").matches) {
-    cursorDot.style.display = 'none';
-    cursorOutline.style.display = 'none';
-    return;
+  // Only initialize on devices that support hovering (e.g., desktops/laptops)
+  if (!window.matchMedia("(any-hover: hover)").matches) {
+    return; // Leave native cursor completely alone for pure touch devices
   }
+
+  // 1. DYNAMIC DOM INJECTION
+  // Create dot
+  const cursorDot = document.createElement('div');
+  cursorDot.className = 'custom-cursor-dot';
+  // Enforce bulletproof inline styles
+  cursorDot.style.cssText = `
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    pointer-events: none !important;
+    z-index: 999999 !important;
+    opacity: 0;
+  `;
+
+  // Create outline
+  const cursorOutline = document.createElement('div');
+  cursorOutline.className = 'custom-cursor-outline';
+  // Enforce bulletproof inline styles
+  cursorOutline.style.cssText = `
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    pointer-events: none !important;
+    z-index: 999998 !important;
+    opacity: 0;
+  `;
+
+  // Inject into DOM at the very end
+  document.body.appendChild(cursorDot);
+  document.body.appendChild(cursorOutline);
+
+  // 2. FORCE HIDE NATIVE CURSOR
+  // Instead of @media queries, we dynamically attach this to guarantee sync
+  document.body.classList.add('hide-native-cursor');
 
   let mouseX = window.innerWidth / 2;
   let mouseY = window.innerHeight / 2;
@@ -53,6 +82,7 @@ function initCustomCursor() {
       cursorOutline.style.opacity = '1';
       outlineX = e.clientX;
       outlineY = e.clientY;
+      console.log('✨ eNotePad Cursor Activated');
     }
     mouseX = e.clientX;
     mouseY = e.clientY;
@@ -76,50 +106,31 @@ function initCustomCursor() {
   }
   animateCursor();
 
-  // Use event delegation for hover effects to avoid attaching thousands of listeners or using MutationObserver
+  // 3. EVENT DELEGATION FOR HOVER STATES
   document.addEventListener('mouseover', (e) => {
-    if (!isVisible) return;
-    const target = e.target;
+    if (!isVisible || !e.target || typeof e.target.matches !== 'function') return;
     
-    // Check if hovering over a text input
-    if (target.matches('input[type="text"], input[type="password"], textarea, [contenteditable="true"]')) {
-      cursorOutline.classList.add('text-hover');
-      cursorDot.style.opacity = '0';
-    } 
-    // Check if hovering over a button or link
-    else if (target.closest('a, button, select, .clickable, .account-tab, .sidebar-nav-btn')) {
-      cursorOutline.classList.add('hover');
-    }
+    try {
+      if (e.target.matches('input[type="text"], input[type="password"], textarea, [contenteditable="true"]')) {
+        cursorOutline.classList.add('text-hover');
+        cursorDot.style.opacity = '0';
+      } else if (e.target.closest('a, button, select, .clickable, .account-tab, .sidebar-nav-btn, label')) {
+        cursorOutline.classList.add('hover');
+      }
+    } catch (err) { /* safely ignore node errors */ }
   });
 
   document.addEventListener('mouseout', (e) => {
-    if (!isVisible) return;
-    const target = e.target;
+    if (!isVisible || !e.target || typeof e.target.matches !== 'function') return;
     
-    if (target.matches('input[type="text"], input[type="password"], textarea, [contenteditable="true"]')) {
-      cursorOutline.classList.remove('text-hover');
-      cursorDot.style.opacity = '1';
-    } 
-    else if (target.closest('a, button, select, .clickable, .account-tab, .sidebar-nav-btn')) {
-      cursorOutline.classList.remove('hover');
-    }
-  });
-
-  // Hide cursor when leaving window
-  document.addEventListener('mouseleave', () => {
-    isVisible = false;
-    cursorDot.style.opacity = '0';
-    cursorOutline.style.opacity = '0';
-  });
-  
-  document.addEventListener('mouseenter', (e) => {
-    isVisible = true;
-    cursorDot.style.opacity = '1';
-    cursorOutline.style.opacity = '1';
-    if (e.clientX && e.clientY) {
-      mouseX = e.clientX;
-      mouseY = e.clientY;
-    }
+    try {
+      if (e.target.matches('input[type="text"], input[type="password"], textarea, [contenteditable="true"]')) {
+        cursorOutline.classList.remove('text-hover');
+        cursorDot.style.opacity = '1';
+      } else if (e.target.closest('a, button, select, .clickable, .account-tab, .sidebar-nav-btn, label')) {
+        cursorOutline.classList.remove('hover');
+      }
+    } catch (err) { /* safely ignore node errors */ }
   });
 }
 
