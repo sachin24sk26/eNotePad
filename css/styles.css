@@ -141,25 +141,33 @@
   box-shadow: none !important;
 }
 
-.sidebar-nav-btn {
+.sidebar-nav-btn,
+.sidebar-quick-link,
+.sidebar-footer-btn {
   position: relative;
   overflow: hidden;
   transform: translateZ(0); /* Hardware acceleration */
 }
 
 /* Ensure child elements (icons, text) slide slightly and stay above the background */
-.sidebar-nav-btn > * {
+.sidebar-nav-btn > *,
+.sidebar-quick-link > *,
+.sidebar-footer-btn > * {
   position: relative;
   z-index: 2;
   transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-.sidebar-nav-btn:not(.active):hover > * {
+.sidebar-nav-btn:not(.active):hover > *,
+.sidebar-quick-link:hover > *,
+.sidebar-footer-btn:hover > * {
   transform: translateX(6px);
 }
 
 /* Glassy background sweep (Light Mode) */
-.sidebar-nav-btn::before {
+.sidebar-nav-btn::before,
+.sidebar-quick-link::before,
+.sidebar-footer-btn::before {
   content: '';
   position: absolute;
   top: 0; left: 0; bottom: 0; 
@@ -171,12 +179,16 @@
   border-radius: inherit;
 }
 
-.sidebar-nav-btn:not(.active):hover::before {
+.sidebar-nav-btn:not(.active):hover::before,
+.sidebar-quick-link:hover::before,
+.sidebar-footer-btn:hover::before {
   transform: translateX(0);
 }
 
 /* Accent pill on the left */
-.sidebar-nav-btn::after {
+.sidebar-nav-btn::after,
+.sidebar-quick-link::after,
+.sidebar-footer-btn::after {
   content: '';
   position: absolute;
   top: 50%; left: 0;
@@ -190,13 +202,17 @@
   z-index: 2;
 }
 
-.sidebar-nav-btn:not(.active):hover::after {
+.sidebar-nav-btn:not(.active):hover::after,
+.sidebar-quick-link:hover::after,
+.sidebar-footer-btn:hover::after {
   height: 60%;
   opacity: 1;
 }
 
 /* Hide default hover background */
-.sidebar-nav-btn:not(.active):hover {
+.sidebar-nav-btn:not(.active):hover,
+.sidebar-quick-link:hover,
+.sidebar-footer-btn:hover {
   background-color: transparent !important;
   color: #516070 !important;
 }
@@ -742,16 +758,22 @@ header.header-scrolled, #topAppBar.header-scrolled {
 }
 
 /* --- Amazing Hover Effect (Dark Mode) --- */
-.dark .sidebar-nav-btn::before {
+.dark .sidebar-nav-btn::before,
+.dark .sidebar-quick-link::before,
+.dark .sidebar-footer-btn::before {
   background: linear-gradient(90deg, rgba(198, 214, 233, 0.12) 0%, rgba(198, 214, 233, 0.02) 100%);
 }
 
-.dark .sidebar-nav-btn::after {
+.dark .sidebar-nav-btn::after,
+.dark .sidebar-quick-link::after,
+.dark .sidebar-footer-btn::after {
   background: #93c5fd; /* Vibrant blue accent */
   box-shadow: 0 0 8px rgba(147, 197, 253, 0.5); /* Subtle glow */
 }
 
-.dark .sidebar-nav-btn:not(.active):hover {
+.dark .sidebar-nav-btn:not(.active):hover,
+.dark .sidebar-quick-link:hover,
+.dark .sidebar-footer-btn:hover {
   background-color: transparent !important;
   color: #c6d6e9 !important;
 }
