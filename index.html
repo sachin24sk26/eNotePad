@@ -198,12 +198,20 @@
       <!-- Branding -->
       <div class="px-4 py-5 mb-1">
         <div class="flex items-center gap-2.5">
-          <div class="w-8 h-8 rounded-xl bg-primary/15 flex items-center justify-center flex-shrink-0">
-            <span class="material-symbols-outlined text-primary text-base">edit_note</span>
+          <div class="relative w-9 h-9 rounded-xl bg-gradient-to-br from-[#00a8ff] to-[#0055ff] flex items-center justify-center shadow-md shadow-blue-500/20 flex-shrink-0">
+            <span class="font-bold text-white text-[22px] italic tracking-tighter" style="font-family: 'Segoe UI', system-ui, sans-serif; margin-right: 1px;">e</span>
+            <div class="absolute -bottom-1 -right-1 bg-surface-container-low rounded-full p-[2px]">
+              <div class="bg-[#00a8ff] rounded-full w-3.5 h-3.5 flex items-center justify-center">
+                <span class="material-symbols-outlined text-white" style="font-size: 9px; font-weight: bold;">share</span>
+              </div>
+            </div>
           </div>
-          <div>
-            <span class="font-body italic text-base text-primary leading-none block">eNotePad</span>
-            <span class="text-[9px] uppercase tracking-widest text-primary/40 font-bold">Digital Curator</span>
+          <div class="flex flex-col justify-center">
+            <div class="text-xl font-bold tracking-tight flex items-baseline leading-none">
+              <span class="text-[#00a8ff]">e</span>
+              <span class="text-primary">NotePad</span>
+            </div>
+            <span class="text-[8px] uppercase tracking-widest text-primary/50 font-bold leading-tight mt-0.5">Digital Curator</span>
           </div>
         </div>
       </div>
@@ -304,7 +312,15 @@
       <header class="-ml-6 pl-6 bg-[#faf9f5]/50 dark:bg-[#0f1117]/55 sticky top-0 z-40 backdrop-blur-2xl border-b border-white/40 dark:border-white/15 transition-all duration-300 shadow-sm" id="topAppBar">
         <div class="flex justify-between items-center w-full px-3.5 sm:px-6 py-3.5 max-w-4xl mx-auto">
           <div class="flex items-center gap-2 sm:gap-3">
-            <span class="text-xl font-body italic text-primary mr-1">eNotePad</span>
+            <div class="flex items-center gap-2 mr-1">
+              <div class="relative w-7 h-7 rounded-[8px] bg-gradient-to-br from-[#00a8ff] to-[#0055ff] flex items-center justify-center shadow-sm flex-shrink-0">
+                <span class="font-bold text-white text-lg italic tracking-tighter" style="font-family: 'Segoe UI', system-ui, sans-serif; margin-right: 1px;">e</span>
+              </div>
+              <div class="text-lg font-bold tracking-tight flex items-baseline leading-none hidden sm:flex">
+                <span class="text-[#00a8ff]">e</span>
+                <span class="text-primary">NotePad</span>
+              </div>
+            </div>
 
             <!-- Top Header Left Action Buttons (Inbox + Find People Search) -->
             <div class="flex items-center gap-1">
