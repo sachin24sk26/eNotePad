@@ -1,0 +1,25 @@
+{
+  "name": "eNotePad — Digital Curator",
+  "short_name": "eNotePad",
+  "description": "Instantly share text, links, code snippets, and images across devices with a simple secret code.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#faf9f5",
+  "theme_color": "#516070",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "assets/Favicon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "utilities"]
+}

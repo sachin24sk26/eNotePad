@@ -1,8 +1,7 @@
 // ============================================================
 // Share Module — The Tactile Editorial
-// Handles content sharing (text/link/image) with 20-min auto-erase.
-// Logged in: Save (main) + Share (icon) + Title/Category fields.
-// Guest: Share only, no title/category.
+// Handles content sharing (text/link/image) with flexible expiry,
+// Burn-After-Reading, password protection, QR Code, and deep link generator.
 // ============================================================
 
 function initShare() {
@@ -14,18 +13,75 @@ function initShare() {
   const fileInput = document.getElementById('imageFileInput');
   const removeImageBtn = document.getElementById('removeImageBtn');
   const codeCopyBtn = document.getElementById('codeCopyBtn');
+  const codeCopyLinkBtn = document.getElementById('codeCopyLinkBtn');
+  const codeQrToggleBtn = document.getElementById('codeQrToggleBtn');
+  const shareQrContainer = document.getElementById('shareQrContainer');
+  const shareQrCanvas = document.getElementById('shareQrCanvas');
   const noteMeta = document.getElementById('noteMeta');
   const noteTitle = document.getElementById('noteTitle');
   const noteCategory = document.getElementById('noteCategory');
-
-  // Fixed 20-minute expiry for all shared content
-  const EXPIRY_MINUTES = 20;
+  const expirySelect = document.getElementById('shareExpirySelect');
+  const expiryBadgeText = document.getElementById('expiryBadgeText');
+  const toggleSharePasswordBtn = document.getElementById('toggleSharePasswordBtn');
+  const sharePasswordRow = document.getElementById('sharePasswordRow');
+  const sharePasswordInput = document.getElementById('sharePasswordInput');
+  const toggleSharePasswordLabel = document.getElementById('toggleSharePasswordLabel');
+  const clearSharePasswordBtn = document.getElementById('clearSharePasswordBtn');
 
   let selectedType = 'text';
   let selectedFile = null;
+  let qrCodeInstance = null;
 
   const addLinkBtn = document.getElementById('addLinkBtn');
   const linkInputsContainer = document.getElementById('linkInputsContainer');
+
+  // ----- Expiry Selector Listener -----
+  if (expirySelect) {
+    expirySelect.addEventListener('change', () => {
+      const val = expirySelect.value;
+      if (val === 'burn') {
+        if (expiryBadgeText) expiryBadgeText.innerHTML = '🔥 <strong>Burn After Reading</strong> (1-Time)';
+      } else {
+        const text = expirySelect.options[expirySelect.selectedIndex].text;
+        if (expiryBadgeText) expiryBadgeText.innerHTML = `Auto-erases in <strong>${text.split(' ')[0]} ${text.split(' ')[1] || ''}</strong>`;
+      }
+    });
+  }
+
+  // ----- Password Protection Toggle -----
+  if (toggleSharePasswordBtn && sharePasswordRow) {
+    toggleSharePasswordBtn.addEventListener('click', () => {
+      const isHidden = sharePasswordRow.style.display === 'none';
+      sharePasswordRow.style.display = isHidden ? 'block' : 'none';
+      if (isHidden && sharePasswordInput) {
+        sharePasswordInput.focus();
+        if (toggleSharePasswordLabel) toggleSharePasswordLabel.textContent = 'Password Enabled';
+        toggleSharePasswordBtn.classList.add('text-primary', 'bg-primary/10', 'border-primary/30');
+      } else {
+        if (sharePasswordInput) sharePasswordInput.value = '';
+        if (toggleSharePasswordLabel) toggleSharePasswordLabel.textContent = 'Add Password';
+        toggleSharePasswordBtn.classList.remove('text-primary', 'bg-primary/10', 'border-primary/30');
+      }
+    });
+  }
+
+  if (clearSharePasswordBtn) {
+    clearSharePasswordBtn.addEventListener('click', () => {
+      if (sharePasswordInput) sharePasswordInput.value = '';
+      if (sharePasswordRow) sharePasswordRow.style.display = 'none';
+      if (toggleSharePasswordLabel) toggleSharePasswordLabel.textContent = 'Add Password';
+      if (toggleSharePasswordBtn) toggleSharePasswordBtn.classList.remove('text-primary', 'bg-primary/10', 'border-primary/30');
+    });
+  }
+
+  // Password Hash Helper (SHA-256)
+  async function hashPassword(str) {
+    if (!str) return null;
+    const encoder = new TextEncoder();
+    const data = encoder.encode(str + '_enotepad_salt_2026');
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+  }
 
   // ----- Dynamic Links -----
   function updateRemoveLinkButtons() {
@@ -170,8 +226,6 @@ function initShare() {
 
   // ----- Upload image helper -----
   async function uploadImage(code) {
-    // Return base64 string directly, bypassing Firebase Storage 
-    // This perfectly averts CORS issues for file:// and localhost origins
     const compressedDataUrl = await compressImage(selectedFile);
     return compressedDataUrl;
   }
@@ -198,7 +252,26 @@ function initShare() {
 
     try {
       const code = await withTimeout(generateUniqueCode(6), 10000, 'generateUniqueCode');
-      const expiresAt = new Date(Date.now() + EXPIRY_MINUTES * 60 * 1000);
+      
+      // Handle custom expiry
+      const expiryVal = expirySelect ? expirySelect.value : '20';
+      const isBurnAfterReading = expiryVal === 'burn';
+      let expiryMinutes = 20;
+      if (!isBurnAfterReading) {
+        expiryMinutes = parseInt(expiryVal) || 20;
+      } else {
+        expiryMinutes = 1440; // 24h fallback safety expiry for unread burn notes
+      }
+      const expiresAt = new Date(Date.now() + expiryMinutes * 60 * 1000);
+
+      // Handle password protection
+      const rawPassword = sharePasswordInput ? sharePasswordInput.value.trim() : '';
+      let passwordHash = null;
+      let isProtected = false;
+      if (rawPassword) {
+        passwordHash = await hashPassword(rawPassword);
+        isProtected = true;
+      }
 
       if (selectedType === 'image') {
         content = await withTimeout(uploadImage(code), 15000, 'Image compression');
@@ -209,6 +282,9 @@ function initShare() {
         content: content,
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
         expiresAt: firebase.firestore.Timestamp.fromDate(expiresAt),
+        burnAfterReading: isBurnAfterReading,
+        isProtected: isProtected,
+        passwordHash: passwordHash,
         userId: null
       };
 
@@ -230,8 +306,8 @@ function initShare() {
           });
       }
 
-      displayCode(code);
-      showToast('Shared! Auto-erases in 20 min ⏱️', 'success');
+      displayCode(code, { isBurnAfterReading, expiryMinutes, isProtected });
+      showToast(isBurnAfterReading ? 'Shared! 🔥 Self-destructs after 1st read' : `Shared! Auto-erases in ${expiryMinutes >= 60 ? (expiryMinutes / 60) + 'h' : expiryMinutes + 'm'} ⏱️`, 'success');
       resetShareForm();
 
       // Guest milestone nudge — fires 2.5s after share to not collide with success toast
@@ -328,12 +404,10 @@ function initShare() {
   function openSaveFolderModal({ noteType, title, onConfirm }) {
     const modal = document.getElementById('saveFolderModal');
     if (!modal) {
-      // Fallback: no modal, save to root
       onConfirm(null, null);
       return;
     }
 
-    // Populate folder list
     const list = document.getElementById('saveFolderList');
     const newFolderInput = document.getElementById('saveFolderNewName');
     const newFolderRow = document.getElementById('saveFolderNewRow');
@@ -350,7 +424,6 @@ function initShare() {
       typeIconEl.textContent = icons[noteType] || 'description';
     }
 
-    // Build folder options
     const folders = (typeof window.getFolderList === 'function') ? window.getFolderList() : [];
     list.innerHTML = '';
     let selectedFolderId = null;
@@ -383,10 +456,8 @@ function initShare() {
     buildFolderItem(null, 'My Files (Root)', 0, 'home');
     buildLevel(null, 1);
 
-    // Auto-select root
     if (list.firstChild) list.firstChild.classList.add('selected');
 
-    // New folder toggle
     if (newFolderRow) newFolderRow.style.display = 'none';
     if (newFolderInput) newFolderInput.value = '';
     if (addFolderBtn) {
@@ -409,7 +480,6 @@ function initShare() {
 
     if (confirmBtn) {
       confirmBtn.onclick = async () => {
-        // If new folder name entered, create it first
         const newName = newFolderInput ? newFolderInput.value.trim() : '';
         if (newName && newFolderRow && newFolderRow.style.display !== 'none') {
           try {
@@ -433,7 +503,6 @@ function initShare() {
       };
     }
 
-    // Escape key
     const escHandler = (e) => { if (e.key === 'Escape') { closeModal(); document.removeEventListener('keydown', escHandler); } };
     document.addEventListener('keydown', escHandler);
   }
@@ -443,11 +512,76 @@ function initShare() {
   }
 
   // ----- Display Code -----
-  function displayCode(code) {
+  function displayCode(code, options = {}) {
     hideEl('shareForm');
     setElText('codeValue', code);
-    setElText('codeExpiry', `Auto-erases in ${EXPIRY_MINUTES} minutes`);
+    
+    // Expiry description
+    if (options.isBurnAfterReading) {
+      setElText('codeExpiry', '🔥 Self-destructs immediately after recipient views it once');
+    } else {
+      const minutes = options.expiryMinutes || 20;
+      const formattedTime = minutes >= 1440 ? `${minutes / 1440} day(s)` : (minutes >= 60 ? `${minutes / 60} hour(s)` : `${minutes} minutes`);
+      setElText('codeExpiry', `Auto-erases in ${formattedTime}`);
+    }
+
+    // Password badge
+    const pwdBadge = document.getElementById('codePasswordBadge');
+    if (pwdBadge) {
+      pwdBadge.style.display = options.isProtected ? 'inline-flex' : 'none';
+    }
+
+    // Direct Link & QR Code
+    const directUrl = `${window.location.origin}${window.location.pathname}?code=${code}`;
+    
+    // Setup QR Code
+    if (shareQrCanvas && typeof QRCode !== 'undefined') {
+      shareQrCanvas.innerHTML = '';
+      try {
+        qrCodeInstance = new QRCode(shareQrCanvas, {
+          text: directUrl,
+          width: 140,
+          height: 140,
+          colorDark: "#516070",
+          colorLight: "#ffffff",
+          correctLevel: QRCode.CorrectLevel.M
+        });
+      } catch (err) {
+        console.warn('QR Code generation notice:', err);
+      }
+    }
+
+    if (shareQrContainer) shareQrContainer.style.display = 'none';
+
     showEl('codeDisplay');
+  }
+
+  // ----- QR Code Toggle -----
+  if (codeQrToggleBtn && shareQrContainer) {
+    codeQrToggleBtn.addEventListener('click', () => {
+      const isVisible = shareQrContainer.style.display !== 'none';
+      shareQrContainer.style.display = isVisible ? 'none' : 'flex';
+      codeQrToggleBtn.classList.toggle('bg-primary', !isVisible);
+      codeQrToggleBtn.classList.toggle('text-on-primary', !isVisible);
+    });
+  }
+
+  // ----- Copy Direct Link -----
+  if (codeCopyLinkBtn) {
+    codeCopyLinkBtn.addEventListener('click', async () => {
+      const valEl = document.getElementById('codeValue');
+      const code = valEl ? valEl.textContent : '';
+      if (!code) return;
+      const directUrl = `${window.location.origin}${window.location.pathname}?code=${code}`;
+      const success = await copyToClipboard(directUrl);
+      if (success) {
+        setElText('codeCopyLinkText', 'Link Copied!');
+        showToast('Direct note link copied to clipboard!', 'success');
+        setTimeout(() => {
+          setElText('codeCopyLinkText', 'Copy Link');
+        }, 2000);
+      }
+    });
   }
 
   // ----- Copy Code -----
@@ -481,6 +615,12 @@ function initShare() {
     }
     if (noteTitle) noteTitle.value = '';
     if (noteCategory) noteCategory.value = '';
+    if (sharePasswordInput) sharePasswordInput.value = '';
+    if (sharePasswordRow) sharePasswordRow.style.display = 'none';
+    if (toggleSharePasswordLabel) toggleSharePasswordLabel.textContent = 'Add Password';
+    if (toggleSharePasswordBtn) toggleSharePasswordBtn.classList.remove('text-primary', 'bg-primary/10', 'border-primary/30');
+    if (expirySelect) expirySelect.value = '20';
+    if (expiryBadgeText) expiryBadgeText.innerHTML = 'Auto-erases in <strong>20 min</strong>';
     selectedFile = null;
     fileInput.value = '';
     hideEl('imagePreview');
@@ -494,6 +634,6 @@ function initShare() {
     else el.removeAttribute('data-hidden');
   }
 
-  // Expose folder picker modal for other modules (e.g. Access tab save feature)
+  // Expose folder picker modal for other modules
   window.openSaveFolderModal = openSaveFolderModal;
 }

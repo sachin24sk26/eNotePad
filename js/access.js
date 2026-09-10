@@ -1,12 +1,32 @@
 // ============================================================
 // Access Module — The Tactile Editorial
-// Uses data-hidden attribute for toggling visibility.
+// Handles note retrieval, password verification, burn-after-reading
+// self-destruct, multi-format export, and URL query param auto-loader.
 // ============================================================
 
 function initAccess() {
   const codeBoxes = document.querySelectorAll('.code-input-box');
   const fetchBtn = document.getElementById('fetchBtn');
   const contentCopyBtn = document.getElementById('contentCopyBtn');
+  const contentSaveBtn = document.getElementById('contentSaveBtn');
+  const accessPasswordPrompt = document.getElementById('accessPasswordPrompt');
+  const accessPasswordInput = document.getElementById('accessPasswordInput');
+  const submitAccessPasswordBtn = document.getElementById('submitAccessPasswordBtn');
+  const burnAfterReadingBadge = document.getElementById('burnAfterReadingBadge');
+  const contentExportBtn = document.getElementById('contentExportBtn');
+  const contentExportDropdown = document.getElementById('contentExportDropdown');
+
+  let pendingDocData = null;
+  let pendingCode = null;
+
+  // Password Hash Helper (SHA-256 with salt)
+  async function hashPassword(str) {
+    if (!str) return null;
+    const encoder = new TextEncoder();
+    const data = encoder.encode(str + '_enotepad_salt_2026');
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+  }
 
   // ----- OTP-style Code Input -----
   codeBoxes.forEach((box, index) => {
@@ -54,8 +74,20 @@ function initAccess() {
     return Array.from(codeBoxes).map(b => b.value).join('').toUpperCase();
   }
 
+  function setCodeInBoxes(code) {
+    if (!code) return;
+    const clean = code.toUpperCase().replace(/[^A-Z0-9]/g, '').substring(0, 6);
+    clean.split('').forEach((char, idx) => {
+      if (codeBoxes[idx]) {
+        codeBoxes[idx].value = char;
+        codeBoxes[idx].classList.add('filled');
+      }
+    });
+  }
+
   fetchBtn.addEventListener('click', fetchContent);
 
+  // ----- Fetch Content -----
   async function fetchContent() {
     const code = getCodeFromBoxes();
 
@@ -69,30 +101,46 @@ function initAccess() {
 
     hideEl('contentResult');
     hideEl('accessStatus');
+    if (accessPasswordPrompt) accessPasswordPrompt.style.display = 'none';
 
     try {
       const doc = await db.collection('shares').doc(code).get();
 
       if (!doc.exists) {
-        showStatus('😕', 'No content found for this code. It may have expired or the code is incorrect.', 'error');
+        showStatus('😕', 'No content found for this code. It may have expired, burned, or the code is incorrect.', 'error');
         return;
       }
 
       const data = doc.data();
 
+      // Check Expiration
       if (data.expiresAt && isExpired(data.expiresAt)) {
         await db.collection('shares').doc(code).delete();
+        // Also clean up owner's history entry
+        if (data.userId) {
+          await db.collection('users').doc(data.userId)
+            .collection('history').doc(code).delete().catch(() => {});
+        }
         showStatus('⏰', 'This content has expired and is no longer available.', 'expired');
         return;
       }
 
-      renderContent(data);
-      showToast('Content retrieved!', 'success');
-
-      // Guest milestone nudge — fires 3s after retrieval
-      if (!getCurrentUser() && typeof window.showGuestMilestoneToast === 'function') {
-        setTimeout(() => window.showGuestMilestoneToast('code_accessed'), 3000);
+      // Check Password Protection
+      if (data.isProtected && data.passwordHash) {
+        pendingDocData = data;
+        pendingCode = code;
+        if (accessPasswordPrompt) {
+          accessPasswordPrompt.style.display = 'block';
+          if (accessPasswordInput) {
+            accessPasswordInput.value = '';
+            setTimeout(() => accessPasswordInput.focus(), 100);
+          }
+        }
+        return;
       }
+
+      // Render Directly if no password
+      await displayRetrievedContent(data, code);
 
     } catch (error) {
       console.error('Fetch error:', error);
@@ -103,7 +151,78 @@ function initAccess() {
     }
   }
 
-  const contentSaveBtn = document.getElementById('contentSaveBtn');
+  // ----- Password Unlock Handler -----
+  if (submitAccessPasswordBtn && accessPasswordInput) {
+    const handlePasswordUnlock = async () => {
+      const enteredPwd = accessPasswordInput.value.trim();
+      if (!enteredPwd) {
+        showToast('Please enter the password', 'warning');
+        accessPasswordInput.focus();
+        return;
+      }
+
+      submitAccessPasswordBtn.disabled = true;
+      submitAccessPasswordBtn.classList.add('btn-loading');
+
+      try {
+        const enteredHash = await hashPassword(enteredPwd);
+        if (pendingDocData && enteredHash === pendingDocData.passwordHash) {
+          if (accessPasswordPrompt) accessPasswordPrompt.style.display = 'none';
+          await displayRetrievedContent(pendingDocData, pendingCode);
+          showToast('Password verified!', 'success');
+        } else {
+          showToast('Incorrect password. Please try again.', 'error');
+          accessPasswordInput.classList.add('ring-2', 'ring-error');
+          setTimeout(() => accessPasswordInput.classList.remove('ring-2', 'ring-error'), 1500);
+          accessPasswordInput.select();
+        }
+      } catch (err) {
+        console.error('Password verify error:', err);
+        showToast('Verification failed', 'error');
+      } finally {
+        submitAccessPasswordBtn.disabled = false;
+        submitAccessPasswordBtn.classList.remove('btn-loading');
+      }
+    };
+
+    submitAccessPasswordBtn.addEventListener('click', handlePasswordUnlock);
+    accessPasswordInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        handlePasswordUnlock();
+      }
+    });
+  }
+
+  // ----- Display Retrieved Content & Handle Burn-After-Reading -----
+  async function displayRetrievedContent(data, code) {
+    renderContent(data);
+
+    // If Burn-After-Reading: Show badge & immediately delete from Firestore
+    if (data.burnAfterReading) {
+      if (burnAfterReadingBadge) burnAfterReadingBadge.style.display = 'flex';
+      try {
+        await db.collection('shares').doc(code).delete();
+        console.log(`🔥 Note [${code}] burned after reading.`);
+        // Also delete the history entry from the note owner's account
+        if (data.userId) {
+          await db.collection('users').doc(data.userId)
+            .collection('history').doc(code).delete().catch(() => {});
+        }
+      } catch (err) {
+        console.warn('Burn deletion notice:', err);
+      }
+    } else {
+      if (burnAfterReadingBadge) burnAfterReadingBadge.style.display = 'none';
+    }
+
+    showToast('Content retrieved!', 'success');
+
+    // Guest milestone nudge
+    if (!getCurrentUser() && typeof window.showGuestMilestoneToast === 'function') {
+      setTimeout(() => window.showGuestMilestoneToast('code_accessed'), 3000);
+    }
+  }
 
   function renderContent(data) {
     const resultContainer = document.getElementById('contentResult');
@@ -118,7 +237,7 @@ function initAccess() {
 
     if (data.type === 'text') {
       const textDiv = document.createElement('div');
-      textDiv.className = 'content-text-display';
+      textDiv.className = 'content-text-display whitespace-pre-wrap leading-relaxed text-sm';
       textDiv.textContent = data.content;
       contentBody.appendChild(textDiv);
       copyBtn.style.display = '';
@@ -130,11 +249,11 @@ function initAccess() {
       
       links.forEach(link => {
         const linkEl = document.createElement('a');
-        linkEl.className = 'content-link-display';
+        linkEl.className = 'content-link-display flex items-center gap-2 p-3 bg-surface-container-low hover:bg-surface-container rounded-xl text-primary font-medium transition-colors text-sm break-all';
         linkEl.href = link;
         linkEl.target = '_blank';
         linkEl.rel = 'noopener noreferrer';
-        linkEl.innerHTML = `<span class="material-symbols-outlined">open_in_new</span> <span class="break-all">${link}</span>`;
+        linkEl.innerHTML = `<span class="material-symbols-outlined text-base">open_in_new</span> <span>${escText(link)}</span>`;
         linkContainer.appendChild(linkEl);
       });
       contentBody.appendChild(linkContainer);
@@ -144,11 +263,11 @@ function initAccess() {
 
     } else if (data.type === 'image') {
       const imageDiv = document.createElement('div');
-      imageDiv.className = 'content-image-display';
+      imageDiv.className = 'content-image-display flex flex-col items-center';
       imageDiv.innerHTML = `
-        <img src="${data.content}" alt="Shared image" class="w-full max-h-[400px] object-contain rounded-xl" />
-        <a class="inline-flex items-center gap-2 mt-4 px-6 py-3 rounded-full text-sm font-medium text-primary hover:bg-surface-container-low transition-all" href="${data.content}" target="_blank" download>
-          <span class="material-symbols-outlined text-lg">download</span> Download Image
+        <img src="${data.content}" alt="Shared image" class="w-full max-h-[400px] object-contain rounded-xl shadow-sm" />
+        <a class="inline-flex items-center gap-2 mt-4 px-6 py-2.5 rounded-full text-xs font-bold text-primary bg-surface-container-low hover:bg-surface-container transition-all" href="${data.content}" target="_blank" download="enotepad-image.png">
+          <span class="material-symbols-outlined text-base">download</span> Download Image
         </a>
       `;
       contentBody.appendChild(imageDiv);
@@ -166,10 +285,15 @@ function initAccess() {
     resultContainer.dataset.title = data.title || `Accessed ${data.type.charAt(0).toUpperCase() + data.type.slice(1)}`;
   }
 
+  function escText(str) {
+    return (str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  // ----- Copy Button -----
   if (contentCopyBtn) {
     contentCopyBtn.addEventListener('click', async () => {
       const resultContainer = document.getElementById('contentResult');
-      const content = resultContainer.dataset.content;
+      const content = resultContainer ? resultContainer.dataset.content : '';
       if (!content) return;
 
       const success = await copyToClipboard(content);
@@ -183,6 +307,65 @@ function initAccess() {
     });
   }
 
+  // ----- Export Dropdown & Format Handlers -----
+  if (contentExportBtn && contentExportDropdown) {
+    contentExportBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isVisible = contentExportDropdown.style.display !== 'none';
+      contentExportDropdown.style.display = isVisible ? 'none' : 'block';
+    });
+
+    document.addEventListener('click', () => {
+      if (contentExportDropdown) contentExportDropdown.style.display = 'none';
+    });
+
+    document.querySelectorAll('.export-format-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const format = btn.dataset.format;
+        const resultContainer = document.getElementById('contentResult');
+        const content = resultContainer ? resultContainer.dataset.content : '';
+        const title = resultContainer ? (resultContainer.dataset.title || 'enotepad-note') : 'enotepad-note';
+        
+        if (!content) {
+          showToast('No content to export', 'warning');
+          return;
+        }
+
+        downloadContentFile(content, title, format);
+        contentExportDropdown.style.display = 'none';
+      });
+    });
+  }
+
+  function downloadContentFile(content, title, format) {
+    let mime = 'text/plain';
+    let ext = 'txt';
+    let fileData = content;
+
+    if (format === 'md') {
+      mime = 'text/markdown';
+      ext = 'md';
+      fileData = `# ${title}\n\n${content}\n\n---\n*Exported from eNotePad*`;
+    } else if (format === 'html') {
+      mime = 'text/html';
+      ext = 'html';
+      fileData = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${title}</title><style>body{font-family:sans-serif;max-width:700px;margin:40px auto;line-height:1.6;padding:0 20px;}h1{color:#516070;}pre{background:#f4f4ef;padding:15px;border-radius:8px;}</style></head><body><h1>${title}</h1><pre>${escText(content)}</pre><p><em>Exported from <a href="https://enotepad.vercel.app">eNotePad</a></em></p></body></html>`;
+    }
+
+    const blob = new Blob([fileData], { type: `${mime};charset=utf-8` });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${title.toLowerCase().replace(/[^a-z0-9]/g, '-')}.${ext}`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast(`Exported as .${ext}! 📄`, 'success');
+  }
+
+  // ----- Save Button -----
   if (contentSaveBtn) {
     contentSaveBtn.addEventListener('click', async () => {
       const currentUser = getCurrentUser();
@@ -198,86 +381,59 @@ function initAccess() {
       if (!resultContainer) return;
       const type = resultContainer.dataset.type || 'text';
       let content = resultContainer.dataset.content || '';
-      const title = resultContainer.dataset.title || `Accessed Note`;
-
-      const doSave = async (folderId, folderName) => {
-        contentSaveBtn.disabled = true;
-        contentSaveBtn.innerHTML = '<span class="material-symbols-outlined text-lg animate-spin">progress_activity</span> Saving…';
-
-        try {
-          const noteId = generateCode(8);
-          let resolvedContent = content;
-          try { resolvedContent = JSON.parse(content); } catch (e) {}
-
-          const preview = title || (type === 'image' ? '🖼️ Image' : (Array.isArray(resolvedContent) ? resolvedContent.join(', ') : resolvedContent).substring(0, 100));
-
-          // 1. Save to File Manager (users/{u}/files)
-          if (typeof window.saveNoteToFileManager === 'function') {
-            await window.saveNoteToFileManager({
-              title: title,
-              category: 'important',
-              noteType: type,
-              content: resolvedContent
-            }, folderId);
-          }
-
-          // 2. Save to savedNotes
-          await db.collection('users').doc(currentUser.username)
-            .collection('savedNotes').doc(noteId)
-            .set({
-              type: type,
-              content: resolvedContent,
-              title: title,
-              category: 'important',
-              preview: preview,
-              noteId: noteId,
-              createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
-
-          // 3. Save to history
-          await db.collection('users').doc(currentUser.username)
-            .collection('history').doc(noteId)
-            .set({
-              type: type,
-              preview: preview,
-              code: noteId,
-              saved: true,
-              createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
-
-          contentSaveBtn.innerHTML = '<span class="material-symbols-outlined text-lg">bookmark_added</span> Saved!';
-          const dest = folderName ? `"${folderName}"` : 'My Files';
-          showToast(`Note saved to ${dest}! 📁`, 'success');
-
-          if (typeof window.loadSavedNotes === 'function') window.loadSavedNotes(currentUser.username);
-          if (typeof window.fileManagerRefresh === 'function') window.fileManagerRefresh(currentUser.username);
-        } catch (err) {
-          console.error('Save accessed note error:', err);
-          showToast('Failed to save note.', 'error');
-          contentSaveBtn.disabled = false;
-          contentSaveBtn.innerHTML = '<span class="material-symbols-outlined text-lg">bookmark_add</span> Save Note';
-        }
-      };
+      const title = resultContainer.dataset.title || 'Saved Note';
 
       if (typeof window.openSaveFolderModal === 'function') {
         window.openSaveFolderModal({
           noteType: type,
+          content: content,
           title: title,
-          onConfirm: doSave
+          username: currentUser.username,
+          onConfirm: async (folderId, folderName) => {
+            contentSaveBtn.classList.add('btn-loading');
+            contentSaveBtn.disabled = true;
+            try {
+              const noteId = generateCode(8);
+              const preview = title || content.substring(0, 100);
+
+              if (typeof window.saveNoteToFileManager === 'function') {
+                await window.saveNoteToFileManager({ title, noteType: type, content }, folderId);
+              }
+
+              await db.collection('users').doc(currentUser.username)
+                .collection('savedNotes').doc(noteId)
+                .set({ type, content, title, preview, noteId, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+
+              const dest = folderName ? `"${folderName}"` : 'My Files';
+              showToast(`Note saved to ${dest}! 📁`, 'success');
+              contentSaveBtn.innerHTML = '<span class="material-symbols-outlined text-lg">check</span> Saved!';
+            } catch (err) {
+              console.error('Save error:', err);
+              showToast('Failed to save note.', 'error');
+            } finally {
+              contentSaveBtn.classList.remove('btn-loading');
+            }
+          }
         });
-      } else {
-        await doSave(null, null);
       }
     });
   }
 
-  function showStatus(icon, text, type) {
-    setElText('accessStatusIcon', icon);
-    setElText('accessStatusText', text);
-    const statusEl = document.getElementById('accessStatus');
-    if (statusEl) {
-      statusEl.className = `p-6 md:p-8 text-center status-${type}`;
+  // ----- Auto-Check URL query param on startup -----
+  function checkUrlForCode() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const codeFromUrl = urlParams.get('code') || window.location.hash.replace('#', '').replace('code=', '');
+
+    if (codeFromUrl && codeFromUrl.length === 6) {
+      setTimeout(() => {
+        if (typeof window.switchToTab === 'function') {
+          window.switchToTab('access');
+        }
+        setCodeInBoxes(codeFromUrl);
+        fetchContent();
+      }, 350);
     }
-    showEl('accessStatus');
   }
+
+  checkUrlForCode();
 }

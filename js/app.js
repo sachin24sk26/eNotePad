@@ -21,8 +21,26 @@ document.addEventListener('DOMContentLoaded', () => {
   initFeedback();
   initGuestNudgeSystem();
   initCustomCursor();
+  initPWA();
   console.log('✨ eNotePad — Digital Curator initialized');
 });
+
+/**
+ * PWA Service Worker Registration
+ */
+function initPWA() {
+  if ('serviceWorker' in navigator && (window.location.protocol === 'https:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js')
+        .then((reg) => {
+          console.log('✨ eNotePad Service Worker active with scope:', reg.scope);
+        })
+        .catch((err) => {
+          console.warn('Service Worker registration notice:', err);
+        });
+    });
+  }
+}
 
 /**
  * Custom Creative Cursor Follower

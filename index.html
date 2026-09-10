@@ -11,7 +11,11 @@
   <meta name="theme-color" id="themeColorMeta" content="#516070" />
   <title>eNotePad — Digital Curator & Instant Note Sharing</title>
   <link rel="icon" href="assets/Favicon.png" type="image/png" />
+  <link rel="manifest" href="manifest.json" />
   <link rel="canonical" href="https://enotepad.vercel.app/" />
+
+  <!-- QR Code Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
   <!-- Google AdSense -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4282755745845869" crossorigin="anonymous"></script>
@@ -686,11 +690,45 @@
                 </div>
               </div>
 
+              <!-- Expiry & Security Controls Bar -->
+              <div class="px-6 py-3 bg-surface-container-low/60 border-t border-outline-variant/15 flex items-center justify-between gap-3 flex-wrap text-xs">
+                <!-- Expiry Duration Selector -->
+                <div class="flex items-center gap-2">
+                  <span class="material-symbols-outlined text-primary/60 text-base">schedule</span>
+                  <label for="shareExpirySelect" class="font-bold text-[11px] text-on-surface-variant uppercase tracking-wider">Expiry:</label>
+                  <select id="shareExpirySelect" class="bg-surface-container-lowest border border-outline-variant/30 rounded-xl px-2.5 py-1 text-xs font-semibold text-primary focus:ring-2 focus:ring-primary/20 outline-none cursor-pointer">
+                    <option value="5">5 Minutes</option>
+                    <option value="20" selected>20 Minutes (Default)</option>
+                    <option value="60">1 Hour</option>
+                    <option value="1440">24 Hours</option>
+                    <option value="10080">7 Days</option>
+                    <option value="burn">🔥 Burn After Reading (1-Time)</option>
+                  </select>
+                </div>
+
+                <!-- Password Protection Toggle -->
+                <div class="flex items-center gap-2">
+                  <button type="button" id="toggleSharePasswordBtn" class="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-surface-container-lowest border border-outline-variant/30 text-on-surface-variant hover:text-primary transition-all text-xs font-medium">
+                    <span class="material-symbols-outlined text-sm">lock</span>
+                    <span id="toggleSharePasswordLabel">Add Password</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Collapsible Password Input -->
+              <div id="sharePasswordRow" style="display: none;" class="px-6 py-2.5 bg-primary/5 border-t border-primary/10">
+                <div class="flex items-center gap-2 max-w-sm">
+                  <span class="material-symbols-outlined text-primary text-base">key</span>
+                  <input type="password" id="sharePasswordInput" placeholder="Set access password / PIN" class="flex-1 px-3 py-1.5 bg-surface-container-lowest border border-primary/30 rounded-xl text-xs text-on-surface placeholder:text-on-surface-variant/40 focus:ring-2 focus:ring-primary/20 outline-none" autocomplete="new-password" />
+                  <button type="button" id="clearSharePasswordBtn" class="text-error text-xs hover:underline">Remove</button>
+                </div>
+              </div>
+
               <!-- Bottom Bar: Timer + Stats + Actions -->
               <div class="px-6 py-4 border-t border-outline-variant/15 flex items-center gap-3 flex-wrap">
-                <div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold uppercase tracking-wider">
+                <div id="expiryStatusBadge" class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold uppercase tracking-wider">
                   <span class="material-symbols-outlined text-xs">timer</span>
-                  <span>Auto-erases in <strong>20 min</strong></span>
+                  <span id="expiryBadgeText">Auto-erases in <strong>20 min</strong></span>
                 </div>
                 <div class="editor-stats flex items-center gap-2.5 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/60">
                   <span><span id="editorWordCount">0</span> words</span>
@@ -751,11 +789,34 @@
                 <p class="text-[10px] uppercase tracking-widest text-primary/50 font-bold mb-2">Your Secret Code</p>
                 <p class="font-headline text-5xl font-bold tracking-[0.3em] text-primary code-reveal" id="codeValue"></p>
                 <p class="text-sm text-on-surface-variant mt-2" id="codeExpiry"></p>
+                <div id="codePasswordBadge" class="mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-xs font-bold" style="display:none">
+                  <span class="material-symbols-outlined text-sm">lock</span> Protected with Password
+                </div>
               </div>
-              <button class="inline-flex items-center gap-2 px-8 py-3 bg-primary text-on-primary rounded-full font-semibold shadow-lg hover:bg-primary-dim transition-all active:scale-[0.98]" id="codeCopyBtn">
-                <span class="material-symbols-outlined text-lg">content_copy</span>
-                <span id="codeCopyText">Copy Code</span>
-              </button>
+
+              <!-- Action Buttons: Copy Code, Copy Link, QR Code -->
+              <div class="flex items-center justify-center gap-2.5 flex-wrap">
+                <button class="inline-flex items-center gap-2 px-6 py-3 bg-primary text-on-primary rounded-full font-semibold shadow-lg hover:bg-primary-dim transition-all active:scale-[0.98]" id="codeCopyBtn">
+                  <span class="material-symbols-outlined text-lg">content_copy</span>
+                  <span id="codeCopyText">Copy Code</span>
+                </button>
+                <button class="inline-flex items-center gap-2 px-5 py-3 bg-surface-container-low border border-outline-variant/25 text-primary hover:bg-surface-container rounded-full font-semibold transition-all active:scale-[0.98]" id="codeCopyLinkBtn" title="Copy direct link that auto-loads content">
+                  <span class="material-symbols-outlined text-lg">link</span>
+                  <span id="codeCopyLinkText">Copy Link</span>
+                </button>
+                <button class="inline-flex items-center gap-2 px-5 py-3 bg-surface-container-low border border-outline-variant/25 text-primary hover:bg-surface-container rounded-full font-semibold transition-all active:scale-[0.98]" id="codeQrToggleBtn" title="Scan with phone camera">
+                  <span class="material-symbols-outlined text-lg">qr_code_2</span>
+                  <span>QR Code</span>
+                </button>
+              </div>
+
+              <!-- QR Code Card Container -->
+              <div id="shareQrContainer" style="display:none" class="p-5 bg-surface-container-low rounded-2xl max-w-xs mx-auto flex flex-col items-center space-y-3 border border-outline-variant/20">
+                <p class="text-xs font-bold text-on-surface">Scan with Phone Camera</p>
+                <div id="shareQrCanvas" class="p-3 bg-white rounded-xl shadow-sm"></div>
+                <p class="text-[11px] text-on-surface-variant/70">Opens note directly without typing code</p>
+              </div>
+
               <div>
                 <button class="text-sm text-primary/50 hover:text-primary font-medium transition-colors" id="shareAnotherBtn">
                   ← Share another
@@ -805,15 +866,55 @@
                 </div>
               </div>
 
+              <!-- Password Protected Note Prompt Modal/Dialog inside Access Panel -->
+              <div id="accessPasswordPrompt" style="display:none" class="p-6 md:p-8 text-center bg-surface-container-low/70 border-t border-outline-variant/15 space-y-4">
+                <div class="w-12 h-12 mx-auto bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-full flex items-center justify-center">
+                  <span class="material-symbols-outlined text-2xl">lock</span>
+                </div>
+                <h3 class="text-lg font-bold text-on-surface">Password Protected Note</h3>
+                <p class="text-xs text-on-surface-variant max-w-xs mx-auto">This note requires an access password set by the creator.</p>
+                <div class="max-w-xs mx-auto space-y-3">
+                  <input type="password" id="accessPasswordInput" placeholder="Enter password / PIN" class="w-full px-4 py-2.5 bg-surface-container-lowest border border-outline-variant/30 rounded-xl text-sm text-center focus:ring-2 focus:ring-primary/20 outline-none" autocomplete="current-password" />
+                  <button id="submitAccessPasswordBtn" class="w-full py-2.5 px-4 bg-primary text-on-primary rounded-xl font-bold text-xs hover:bg-primary-dim transition-all shadow-md">
+                    Unlock Content
+                  </button>
+                </div>
+              </div>
+
               <!-- Content Result -->
               <div class="p-6 md:p-8" id="contentResult" data-hidden="true">
+                <!-- Self-Destruct Warning Badge (Burn After Reading) -->
+                <div id="burnAfterReadingBadge" style="display:none" class="mb-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs font-semibold flex items-center gap-2">
+                  <span class="material-symbols-outlined text-base">local_fire_department</span>
+                  <span><strong>Burn After Reading Activated:</strong> This note has been permanently deleted from the server and cannot be accessed again.</span>
+                </div>
+
                 <div class="bg-surface rounded-xl p-6 editorial-border">
-                  <div class="flex items-center justify-between mb-4 pb-4 border-b border-outline-variant/15">
+                  <div class="flex items-center justify-between mb-4 pb-4 border-b border-outline-variant/15 flex-wrap gap-2">
                     <span class="inline-flex items-center gap-2 px-3 py-1 text-xs font-semibold uppercase tracking-wider rounded-full bg-primary-container/40 text-primary" id="contentTypeBadge"></span>
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-2 flex-wrap">
                       <button class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium text-primary hover:bg-surface-container-low transition-all" id="contentCopyBtn">
                         <span class="material-symbols-outlined text-lg">content_copy</span> Copy
                       </button>
+
+                      <!-- Multi-format Export Dropdown -->
+                      <div class="relative">
+                        <button class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm font-medium text-primary hover:bg-surface-container-low transition-all" id="contentExportBtn">
+                          <span class="material-symbols-outlined text-lg">file_download</span> Export
+                        </button>
+                        <div id="contentExportDropdown" style="display:none" class="absolute right-0 top-full mt-1 bg-surface-container-lowest border border-outline-variant/20 rounded-xl shadow-xl py-1 w-36 z-30">
+                          <button class="w-full text-left px-3 py-2 text-xs font-medium text-on-surface hover:bg-surface-container-low flex items-center gap-2 export-format-btn" data-format="txt">
+                            <span class="material-symbols-outlined text-sm">description</span> Text (.txt)
+                          </button>
+                          <button class="w-full text-left px-3 py-2 text-xs font-medium text-on-surface hover:bg-surface-container-low flex items-center gap-2 export-format-btn" data-format="md">
+                            <span class="material-symbols-outlined text-sm">markdown</span> Markdown (.md)
+                          </button>
+                          <button class="w-full text-left px-3 py-2 text-xs font-medium text-on-surface hover:bg-surface-container-low flex items-center gap-2 export-format-btn" data-format="html">
+                            <span class="material-symbols-outlined text-sm">html</span> HTML (.html)
+                          </button>
+                        </div>
+                      </div>
+
                       <button class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold bg-primary text-on-primary hover:bg-primary-dim transition-all shadow-sm active:scale-[0.98] cursor-pointer" id="contentSaveBtn" type="button">
                         <span class="material-symbols-outlined text-lg">bookmark_add</span>
                         <span id="contentSaveBtnText">Save Note</span>

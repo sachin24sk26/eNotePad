@@ -598,7 +598,22 @@ header.header-scrolled, #topAppBar.header-scrolled {
 }
 
 .content-link-display:hover {
-  background: #edeee8;
+  background: #e8e8e2;
+  transform: translateY(-1px);
+}
+
+/* ---------- QR Code & Export Dropdown Custom Styles ---------- */
+#shareQrCanvas img, #shareQrCanvas canvas {
+  margin: 0 auto;
+  border-radius: 8px;
+}
+
+.export-format-btn {
+  transition: background-color 0.15s ease;
+}
+
+.dark #shareQrCanvas {
+  background: #ffffff !important;
 }
 
 .content-image-display {
