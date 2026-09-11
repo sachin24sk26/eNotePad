@@ -97,6 +97,7 @@ function initAdmin() {
         case 'broadcast': loadBroadcastHistory(); break;
         case 'rooms': loadAdminRooms(); break;
         case 'shares': loadAdminShares(); break;
+        case 'monetize': break;
         case 'logs': loadAdminLogs(); break;
       }
     });

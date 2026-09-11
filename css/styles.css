@@ -4571,3 +4571,106 @@ body.hide-native-cursor * {
     background-color: rgba(218, 234, 254, 0.05);
     border-color: rgba(218, 234, 254, 0.3);
   }
+
+  /* =========================================================
+     INTERACTIVE BUY ME A COFFEE WIDGET & MODAL
+     ========================================================= */
+  @keyframes coffeeSteamRise {
+    0% { transform: translateY(0) scaleX(0.9); opacity: 0; }
+    25% { opacity: 0.75; }
+    60% { transform: translateY(-14px) scaleX(1.2) rotate(6deg); opacity: 0.45; }
+    100% { transform: translateY(-26px) scaleX(0.8) rotate(-6deg); opacity: 0; }
+  }
+
+  .coffee-steam-particle-1 { animation: coffeeSteamRise 2.2s infinite ease-out; }
+  .coffee-steam-particle-2 { animation: coffeeSteamRise 2.2s infinite ease-out 0.65s; }
+  .coffee-steam-particle-3 { animation: coffeeSteamRise 2.2s infinite ease-out 1.3s; }
+
+  @keyframes coffeeWiggle {
+    0%, 100% { transform: rotate(0deg); }
+    15% { transform: rotate(-10deg) scale(1.05); }
+    30% { transform: rotate(8deg) scale(1.05); }
+    45% { transform: rotate(-6deg); }
+    60% { transform: rotate(4deg); }
+    75% { transform: rotate(0deg); }
+  }
+
+  .coffee-wiggle {
+    animation: coffeeWiggle 1.2s ease-in-out;
+  }
+
+  .coffee-mug-container {
+    perspective: 600px;
+  }
+
+  .coffee-liquid-wave {
+    transition: height 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .coffee-chip {
+    transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+    border: 1.5px solid rgba(175, 179, 172, 0.25);
+  }
+
+  .coffee-chip:hover {
+    transform: translateY(-2px);
+    border-color: rgba(217, 119, 6, 0.4);
+  }
+
+  .coffee-chip.active {
+    background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+    color: #ffffff !important;
+    border-color: #d97706 !important;
+    box-shadow: 0 4px 14px rgba(217, 119, 6, 0.35);
+    transform: translateY(-2px) scale(1.02);
+  }
+
+  .dark .coffee-chip {
+    border-color: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  .dark .coffee-chip.active {
+    background: linear-gradient(135deg, #f59e0b, #b45309) !important;
+    color: #ffffff !important;
+    border-color: #f59e0b !important;
+    box-shadow: 0 4px 18px rgba(245, 158, 11, 0.4);
+  }
+
+  @keyframes floatHeart {
+    0% { transform: translate(-50%, 0) scale(0.6); opacity: 1; }
+    50% { opacity: 0.9; transform: translate(-50%, -30px) scale(1.15) rotate(12deg); }
+    100% { transform: translate(-50%, -60px) scale(0.8) rotate(-15deg); opacity: 0; }
+  }
+
+  .floating-heart {
+    position: absolute;
+    animation: floatHeart 1.4s ease-out forwards;
+    pointer-events: none;
+    z-index: 50;
+  }
+
+  /* Copy button in UPI tab */
+  #coffeeCopyUpiBtn {
+    background-color: #516070 !important;
+    color: #ffffff !important;
+  }
+
+  .dark #coffeeCopyUpiBtn {
+    background-color: #d97706 !important;
+    color: #ffffff !important;
+    border-color: rgba(245, 158, 11, 0.4) !important;
+    box-shadow: 0 2px 10px rgba(217, 119, 6, 0.35) !important;
+  }
+
+  #coffeeCopyUpiBtn:hover {
+    filter: brightness(1.1);
+  }
+
+  #coffeeCopyUpiBtn.copied {
+    background-color: #059669 !important;
+    color: #ffffff !important;
+    border-color: #059669 !important;
+  }
+
+

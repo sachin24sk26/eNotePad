@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <meta name="description" content="eNotePad Monetization Roadmap — track every task to turn your project into income." />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Monetization Roadmap — eNotePad</title>
+  <link rel="icon" href="assets/Favicon.png" type="image/png" />
+  <!-- Google AdSense -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4282755745845869" crossorigin="anonymous"></script>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary-dim": "#455464", "on-surface": "#2f342e",
+            "surface-container-low": "#f4f4ef", "surface": "#faf9f5",
+            "surface-tint": "#516070", "on-surface-variant": "#5c605a",
+            "outline-variant": "#afb3ac", "tertiary": "#575e78",
+            "surface-container-lowest": "#ffffff", "on-primary": "#f4f8ff",
+            "primary": "#516070", "outline": "#787c75",
+            "surface-container": "#edeee8", "background": "#faf9f5",
+            "primary-container": "#d4e4f8", "on-primary-container": "#445363",
+            "surface-container-high": "#e6e9e2", "error": "#9f403d",
+            "on-tertiary": "#faf8ff", "surface-dim": "#d6dcd2",
+          },
+          fontFamily: { headline:["Inter","sans-serif"], body:["Newsreader","serif"], label:["Inter","sans-serif"] }
+        }
+      }
+    };
+  </script>
+  <style>
+    .material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24}
+    .ms-filled{font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24}
+    .paper-grain{background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");opacity:.025}
+    .editorial-shadow{box-shadow:0 12px 32px rgba(47,52,46,.07)}
+    .editorial-border{border:1px solid rgba(175,179,172,.15)}
+    .nav-blur{backdrop-filter:blur(20px) saturate(1.6);-webkit-backdrop-filter:blur(20px) saturate(1.6)}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+    .fade-up{animation:fadeUp .55s cubic-bezier(.22,1,.36,1) both}
+    .d1{animation-delay:.07s}.d2{animation-delay:.14s}.d3{animation-delay:.21s}.d4{animation-delay:.28s}
+    .reveal{opacity:0;transform:translateY(24px);transition:opacity .6s cubic-bezier(.22,1,.36,1),transform .6s cubic-bezier(.22,1,.36,1)}
+    .reveal.visible{opacity:1;transform:translateY(0)}
+    .task-item{transition:background .18s,transform .15s;cursor:pointer}
+    .task-item:hover{transform:translateX(3px);background:rgba(81,96,112,.03)}
+    .task-item.done{opacity:.55}
+    .task-item.done .task-title{text-decoration:line-through;color:rgba(95,96,90,.45)}
+    .task-cb{appearance:none;width:20px;height:20px;border-radius:6px;border:2px solid rgba(81,96,112,.3);background:transparent;cursor:pointer;flex-shrink:0;transition:all .2s;position:relative;margin-top:1px}
+    .task-cb:checked{background:#516070;border-color:#516070}
+    .task-cb:checked::after{content:'';position:absolute;left:5px;top:2px;width:6px;height:10px;border:2px solid #f4f8ff;border-top:none;border-left:none;transform:rotate(45deg)}
+    .badge-easy{background:rgba(34,197,94,.12);color:#16a34a}
+    .badge-medium{background:rgba(234,179,8,.12);color:#ca8a04}
+    .badge-hard{background:rgba(99,102,241,.12);color:#4f46e5}
+    .ring-bg{stroke:rgba(81,96,112,.1)}
+    .ring-progress{stroke:#516070;stroke-linecap:round;transition:stroke-dashoffset 1s cubic-bezier(.22,1,.36,1);transform-origin:center;transform:rotate(-90deg)}
+    /* ── Comprehensive Dark Mode ── */
+    .dark body{background-color:#0e1210!important;color:#dde3da!important}
+    .dark .bg-background{background-color:#0e1210!important}
+    .dark .bg-surface-container-lowest{background-color:#1b1f1a!important}
+    .dark .bg-surface-container-low{background-color:#181c17!important}
+    .dark .bg-surface-container{background-color:#1f241e!important}
+    .dark .bg-surface-container-high{background-color:#262b25!important}
+    .dark .bg-surface-dim{background-color:#141714!important}
+    .dark .text-on-surface{color:#dde3da!important}
+    .dark .text-on-surface-variant{color:#8b9388!important}
+    .dark .text-primary{color:#b8cee2!important}
+    .dark .bg-primary{background-color:#3d5262!important}
+    .dark .bg-primary-container{background-color:rgba(184,206,226,.1)!important}
+    .dark .text-on-primary-container{color:#b8cee2!important}
+    .dark .text-on-primary{color:#e8f0f8!important}
+    .dark .border-outline-variant{border-color:rgba(184,206,226,.12)!important}
+    .dark .bg-surface-container-low\/60{background-color:rgba(24,28,23,.6)!important}
+    /* nav */
+    .dark .bg-background\/85{background-color:rgba(14,18,16,.85)!important}
+    /* editorial */
+    .dark .editorial-border{border-color:rgba(184,206,226,.1)!important}
+    .dark .editorial-shadow{box-shadow:0 12px 32px rgba(0,0,0,.35)!important}
+    .dark .feature-card:hover{box-shadow:0 20px 48px rgba(0,0,0,.4)!important}
+    /* task checkbox */
+    .dark .task-cb{border-color:rgba(184,206,226,.3)}
+    .dark .task-cb:checked{background:#b8cee2;border-color:#b8cee2}
+    .dark .task-cb:checked::after{border-color:#1b1f1a}
+    .dark .task-item:hover{background:rgba(184,206,226,.04)!important}
+    /* badges */
+    .dark .badge-easy{background:rgba(34,197,94,.15);color:#4ade80}
+    .dark .badge-medium{background:rgba(234,179,8,.15);color:#fbbf24}
+    .dark .badge-hard{background:rgba(129,140,248,.15);color:#a5b4fc}
+    /* view tab active */
+    .dark .view-tab.active{background:#3d5262;color:#e8f0f8}
+    /* progress ring */
+    .dark .ring-progress{stroke:#b8cee2}
+    .dark .ring-bg{stroke:rgba(184,206,226,.12)}
+    /* stat gradients */
+    .dark .stat-grad-1{background:linear-gradient(135deg,rgba(184,206,226,.08) 0%,rgba(184,206,226,.03) 100%)}
+    .dark .stat-grad-2{background:linear-gradient(135deg,rgba(74,222,128,.06) 0%,rgba(74,222,128,.02) 100%)}
+    .dark .stat-grad-3{background:linear-gradient(135deg,rgba(251,191,36,.06) 0%,rgba(251,191,36,.02) 100%)}
+    .dark .stat-grad-4{background:linear-gradient(135deg,rgba(165,180,252,.06) 0%,rgba(165,180,252,.02) 100%)}
+    /* textarea */
+    .dark #userNotes{background:#262b25;color:#dde3da}
+    /* links section */
+    .dark .bg-surface-container.hover\:bg-surface-container-high:hover{background-color:#262b25!important}
+    /* green income text stays readable */
+    .dark .text-green-600{color:#4ade80!important}
+    .stat-grad-1{background:linear-gradient(135deg,rgba(81,96,112,.1) 0%,rgba(87,94,120,.04) 100%)}
+    .stat-grad-2{background:linear-gradient(135deg,rgba(34,197,94,.08) 0%,rgba(34,197,94,.02) 100%)}
+    .stat-grad-3{background:linear-gradient(135deg,rgba(234,179,8,.08) 0%,rgba(234,179,8,.02) 100%)}
+    .stat-grad-4{background:linear-gradient(135deg,rgba(99,102,241,.08) 0%,rgba(99,102,241,.02) 100%)}
+    .view-tab.active{background:#516070;color:#f4f8ff}
+    .view-tab{transition:all .18s}
+    .cta-btn{transition:transform .18s,box-shadow .18s}
+    .cta-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(81,96,112,.28)}
+    .hero-orb{position:absolute;border-radius:50%;filter:blur(70px);opacity:.25;pointer-events:none}
+    .faq-body{max-height:0;overflow:hidden;transition:max-height .35s cubic-bezier(.22,1,.36,1)}
+    /* Income display */
+    @keyframes countUp{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}
+    .income-pop{animation:countUp .3s cubic-bezier(.22,1,.36,1)}
+    /* ad containers */
+    .dark .ad-unit-wrap { background: rgba(184,206,226,0.03) !important; }
+  </style>
+</head>
+<body class="bg-background text-on-surface font-label min-h-screen overflow-x-hidden">
+<div class="fixed inset-0 pointer-events-none paper-grain z-50"></div>
+
+<!-- NAV -->
+<nav class="fixed top-0 left-0 right-0 z-40 bg-background/85 nav-blur border-b border-outline-variant/10">
+  <div class="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
+    <a href="index.html" class="flex items-center gap-2" style="text-decoration:none">
+      <img src="assets/logo.png" alt="eNotePad" class="w-7 h-7 object-contain" onerror="this.style.display='none'"/>
+      <div class="flex items-baseline leading-none">
+        <span style="color:#00a8ff" class="text-lg font-bold">e</span>
+        <span class="text-primary text-lg font-bold">NotePad</span>
+      </div>
+      <span class="hidden sm:inline ml-1 text-[8px] uppercase tracking-widest text-primary/40 font-bold self-end mb-0.5">Monetize</span>
+    </a>
+    <div class="flex items-center gap-2.5">
+      <button id="themeToggle" class="w-9 h-9 rounded-full flex items-center justify-center border border-outline-variant/20 text-primary/60 hover:text-primary hover:bg-surface-container transition-all">
+        <span class="material-symbols-outlined text-base" id="themeIcon">dark_mode</span>
+      </button>
+      <a href="index.html#coffee" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500/15 hover:bg-amber-500/25 text-amber-700 dark:text-amber-300 border border-amber-500/30 text-xs font-bold transition-all" style="text-decoration:none">
+        <span>☕</span>
+        <span class="hidden sm:inline">Buy Coffee</span>
+      </a>
+      <a href="index.html" class="cta-btn inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-on-primary rounded-full text-sm font-semibold" style="text-decoration:none">
+        <span class="material-symbols-outlined text-sm">arrow_back</span> App
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="relative pt-24 pb-10 overflow-hidden">
+  <div class="hero-orb w-96 h-96 top-0 -left-20" style="background:radial-gradient(circle,rgba(81,96,112,.15) 0%,transparent 70%)"></div>
+  <div class="hero-orb w-72 h-72 top-10 -right-16" style="background:radial-gradient(circle,rgba(34,197,94,.1) 0%,transparent 70%)"></div>
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8">
+
+      <!-- Left -->
+      <div>
+        <div class="fade-up inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-outline-variant/20 bg-surface-container text-xs font-semibold text-on-surface-variant uppercase tracking-widest mb-5">
+          <span class="material-symbols-outlined text-sm text-primary ms-filled">payments</span>
+          Monetization Roadmap
+        </div>
+        <h1 class="fade-up d1 font-body text-4xl sm:text-5xl italic text-on-surface mb-3 leading-tight">
+          Turn <span class="text-primary">eNotePad</span><br/>into income 💰
+        </h1>
+        <p class="fade-up d2 text-on-surface-variant max-w-lg leading-relaxed text-sm">
+          Every task below is a real step toward making money from your project.
+          Check them off as you complete them — your progress and estimated income update live.
+        </p>
+        <!-- Filter tabs -->
+        <div class="fade-up d3 flex items-center gap-2 mt-6 flex-wrap">
+          <button class="view-tab active px-4 py-1.5 rounded-full text-xs font-bold border border-outline-variant/20" onclick="switchView('all',this)">All Tasks</button>
+          <button class="view-tab px-4 py-1.5 rounded-full text-xs font-bold border border-outline-variant/20 text-on-surface-variant" onclick="switchView('easy',this)">🟢 Easy</button>
+          <button class="view-tab px-4 py-1.5 rounded-full text-xs font-bold border border-outline-variant/20 text-on-surface-variant" onclick="switchView('medium',this)">🟡 Medium</button>
+          <button class="view-tab px-4 py-1.5 rounded-full text-xs font-bold border border-outline-variant/20 text-on-surface-variant" onclick="switchView('hard',this)">🔵 Advanced</button>
+          <button class="view-tab px-4 py-1.5 rounded-full text-xs font-bold border border-outline-variant/20 text-on-surface-variant" onclick="switchView('done',this)">✅ Done</button>
+        </div>
+      </div>
+
+      <!-- Progress ring card -->
+      <div class="fade-up d4 flex-shrink-0 bg-surface-container-lowest rounded-3xl p-6 editorial-shadow editorial-border flex flex-col items-center gap-2 w-52">
+        <p class="text-[10px] uppercase tracking-widest text-on-surface-variant/50 font-bold">Overall Progress</p>
+        <div class="relative w-28 h-28">
+          <svg width="112" height="112" viewBox="0 0 100 100">
+            <circle class="ring-bg" cx="50" cy="50" r="42" fill="none" stroke-width="9"/>
+            <circle class="ring-progress" id="progressRing" cx="50" cy="50" r="42" fill="none" stroke-width="9" stroke-dasharray="264" stroke-dashoffset="264"/>
+          </svg>
+          <div class="absolute inset-0 flex flex-col items-center justify-center">
+            <span class="text-2xl font-black text-primary leading-none" id="progressPct">0%</span>
+            <span class="text-[9px] text-on-surface-variant/50 uppercase tracking-widest">Done</span>
+          </div>
+        </div>
+        <div class="text-center">
+          <div class="text-base font-black text-on-surface"><span id="doneCount">0</span> of <span id="totalCount">0</span></div>
+          <div class="text-[10px] text-on-surface-variant/50">tasks complete</div>
+        </div>
+        <div class="w-full border-t border-outline-variant/10 pt-3 space-y-2">
+          <div class="flex justify-between text-xs items-center">
+            <span class="text-on-surface-variant/60">Est. income</span>
+            <span class="font-black text-green-600" id="incomeEst">₹0/mo</span>
+          </div>
+          <div class="flex justify-between text-xs items-center">
+            <span class="text-on-surface-variant/60">Phase</span>
+            <span class="font-bold text-primary text-right" id="currentPhase" style="max-width:90px;font-size:10px;line-height:1.3">Not started</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section class="max-w-6xl mx-auto px-6 pb-8">
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="reveal stat-grad-1 rounded-2xl p-5 editorial-border editorial-shadow">
+      <span class="material-symbols-outlined text-2xl text-primary ms-filled mb-2 block">rocket_launch</span>
+      <div class="text-xl font-black text-on-surface">₹0–500</div>
+      <div class="text-[11px] text-on-surface-variant/60 mt-0.5 font-semibold">Phase 1 · Traffic</div>
+    </div>
+    <div class="reveal stat-grad-2 rounded-2xl p-5 editorial-border editorial-shadow">
+      <span class="material-symbols-outlined text-2xl ms-filled mb-2 block" style="color:#16a34a">payments</span>
+      <div class="text-xl font-black text-on-surface">₹2–5K</div>
+      <div class="text-[11px] text-on-surface-variant/60 mt-0.5 font-semibold">Phase 2 · First Income</div>
+    </div>
+    <div class="reveal stat-grad-3 rounded-2xl p-5 editorial-border editorial-shadow">
+      <span class="material-symbols-outlined text-2xl ms-filled mb-2 block" style="color:#ca8a04">star</span>
+      <div class="text-xl font-black text-on-surface">₹10–20K</div>
+      <div class="text-[11px] text-on-surface-variant/60 mt-0.5 font-semibold">Phase 3 · Pro Plan</div>
+    </div>
+    <div class="reveal stat-grad-4 rounded-2xl p-5 editorial-border editorial-shadow">
+      <span class="material-symbols-outlined text-2xl ms-filled mb-2 block" style="color:#4f46e5">trending_up</span>
+      <div class="text-xl font-black text-on-surface">₹50K+</div>
+      <div class="text-[11px] text-on-surface-variant/60 mt-0.5 font-semibold">Phase 4 · Scale</div>
+    </div>
+  </div>
+</section>
+
+<!-- AD UNIT 1: Between Stats and Main Content (Horizontal Banner Slot Mockup) -->
+<div class="max-w-6xl mx-auto px-6 pb-4">
+  <div class="ad-unit-wrap rounded-2xl overflow-hidden editorial-border p-4 text-center" style="background:rgba(81,96,112,0.03);">
+    <p class="text-[9px] uppercase tracking-widest text-on-surface-variant/40 font-bold mb-1">Ad Placement Slot 1 (Responsive Leaderboard)</p>
+    <p class="text-xs text-primary/60 italic font-body">Auto-Ads or Unit Slot active once AdSense approval is granted</p>
+  </div>
+</div>
+
+<!-- MAIN -->
+<section class="max-w-6xl mx-auto px-6 pb-20">
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+    <!-- Task list -->
+    <div class="lg:col-span-2 space-y-5" id="taskListContainer"></div>
+
+    <!-- Right sidebar -->
+    <div class="space-y-5">
+
+      <!-- AD UNIT 2: Sidebar Top Slot Mockup -->
+      <div class="reveal ad-unit-wrap rounded-2xl overflow-hidden editorial-border editorial-shadow p-4 text-center" style="background:rgba(81,96,112,0.03);">
+        <p class="text-[9px] uppercase tracking-widest text-on-surface-variant/40 font-bold mb-1">Sidebar Display Ad Slot</p>
+        <p class="text-xs text-primary/60 italic font-body">Ready for AdSense after site approval</p>
+      </div>
+
+      <!-- Notes -->
+      <div class="reveal bg-surface-container-lowest rounded-2xl p-5 editorial-shadow editorial-border">
+        <h3 class="font-body text-lg italic text-on-surface mb-3 flex items-center gap-2">
+          <span class="material-symbols-outlined text-base text-primary ms-filled">sticky_note_2</span> Your Notes
+        </h3>
+        <textarea id="userNotes" rows="5" placeholder="Write your ideas, plans, target dates..." class="w-full bg-surface-container rounded-xl p-3 text-sm text-on-surface resize-none outline-none border-none font-body placeholder:text-on-surface-variant/40 leading-relaxed"></textarea>
+        <div class="flex items-center justify-between mt-2">
+          <span class="text-[10px] text-on-surface-variant/40" id="notesSaved"></span>
+          <button onclick="saveNotes()" class="px-3 py-1.5 rounded-xl bg-primary/10 text-primary text-xs font-bold hover:bg-primary/20 transition-all">💾 Save</button>
+        </div>
+      </div>
+
+      <!-- Income Estimator -->
+      <div class="reveal bg-surface-container-lowest rounded-2xl p-5 editorial-shadow editorial-border">
+        <h3 class="font-body text-lg italic text-on-surface mb-4 flex items-center gap-2">
+          <span class="material-symbols-outlined text-base text-primary ms-filled">calculate</span> Income Estimator
+        </h3>
+        <div class="space-y-4">
+          <div>
+            <div class="flex justify-between mb-1">
+              <label class="text-[10px] uppercase tracking-widest text-on-surface-variant/50 font-bold">Daily Visitors</label>
+              <span class="text-xs font-black text-primary" id="visitorVal">100</span>
+            </div>
+            <input type="range" id="visitors" min="10" max="5000" value="100" step="10" class="w-full accent-primary" oninput="calcIncome()"/>
+            <div class="flex justify-between text-[10px] text-on-surface-variant/40 mt-0.5"><span>10</span><span>5000</span></div>
+          </div>
+          <div>
+            <div class="flex justify-between mb-1">
+              <label class="text-[10px] uppercase tracking-widest text-on-surface-variant/50 font-bold">Pro Conversion %</label>
+              <span class="text-xs font-black text-primary" id="convVal">2%</span>
+            </div>
+            <input type="range" id="conversion" min="0" max="10" value="2" step="0.5" class="w-full accent-primary" oninput="calcIncome()"/>
+            <div class="flex justify-between text-[10px] text-on-surface-variant/40 mt-0.5"><span>0%</span><span>10%</span></div>
+          </div>
+          <div class="pt-3 border-t border-outline-variant/10 space-y-2">
+            <div class="flex justify-between text-xs">
+              <span class="text-on-surface-variant/70">AdSense (monthly)</span>
+              <span class="font-bold text-on-surface" id="adsenseIncome">₹150</span>
+            </div>
+            <div class="flex justify-between text-xs">
+              <span class="text-on-surface-variant/70">Pro Plan (monthly)</span>
+              <span class="font-bold text-on-surface" id="proIncome">₹594</span>
+            </div>
+            <div class="flex justify-between text-sm font-bold text-primary pt-2 border-t border-outline-variant/10">
+              <span>Total / month</span>
+              <span id="totalIncome">₹744</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Links -->
+      <div class="reveal bg-surface-container-lowest rounded-2xl p-5 editorial-shadow editorial-border">
+        <h3 class="font-body text-lg italic text-on-surface mb-4 flex items-center gap-2">
+          <span class="material-symbols-outlined text-base text-primary ms-filled">link</span> Useful Links
+        </h3>
+        <div class="space-y-2">
+          <a href="https://adsense.google.com" target="_blank" class="flex items-center gap-3 p-3 rounded-xl bg-surface-container hover:bg-surface-container-high transition-all" style="text-decoration:none">
+            <span class="w-8 h-8 rounded-lg bg-yellow-100 flex items-center justify-center text-sm">💛</span>
+            <div class="flex-1 min-w-0"><p class="text-xs font-semibold text-on-surface">Google AdSense</p><p class="text-[10px] text-on-surface-variant/60">Apply for ad revenue</p></div>
+            <span class="material-symbols-outlined text-sm text-on-surface-variant/30">open_in_new</span>
+          </a>
+          <a href="https://razorpay.com" target="_blank" class="flex items-center gap-3 p-3 rounded-xl bg-surface-container hover:bg-surface-container-high transition-all" style="text-decoration:none">
+            <span class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center text-sm">💳</span>
+            <div class="flex-1 min-w-0"><p class="text-xs font-semibold text-on-surface">Razorpay</p><p class="text-[10px] text-on-surface-variant/60">Accept INR payments</p></div>
+            <span class="material-symbols-outlined text-sm text-on-surface-variant/30">open_in_new</span>
+          </a>
+          <a href="https://buymeacoffee.com/sachin24sk" target="_blank" class="flex items-center gap-3 p-3 rounded-xl bg-surface-container hover:bg-surface-container-high transition-all" style="text-decoration:none">
+            <span class="w-8 h-8 rounded-lg bg-yellow-100 flex items-center justify-center text-sm">☕</span>
+            <div class="flex-1 min-w-0"><p class="text-xs font-semibold text-on-surface">Buy Me a Coffee</p><p class="text-[10px] text-on-surface-variant/60">Direct supporter contributions &amp; UPI</p></div>
+            <span class="material-symbols-outlined text-sm text-on-surface-variant/30">open_in_new</span>
+          </a>
+          <a href="https://ko-fi.com" target="_blank" class="flex items-center gap-3 p-3 rounded-xl bg-surface-container hover:bg-surface-container-high transition-all" style="text-decoration:none">
+            <span class="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center text-sm">☕</span>
+            <div class="flex-1 min-w-0"><p class="text-xs font-semibold text-on-surface">Ko-fi</p><p class="text-[10px] text-on-surface-variant/60">Donations & supporters</p></div>
+            <span class="material-symbols-outlined text-sm text-on-surface-variant/30">open_in_new</span>
+          </a>
+          <a href="https://www.producthunt.com/posts/new" target="_blank" class="flex items-center gap-3 p-3 rounded-xl bg-surface-container hover:bg-surface-container-high transition-all" style="text-decoration:none">
+            <span class="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center text-sm">🦊</span>
+            <div class="flex-1 min-w-0"><p class="text-xs font-semibold text-on-surface">Product Hunt</p><p class="text-[10px] text-on-surface-variant/60">Launch for traffic</p></div>
+            <span class="material-symbols-outlined text-sm text-on-surface-variant/30">open_in_new</span>
+          </a>
+          <a href="https://reddit.com/r/InternetIsBeautiful" target="_blank" class="flex items-center gap-3 p-3 rounded-xl bg-surface-container hover:bg-surface-container-high transition-all" style="text-decoration:none">
+            <span class="w-8 h-8 rounded-lg bg-orange-50 flex items-center justify-center text-sm">🔴</span>
+            <div class="flex-1 min-w-0"><p class="text-xs font-semibold text-on-surface">r/InternetIsBeautiful</p><p class="text-[10px] text-on-surface-variant/60">Go viral on Reddit</p></div>
+            <span class="material-symbols-outlined text-sm text-on-surface-variant/30">open_in_new</span>
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<script>
+// Theme
+const root=document.documentElement;
+const tb=document.getElementById('themeToggle');
+const ti=document.getElementById('themeIcon');
+const sv=localStorage.getItem('enp-theme');
+if(sv==='dark'||(!sv&&window.matchMedia('(prefers-color-scheme:dark)').matches)){root.classList.add('dark');ti.textContent='light_mode';}
+tb.addEventListener('click',()=>{root.classList.toggle('dark');const d=root.classList.contains('dark');ti.textContent=d?'light_mode':'dark_mode';localStorage.setItem('enp-theme',d?'dark':'light');});
+
+// Scroll reveal
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');io.unobserve(e.target);}}),{threshold:.08});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+// Task data
+const phases=[
+  {id:'p1',label:'Phase 1',title:'Get Traffic First',icon:'rocket_launch',color:'text-blue-500',bg:'bg-blue-50',timeframe:'Month 1–2',goal:'Build audience before monetizing',tasks:[
+    {id:'t1',title:'Share on Reddit r/InternetIsBeautiful',desc:'Write a genuine post: "I built a no-login clipboard tool, here\'s how". Gets thousands of visitors in hours.',difficulty:'easy',time:'30 min',income:null},
+    {id:'t2',title:'Submit to Product Hunt',desc:'Create a proper listing with screenshots and a short video. Even a small launch = 500+ visitors in a day.',difficulty:'easy',time:'2 hrs',income:null},
+    {id:'t3',title:'Post on Twitter/X with a demo GIF',desc:'Record a 20-second screen recording of the app. "I built X in 3 months — here\'s how it works" posts go viral.',difficulty:'easy',time:'1 hr',income:null},
+    {id:'t4',title:'Add to LinkedIn profile & post about it',desc:'Professionals share useful tools. Target the education & productivity audience. Add it to your "Projects" section.',difficulty:'easy',time:'30 min',income:null},
+    {id:'t5',title:'Submit to GitHub Awesome Lists',desc:'Find repos like awesome-selfhosted, awesome-tools and open a Pull Request to add your project.',difficulty:'easy',time:'1 hr',income:null},
+    {id:'t6',title:'Share the how-it-works.html page',desc:'You already built this! Share the link with everyone — it explains the app better than you can in a message.',difficulty:'easy',time:'5 min',income:null},
+  ]},
+  {id:'p2',label:'Phase 2',title:'First Real Income',icon:'payments',color:'text-green-600',bg:'bg-green-50',timeframe:'Month 3',goal:'Start earning passively from traffic',tasks:[
+    {id:'t7',title:'Apply for Google AdSense',desc:'You already have the AdSense script in your index.html! Apply at adsense.google.com. Needs 10+ indexed pages. Takes 2–4 weeks to approve.',difficulty:'easy',time:'1 hr',income:'₹500–2K/mo'},
+    {id:'t8',title:'Place AdSense ad units in the UI',desc:'Add ads below the Share button, after code is revealed, and in the sidebar footer. Non-intrusive but visible positions.',difficulty:'easy',time:'2 hrs',income:'₹200–1K/mo'},
+    {id:'t9',title:'Set up Ko-fi donation button',desc:'Go to ko-fi.com — create a page in 5 minutes. Add a "☕ Support eNotePad" button in the sidebar. Loyal users donate happily.',difficulty:'easy',time:'30 min',income:'₹200–500/mo'},
+    {id:'t10',title:'Add "Made with eNotePad" footer to shared notes',desc:'When someone accesses a note, add a subtle footer: "Shared via eNotePad — Try it free →". Free marketing on every share.',difficulty:'medium',time:'1 hr',income:null},
+  ]},
+  {id:'p3',label:'Phase 3',title:'Launch Pro Plan',icon:'star',color:'text-yellow-600',bg:'bg-yellow-50',timeframe:'Month 4–5',goal:'Build recurring monthly revenue',tasks:[
+    {id:'t11',title:'Design what features go behind paywall',desc:'Free: 20-min expiry, 10K chars, 5 saved notes. Pro (₹99/mo): 7-day expiry, unlimited notes, custom code, no ads, password-protection.',difficulty:'medium',time:'1 day',income:'₹99/user/mo'},
+    {id:'t12',title:'Integrate Razorpay for INR payments',desc:'Razorpay has a free tier, supports UPI/cards/net banking. Create a subscription plan in their dashboard. Add checkout to your Firebase auth flow.',difficulty:'hard',time:'3–5 days',income:'₹2K–10K/mo'},
+    {id:'t13',title:'Update Firebase rules to enforce plan limits',desc:'Add a "plan" field to user Firestore documents. Enforce in rules: free users max 5 notes, 20-min expiry only. Pro = unlimited.',difficulty:'hard',time:'2 days',income:null},
+    {id:'t14',title:'Add "Go Pro" upgrade modal in the UI',desc:'Show a tasteful modal when a free user hits a limit. Keep it soft — show the benefits, not just a block. Match your glassmorphic design.',difficulty:'medium',time:'1 day',income:null},
+    {id:'t15',title:'Send welcome email to new Pro subscribers',desc:'Use a Firebase Function + SendGrid (free tier) to send a branded "Welcome to Pro!" email when payment confirms.',difficulty:'medium',time:'2 hrs',income:null},
+  ]},
+  {id:'p4',label:'Phase 4',title:'Scale & Expand',icon:'trending_up',color:'text-purple-600',bg:'bg-purple-50',timeframe:'Month 6+',goal:'Multiple income streams, serious revenue',tasks:[
+    {id:'t16',title:'Launch Classroom / Team Plan',desc:'₹299/mo for teachers: shared dashboard, bulk code generation, admin access logs. Cold-email schools & colleges directly.',difficulty:'hard',time:'1 week',income:'₹5K–20K/mo'},
+    {id:'t17',title:'Offer API access to developers',desc:'Let developers use your sharing backend in their apps. ₹999/mo for API key + 10K requests/day. Write API docs and a key management page.',difficulty:'hard',time:'2 weeks',income:'₹5K–15K/mo'},
+    {id:'t18',title:'White-label for businesses',desc:'Let companies embed eNotePad in their intranet. One-time ₹5K–₹20K setup fee + monthly hosting. Cold-email 10 companies to start.',difficulty:'hard',time:'ongoing',income:'₹5K–20K/sale'},
+    {id:'t19',title:'Add affiliate links for tools users share',desc:'Amazon Associates, Flipkart affiliate — when users share product links, append your affiliate ID. Earn % on resulting purchases.',difficulty:'medium',time:'1 day',income:'₹500–2K/mo'},
+    {id:'t20',title:'Wrap as Android/iOS app (Capacitor)',desc:'Use Capacitor to wrap your PWA into a native app for Play Store / App Store. New discovery channel. Keep free with Pro upsell.',difficulty:'hard',time:'1 month',income:'₹2K–10K/mo'},
+  ]},
+];
+
+const STORAGE_KEY='enp-money-tasks';
+let taskState=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}');
+
+function renderAll(filter){
+  filter=filter||'all';
+  const container=document.getElementById('taskListContainer');
+  container.innerHTML='';
+  let anyRendered=false;
+  phases.forEach(phase=>{
+    let tasks;
+    if(filter==='done') tasks=phase.tasks.filter(t=>taskState[t.id]);
+    else if(filter==='all') tasks=phase.tasks;
+    else tasks=phase.tasks.filter(t=>t.difficulty===filter&&!taskState[t.id]);
+    if(!tasks.length) return;
+    anyRendered=true;
+    const done=tasks.filter(t=>taskState[t.id]).length;
+    const phaseEl=document.createElement('div');
+    phaseEl.className='reveal bg-surface-container-lowest rounded-3xl editorial-shadow editorial-border overflow-hidden';
+    phaseEl.innerHTML=`
+      <div class="flex items-center gap-3 px-6 py-4 border-b border-outline-variant/10 bg-surface-container/40">
+        <div class="w-9 h-9 rounded-xl ${phase.bg} flex items-center justify-center flex-shrink-0">
+          <span class="material-symbols-outlined text-lg ms-filled ${phase.color}">${phase.icon}</span>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-2 flex-wrap mb-0.5">
+            <span class="text-[9px] uppercase tracking-widest font-black text-on-surface-variant/40">${phase.label}</span>
+            <span class="text-[9px] px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant/60 font-semibold">${phase.timeframe}</span>
+          </div>
+          <h2 class="font-body text-xl italic text-on-surface leading-tight">${phase.title}</h2>
+        </div>
+        <div class="text-right flex-shrink-0">
+          <div class="text-xs font-bold text-on-surface-variant/50">${done}/${tasks.length} done</div>
+          <div class="text-[9px] text-on-surface-variant/40 hidden sm:block">${phase.goal}</div>
+        </div>
+      </div>
+      <div class="divide-y divide-outline-variant/8" id="pt-${phase.id}"></div>
+    `;
+    container.appendChild(phaseEl);
+    io.observe(phaseEl);
+    const tc=phaseEl.querySelector('#pt-'+phase.id);
+    tasks.forEach(task=>{
+      const isDone=!!taskState[task.id];
+      const dc=task.difficulty==='easy'?'badge-easy':task.difficulty==='medium'?'badge-medium':'badge-hard';
+      const dl=task.difficulty==='easy'?'🟢 Easy':task.difficulty==='medium'?'🟡 Medium':'🔵 Advanced';
+      const el=document.createElement('div');
+      el.className=`task-item flex items-start gap-4 px-6 py-4 ${isDone?'done':''}`;
+      el.id='task-'+task.id;
+      el.innerHTML=`
+        <input type="checkbox" class="task-cb" ${isDone?'checked':''} onchange="toggleTask('${task.id}',this)" onclick="event.stopPropagation()"/>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-start justify-between gap-3 flex-wrap mb-1">
+            <p class="task-title font-semibold text-sm text-on-surface leading-snug">${task.title}</p>
+            <div class="flex items-center gap-1.5 flex-shrink-0">
+              <span class="text-[10px] px-2 py-0.5 rounded-full font-bold ${dc}">${dl}</span>
+              ${task.time?`<span class="text-[10px] text-on-surface-variant/40 font-semibold whitespace-nowrap">⏱ ${task.time}</span>`:''}
+            </div>
+          </div>
+          <p class="text-xs text-on-surface-variant/70 leading-relaxed">${task.desc}</p>
+          ${task.income?`<div class="mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-50 text-green-700 text-[10px] font-bold"><span class="material-symbols-outlined text-xs ms-filled">payments</span>${task.income}</div>`:''}
+        </div>
+      `;
+      el.addEventListener('click',e=>{ if(e.target.classList.contains('task-cb')) return; const cb=el.querySelector('.task-cb'); cb.checked=!cb.checked; toggleTask(task.id,cb); });
+      tc.appendChild(el);
+    });
+  });
+  if(!anyRendered){
+    const empty=document.createElement('div');
+    empty.className='text-center py-16 text-on-surface-variant/50 font-body italic text-lg';
+    empty.textContent= filter==='done'?'No tasks completed yet — start checking things off!':'No tasks in this category.';
+    container.appendChild(empty);
+  }
+  updateProgress();
+  document.querySelectorAll('.reveal:not(.visible)').forEach(el=>io.observe(el));
+}
+
+function toggleTask(id,cb){
+  taskState[id]=cb.checked;
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(taskState));
+  const el=document.getElementById('task-'+id);
+  if(el) el.classList.toggle('done',cb.checked);
+  updateProgress();
+}
+
+function updateProgress(){
+  const all=phases.flatMap(p=>p.tasks);
+  const total=all.length;
+  const done=all.filter(t=>taskState[t.id]).length;
+  const pct=total?Math.round((done/total)*100):0;
+  const circum=264;
+  document.getElementById('progressRing').style.strokeDashoffset=circum-(pct/100)*circum;
+  document.getElementById('progressPct').textContent=pct+'%';
+  document.getElementById('doneCount').textContent=done;
+  document.getElementById('totalCount').textContent=total;
+  const phases_label=['Not started','Phase 1 — Traffic','Phase 2 — First Income','Phase 3 — Pro Plan','Phase 4 — Scaling'];
+  const pi=pct===0?0:pct<25?1:pct<50?2:pct<75?3:4;
+  document.getElementById('currentPhase').textContent=phases_label[pi]||'Complete! 🎉';
+  const incomeMap=[0,500,3000,12000,50000];
+  document.getElementById('incomeEst').textContent='₹'+(incomeMap[pi]||0).toLocaleString()+'/mo';
+}
+
+function switchView(f,btn){
+  document.querySelectorAll('.view-tab').forEach(b=>{b.classList.remove('active');b.classList.add('text-on-surface-variant');});
+  btn.classList.add('active');btn.classList.remove('text-on-surface-variant');
+  renderAll(f);
+}
+
+// Income estimator
+function calcIncome(){
+  const v=+document.getElementById('visitors').value;
+  const c=+document.getElementById('conversion').value;
+  document.getElementById('visitorVal').textContent=v;
+  document.getElementById('convVal').textContent=c+'%';
+  const a=Math.round(v*30*0.015*35);
+  const p=Math.round(v*30*(c/100)*99);
+  document.getElementById('adsenseIncome').textContent='₹'+a.toLocaleString();
+  document.getElementById('proIncome').textContent='₹'+p.toLocaleString();
+  document.getElementById('totalIncome').textContent='₹'+(a+p).toLocaleString();
+}
+
+// Notes
+const ne=document.getElementById('userNotes');
+ne.value=localStorage.getItem('enp-money-notes')||'';
+function saveNotes(){
+  localStorage.setItem('enp-money-notes',ne.value);
+  const el=document.getElementById('notesSaved');
+  el.textContent='Saved ✓ '+new Date().toLocaleTimeString();
+  setTimeout(()=>el.textContent='',3000);
+}
+ne.addEventListener('input',()=>{clearTimeout(window._nt);window._nt=setTimeout(saveNotes,1500);});
+
+// Init
+renderAll('all');
+calcIncome();
+</script>
+</body>
+</html>

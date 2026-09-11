@@ -454,14 +454,30 @@ function initNavigation() {
       if (icon) icon.style.fontVariationSettings = isActive ? "'FILL' 1" : "'FILL' 0";
     });
 
-    // Sync inline tabs
-    inlineTabs.forEach(tab => {
-      tab.classList.toggle('active', tab.dataset.tab === tabName);
-    });
+    // If opening admin tab, initialize admin functions
+    if (tabName === 'admin' && typeof initAdmin === 'function') {
+      initAdmin();
+    }
   }
 
-  // Expose globally for sidebar quick links
+  // Expose globally for sidebar quick links and hash routing
   window.switchToTab = switchTab;
+
+  // Handle hash / param on load
+  try {
+    const urlParams = new URLSearchParams(window.location.search);
+    const initialTab = urlParams.get('tab') || window.location.hash.replace('#', '');
+    if (initialTab && panels[initialTab]) {
+      switchTab(initialTab);
+    }
+  } catch (e) {}
+
+  window.addEventListener('hashchange', () => {
+    const hashTab = window.location.hash.replace('#', '');
+    if (hashTab && panels[hashTab]) {
+      switchTab(hashTab);
+    }
+  });
 
   // Attach click handlers (deduplicated)
   [...sidebarBtns, ...topnavLinks, ...mobileBtns, ...inlineTabs].forEach(el => {

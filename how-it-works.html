@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <meta name="description" content="Learn how eNotePad works — share text, links, and images across devices instantly with a 6-character secret code. No login required." />
+  <meta name="author" content="eNotePad — Digital Curator" />
+  <title>How It Works — eNotePad</title>
+  <link rel="icon" href="assets/Favicon.png" type="image/png" />
+  <link rel="canonical" href="https://enotepad.vercel.app/how-it-works.html" />
+
+  <!-- Google AdSense Account Verification -->
+  <meta name="google-adsense-account" content="ca-pub-4282755745845869" />
+
+  <!-- Google AdSense -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4282755745845869" crossorigin="anonymous"></script>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+
+  <!-- Google Fonts: Inter + Newsreader -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,600&display=swap" rel="stylesheet" />
+
+  <!-- Material Symbols -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind Config: Tactile Editorial Design System -->
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary-dim": "#455464",
+            "on-tertiary": "#faf8ff",
+            "on-surface": "#2f342e",
+            "inverse-primary": "#daeafe",
+            "primary-fixed": "#d4e4f8",
+            "error": "#9f403d",
+            "surface-container-low": "#f4f4ef",
+            "surface": "#faf9f5",
+            "surface-container-highest": "#e0e4dc",
+            "surface-tint": "#516070",
+            "inverse-surface": "#0d0f0d",
+            "on-surface-variant": "#5c605a",
+            "outline-variant": "#afb3ac",
+            "tertiary": "#575e78",
+            "secondary": "#5e5f62",
+            "surface-variant": "#e0e4dc",
+            "surface-container-lowest": "#ffffff",
+            "on-primary": "#f4f8ff",
+            "primary": "#516070",
+            "outline": "#787c75",
+            "secondary-container": "#e2e2e5",
+            "on-secondary-container": "#505255",
+            "on-background": "#2f342e",
+            "surface-container": "#edeee8",
+            "background": "#faf9f5",
+            "tertiary-container": "#d5dcfb",
+            "primary-container": "#d4e4f8",
+            "on-primary-container": "#445363",
+            "surface-dim": "#d6dcd2",
+            "surface-bright": "#faf9f5",
+            "surface-container-high": "#e6e9e2",
+          },
+          fontFamily: {
+            headline: ["Inter", "sans-serif"],
+            body: ["Newsreader", "serif"],
+            label: ["Inter", "sans-serif"]
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    .paper-grain {
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+      opacity: 0.025;
+    }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .material-symbols-outlined.filled {
+      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .editorial-shadow { box-shadow: 0 12px 32px rgba(47, 52, 46, 0.07); }
+    .editorial-border { border: 1px solid rgba(175, 179, 172, 0.15); }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(28px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .fade-up { animation: fadeUp 0.65s cubic-bezier(0.22, 1, 0.36, 1) both; }
+    .delay-1 { animation-delay: 0.08s; }
+    .delay-2 { animation-delay: 0.16s; }
+    .delay-3 { animation-delay: 0.24s; }
+    .delay-4 { animation-delay: 0.32s; }
+    .delay-5 { animation-delay: 0.40s; }
+    .delay-6 { animation-delay: 0.48s; }
+
+    .reveal { opacity: 0; transform: translateY(32px); transition: opacity 0.7s cubic-bezier(0.22,1,0.36,1), transform 0.7s cubic-bezier(0.22,1,0.36,1); }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    @keyframes codePulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(81, 96, 112, 0.12); }
+      50% { box-shadow: 0 0 0 10px rgba(81, 96, 112, 0); }
+    }
+    .code-badge { animation: codePulse 2.5s ease-in-out infinite; }
+
+    .hero-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.3;
+      pointer-events: none;
+    }
+
+    .feature-card { transition: transform 0.25s cubic-bezier(0.22,1,0.36,1), box-shadow 0.25s ease; }
+    .feature-card:hover { transform: translateY(-4px); box-shadow: 0 20px 48px rgba(47,52,46,0.10); }
+
+    .cta-btn { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+    .cta-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(81,96,112,0.28); }
+    .cta-btn:active { transform: translateY(0); }
+
+    @keyframes dotPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.15); }
+    }
+    .timeline-dot { animation: dotPulse 2s ease-in-out infinite; }
+
+    /* ── Comprehensive Dark Mode ── */
+    .dark body { background-color: #0e1210 !important; color: #dde3da !important; }
+    .dark .bg-background { background-color: #0e1210 !important; }
+    .dark .bg-surface-container-lowest { background-color: #1b1f1a !important; }
+    .dark .bg-surface-container-low { background-color: #181c17 !important; }
+    .dark .bg-surface-container-low\/60 { background-color: rgba(24,28,23,0.6) !important; }
+    .dark .bg-surface-container { background-color: #1f241e !important; }
+    .dark .bg-surface-container-high { background-color: #262b25 !important; }
+    .dark .bg-surface-dim { background-color: #141714 !important; }
+    .dark .text-on-surface { color: #dde3da !important; }
+    .dark .text-on-surface\/40 { color: rgba(221,227,218,0.4) !important; }
+    .dark .text-on-surface-variant { color: #8b9388 !important; }
+    .dark .text-on-surface-variant\/60 { color: rgba(139,147,136,0.6) !important; }
+    .dark .text-on-surface-variant\/70 { color: rgba(139,147,136,0.7) !important; }
+    .dark .text-primary { color: #b8cee2 !important; }
+    .dark .text-primary\/50 { color: rgba(184,206,226,0.5) !important; }
+    .dark .text-primary\/40 { color: rgba(184,206,226,0.4) !important; }
+    .dark .text-on-primary { color: #e8f0f8 !important; }
+    .dark .text-on-primary-container { color: #b8cee2 !important; }
+    .dark .text-tertiary { color: #9aa4c0 !important; }
+    .dark .text-on-tertiary { color: #e8f0f8 !important; }
+    .dark .bg-primary { background-color: #3d5262 !important; }
+    .dark .bg-primary\/10 { background-color: rgba(184,206,226,0.08) !important; }
+    .dark .bg-primary\/5 { background-color: rgba(184,206,226,0.04) !important; }
+    .dark .bg-primary-container { background-color: rgba(184,206,226,0.1) !important; }
+    .dark .bg-primary-container\/60 { background-color: rgba(184,206,226,0.08) !important; }
+    .dark .bg-primary-container\/80 { background-color: rgba(184,206,226,0.1) !important; }
+    .dark .bg-tertiary\/10 { background-color: rgba(154,164,192,0.1) !important; }
+    .dark .bg-surface-container\/40 { background-color: rgba(31,36,30,0.4) !important; }
+    /* nav */
+    .dark .bg-background\/80 { background-color: rgba(14,18,16,0.8) !important; }
+    /* borders */
+    .dark .editorial-border { border-color: rgba(184,206,226,0.1) !important; }
+    .dark .border-outline-variant\/10 { border-color: rgba(184,206,226,0.08) !important; }
+    .dark .border-outline-variant\/20 { border-color: rgba(184,206,226,0.12) !important; }
+    .dark .border-primary\/15 { border-color: rgba(184,206,226,0.12) !important; }
+    /* shadows */
+    .dark .editorial-shadow { box-shadow: 0 12px 32px rgba(0,0,0,0.35) !important; }
+    .dark .feature-card:hover { transform: translateY(-4px); box-shadow: 0 20px 48px rgba(0,0,0,0.4) !important; }
+    /* code badge pulse */
+    .dark .code-badge { background-color: rgba(184,206,226,0.1) !important; }
+    /* comparison table alternating row */
+    .dark .bg-surface-container\/40 { background-color: rgba(31,36,30,0.5) !important; }
+    /* FAQ */
+    .dark .faq-body p { color: #8b9388 !important; }
+    /* CTA section tint */
+    .dark .bg-primary\/5 { background-color: rgba(61,82,98,0.15) !important; }
+    /* footer */
+    .dark footer { background-color: #181c17 !important; }
+    /* "access" mockup green */
+    .dark .text-green-600 { color: #4ade80 !important; }
+
+    .nav-blur {
+      backdrop-filter: blur(20px) saturate(1.6);
+      -webkit-backdrop-filter: blur(20px) saturate(1.6);
+    }
+
+    .animated-underline { position: relative; display: inline-block; }
+    .animated-underline::after {
+      content: '';
+      position: absolute;
+      left: 0; bottom: -3px;
+      width: 100%; height: 2px;
+      background: linear-gradient(to right, #516070, #575e78);
+      border-radius: 2px;
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.4s cubic-bezier(0.22,1,0.36,1);
+    }
+    .animated-underline:hover::after { transform: scaleX(1); }
+
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+    .cursor { animation: blink 1s step-end infinite; }
+
+    @keyframes floatUp {
+      0% { transform: translateY(0) rotate(0deg); opacity: 0.5; }
+      100% { transform: translateY(-120px) rotate(180deg); opacity: 0; }
+    }
+    .particle {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(81,96,112,0.08);
+      pointer-events: none;
+    }
+
+    /* FAQ transitions */
+    .faq-body { max-height: 0; overflow: hidden; transition: max-height 0.35s cubic-bezier(0.22,1,0.36,1); }
+    /* ad containers */
+    .dark .ad-unit-wrap { background: rgba(184,206,226,0.03) !important; }
+  </style>
+</head>
+
+<body class="bg-background text-on-surface font-label min-h-screen relative overflow-x-hidden">
+
+  <!-- Paper Grain -->
+  <div class="fixed inset-0 pointer-events-none paper-grain z-50"></div>
+
+  <!-- ===== STICKY NAV ===== -->
+  <nav class="fixed top-0 left-0 right-0 z-40 bg-background/80 nav-blur border-b border-outline-variant/10">
+    <div class="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
+      <a href="index.html" class="flex items-center gap-2 no-underline" style="text-decoration:none;">
+        <img src="assets/logo.png" alt="eNotePad Logo" class="w-7 h-7 object-contain" onerror="this.style.display='none'" />
+        <div class="flex items-baseline leading-none">
+          <span style="color:#00a8ff" class="text-lg font-bold">e</span>
+          <span class="text-primary text-lg font-bold">NotePad</span>
+        </div>
+        <span class="text-[8px] uppercase tracking-widest text-primary/40 font-bold self-end mb-0.5 hidden sm:inline">Digital Curator</span>
+      </a>
+
+      <div class="flex items-center gap-2.5">
+        <button id="themeToggle" class="w-9 h-9 rounded-full flex items-center justify-center border border-outline-variant/20 text-primary/60 hover:text-primary hover:bg-surface-container transition-all" title="Toggle theme">
+          <span class="material-symbols-outlined text-base" id="themeIcon">dark_mode</span>
+        </button>
+        <a href="index.html" class="cta-btn inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-on-primary rounded-full text-sm font-semibold shadow-sm" style="text-decoration:none;">
+          <span class="material-symbols-outlined text-sm">arrow_forward</span>
+          Open App
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ===== HERO ===== -->
+  <section class="relative min-h-screen flex flex-col items-center justify-center pt-14 pb-20 overflow-hidden">
+
+    <div class="hero-orb w-96 h-96 top-10 -left-24" style="background:radial-gradient(circle,rgba(81,96,112,0.15) 0%,transparent 70%);"></div>
+    <div class="hero-orb w-80 h-80 bottom-20 -right-20" style="background:radial-gradient(circle,rgba(87,94,120,0.12) 0%,transparent 70%);"></div>
+
+    <div class="particle w-3 h-3" style="top:30%;left:10%;animation:floatUp 4s ease-in-out infinite;"></div>
+    <div class="particle w-2 h-2" style="top:60%;left:15%;animation:floatUp 5.5s ease-in-out infinite 1s;"></div>
+    <div class="particle w-4 h-4" style="top:20%;right:12%;animation:floatUp 3.8s ease-in-out infinite 0.5s;"></div>
+    <div class="particle w-2 h-2" style="top:70%;right:8%;animation:floatUp 6s ease-in-out infinite 2s;"></div>
+
+    <div class="relative z-10 max-w-4xl mx-auto px-6 text-center">
+
+      <!-- Badge -->
+      <div class="fade-up inline-flex items-center gap-2 px-4 py-2 rounded-full border border-outline-variant/20 bg-surface-container mb-8 text-xs font-semibold text-on-surface-variant uppercase tracking-widest">
+        <span class="material-symbols-outlined text-sm text-primary filled">auto_awesome</span>
+        How it works
+      </div>
+
+      <!-- Headline -->
+      <h1 class="fade-up delay-1 font-body text-5xl sm:text-6xl md:text-7xl italic text-on-surface leading-tight mb-6">
+        Share anything.<br/>
+        <span class="text-primary">No login.</span>
+        <span class="text-on-surface/40"> No friction.</span>
+      </h1>
+
+      <!-- Subtitle -->
+      <p class="fade-up delay-2 font-label text-lg sm:text-xl text-on-surface-variant max-w-2xl mx-auto mb-10 leading-relaxed">
+        eNotePad lets you instantly send text, links, or images to any device — just share a
+        <strong class="text-primary font-semibold">6-character secret code</strong>.
+        Content auto-disappears in 20 minutes. No account needed.
+      </p>
+
+      <!-- CTA buttons -->
+      <div class="fade-up delay-3 flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
+        <a href="index.html" class="cta-btn inline-flex items-center gap-2 px-8 py-3.5 bg-primary text-on-primary rounded-full text-base font-bold shadow-lg" style="text-decoration:none;">
+          <span class="material-symbols-outlined">rocket_launch</span>
+          Try it now — Free
+        </a>
+        <a href="#how-it-works" class="cta-btn inline-flex items-center gap-2 px-8 py-3.5 border border-outline-variant/30 bg-surface-container-lowest rounded-full text-base font-semibold text-on-surface-variant hover:text-primary transition-colors" style="text-decoration:none;">
+          <span class="material-symbols-outlined">play_circle</span>
+          See the steps
+        </a>
+      </div>
+
+      <!-- Code demo pill -->
+      <div class="fade-up delay-4 inline-flex items-center gap-3 px-6 py-3 bg-surface-container-lowest rounded-2xl editorial-shadow editorial-border flex-wrap justify-center">
+        <span class="text-xs text-on-surface-variant/60 font-label uppercase tracking-widest">Example Code</span>
+        <div class="flex gap-1.5">
+          <span class="code-badge w-9 h-9 rounded-xl bg-primary-container text-primary font-bold text-sm flex items-center justify-center editorial-border">A</span>
+          <span class="code-badge w-9 h-9 rounded-xl bg-primary-container text-primary font-bold text-sm flex items-center justify-center editorial-border" style="animation-delay:.3s">4</span>
+          <span class="code-badge w-9 h-9 rounded-xl bg-primary-container text-primary font-bold text-sm flex items-center justify-center editorial-border" style="animation-delay:.6s">X</span>
+          <span class="code-badge w-9 h-9 rounded-xl bg-primary-container text-primary font-bold text-sm flex items-center justify-center editorial-border" style="animation-delay:.9s">7</span>
+          <span class="code-badge w-9 h-9 rounded-xl bg-primary-container text-primary font-bold text-sm flex items-center justify-center editorial-border" style="animation-delay:1.2s">K</span>
+          <span class="code-badge w-9 h-9 rounded-xl bg-primary-container text-primary font-bold text-sm flex items-center justify-center editorial-border" style="animation-delay:1.5s">2</span>
+        </div>
+        <span class="text-xs text-on-surface-variant/60 hidden sm:inline">← enter this on any device</span>
+      </div>
+    </div>
+
+    <!-- Scroll hint -->
+    <div class="fade-up delay-6 absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 text-on-surface-variant/40">
+      <span class="text-xs uppercase tracking-widest font-label">Scroll</span>
+      <span class="material-symbols-outlined text-lg" style="animation:dotPulse 1.5s ease-in-out infinite;">keyboard_arrow_down</span>
+    </div>
+  </section>
+
+  <!-- ===== 3-STEP WALKTHROUGH ===== -->
+  <section id="how-it-works" class="relative py-24 bg-surface-container-low/60">
+    <div class="max-w-6xl mx-auto px-6">
+
+      <div class="text-center mb-16 reveal">
+        <p class="text-xs uppercase tracking-widest text-primary/50 font-bold mb-3">The process</p>
+        <h2 class="font-body text-4xl sm:text-5xl italic text-on-surface mb-4">Three steps. That's it.</h2>
+        <p class="text-on-surface-variant max-w-xl mx-auto leading-relaxed">Everything happens in under 30 seconds. No downloads, no accounts, no cables.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6 relative">
+
+        <!-- Desktop connector line -->
+        <div class="hidden md:block absolute top-12 left-[calc(33.33%+2rem)] right-[calc(33.33%+2rem)] h-px bg-gradient-to-r from-primary/20 via-primary/10 to-primary/20 z-0"></div>
+
+        <!-- STEP 1 -->
+        <div class="reveal delay-1 relative z-10 bg-surface-container-lowest rounded-3xl p-8 editorial-shadow editorial-border feature-card text-center flex flex-col items-center">
+          <div class="relative mb-6">
+            <div class="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto">
+              <span class="material-symbols-outlined text-4xl text-primary filled">edit_note</span>
+            </div>
+            <div class="timeline-dot absolute -top-2 -right-2 w-7 h-7 rounded-full bg-primary text-on-primary flex items-center justify-center text-xs font-black editorial-shadow">1</div>
+          </div>
+          <h3 class="font-body text-2xl italic text-on-surface mb-3">Write or paste</h3>
+          <p class="text-on-surface-variant text-sm leading-relaxed mb-5">Type a note, paste a link, or upload an image. Pick an expiry time (5, 10, or 20 min).</p>
+          <div class="w-full bg-surface-container rounded-2xl p-4 editorial-border text-left">
+            <div class="flex items-center gap-1.5 mb-3">
+              <div class="w-2 h-2 rounded-full bg-error/40"></div>
+              <div class="w-2 h-2 rounded-full bg-primary/30"></div>
+              <div class="w-2 h-2 rounded-full bg-primary/50"></div>
+              <span class="text-[10px] text-on-surface-variant/40 ml-auto font-label">Share Tab</span>
+            </div>
+            <div class="bg-surface-container-lowest rounded-xl p-3 text-xs text-on-surface-variant/60 font-body italic" style="min-height:52px">
+              "Hey! Here's the meeting link for tomorrow...<span class="cursor text-primary">|</span>"
+            </div>
+            <div class="mt-3 flex gap-2">
+              <span class="px-3 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-semibold">📄 Text</span>
+              <span class="px-3 py-1 rounded-full text-on-surface-variant/40 text-[10px] font-semibold border border-outline-variant/20">🔗 Link</span>
+              <span class="px-3 py-1 rounded-full text-on-surface-variant/40 text-[10px] font-semibold border border-outline-variant/20">🖼 Image</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 2 -->
+        <div class="reveal delay-2 relative z-10 bg-surface-container-lowest rounded-3xl p-8 editorial-shadow editorial-border feature-card text-center flex flex-col items-center">
+          <div class="relative mb-6">
+            <div class="w-20 h-20 rounded-2xl bg-tertiary/10 flex items-center justify-center mx-auto">
+              <span class="material-symbols-outlined text-4xl text-tertiary filled">key</span>
+            </div>
+            <div class="timeline-dot absolute -top-2 -right-2 w-7 h-7 rounded-full bg-tertiary text-on-tertiary flex items-center justify-center text-xs font-black editorial-shadow" style="animation-delay:.5s">2</div>
+          </div>
+          <h3 class="font-body text-2xl italic text-on-surface mb-3">Get your code</h3>
+          <p class="text-on-surface-variant text-sm leading-relaxed mb-5">Hit "Share" — a unique 6-character code is generated instantly. Share this code with anyone.</p>
+          <div class="w-full bg-surface-container rounded-2xl p-4 editorial-border">
+            <p class="text-[10px] uppercase tracking-widest text-on-surface-variant/40 font-bold mb-3">Your code is ready!</p>
+            <div class="flex justify-center gap-1.5 mb-3">
+              <div class="w-10 h-10 rounded-xl bg-primary-container/80 text-primary font-black text-sm flex items-center justify-center editorial-border">M</div>
+              <div class="w-10 h-10 rounded-xl bg-primary-container/80 text-primary font-black text-sm flex items-center justify-center editorial-border">7</div>
+              <div class="w-10 h-10 rounded-xl bg-primary-container/80 text-primary font-black text-sm flex items-center justify-center editorial-border">N</div>
+              <div class="w-10 h-10 rounded-xl bg-primary-container/80 text-primary font-black text-sm flex items-center justify-center editorial-border">Q</div>
+              <div class="w-10 h-10 rounded-xl bg-primary-container/80 text-primary font-black text-sm flex items-center justify-center editorial-border">2</div>
+              <div class="w-10 h-10 rounded-xl bg-primary-container/80 text-primary font-black text-sm flex items-center justify-center editorial-border">P</div>
+            </div>
+            <button class="w-full py-2 rounded-xl bg-primary text-on-primary text-xs font-bold flex items-center justify-center gap-1.5 cursor-default">
+              <span class="material-symbols-outlined text-sm">content_copy</span> Copy Code
+            </button>
+          </div>
+        </div>
+
+        <!-- STEP 3 -->
+        <div class="reveal delay-3 relative z-10 bg-surface-container-lowest rounded-3xl p-8 editorial-shadow editorial-border feature-card text-center flex flex-col items-center">
+          <div class="relative mb-6">
+            <div class="w-20 h-20 rounded-2xl bg-primary-container/60 flex items-center justify-center mx-auto">
+              <span class="material-symbols-outlined text-4xl text-primary filled">download_done</span>
+            </div>
+            <div class="timeline-dot absolute -top-2 -right-2 w-7 h-7 rounded-full bg-primary/80 text-on-primary flex items-center justify-center text-xs font-black editorial-shadow" style="animation-delay:1s">3</div>
+          </div>
+          <h3 class="font-body text-2xl italic text-on-surface mb-3">Access anywhere</h3>
+          <p class="text-on-surface-variant text-sm leading-relaxed mb-5">They open eNotePad → "Access" tab → enter the code. Content appears instantly, on any device.</p>
+          <div class="w-full bg-surface-container rounded-2xl p-4 editorial-border text-left">
+            <p class="text-[10px] uppercase tracking-widest text-on-surface-variant/40 font-bold mb-3">Access Tab</p>
+            <div class="mb-3">
+              <input type="text" value="M7NQ2P" maxlength="6" readonly class="w-full bg-surface-container-lowest border border-outline-variant/20 rounded-xl px-3 py-2 text-sm font-bold text-primary text-center tracking-[0.3em] outline-none cursor-default" />
+            </div>
+            <button class="w-full py-2 rounded-xl bg-primary text-on-primary text-xs font-bold flex items-center justify-center gap-1.5 cursor-default mb-3">
+              <span class="material-symbols-outlined text-sm">lock_open</span> Retrieve Content
+            </button>
+            <div class="p-3 bg-surface-container-lowest rounded-xl border border-primary/15">
+              <div class="flex items-center gap-1.5 mb-1">
+                <span class="material-symbols-outlined text-sm text-green-500 filled">check_circle</span>
+                <span class="text-[10px] font-bold text-green-600 uppercase tracking-widest">Content Retrieved!</span>
+              </div>
+              <p class="text-xs text-on-surface-variant/70 font-body italic">"Hey! Here's the meeting link..."</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+
+  <!-- ===== USE CASES ===== -->
+  <section class="py-24 bg-background">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="text-center mb-14 reveal">
+        <p class="text-xs uppercase tracking-widest text-primary/50 font-bold mb-3">Real examples</p>
+        <h2 class="font-body text-4xl sm:text-5xl italic text-on-surface mb-4">When would you use this?</h2>
+        <p class="text-on-surface-variant max-w-lg mx-auto">Situations where eNotePad saves you time every single day.</p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+
+        <div class="reveal delay-1 feature-card bg-surface-container-lowest rounded-2xl p-6 editorial-shadow editorial-border">
+          <div class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center mb-4">
+            <span class="material-symbols-outlined filled text-blue-400">smartphone</span>
+          </div>
+          <h3 class="font-headline font-semibold text-on-surface mb-2">Phone → PC transfer</h3>
+          <p class="text-sm text-on-surface-variant leading-relaxed">Copy a link on your phone and need it on your laptop? Share it with eNotePad — no cable, no email, no AirDrop needed.</p>
+          <div class="mt-4 pt-4 border-t border-outline-variant/10 flex items-center gap-2 text-xs text-on-surface-variant/50">
+            <span class="material-symbols-outlined text-sm">timer</span> Takes under 10 seconds
+          </div>
+        </div>
+
+        <div class="reveal delay-2 feature-card bg-surface-container-lowest rounded-2xl p-6 editorial-shadow editorial-border">
+          <div class="w-12 h-12 rounded-xl bg-green-50 flex items-center justify-center mb-4">
+            <span class="material-symbols-outlined filled text-green-500">group</span>
+          </div>
+          <h3 class="font-headline font-semibold text-on-surface mb-2">Quick share with a friend</h3>
+          <p class="text-sm text-on-surface-variant leading-relaxed">Share a WiFi password, a meeting link, or an address with someone nearby — no WhatsApp group, no contact saving needed.</p>
+          <div class="mt-4 pt-4 border-t border-outline-variant/10 flex items-center gap-2 text-xs text-on-surface-variant/50">
+            <span class="material-symbols-outlined text-sm">lock</span> Auto-deletes in 20 min
+          </div>
+        </div>
+
+        <div class="reveal delay-3 feature-card bg-surface-container-lowest rounded-2xl p-6 editorial-shadow editorial-border">
+          <div class="w-12 h-12 rounded-xl bg-purple-50 flex items-center justify-center mb-4">
+            <span class="material-symbols-outlined filled text-purple-400">code</span>
+          </div>
+          <h3 class="font-headline font-semibold text-on-surface mb-2">Share a code snippet</h3>
+          <p class="text-sm text-on-surface-variant leading-relaxed">Helping a classmate with code? Paste it into eNotePad, give them the code, and they can copy it on their machine instantly.</p>
+          <div class="mt-4 pt-4 border-t border-outline-variant/10 flex items-center gap-2 text-xs text-on-surface-variant/50">
+            <span class="material-symbols-outlined text-sm">privacy_tip</span> No login ever required
+          </div>
+        </div>
+
+        <div class="reveal delay-1 feature-card bg-surface-container-lowest rounded-2xl p-6 editorial-shadow editorial-border">
+          <div class="w-12 h-12 rounded-xl bg-orange-50 flex items-center justify-center mb-4">
+            <span class="material-symbols-outlined filled text-orange-400">image</span>
+          </div>
+          <h3 class="font-headline font-semibold text-on-surface mb-2">Send a photo quickly</h3>
+          <p class="text-sm text-on-surface-variant leading-relaxed">Upload a photo and share the code. The other person downloads it without WhatsApp compression — full quality, no app needed.</p>
+          <div class="mt-4 pt-4 border-t border-outline-variant/10 flex items-center gap-2 text-xs text-on-surface-variant/50">
+            <span class="material-symbols-outlined text-sm">hd</span> High quality uploads
+          </div>
+        </div>
+
+        <div class="reveal delay-2 feature-card bg-surface-container-lowest rounded-2xl p-6 editorial-shadow editorial-border">
+          <div class="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center mb-4">
+            <span class="material-symbols-outlined filled text-red-400">school</span>
+          </div>
+          <h3 class="font-headline font-semibold text-on-surface mb-2">Classroom sharing</h3>
+          <p class="text-sm text-on-surface-variant leading-relaxed">A teacher shares a resource or assignment note. Students enter the code — everyone gets it instantly, no accounts needed.</p>
+          <div class="mt-4 pt-4 border-t border-outline-variant/10 flex items-center gap-2 text-xs text-on-surface-variant/50">
+            <span class="material-symbols-outlined text-sm">devices</span> Works on any device
+          </div>
+        </div>
+
+        <div class="reveal delay-3 feature-card bg-surface-container-lowest rounded-2xl p-6 editorial-shadow editorial-border">
+          <div class="w-12 h-12 rounded-xl bg-teal-50 flex items-center justify-center mb-4">
+            <span class="material-symbols-outlined filled text-teal-500">bookmark</span>
+          </div>
+          <h3 class="font-headline font-semibold text-on-surface mb-2">Saved notes (with account)</h3>
+          <p class="text-sm text-on-surface-variant leading-relaxed">Create a free account with just a username and 4-digit PIN to keep notes permanently — your personal digital notepad.</p>
+          <div class="mt-4 pt-4 border-t border-outline-variant/10 flex items-center gap-2 text-xs text-on-surface-variant/50">
+            <span class="material-symbols-outlined text-sm">pin</span> Just username + 4-digit PIN
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+
+  <!-- ===== COMPARISON TABLE ===== -->
+  <section class="py-24 bg-surface-container-low/60">
+    <div class="max-w-4xl mx-auto px-6">
+      <div class="text-center mb-14 reveal">
+        <p class="text-xs uppercase tracking-widest text-primary/50 font-bold mb-3">Why not just...</p>
+        <h2 class="font-body text-4xl sm:text-5xl italic text-on-surface mb-4">How is this different?</h2>
+        <p class="text-on-surface-variant max-w-lg mx-auto">Good question. Here's how eNotePad compares to the alternatives you already use.</p>
+      </div>
+
+      <div class="reveal bg-surface-container-lowest rounded-3xl editorial-shadow editorial-border overflow-hidden">
+        <div class="grid grid-cols-4 text-xs font-bold uppercase tracking-widest text-on-surface-variant/50 bg-surface-container px-6 py-4 gap-4">
+          <div>Feature</div>
+          <div class="text-center text-primary">eNotePad</div>
+          <div class="text-center">WhatsApp</div>
+          <div class="text-center">Email</div>
+        </div>
+        <div id="comparisonTable"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FAQ ===== -->
+  <section class="py-24 bg-background">
+    <div class="max-w-3xl mx-auto px-6">
+      <div class="text-center mb-14 reveal">
+        <p class="text-xs uppercase tracking-widest text-primary/50 font-bold mb-3">Questions</p>
+        <h2 class="font-body text-4xl sm:text-5xl italic text-on-surface mb-4">Frequently asked</h2>
+        <p class="text-on-surface-variant">Everything you might want to know before getting started.</p>
+      </div>
+      <div class="space-y-3" id="faqContainer"></div>
+    </div>
+  </section>
+
+
+
+  <!-- ===== FINAL CTA ===== -->
+  <section class="py-28 relative overflow-hidden">
+    <div class="absolute inset-0 bg-primary/5"></div>
+    <div class="hero-orb w-96 h-96 top-0 left-1/2 -translate-x-1/2" style="background:radial-gradient(circle,rgba(81,96,112,0.1) 0%,transparent 70%);"></div>
+
+    <div class="relative max-w-2xl mx-auto px-6 text-center reveal">
+      <div class="w-20 h-20 rounded-3xl bg-primary/10 flex items-center justify-center mx-auto mb-6">
+        <span class="material-symbols-outlined text-4xl text-primary filled">bolt</span>
+      </div>
+      <h2 class="font-body text-4xl sm:text-5xl italic text-on-surface mb-4">Ready to try it?</h2>
+      <p class="text-on-surface-variant text-lg mb-8 max-w-xl mx-auto">No setup. No account. Just open the app and share something in under 30 seconds.</p>
+      <a href="index.html" class="cta-btn inline-flex items-center gap-2.5 px-10 py-4 bg-primary text-on-primary rounded-full text-lg font-bold shadow-xl" style="text-decoration:none;">
+        <span class="material-symbols-outlined">edit_note</span>
+        Open eNotePad
+        <span class="material-symbols-outlined">arrow_forward</span>
+      </a>
+      <p class="text-xs text-on-surface-variant/40 mt-5">Free forever &middot; No login required &middot; Works on all devices</p>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="border-t border-outline-variant/10 bg-surface-container-low py-8">
+    <div class="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-2">
+        <span style="color:#00a8ff" class="font-bold text-sm">e</span>
+        <span class="text-primary font-bold text-sm">NotePad</span>
+        <span class="text-on-surface-variant/40 text-xs">— Digital Curator</span>
+      </div>
+      <div class="flex items-center gap-5 text-xs text-on-surface-variant/50">
+        <a href="privacy.html" class="hover:text-primary transition-colors animated-underline" style="text-decoration:none;">Privacy</a>
+        <a href="terms.html" class="hover:text-primary transition-colors animated-underline" style="text-decoration:none;">Terms</a>
+        <a href="support.html" class="hover:text-primary transition-colors animated-underline" style="text-decoration:none;">Support</a>
+        <a href="index.html" class="hover:text-primary transition-colors animated-underline" style="text-decoration:none;">Open App</a>
+      </div>
+      <p class="text-xs text-on-surface-variant/30">Made with ❤️ by eNotePad</p>
+    </div>
+  </footer>
+
+  <script>
+    // ── Theme Toggle ──────────────────────────────
+    const root = document.documentElement;
+    const themeBtn = document.getElementById('themeToggle');
+    const themeIcon = document.getElementById('themeIcon');
+    const savedTheme = localStorage.getItem('enp-theme');
+    if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      root.classList.add('dark');
+      themeIcon.textContent = 'light_mode';
+    }
+    themeBtn.addEventListener('click', () => {
+      root.classList.toggle('dark');
+      const isDark = root.classList.contains('dark');
+      themeIcon.textContent = isDark ? 'light_mode' : 'dark_mode';
+      localStorage.setItem('enp-theme', isDark ? 'dark' : 'light');
+    });
+
+    // ── Scroll Reveal ─────────────────────────────
+    const revealEls = document.querySelectorAll('.reveal');
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
+    revealEls.forEach(el => io.observe(el));
+
+    // ── Comparison Table ──────────────────────────
+    const rows = [
+      { feature: 'No account needed',        enp: true,  wa: false, email: false },
+      { feature: 'Works across any device',   enp: true,  wa: true,  email: true  },
+      { feature: 'Auto-deletes content',      enp: true,  wa: false, email: false },
+      { feature: 'No app install needed',     enp: true,  wa: false, email: false },
+      { feature: 'Share via a simple code',   enp: true,  wa: false, email: false },
+      { feature: 'Text, links & images',      enp: true,  wa: true,  email: true  },
+      { feature: 'Permanent saved notes',     enp: true,  wa: false, email: true  },
+      { feature: 'Zero personal data stored', enp: true,  wa: false, email: false },
+    ];
+    const check = (v) => v
+      ? `<span class="material-symbols-outlined text-lg filled" style="color:#22c55e;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24">check_circle</span>`
+      : `<span class="material-symbols-outlined text-lg" style="color:rgba(175,179,172,0.4)">cancel</span>`;
+    const tableEl = document.getElementById('comparisonTable');
+    rows.forEach((row, i) => {
+      const div = document.createElement('div');
+      div.className = `grid grid-cols-4 gap-4 items-center px-6 py-3.5 text-sm ${i % 2 === 0 ? '' : 'bg-surface-container/40'}`;
+      div.innerHTML = `
+        <span class="text-on-surface-variant text-xs sm:text-sm">${row.feature}</span>
+        <span class="flex justify-center">${check(row.enp)}</span>
+        <span class="flex justify-center">${check(row.wa)}</span>
+        <span class="flex justify-center">${check(row.email)}</span>
+      `;
+      tableEl.appendChild(div);
+    });
+
+    // ── FAQ Accordion ─────────────────────────────
+    const faqs = [
+      { q: "Is eNotePad completely free?", a: "Yes! eNotePad is 100% free. The core sharing feature (text, links, images with a 6-char code) requires no account at all — ever." },
+      { q: "Do I need to install anything?", a: "No. eNotePad is a web app — it works in any browser on any device (phone, PC, tablet). Just open the website. No app store needed." },
+      { q: "Why does the content disappear after 20 minutes?", a: "Auto-expiry is a privacy feature. Once it's gone, it's gone — no trace left on any server. Perfect for sensitive notes, passwords, or one-time links." },
+      { q: "What exactly is the 6-character code?", a: "Every time you share content, eNotePad generates a unique 6-character code (like 'A4X7K2'). Anyone who enters this code on the Access tab within the expiry window instantly gets your content." },
+      { q: "Can I use this instead of sending a WhatsApp message?", a: "Absolutely! For quick one-time shares (links, notes, images), eNotePad is faster — no opening WhatsApp, finding a contact, or waiting for delivery. Just share the code!" },
+      { q: "What if I want to keep notes permanently?", a: "Create a free account with just a username and 4-digit PIN (no email or phone needed). Logged-in users can save notes indefinitely in their personal library." },
+      { q: "Is my data private and secure?", a: "Yes. Temporary content is auto-deleted after expiry. No login is required, so your identity is never attached to what you share. We store as little data as possible." },
+    ];
+    const faqContainer = document.getElementById('faqContainer');
+    faqs.forEach((faq, i) => {
+      const div = document.createElement('div');
+      div.className = 'reveal bg-surface-container-lowest rounded-2xl editorial-border editorial-shadow overflow-hidden';
+      div.innerHTML = `
+        <button class="w-full flex items-center justify-between gap-4 px-6 py-4 text-left group" onclick="toggleFaq(${i})">
+          <span class="font-headline font-semibold text-on-surface text-sm">${faq.q}</span>
+          <span class="material-symbols-outlined text-primary/50 group-hover:text-primary flex-shrink-0 transition-all duration-300" id="faq-icon-${i}">expand_more</span>
+        </button>
+        <div class="faq-body" id="faq-body-${i}">
+          <p class="px-6 pb-5 text-sm text-on-surface-variant leading-relaxed font-body">${faq.a}</p>
+        </div>
+      `;
+      faqContainer.appendChild(div);
+      // Re-observe newly added reveal elements
+      io.observe(div);
+    });
+
+    let openFaqIdx = null;
+    function toggleFaq(i) {
+      const body = document.getElementById('faq-body-' + i);
+      const icon = document.getElementById('faq-icon-' + i);
+      const isOpen = body.style.maxHeight && body.style.maxHeight !== '0px';
+
+      // Close previous
+      if (openFaqIdx !== null && openFaqIdx !== i) {
+        const prevBody = document.getElementById('faq-body-' + openFaqIdx);
+        const prevIcon = document.getElementById('faq-icon-' + openFaqIdx);
+        prevBody.style.maxHeight = '0px';
+        if (prevIcon) prevIcon.style.transform = '';
+      }
+
+      body.style.maxHeight = isOpen ? '0px' : body.scrollHeight + 'px';
+      icon.style.transform = isOpen ? '' : 'rotate(180deg)';
+      openFaqIdx = isOpen ? null : i;
+    }
+
+    // ── Smooth scroll ─────────────────────────────
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.querySelector(a.getAttribute('href'));
+        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+  </script>
+</body>
+</html>

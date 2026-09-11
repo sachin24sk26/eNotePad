@@ -17,6 +17,9 @@
   <!-- QR Code Library -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
+  <!-- Google AdSense Account Verification -->
+  <meta name="google-adsense-account" content="ca-pub-4282755745845869" />
+
   <!-- Google AdSense -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4282755745845869" crossorigin="anonymous"></script>
 
@@ -34,28 +37,87 @@
   <meta name="twitter:description" content="Instantly share text, links, code snippets, and images across devices with a simple secret code. No login required." />
   <meta name="twitter:image" content="https://enotepad.vercel.app/assets/logo.png" />
 
-  <!-- Structured Data / JSON-LD for Google Search & Sitelinks -->
+  <!-- Structured Data / JSON-LD: WebApplication & FAQPage Schema for Google Rich Snippets -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "WebApplication",
-    "name": "eNotePad",
-    "alternateName": ["eNotePad Digital Curator", "eNotePad Online Note Sharing"],
-    "url": "https://enotepad.vercel.app/",
-    "logo": "https://enotepad.vercel.app/assets/logo.png",
-    "description": "Instantly share text, links, code snippets, and images across devices with a simple secret code. No login required.",
-    "applicationCategory": "UtilitiesApplication",
-    "operatingSystem": "All",
-    "offers": {
-      "@type": "Offer",
-      "price": "0",
-      "priceCurrency": "USD"
-    },
-    "potentialAction": {
-      "@type": "SearchAction",
-      "target": "https://enotepad.vercel.app/?code={search_term_string}",
-      "query-input": "required name=search_term_string"
-    }
+    "@graph": [
+      {
+        "@type": "WebApplication",
+        "@id": "https://enotepad.vercel.app/#webapp",
+        "name": "eNotePad",
+        "alternateName": ["eNotePad Digital Curator", "eNotePad Online Note Sharing", "eNotePad Ephemeral Notepad"],
+        "url": "https://enotepad.vercel.app/",
+        "logo": "https://enotepad.vercel.app/assets/logo.png",
+        "description": "Instantly share text, links, code snippets, and images across devices with a simple 6-character secret code. Free online notepad, no login required.",
+        "applicationCategory": "UtilitiesApplication",
+        "operatingSystem": "All",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://enotepad.vercel.app/?code={search_term_string}",
+          "query-input": "required name=search_term_string"
+        }
+      },
+      {
+        "@type": "FAQPage",
+        "@id": "https://enotepad.vercel.app/#faq",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "What is eNotePad and how does it work?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "eNotePad is a fast, privacy-first ephemeral note sharing utility and digital curator. It allows you to create rich text notes, code snippets, links, or image uploads and share them across any device using a temporary 6-character secret code or QR code without creating an account."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Do I need to sign up or register to share notes?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "No registration is required. Anyone can instantly write a note and receive a 6-character secret code. If you choose to create a free account, you unlock persistent note archives, folder organization, custom profiles, and direct user-to-user sharing."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How long do temporary notes remain active before deletion?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "You have full control over note duration. You can select 5 minutes, 20 minutes (default), 1 hour, 24 hours, 7 days, or single-read Burn After Reading. Once expired, notes are permanently purged from servers."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Is my shared note data secure and private?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. eNotePad uses SSL/TLS encryption in transit and provides optional client-side password/PIN protection. Notes set to Burn After Reading or expired intervals are irrevocably deleted from active memory and disk."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can I share images or code snippets with formatting?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. eNotePad supports rich text styling, code blocks, bullet points, Markdown mode, clickable web hyperlinks, and direct image uploads up to 5MB."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What is the Convo Room feature?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Convo Room is eNotePad's real-time collaborative workspace where multiple people can join a room via a shared room code to exchange messages, live notes, and scratchpad thoughts simultaneously."
+            }
+          }
+        ]
+      }
+    ]
   }
   </script>
 
@@ -197,7 +259,7 @@
   <div class="flex min-h-screen w-full max-w-full overflow-x-hidden">
 
     <!-- ========== SIDEBAR ========== -->
-    <aside class="sidebar-aside flex-col w-60 h-screen p-3 bg-surface-container-low rounded-r-3xl fixed left-0 top-0 z-50 transition-all duration-300 ease-out flex" id="sidebar">
+    <aside class="sidebar-aside flex-col w-60 h-screen p-3 bg-surface-container-low rounded-r-3xl fixed left-0 top-0 z-50 transition-all duration-300 ease-out flex overflow-y-auto" id="sidebar">
 
       <!-- Branding -->
       <div class="px-4 py-5 mb-1">
@@ -232,6 +294,10 @@
         <button class="w-full flex items-center gap-3 px-4 py-2.5 text-primary/60 hover:text-primary hover:bg-white/60 transition-all rounded-xl text-sm" onclick="window.open('convo_room/index.html', '_blank')">
           <span class="material-symbols-outlined text-lg">forum</span>
           <span>Convo Room</span>
+        </button>
+        <button class="w-full flex items-center gap-3 px-4 py-2.5 text-primary/60 hover:text-primary hover:bg-white/60 transition-all rounded-xl text-sm" onclick="window.open('how-it-works.html', '_blank')">
+          <span class="material-symbols-outlined text-lg">help_outline</span>
+          <span>How It Works</span>
         </button>
         <button class="sidebar-nav-btn w-full flex items-center gap-3 px-4 py-2.5 text-error/60 hover:text-error hover:bg-error/5 transition-all rounded-xl text-sm" data-tab="admin" id="sidebarAdmin" style="display: none;">
           <span class="material-symbols-outlined text-lg">admin_panel_settings</span>
@@ -273,6 +339,12 @@
           <span class="material-symbols-outlined text-base group-hover:scale-110 transition-transform">chat_bubble_outline</span>
           <span class="flex-1 text-left">Feedback to Dev</span>
           <span class="text-[8px] font-bold uppercase tracking-widest bg-primary/8 text-primary/50 px-1.5 py-0.5 rounded-full">Dev</span>
+        </button>
+
+        <button class="sidebar-footer-btn w-full flex items-center gap-3 px-4 py-2 text-amber-700/80 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300 hover:bg-amber-500/10 transition-all rounded-xl text-xs group font-semibold cursor-pointer" id="sidebarCoffeeBtn" onclick="if(typeof openCoffeeModal==='function')openCoffeeModal(2);">
+          <span class="text-base group-hover:scale-125 transition-transform inline-block">☕</span>
+          <span class="flex-1 text-left">Buy Me a Coffee</span>
+          <span class="text-[8px] font-bold uppercase tracking-widest bg-amber-500/15 text-amber-700 dark:text-amber-300 px-1.5 py-0.5 rounded-full">Tip</span>
         </button>
 
         <button class="w-full py-3 bg-primary text-on-primary rounded-2xl font-semibold text-sm shadow-lg hover:bg-primary-dim transition-all active:scale-[0.98] flex items-center justify-center gap-2" id="newNoteBtn">
@@ -340,6 +412,10 @@
             </nav>
           </div>
           <div class="flex items-center gap-2">
+            <button onclick="if(typeof openCoffeeModal==='function')openCoffeeModal(2);" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500/15 hover:bg-amber-500/25 text-amber-700 dark:text-amber-300 border border-amber-500/25 text-xs font-bold transition-all active:scale-95 cursor-pointer shadow-sm" title="Buy eNotePad a Coffee">
+              <span class="text-sm">☕</span>
+              <span class="hidden sm:inline">Coffee</span>
+            </button>
             <button class="theme-toggle-btn flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all active:scale-[0.97]" id="themeToggle" aria-label="Toggle theme">
               <span class="material-symbols-outlined text-base theme-icon-dark">dark_mode</span>
               <span class="material-symbols-outlined text-base theme-icon-light">light_mode</span>
@@ -1541,6 +1617,9 @@
               <button class="admin-tab-btn px-4 py-2.5 rounded-xl text-[11px] font-bold transition-all flex items-center gap-1.5 whitespace-nowrap" data-admin-tab="shares">
                 <span class="material-symbols-outlined text-sm">content_copy</span> Shares
               </button>
+              <button class="admin-tab-btn px-4 py-2.5 rounded-xl text-[11px] font-bold transition-all flex items-center gap-1.5 whitespace-nowrap" data-admin-tab="monetize">
+                <span class="material-symbols-outlined text-sm text-emerald-500">payments</span> Monetize
+              </button>
               <button class="admin-tab-btn px-4 py-2.5 rounded-xl text-[11px] font-bold transition-all flex items-center gap-1.5 whitespace-nowrap" data-admin-tab="logs">
                 <span class="material-symbols-outlined text-sm">history</span> Logs
               </button>
@@ -1638,10 +1717,14 @@
                 <h3 class="text-xs uppercase tracking-widest text-on-surface-variant font-bold flex items-center gap-2">
                   <span class="material-symbols-outlined text-sm">bolt</span> Quick Actions
                 </h3>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
                   <button class="bg-surface-container-low hover:bg-surface-container-high border border-outline-variant/10 hover:border-outline-variant/30 p-4 rounded-2xl text-center transition-all group" onclick="document.querySelector('[data-admin-tab=broadcast]').click()">
                     <span class="material-symbols-outlined text-xl text-on-surface-variant group-hover:text-primary transition-colors">campaign</span>
                     <p class="text-[10px] text-on-surface-variant group-hover:text-on-surface font-bold uppercase tracking-wider mt-2 transition-colors">New Broadcast</p>
+                  </button>
+                  <button class="bg-surface-container-low hover:bg-surface-container-high border border-outline-variant/10 hover:border-emerald-500/30 p-4 rounded-2xl text-center transition-all group" onclick="document.querySelector('[data-admin-tab=monetize]').click()">
+                    <span class="material-symbols-outlined text-xl text-emerald-500 group-hover:scale-110 transition-transform">payments</span>
+                    <p class="text-[10px] text-on-surface-variant group-hover:text-emerald-600 font-bold uppercase tracking-wider mt-2 transition-colors">Monetize</p>
                   </button>
                   <button class="bg-surface-container-low hover:bg-surface-container-high border border-outline-variant/10 hover:border-outline-variant/30 p-4 rounded-2xl text-center transition-all group" onclick="adminExportUsersCSV()">
                     <span class="material-symbols-outlined text-xl text-on-surface-variant group-hover:text-primary transition-colors">download</span>
@@ -1874,6 +1957,183 @@
               </div>
             </div>
 
+            <!-- =============== MONETIZE SECTION =============== -->
+            <div class="admin-section hidden space-y-6" id="adminSectionMonetize">
+              <!-- Header & Quick Launch Card -->
+              <div class="bg-surface-container-lowest p-6 md:p-8 rounded-[28px] border border-outline-variant/15 editorial-shadow flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                <div class="flex items-start gap-4">
+                  <div class="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-emerald-500 border border-emerald-500/20 flex-shrink-0">
+                    <span class="material-symbols-outlined text-2xl">payments</span>
+                  </div>
+                  <div>
+                    <div class="flex items-center gap-2.5 flex-wrap">
+                      <h3 class="text-xl font-headline italic text-on-surface">Monetization & Revenue Hub</h3>
+                      <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 uppercase tracking-wider">Active Strategy</span>
+                    </div>
+                    <p class="text-xs text-on-surface-variant mt-1 max-w-xl leading-relaxed">
+                      Comprehensive roadmap for turning eNotePad into a sustainable business: Google AdSense ad units, Pro tiers, and B2B room sponsorships.
+                    </p>
+                  </div>
+                </div>
+
+                <div class="flex items-center gap-3 w-full md:w-auto flex-wrap">
+                  <button onclick="window.open('monetize.html', '_blank')" class="flex-1 md:flex-initial px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-2 group">
+                    <span>Open Roadmap Dashboard</span>
+                    <span class="material-symbols-outlined text-sm group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform">open_in_new</span>
+                  </button>
+                  <a href="https://adsense.google.com" target="_blank" class="px-4 py-2.5 bg-surface-container-low hover:bg-surface-container-high border border-outline-variant/15 rounded-xl text-xs font-bold text-on-surface transition-all flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-sm text-primary">analytics</span> AdSense Console
+                  </a>
+                </div>
+              </div>
+
+              <!-- Revenue Streams Grid -->
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- Stream 1: AdSense -->
+                <div class="bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant/15 editorial-shadow flex flex-col justify-between">
+                  <div class="space-y-2">
+                    <div class="flex items-center justify-between">
+                      <span class="w-9 h-9 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-lg">ad</span>
+                      </span>
+                      <span class="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">Configured</span>
+                    </div>
+                    <p class="text-sm font-bold text-on-surface">Google AdSense</p>
+                    <p class="text-[11px] text-on-surface-variant leading-normal">
+                      Responsive banner units placed across <code class="text-primary font-mono text-[10px]">how-it-works.html</code> and roadmap pages. Publisher ID active.
+                    </p>
+                  </div>
+                  <div class="mt-4 pt-3 border-t border-outline-variant/10 flex items-center justify-between text-[11px]">
+                    <span class="text-on-surface-variant font-medium">Est. CPM:</span>
+                    <span class="font-bold text-emerald-600">$1.50 - $4.00</span>
+                  </div>
+                </div>
+
+                <!-- Stream 2: Pro Subscription -->
+                <div class="bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant/15 editorial-shadow flex flex-col justify-between">
+                  <div class="space-y-2">
+                    <div class="flex items-center justify-between">
+                      <span class="w-9 h-9 rounded-xl bg-purple-500/10 text-purple-500 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-lg">workspace_premium</span>
+                      </span>
+                      <span class="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 border border-amber-500/20">Roadmap</span>
+                    </div>
+                    <p class="text-sm font-bold text-on-surface">eNotePad Pro</p>
+                    <p class="text-[11px] text-on-surface-variant leading-normal">
+                      Custom slug links (<code class="text-purple-600 font-mono text-[10px]">/my-notes</code>), unlimited note expiration, password protection, and zero ads.
+                    </p>
+                  </div>
+                  <div class="mt-4 pt-3 border-t border-outline-variant/10 flex items-center justify-between text-[11px]">
+                    <span class="text-on-surface-variant font-medium">Target Price:</span>
+                    <span class="font-bold text-purple-600">$4.99 / mo</span>
+                  </div>
+                </div>
+
+                <!-- Stream 3: Room Sponsorships -->
+                <div class="bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant/15 editorial-shadow flex flex-col justify-between">
+                  <div class="space-y-2">
+                    <div class="flex items-center justify-between">
+                      <span class="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-lg">storefront</span>
+                      </span>
+                      <span class="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 border border-blue-500/20">Phase 3</span>
+                    </div>
+                    <p class="text-sm font-bold text-on-surface">Convo Sponsorships</p>
+                    <p class="text-[11px] text-on-surface-variant leading-normal">
+                      Branded chat rooms, community study circles, sponsored pinned messages, and developer bot webhooks.
+                    </p>
+                  </div>
+                  <div class="mt-4 pt-3 border-t border-outline-variant/10 flex items-center justify-between text-[11px]">
+                    <span class="text-on-surface-variant font-medium">Per Room:</span>
+                    <span class="font-bold text-emerald-600">$19 - $49 / mo</span>
+                  </div>
+                </div>
+
+                <!-- Stream 4: Developer API -->
+                <div class="bg-surface-container-lowest p-5 rounded-2xl border border-outline-variant/15 editorial-shadow flex flex-col justify-between">
+                  <div class="space-y-2">
+                    <div class="flex items-center justify-between">
+                      <span class="w-9 h-9 rounded-xl bg-orange-500/10 text-orange-500 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-lg">api</span>
+                      </span>
+                      <span class="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-600 border border-purple-500/20">Phase 4</span>
+                    </div>
+                    <p class="text-sm font-bold text-on-surface">API & Webhooks</p>
+                    <p class="text-[11px] text-on-surface-variant leading-normal">
+                      Programmatic note generation, automated pastebin API keys, and enterprise ephemeral storage.
+                    </p>
+                  </div>
+                  <div class="mt-4 pt-3 border-t border-outline-variant/10 flex items-center justify-between text-[11px]">
+                    <span class="text-on-surface-variant font-medium">Usage:</span>
+                    <span class="font-bold text-orange-600">Pay-as-you-go</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Interactive Roadmap Preview Card -->
+              <div class="bg-surface-container-lowest p-6 md:p-8 rounded-[28px] border border-outline-variant/15 editorial-shadow space-y-6">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div>
+                    <h4 class="text-base font-bold text-on-surface">Live Monetization Tasks & Implementation Tracker</h4>
+                    <p class="text-xs text-on-surface-variant mt-0.5">Track and check off high-impact monetization milestones.</p>
+                  </div>
+                  <button onclick="window.open('monetize.html', '_blank')" class="px-4 py-2 bg-surface-container hover:bg-surface-container-high border border-outline-variant/20 rounded-xl text-xs font-bold text-primary transition-all flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-sm">checklist</span> Open Full Task Checklist
+                  </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <!-- Milestone 1 -->
+                  <div class="p-4 rounded-2xl bg-surface-container-low border border-outline-variant/10 flex items-start gap-3">
+                    <div class="w-8 h-8 rounded-full bg-emerald-500/15 text-emerald-600 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <span class="material-symbols-outlined text-base">check_circle</span>
+                    </div>
+                    <div>
+                      <p class="text-xs font-bold text-on-surface">Google AdSense Script & Units Integration</p>
+                      <p class="text-[11px] text-on-surface-variant mt-0.5">Placed responsive display ad containers with client ca-pub-4282755745845869.</p>
+                      <span class="inline-block mt-2 text-[9px] font-bold uppercase tracking-wider text-emerald-600 bg-emerald-500/10 px-2 py-0.5 rounded-full">Phase 1 Complete</span>
+                    </div>
+                  </div>
+
+                  <!-- Milestone 2 -->
+                  <div class="p-4 rounded-2xl bg-surface-container-low border border-outline-variant/10 flex items-start gap-3">
+                    <div class="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <span class="material-symbols-outlined text-base">radio_button_unchecked</span>
+                    </div>
+                    <div>
+                      <p class="text-xs font-bold text-on-surface">AdSense Account Verification & Domain Approval</p>
+                      <p class="text-[11px] text-on-surface-variant mt-0.5">Submit site URL and verify ads.txt in Google AdSense management portal.</p>
+                      <span class="inline-block mt-2 text-[9px] font-bold uppercase tracking-wider text-primary bg-primary/10 px-2 py-0.5 rounded-full">In Progress</span>
+                    </div>
+                  </div>
+
+                  <!-- Milestone 3 -->
+                  <div class="p-4 rounded-2xl bg-surface-container-low border border-outline-variant/10 flex items-start gap-3">
+                    <div class="w-8 h-8 rounded-full bg-purple-500/10 text-purple-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <span class="material-symbols-outlined text-base">radio_button_unchecked</span>
+                    </div>
+                    <div>
+                      <p class="text-xs font-bold text-on-surface">Stripe / Razorpay Pro Subscription Checkout</p>
+                      <p class="text-[11px] text-on-surface-variant mt-0.5">Integrate payment gateway for monthly or yearly unlimited storage & custom URLs.</p>
+                      <span class="inline-block mt-2 text-[9px] font-bold uppercase tracking-wider text-purple-600 bg-purple-500/10 px-2 py-0.5 rounded-full">Phase 2 Planned</span>
+                    </div>
+                  </div>
+
+                  <!-- Milestone 4 -->
+                  <div class="p-4 rounded-2xl bg-surface-container-low border border-outline-variant/10 flex items-start gap-3">
+                    <div class="w-8 h-8 rounded-full bg-blue-500/10 text-blue-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <span class="material-symbols-outlined text-base">radio_button_unchecked</span>
+                    </div>
+                    <div>
+                      <p class="text-xs font-bold text-on-surface">Affiliate & Partner Tool Recommendations</p>
+                      <p class="text-[11px] text-on-surface-variant mt-0.5">Add non-intrusive developer tools and hosting partner links inside note toolbars.</p>
+                      <span class="inline-block mt-2 text-[9px] font-bold uppercase tracking-wider text-blue-600 bg-blue-500/10 px-2 py-0.5 rounded-full">Phase 2 Planned</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
       </div> <!-- /panelAdmin -->
@@ -1912,6 +2172,341 @@
           </div>
         </div>
       </div>
+
+      <!-- ================================================================= -->
+      <!-- ===== CRAWLABLE HIGH-VALUE EDITORIAL & ARCHITECTURE GUIDE ===== -->
+      <!-- ================================================================= -->
+      <section class="w-full max-w-4xl mx-auto px-4 sm:px-6 py-12 sm:py-16 space-y-16" id="editorialGuideSection">
+
+        <!-- 1. Header & Value Proposition -->
+        <article class="text-center space-y-4">
+          <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-wider">
+            <span class="material-symbols-outlined text-sm">verified_user</span>
+            <span>Ephemeral Digital Curation & Zero-Friction Sharing</span>
+          </div>
+          <h2 class="font-headline text-3xl sm:text-4xl md:text-5xl italic text-on-surface tracking-tight">
+            Instant, Secure Note Sharing Without Accounts or Tracking
+          </h2>
+          <p class="text-on-surface-variant max-w-2xl mx-auto text-sm sm:text-base leading-relaxed font-body">
+            In an era where traditional note applications demand complex sign-ups, sync permissions, and perpetual cloud tracking, 
+            <strong>eNotePad</strong> delivers a streamlined, privacy-conscious alternative. Effortlessly transfer formatted text, code snippets, web links, and images across any device using a lightweight 6-character secret code or instantaneous QR scan.
+          </p>
+          <div class="flex flex-wrap items-center justify-center gap-3 pt-2 text-xs font-semibold text-primary">
+            <span class="flex items-center gap-1 bg-surface-container-low px-3 py-1.5 rounded-xl border border-outline-variant/15">
+              <span class="material-symbols-outlined text-sm text-emerald-600 dark:text-emerald-400">check_circle</span> No Account Required
+            </span>
+            <span class="flex items-center gap-1 bg-surface-container-low px-3 py-1.5 rounded-xl border border-outline-variant/15">
+              <span class="material-symbols-outlined text-sm text-emerald-600 dark:text-emerald-400">check_circle</span> Automated Ephemeral Purge
+            </span>
+            <span class="flex items-center gap-1 bg-surface-container-low px-3 py-1.5 rounded-xl border border-outline-variant/15">
+              <span class="material-symbols-outlined text-sm text-emerald-600 dark:text-emerald-400">check_circle</span> Client-Side PIN Encryption
+            </span>
+            <span class="flex items-center gap-1 bg-surface-container-low px-3 py-1.5 rounded-xl border border-outline-variant/15">
+              <span class="material-symbols-outlined text-sm text-emerald-600 dark:text-emerald-400">check_circle</span> Cross-Platform Universal Access
+            </span>
+          </div>
+        </article>
+
+        <!-- 2. How Instant Sharing Works: 3 Simple Steps -->
+        <section class="space-y-6">
+          <div class="text-center space-y-2">
+            <p class="text-[10px] uppercase tracking-[0.2em] font-bold text-primary/60">Step-By-Step Workflow</p>
+            <h3 class="font-headline text-2xl sm:text-3xl italic text-on-surface">How eNotePad Works in Three Quick Steps</h3>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-surface-container-lowest rounded-2xl p-6 editorial-shadow editorial-border flex flex-col space-y-3">
+              <div class="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary font-bold text-lg">
+                1
+              </div>
+              <h4 class="font-bold text-base text-on-surface">Compose Your Content</h4>
+              <p class="text-xs text-on-surface-variant leading-relaxed">
+                Type or paste your text, Markdown documents, code repositories, or upload images directly into the rich text editor. Customize your note's expiration timer (5m, 20m, 1h, 24h, 7d, or 1-time read) and optionally set a private unlock PIN.
+              </p>
+            </div>
+            <div class="bg-surface-container-lowest rounded-2xl p-6 editorial-shadow editorial-border flex flex-col space-y-3">
+              <div class="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary font-bold text-lg">
+                2
+              </div>
+              <h4 class="font-bold text-base text-on-surface">Generate 6-Digit Key or QR</h4>
+              <p class="text-xs text-on-surface-variant leading-relaxed">
+                Click <strong>Share Note</strong>. eNotePad instantly generates a memorable, collision-resistant 6-character secret key, a direct copyable link, and an interactive QR code ready for instant camera scans.
+              </p>
+            </div>
+            <div class="bg-surface-container-lowest rounded-2xl p-6 editorial-shadow editorial-border flex flex-col space-y-3">
+              <div class="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary font-bold text-lg">
+                3
+              </div>
+              <h4 class="font-bold text-base text-on-surface">Retrieve & Self-Destruct</h4>
+              <p class="text-xs text-on-surface-variant leading-relaxed">
+                The recipient opens eNotePad on any desktop browser, tablet, or smartphone, enters the 6-character key under the <strong>Access</strong> tab, and views the note. Once time expires or read once, content is permanently destroyed.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 3. Security, Privacy & Zero-Trace Architecture -->
+        <section class="bg-surface-container-lowest rounded-3xl p-6 sm:p-10 editorial-shadow editorial-border space-y-6">
+          <div class="space-y-2">
+            <div class="flex items-center gap-2 text-primary">
+              <span class="material-symbols-outlined text-2xl">lock_reset</span>
+              <span class="text-xs font-bold uppercase tracking-widest">Privacy Architecture</span>
+            </div>
+            <h3 class="font-headline text-2xl sm:text-3xl italic text-on-surface">Engineered for Zero-Trace Ephemeral Privacy</h3>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs text-on-surface-variant leading-relaxed">
+            <div class="space-y-2">
+              <h5 class="font-bold text-sm text-on-surface flex items-center gap-2">
+                <span class="material-symbols-outlined text-base text-primary">auto_delete</span>
+                Automatic Memory & Disk Purge
+              </h5>
+              <p>
+                Unlike conventional cloud platforms that store deleted notes in recycling archives, eNotePad implements an automated garbage collection routine. Every expired note is systematically and irreversibly excised from active storage and memory caches.
+              </p>
+            </div>
+            <div class="space-y-2">
+              <h5 class="font-bold text-sm text-on-surface flex items-center gap-2">
+                <span class="material-symbols-outlined text-base text-primary">key</span>
+                End-to-End PIN Password Protection
+              </h5>
+              <p>
+                For sensitive payloads—such as one-time credentials, configuration files, or private correspondence—you can apply a secret password or 4-digit PIN. The note content remains locked until the authorized recipient inputs the matching key.
+              </p>
+            </div>
+            <div class="space-y-2">
+              <h5 class="font-bold text-sm text-on-surface flex items-center gap-2">
+                <span class="material-symbols-outlined text-base text-primary">local_fire_department</span>
+                "Burn After Reading" Capability
+              </h5>
+              <p>
+                Selecting the <em>Burn After Reading</em> policy ensures that the moment a recipient successfully unlocks and retrieves the note payload, it is instantly shredded and cannot be accessed a second time.
+              </p>
+            </div>
+            <div class="space-y-2">
+              <h5 class="font-bold text-sm text-on-surface flex items-center gap-2">
+                <span class="material-symbols-outlined text-base text-primary">no_accounts</span>
+                Zero Personal Data Collection
+              </h5>
+              <p>
+                You can write and share notes completely anonymously. We do not require your email address, phone number, or biometric data to use the core utility. No cookies or behavioral profile trackers are embedded.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 4. Comparison Matrix: eNotePad vs Traditional Alternatives -->
+        <section class="space-y-6">
+          <div class="text-center space-y-2">
+            <p class="text-[10px] uppercase tracking-[0.2em] font-bold text-primary/60">Objective Comparison</p>
+            <h3 class="font-headline text-2xl sm:text-3xl italic text-on-surface">Why Choose eNotePad Over Traditional Tools?</h3>
+            <p class="text-xs text-on-surface-variant max-w-xl mx-auto">See how eNotePad solves everyday data-transfer pain points compared to older pastebins, complex cloud suites, and messaging apps.</p>
+          </div>
+          <div class="bg-surface-container-lowest rounded-2xl editorial-shadow editorial-border overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead>
+                  <tr class="bg-surface-container-low border-b border-outline-variant/15 text-on-surface font-bold">
+                    <th class="p-4">Feature / Requirement</th>
+                    <th class="p-4 text-primary font-bold">eNotePad</th>
+                    <th class="p-4 text-on-surface-variant">Legacy Pastebins</th>
+                    <th class="p-4 text-on-surface-variant">Google Keep / Notion</th>
+                    <th class="p-4 text-on-surface-variant">Emailing Yourself</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-outline-variant/10 text-on-surface-variant">
+                  <tr class="hover:bg-surface-container-low/30 transition-colors">
+                    <td class="p-4 font-semibold text-on-surface">Account / Sign-in Needed?</td>
+                    <td class="p-4 text-emerald-600 dark:text-emerald-400 font-bold">No — Zero Sign-Up</td>
+                    <td class="p-4">Sometimes Required</td>
+                    <td class="p-4 text-error font-medium">Mandatory Sign-In</td>
+                    <td class="p-4 text-error font-medium">Mandatory Login</td>
+                  </tr>
+                  <tr class="hover:bg-surface-container-low/30 transition-colors">
+                    <td class="p-4 font-semibold text-on-surface">Transfer Speed</td>
+                    <td class="p-4 text-primary font-bold">Instant (6-char Code/QR)</td>
+                    <td class="p-4">Long awkward URLs</td>
+                    <td class="p-4">Slow app synchronization</td>
+                    <td class="p-4">Subject lines & spam delays</td>
+                  </tr>
+                  <tr class="hover:bg-surface-container-low/30 transition-colors">
+                    <td class="p-4 font-semibold text-on-surface">Auto-Destruct & Burn Timers</td>
+                    <td class="p-4 text-emerald-600 dark:text-emerald-400 font-bold">5m, 20m, 24h, or 1-Read</td>
+                    <td class="p-4">Rare / Paid Only</td>
+                    <td class="p-4 text-error font-medium">Never (Stored Forever)</td>
+                    <td class="p-4 text-error font-medium">Lives in Inbox forever</td>
+                  </tr>
+                  <tr class="hover:bg-surface-container-low/30 transition-colors">
+                    <td class="p-4 font-semibold text-on-surface">PIN Password Protection</td>
+                    <td class="p-4 text-emerald-600 dark:text-emerald-400 font-bold">Built-In & Free</td>
+                    <td class="p-4">Often locked behind PRO</td>
+                    <td class="p-4">Tied to entire Google account</td>
+                    <td class="p-4">None for single email</td>
+                  </tr>
+                  <tr class="hover:bg-surface-container-low/30 transition-colors">
+                    <td class="p-4 font-semibold text-on-surface">Rich Text, Code & Images</td>
+                    <td class="p-4 text-emerald-600 dark:text-emerald-400 font-bold">Supported (All in One)</td>
+                    <td class="p-4">Plain text only</td>
+                    <td class="p-4">Supported</td>
+                    <td class="p-4">Formatting errors & bloat</td>
+                  </tr>
+                  <tr class="hover:bg-surface-container-low/30 transition-colors">
+                    <td class="p-4 font-semibold text-on-surface">Live Team Collaboration</td>
+                    <td class="p-4 text-primary font-bold">Convo Room (Instant Code)</td>
+                    <td class="p-4">No real-time rooms</td>
+                    <td class="p-4">Requires shared workspace invite</td>
+                    <td class="p-4">Cluttered reply chains</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 5. Real-World Use Cases Across Industries -->
+        <section class="space-y-6">
+          <div class="text-center space-y-2">
+            <p class="text-[10px] uppercase tracking-[0.2em] font-bold text-primary/60">Practical Scenarios</p>
+            <h3 class="font-headline text-2xl sm:text-3xl italic text-on-surface">Everyday Use Cases for eNotePad</h3>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div class="bg-surface-container-lowest rounded-2xl p-6 editorial-shadow editorial-border space-y-3">
+              <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                <span class="material-symbols-outlined">terminal</span>
+              </div>
+              <h4 class="font-bold text-sm text-on-surface">Developers & Cloud Engineers</h4>
+              <p class="text-xs text-on-surface-variant leading-relaxed">
+                Need to quickly shuttle an SSH public key, bash curl script, Docker configuration, or staging API token to a remote server or client machine without logging into Slack, Discord, or personal email on untrusted hardware? Drop it into eNotePad with a 5-minute burn timer.
+              </p>
+            </div>
+            <div class="bg-surface-container-lowest rounded-2xl p-6 editorial-shadow editorial-border space-y-3">
+              <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                <span class="material-symbols-outlined">devices</span>
+              </div>
+              <h4 class="font-bold text-sm text-on-surface">Seamless Cross-Platform Bridge</h4>
+              <p class="text-xs text-on-surface-variant leading-relaxed">
+                Copying a long URL, phone number, address, or screenshot from your personal iPhone to an office Windows workstation? Open eNotePad, paste, click share, scan the generated QR code with your phone camera, and you are done in 4 seconds.
+              </p>
+            </div>
+            <div class="bg-surface-container-lowest rounded-2xl p-6 editorial-shadow editorial-border space-y-3">
+              <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                <span class="material-symbols-outlined">school</span>
+              </div>
+              <h4 class="font-bold text-sm text-on-surface">Students, Educators & Classrooms</h4>
+              <p class="text-xs text-on-surface-variant leading-relaxed">
+                Teachers and students can instantly share project reference links, homework prompts, reading excerpts, or code solutions on a lecture hall screen. Students simply enter the 6-character code on their laptops without sharing phone numbers or social profiles.
+              </p>
+            </div>
+            <div class="bg-surface-container-lowest rounded-2xl p-6 editorial-shadow editorial-border space-y-3">
+              <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                <span class="material-symbols-outlined">groups</span>
+              </div>
+              <h4 class="font-bold text-sm text-on-surface">Instant Agile Collaboration</h4>
+              <p class="text-xs text-on-surface-variant leading-relaxed">
+                Need a frictionless scratchpad during a client video call or group interview? Spin up a temporary eNotePad note or jump into our live <strong>Convo Room</strong> to co-author meeting minutes, outline milestones, and curate action items in real-time.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 6. Frequently Asked Questions (Interactive Accordion) -->
+        <section class="space-y-6">
+          <div class="text-center space-y-2">
+            <p class="text-[10px] uppercase tracking-[0.2em] font-bold text-primary/60">Got Questions?</p>
+            <h3 class="font-headline text-2xl sm:text-3xl italic text-on-surface">Frequently Asked Questions</h3>
+            <p class="text-xs text-on-surface-variant">Find answers to common questions regarding security, data retention, and features.</p>
+          </div>
+          <div class="space-y-3 max-w-3xl mx-auto">
+
+            <details class="group bg-surface-container-lowest rounded-2xl editorial-border editorial-shadow p-5 transition-all cursor-pointer">
+              <summary class="flex justify-between items-center font-bold text-sm text-on-surface list-none">
+                <span>Is eNotePad completely free to use?</span>
+                <span class="material-symbols-outlined text-primary group-open:rotate-180 transition-transform text-lg">expand_more</span>
+              </summary>
+              <div class="mt-3 text-xs text-on-surface-variant leading-relaxed pt-2 border-t border-outline-variant/10">
+                Yes, eNotePad is 100% free for everyone. There are no subscriptions, paywalls, or feature limits on temporary note sharing, encryption locks, QR generation, or rich text editing.
+              </div>
+            </details>
+
+            <details class="group bg-surface-container-lowest rounded-2xl editorial-border editorial-shadow p-5 transition-all cursor-pointer">
+              <summary class="flex justify-between items-center font-bold text-sm text-on-surface list-none">
+                <span>How long does my shared note stay online?</span>
+                <summary class="hidden"></summary>
+                <span class="material-symbols-outlined text-primary group-open:rotate-180 transition-transform text-lg">expand_more</span>
+              </summary>
+              <div class="mt-3 text-xs text-on-surface-variant leading-relaxed pt-2 border-t border-outline-variant/10">
+                You have full control over note lifespan when creating it. The default duration is 20 minutes, but you can select 5 minutes, 1 hour, 24 hours, 7 days, or "Burn After Reading" (which destroys the note immediately after its first view). Once expired, the content is permanently purged.
+              </div>
+            </details>
+
+            <details class="group bg-surface-container-lowest rounded-2xl editorial-border editorial-shadow p-5 transition-all cursor-pointer">
+              <summary class="flex justify-between items-center font-bold text-sm text-on-surface list-none">
+                <span>Can anyone guess my 6-character secret code?</span>
+                <span class="material-symbols-outlined text-primary group-open:rotate-180 transition-transform text-lg">expand_more</span>
+              </summary>
+              <div class="mt-3 text-xs text-on-surface-variant leading-relaxed pt-2 border-t border-outline-variant/10">
+                Our code generation engine uses cryptographically randomized alphanumeric characters, yielding hundreds of millions of unique permutations. In addition, automated rate-limiting blocks brute-force attempts, and you can enforce a secondary password or PIN for maximum defense.
+              </div>
+            </details>
+
+            <details class="group bg-surface-container-lowest rounded-2xl editorial-border editorial-shadow p-5 transition-all cursor-pointer">
+              <summary class="flex justify-between items-center font-bold text-sm text-on-surface list-none">
+                <span>Do I need to install any mobile app or browser extension?</span>
+                <span class="material-symbols-outlined text-primary group-open:rotate-180 transition-transform text-lg">expand_more</span>
+              </summary>
+              <div class="mt-3 text-xs text-on-surface-variant leading-relaxed pt-2 border-t border-outline-variant/10">
+                No installation is required. eNotePad is built with cutting-edge progressive web standards that function seamlessly inside Safari, Chrome, Firefox, Edge, or mobile web browsers. It can also be installed as a lightweight PWA on your home screen if desired.
+              </div>
+            </details>
+
+            <details class="group bg-surface-container-lowest rounded-2xl editorial-border editorial-shadow p-5 transition-all cursor-pointer">
+              <summary class="flex justify-between items-center font-bold text-sm text-on-surface list-none">
+                <span>What file formats and media types can I share?</span>
+                <span class="material-symbols-outlined text-primary group-open:rotate-180 transition-transform text-lg">expand_more</span>
+              </summary>
+              <div class="mt-3 text-xs text-on-surface-variant leading-relaxed pt-2 border-t border-outline-variant/10">
+                eNotePad supports formatted rich text, pure Markdown documents, source code snippets, multiple clickable URL links, and image formats including JPEG, PNG, GIF, and WebP (up to 5MB per upload).
+              </div>
+            </details>
+
+            <details class="group bg-surface-container-lowest rounded-2xl editorial-border editorial-shadow p-5 transition-all cursor-pointer">
+              <summary class="flex justify-between items-center font-bold text-sm text-on-surface list-none">
+                <span>What is the difference between guest use and registering an account?</span>
+                <span class="material-symbols-outlined text-primary group-open:rotate-180 transition-transform text-lg">expand_more</span>
+              </summary>
+              <div class="mt-3 text-xs text-on-surface-variant leading-relaxed pt-2 border-t border-outline-variant/10">
+                Guest mode gives you immediate, zero-friction ephemeral note sharing. Creating a free account gives you personal folder organization, permanent note archives, saved drafts, custom user handles (@username), and direct user-to-user note dispatch.
+              </div>
+            </details>
+
+          </div>
+        </section>
+
+        <!-- 7. Navigation & Quick Links -->
+        <div class="border-t border-outline-variant/15 pt-8 text-center space-y-4">
+          <p class="text-xs text-on-surface-variant/70">Explore more eNotePad guides and policies:</p>
+          <div class="flex flex-wrap justify-center items-center gap-4 text-xs font-semibold text-primary">
+            <a href="how-it-works.html" class="hover:underline flex items-center gap-1">
+              <span class="material-symbols-outlined text-sm">menu_book</span> How It Works Guide
+            </a>
+            <span>·</span>
+            <a href="convo_room/index.html" class="hover:underline flex items-center gap-1">
+              <span class="material-symbols-outlined text-sm">forum</span> Live Convo Room
+            </a>
+            <span>·</span>
+            <a href="support.html" class="hover:underline flex items-center gap-1">
+              <span class="material-symbols-outlined text-sm">support_agent</span> Help & FAQs
+            </a>
+            <span>·</span>
+            <a href="privacy.html" class="hover:underline flex items-center gap-1">
+              <span class="material-symbols-outlined text-sm">shield</span> Privacy Policy
+            </a>
+            <span>·</span>
+            <a href="terms.html" class="hover:underline flex items-center gap-1">
+              <span class="material-symbols-outlined text-sm">gavel</span> Terms of Service
+            </a>
+          </div>
+        </div>
+
+      </section>
 
       <!-- Footer -->
       <footer class="flex flex-col sm:flex-row justify-center items-center gap-4 py-8 pb-28 md:pb-8 w-full opacity-70 bg-transparent text-primary font-label text-sm">
@@ -2259,6 +2854,8 @@
         </button>
       </div>
     </div>
+  </div>
+
   <!-- ========== GUEST NUDGE BANNER / NOTIFICATION ========== -->
   <div id="guestNudgeBanner" class="fixed bottom-5 right-5 z-[9970] max-w-[350px] w-[calc(100vw-2.5rem)] transition-all duration-300 transform translate-y-12 opacity-0 pointer-events-none" style="display:none">
     <!-- Gradient accent bar -->
@@ -2385,11 +2982,257 @@
     </div>
   </div>
 
+  <!-- ========== FLOATING STEAMING COFFEE WIDGET ========== -->
+  <div id="coffeeFloatingWidget" class="fixed bottom-24 md:bottom-6 right-5 z-[9999] flex items-center group transition-all duration-300">
+    <button id="coffeeFabBtn" onclick="if(typeof openCoffeeModal==='function')openCoffeeModal(2);" class="relative flex items-center gap-2.5 px-4 py-2.5 bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 hover:from-amber-600 hover:to-amber-800 text-white rounded-full shadow-[0_10px_25px_-5px_rgba(217,119,6,0.45)] hover:shadow-[0_15px_35px_-5px_rgba(217,119,6,0.65)] active:scale-95 transition-all cursor-pointer border border-white/20 select-none" title="Buy the creator a coffee">
+      <!-- Animated Steaming Coffee Icon -->
+      <div class="relative w-5 h-5 flex items-center justify-center">
+        <span class="absolute -top-2 left-1 w-1 h-2 bg-white/75 rounded-full coffee-steam-particle-1 pointer-events-none"></span>
+        <span class="absolute -top-3 left-2.5 w-1 h-2.5 bg-white/65 rounded-full coffee-steam-particle-2 pointer-events-none"></span>
+        <span class="text-base">☕</span>
+      </div>
+      <span class="text-xs font-bold tracking-tight pr-0.5 hidden sm:inline">Buy me a coffee</span>
+      <span class="hidden md:inline-flex text-[9px] font-black uppercase bg-black/20 text-amber-100 px-1.5 py-0.5 rounded-full">Support</span>
+    </button>
+    <!-- Interactive Nudge Speech Bubble -->
+    <div id="coffeeNudgeBubble" class="absolute bottom-full right-0 mb-3 bg-surface-container-lowest text-on-surface text-[11px] font-medium px-3.5 py-2 rounded-2xl shadow-xl border border-outline-variant/20 whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-300 transform translate-y-1 group-hover:translate-y-0 flex items-center gap-2">
+      <span>Fuel late-night code &amp; servers! ⚡</span>
+      <button id="closeCoffeeNudge" class="text-on-surface-variant/70 hover:text-on-surface text-xs leading-none">✕</button>
+    </div>
+  </div>
+
+  <!-- ========== INTERACTIVE BUY ME A COFFEE MODAL ========== -->
+  <div class="fixed inset-0 z-[10001] flex items-end sm:items-center justify-center p-3 sm:p-4" id="coffeeModal" style="display:none">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-md" id="coffeeModalBackdrop"></div>
+    <div class="relative w-full max-w-lg bg-surface-container-lowest rounded-[32px] editorial-shadow border border-outline-variant/20 overflow-hidden animate-slide-up max-h-[92vh] flex flex-col" id="coffeeModalContent">
+      
+      <!-- Top Banner with Coffee Header -->
+      <div class="relative p-6 bg-gradient-to-br from-amber-500/15 via-orange-500/10 to-transparent border-b border-outline-variant/15 flex items-start justify-between gap-4">
+        <div class="flex items-center gap-4">
+          <!-- Interactive Mug Visualizer -->
+          <div class="relative w-16 h-16 flex-shrink-0 cursor-pointer group" id="coffeeMugWrapper" title="Click me for love!">
+            <div id="coffeeMugGraphic" class="w-full h-full relative transition-transform">
+              <!-- Animated Steam Particles -->
+              <div class="absolute -top-3 left-1/2 -translate-x-1/2 flex items-center justify-center gap-1.5 pointer-events-none">
+                <span class="w-1.5 h-3 bg-amber-500/70 rounded-full coffee-steam-particle-1"></span>
+                <span class="w-1.5 h-4 bg-amber-600/60 rounded-full coffee-steam-particle-2"></span>
+                <span class="w-1.5 h-2.5 bg-amber-500/80 rounded-full coffee-steam-particle-3"></span>
+              </div>
+              
+              <!-- Mug Graphic -->
+              <div class="w-14 h-12 mt-3 bg-surface-container rounded-b-2xl rounded-t-sm border-2 border-amber-600/50 relative overflow-hidden shadow-inner flex flex-col justify-end">
+                <!-- Coffee Liquid -->
+                <div id="coffeeCupLiquid" class="coffee-liquid-wave w-full bg-gradient-to-t from-[#451a03] to-[#92400e] relative" style="height: 65%;">
+                  <!-- Foam Top -->
+                  <div class="absolute top-0 inset-x-0 h-2 bg-gradient-to-r from-amber-100 via-amber-200 to-amber-100 opacity-90"></div>
+                </div>
+              </div>
+              <!-- Mug Handle -->
+              <div class="absolute top-5 -right-0.5 w-3.5 h-7 border-2 border-l-0 border-amber-600/50 rounded-r-xl"></div>
+            </div>
+          </div>
+
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="font-headline text-xl italic text-on-surface">Buy eNotePad a Coffee</h3>
+              <span class="text-[9px] font-black uppercase tracking-widest bg-amber-500/15 text-amber-700 dark:text-amber-300 px-2 py-0.5 rounded-full">Creator Fuel</span>
+            </div>
+            <p class="text-xs text-on-surface-variant mt-0.5">Keep eNotePad 100% independent, fast &amp; privacy-focused.</p>
+          </div>
+        </div>
+
+        <button class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-container transition-all text-on-surface-variant hover:text-on-surface" id="closeCoffeeModal">
+          <span class="material-symbols-outlined text-lg">close</span>
+        </button>
+      </div>
+
+      <!-- Modal Body (Scrollable) -->
+      <div class="p-6 overflow-y-auto space-y-6 flex-1 text-on-surface">
+        
+        <!-- Main Form Container -->
+        <div id="coffeeMainForm" class="space-y-5">
+          <!-- Step 1: Select Coffee Quantity -->
+          <div>
+            <label class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold block mb-2.5">
+              1. Select Your Coffee Fuel
+            </label>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5" id="coffeeTiers">
+              <button type="button" class="coffee-chip p-3 rounded-2xl bg-surface-container-low flex flex-col items-center text-center cursor-pointer" data-tier="1">
+                <span class="text-xl mb-1">☕</span>
+                <span class="text-xs font-bold text-on-surface">1 Coffee</span>
+                <span class="text-[10px] text-on-surface-variant font-semibold mt-0.5">$2 <span class="opacity-70">(₹150)</span></span>
+              </button>
+
+              <button type="button" class="coffee-chip active p-3 rounded-2xl bg-surface-container-low flex flex-col items-center text-center cursor-pointer relative" data-tier="2">
+                <span class="absolute -top-2 bg-amber-500 text-white text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full shadow-sm">Popular</span>
+                <span class="text-xl mb-1">☕☕</span>
+                <span class="text-xs font-bold text-on-surface">2 Coffees</span>
+                <span class="text-[10px] text-on-surface-variant font-semibold mt-0.5">$5 <span class="opacity-70">(₹350)</span></span>
+              </button>
+
+              <button type="button" class="coffee-chip p-3 rounded-2xl bg-surface-container-low flex flex-col items-center text-center cursor-pointer" data-tier="3">
+                <span class="text-xl mb-1">🫖</span>
+                <span class="text-xs font-bold text-on-surface">3 Coffees</span>
+                <span class="text-[10px] text-on-surface-variant font-semibold mt-0.5">$10 <span class="opacity-70">(₹800)</span></span>
+              </button>
+
+              <button type="button" class="coffee-chip p-3 rounded-2xl bg-surface-container-low flex flex-col items-center text-center cursor-pointer" data-tier="5">
+                <span class="text-xl mb-1">👑</span>
+                <span class="text-xs font-bold text-on-surface">5 Coffees</span>
+                <span class="text-[10px] text-on-surface-variant font-semibold mt-0.5">$25 <span class="opacity-70">(₹2k)</span></span>
+              </button>
+            </div>
+
+            <!-- Dynamic Tier Impact Banner -->
+            <div class="mt-3 p-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-between gap-3">
+              <div class="flex items-center gap-2.5 min-w-0">
+                <span class="text-base flex-shrink-0">⚡</span>
+                <div class="min-w-0">
+                  <p class="text-xs font-bold text-amber-800 dark:text-amber-300 truncate" id="coffeeTierTitle">Double Cappuccino</p>
+                  <p class="text-[11px] text-amber-700/80 dark:text-amber-400/80 line-clamp-1" id="coffeeTierDesc">⭐ Most Popular! Covers cloud database &amp; fast API queries.</p>
+                </div>
+              </div>
+              <span class="text-xs font-black text-amber-800 dark:text-amber-300 flex-shrink-0" id="coffeeTierPrice">$5 (₹350)</span>
+            </div>
+          </div>
+
+          <!-- Step 2: Supporter Name & Sweet Note -->
+          <div class="space-y-3">
+            <label class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold block">
+              2. Leave a Note for the Creator (Optional)
+            </label>
+            <input type="text" id="coffeeSupporterName" maxlength="30" placeholder="Your name or @handle (or Anonymous)" class="w-full px-4 py-2.5 bg-surface-dim/30 dark:bg-surface-container rounded-xl border border-outline-variant/15 text-xs text-on-surface focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-all placeholder:text-outline-variant/50" />
+            <input type="text" id="coffeeSupporterNote" maxlength="80" placeholder="Say something nice (e.g. Thanks for anonymous notes!)" class="w-full px-4 py-2.5 bg-surface-dim/30 dark:bg-surface-container rounded-xl border border-outline-variant/15 text-xs text-on-surface focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-all placeholder:text-outline-variant/50" />
+          </div>
+
+          <!-- Step 3: Choose Payment Method -->
+          <div>
+            <label class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold block mb-2">
+              3. Support Method
+            </label>
+
+            <!-- Method Switcher Pills -->
+            <div class="flex items-center gap-1.5 p-1 bg-surface-container-low rounded-xl border border-outline-variant/15 mb-3">
+              <button type="button" class="coffee-method-tab flex-1 py-1.5 rounded-lg text-xs font-bold transition-all text-center flex items-center justify-center gap-1.5 active bg-surface-container-high text-primary" data-method="bmc">
+                <span>☕ BuyMeACoffee</span>
+              </button>
+              <button type="button" class="coffee-method-tab flex-1 py-1.5 rounded-lg text-xs font-medium text-on-surface-variant transition-all text-center flex items-center justify-center gap-1.5" data-method="upi">
+                <span>⚡ UPI / QR</span>
+              </button>
+              <button type="button" class="coffee-method-tab flex-1 py-1.5 rounded-lg text-xs font-medium text-on-surface-variant transition-all text-center flex items-center justify-center gap-1.5" data-method="virtual">
+                <span>❤️ Free Love</span>
+              </button>
+            </div>
+
+            <!-- Method Content: BMC Direct -->
+            <div id="coffeeSectionBmc" class="space-y-3">
+              <a id="coffeeDirectBmcBtn" href="https://buymeacoffee.com/sachin24sk" target="_blank" class="w-full py-3.5 px-6 rounded-2xl font-bold text-sm bg-[#FFDD00] text-black hover:bg-[#FACC15] active:scale-[0.98] transition-all flex items-center justify-center gap-2.5 shadow-md shadow-amber-500/20 group">
+                <span class="text-base group-hover:scale-125 transition-transform">☕</span>
+                <span>Proceed to BuyMeACoffee</span>
+                <span class="material-symbols-outlined text-sm opacity-70">open_in_new</span>
+              </a>
+              <p class="text-[10px] text-center text-on-surface-variant/70">
+                Supports International Cards, Apple Pay, Google Pay, PayPal. Zero setup required.
+              </p>
+            </div>
+
+            <!-- Method Content: UPI Instant -->
+            <div id="coffeeSectionUpi" class="space-y-3" style="display:none">
+              <div class="p-4 rounded-2xl bg-surface-container-low border border-outline-variant/15 flex flex-col sm:flex-row items-center gap-4">
+                <!-- Real UPI QR Code Card -->
+                <div class="relative group/qr cursor-pointer flex-shrink-0" onclick="window.open('assets/upi_qr.jpg', '_blank')" title="Click to view full image">
+                  <img src="assets/upi_qr.jpg" alt="UPI QR Code - Sachin Kumar" class="w-28 sm:w-32 h-auto object-contain rounded-2xl border-2 border-white/60 dark:border-white/10 shadow-md group-hover/qr:scale-105 transition-transform" />
+                  <span class="absolute bottom-1 right-1 bg-black/60 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-0.5 pointer-events-none">
+                    <span class="material-symbols-outlined text-[10px]">zoom_in</span> Full
+                  </span>
+                </div>
+
+                <div class="flex-1 text-center sm:text-left min-w-0 space-y-1">
+                  <div class="flex items-center gap-2 justify-center sm:justify-start">
+                    <span class="text-xs font-bold text-on-surface">Sachin Kumar</span>
+                    <span class="text-[9px] uppercase tracking-widest px-2 py-0.2 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold border border-emerald-500/20">Verified UPI</span>
+                  </div>
+                  <p class="text-[10px] uppercase tracking-wider text-on-surface-variant font-bold">Instant Zero-Fee Indian UPI</p>
+                  <div class="p-2 rounded-xl bg-surface-container border border-outline-variant/15 flex items-center justify-between gap-2">
+                    <p class="text-xs font-mono font-bold text-on-surface select-all truncate" id="coffeeUpiDisplay">officialsachinkumarthakur@okicici</p>
+                    <button type="button" id="coffeeCopyUpiBtn" class="px-3 py-1.5 rounded-lg bg-[#516070] hover:bg-[#455464] text-white dark:bg-amber-600 dark:hover:bg-amber-500 dark:text-white text-[11px] font-bold transition-all flex items-center gap-1.5 shadow-sm active:scale-95 flex-shrink-0 cursor-pointer">
+                      <span class="material-symbols-outlined text-xs">content_copy</span> Copy
+                    </button>
+                  </div>
+                  <div class="flex items-center gap-2 mt-2 justify-center sm:justify-start pt-1">
+                    <a href="upi://pay?pa=officialsachinkumarthakur@okicici&amp;pn=Sachin%20Kumar&amp;cu=INR" class="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold transition-all flex items-center gap-1 sm:hidden shadow-sm">
+                      <span class="material-symbols-outlined text-xs">phone_iphone</span> Pay in UPI App
+                    </a>
+                    <span class="text-[10px] text-on-surface-variant/70">Scan with Google Pay, PhonePe, Paytm or BHIM</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Method Content: Virtual Free Love -->
+            <div id="coffeeSectionVirtual" class="space-y-3" style="display:none">
+              <div class="p-4 rounded-2xl bg-gradient-to-br from-pink-500/10 via-rose-500/5 to-transparent border border-pink-500/20 text-center space-y-2">
+                <span class="text-3xl inline-block animate-bounce">💖</span>
+                <p class="text-xs font-bold text-on-surface">No wallet? No problem at all!</p>
+                <p class="text-[11px] text-on-surface-variant max-w-sm mx-auto">
+                  Your words of appreciation motivate late-night updates just as much as real coffee. Send free love to add your name to the community supporters wall!
+                </p>
+                <button type="button" id="sendVirtualCoffeeBtn" class="w-full py-3 px-6 rounded-2xl font-bold text-xs bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white shadow-md shadow-pink-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+                  <span id="virtualCoffeeBtnText">Send 2 Virtual Coffees &amp; Love ❤️</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Thank You Success Feedback Card (Hidden by default) -->
+        <div id="coffeeSuccessCard" class="text-center py-6 space-y-4" style="display:none">
+          <div class="w-16 h-16 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 mx-auto flex items-center justify-center text-3xl shadow-sm">
+            ☕
+          </div>
+          <div class="space-y-1">
+            <h4 class="font-headline text-2xl italic text-on-surface">You're Awesome, <span id="coffeeThankYouName">Friend</span>!</h4>
+            <p class="text-xs text-on-surface-variant max-w-xs mx-auto">
+              Your kindness and support directly fuel eNotePad's hosting, new features, and development coffee cups. Thank you for being part of this journey! 🚀
+            </p>
+          </div>
+          <div class="pt-2 flex justify-center gap-3">
+            <button type="button" id="coffeeAnotherTipBtn" class="px-4 py-2 bg-surface-container hover:bg-surface-container-high rounded-xl text-xs font-bold text-primary transition-all">
+              Send Another
+            </button>
+            <button type="button" onclick="closeCoffeeModal()" class="px-5 py-2 bg-primary text-on-primary rounded-xl text-xs font-bold transition-all shadow-sm">
+              Done
+            </button>
+          </div>
+        </div>
+
+        <!-- Recent Supporters Wall / Community Ticker -->
+        <div class="pt-3 border-t border-outline-variant/10 space-y-2.5">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              Recent Community Fuel
+            </span>
+            <span class="text-[10px] text-on-surface-variant/70 font-semibold">42+ coffees fueled</span>
+          </div>
+
+          <div id="coffeeSupportersList" class="space-y-2 max-h-36 overflow-y-auto pr-1">
+            <!-- Populated via js/coffee.js -->
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
   <!-- ========== Firebase SDK (v9 Compat) ========== -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
+
+  <!-- Confetti library -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 
   <!-- App Scripts -->
   <script src="js/firebase-config.js?v=13"></script>
@@ -2401,6 +3244,7 @@
   <script src="js/auth.js?v=13"></script>
   <script src="js/filemanager.js?v=12"></script>
   <script src="js/users.js?v=3"></script>
+  <script src="js/coffee.js?v=1"></script>
   <script src="js/app.js?v=15"></script>
 </body>
 </html>
