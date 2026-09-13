@@ -130,7 +130,10 @@
 <nav class="fixed top-0 left-0 right-0 z-40 bg-background/85 nav-blur border-b border-outline-variant/10">
   <div class="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
     <a href="index.html" class="flex items-center gap-2" style="text-decoration:none">
-      <img src="assets/logo.png" alt="eNotePad" class="w-7 h-7 object-contain" onerror="this.style.display='none'"/>
+      <div class="relative w-7 h-7 flex items-center justify-center flex-shrink-0">
+        <img src="assets/logo-light.svg" alt="eNotePad Logo" class="w-full h-full object-contain dark:hidden" />
+        <img src="assets/logo-dark.svg" alt="eNotePad Logo" class="w-full h-full object-contain hidden dark:block" />
+      </div>
       <div class="flex items-baseline leading-none">
         <span style="color:#00a8ff" class="text-lg font-bold">e</span>
         <span class="text-primary text-lg font-bold">NotePad</span>

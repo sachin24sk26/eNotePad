@@ -16,8 +16,19 @@ function initAccess() {
   const contentExportBtn = document.getElementById('contentExportBtn');
   const contentExportDropdown = document.getElementById('contentExportDropdown');
 
+  const accessPasteBtn = document.getElementById('accessPasteBtn');
+  const accessClearBtn = document.getElementById('accessClearBtn');
+  const retrieveAnotherBtn = document.getElementById('retrieveAnotherBtn');
+  const statusRetryBtn = document.getElementById('statusRetryBtn');
+
   let pendingDocData = null;
   let pendingCode = null;
+
+  function updateClearBtnVisibility() {
+    if (!accessClearBtn) return;
+    const hasAny = Array.from(codeBoxes).some(b => b.value.length > 0);
+    accessClearBtn.style.display = hasAny ? 'inline-flex' : 'none';
+  }
 
   // Password Hash Helper (SHA-256 with salt)
   async function hashPassword(str) {
@@ -39,7 +50,11 @@ function initAccess() {
         if (index < codeBoxes.length - 1) {
           codeBoxes[index + 1].focus();
         }
+      } else {
+        box.classList.remove('filled');
       }
+
+      updateClearBtnVisibility();
 
       if (getCodeFromBoxes().length === 6) {
         fetchContent();
@@ -51,6 +66,10 @@ function initAccess() {
         codeBoxes[index - 1].focus();
         codeBoxes[index - 1].value = '';
         codeBoxes[index - 1].classList.remove('filled');
+        updateClearBtnVisibility();
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        fetchContent();
       }
     });
 
@@ -63,12 +82,74 @@ function initAccess() {
       }
       const focusIndex = Math.min(pasted.length, 5);
       codeBoxes[focusIndex].focus();
+      updateClearBtnVisibility();
 
       if (pasted.length >= 6) {
         fetchContent();
       }
     });
   });
+
+  // Paste Code Button Handler
+  if (accessPasteBtn) {
+    accessPasteBtn.addEventListener('click', async () => {
+      try {
+        const text = await navigator.clipboard.readText();
+        const clean = (text || '').toUpperCase().replace(/[^A-Z0-9]/g, '').substring(0, 6);
+        if (!clean) {
+          showToast('No valid code in clipboard', 'warning');
+          return;
+        }
+        setCodeInBoxes(clean);
+        updateClearBtnVisibility();
+        showToast(`Pasted "${clean}"`, 'success');
+        if (clean.length === 6) {
+          fetchContent();
+        }
+      } catch (err) {
+        showToast('Please paste manually or allow clipboard access', 'warning');
+      }
+    });
+  }
+
+  // Clear Code Button Handler
+  if (accessClearBtn) {
+    accessClearBtn.addEventListener('click', () => {
+      codeBoxes.forEach(box => {
+        box.value = '';
+        box.classList.remove('filled');
+      });
+      updateClearBtnVisibility();
+      if (codeBoxes[0]) codeBoxes[0].focus();
+    });
+  }
+
+  // Retrieve Another Note Button Handler
+  if (retrieveAnotherBtn) {
+    retrieveAnotherBtn.addEventListener('click', () => {
+      hideEl('contentResult');
+      hideEl('accessStatus');
+      codeBoxes.forEach(box => {
+        box.value = '';
+        box.classList.remove('filled');
+      });
+      updateClearBtnVisibility();
+      if (codeBoxes[0]) codeBoxes[0].focus();
+    });
+  }
+
+  // Retry Button Handler
+  if (statusRetryBtn) {
+    statusRetryBtn.addEventListener('click', () => {
+      hideEl('accessStatus');
+      codeBoxes.forEach(box => {
+        box.value = '';
+        box.classList.remove('filled');
+      });
+      updateClearBtnVisibility();
+      if (codeBoxes[0]) codeBoxes[0].focus();
+    });
+  }
 
   function getCodeFromBoxes() {
     return Array.from(codeBoxes).map(b => b.value).join('').toUpperCase();
@@ -83,6 +164,7 @@ function initAccess() {
         codeBoxes[idx].classList.add('filled');
       }
     });
+    updateClearBtnVisibility();
   }
 
   fetchBtn.addEventListener('click', fetchContent);
@@ -102,6 +184,10 @@ function initAccess() {
     hideEl('contentResult');
     hideEl('accessStatus');
     if (accessPasswordPrompt) accessPasswordPrompt.style.display = 'none';
+    if (expiryTimerInterval) {
+      clearInterval(expiryTimerInterval);
+      expiryTimerInterval = null;
+    }
 
     try {
       const doc = await db.collection('shares').doc(code).get();
@@ -194,9 +280,92 @@ function initAccess() {
     });
   }
 
+  let expiryTimerInterval = null;
+
+  function startContentExpiryTimer(expiresAt, code) {
+    if (expiryTimerInterval) {
+      clearInterval(expiryTimerInterval);
+      expiryTimerInterval = null;
+    }
+
+    const timerBadge = document.getElementById('contentExpiryTimerBadge');
+    const timerText = document.getElementById('contentExpiryTimerText');
+    const timerIcon = document.getElementById('contentExpiryTimerIcon');
+    if (!timerBadge || !timerText) return;
+
+    if (!expiresAt) {
+      timerBadge.className = 'inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-full bg-surface-container-low text-on-surface-variant border border-outline-variant/20';
+      if (timerIcon) timerIcon.textContent = 'all_inclusive';
+      timerText.textContent = 'No Expiration';
+      timerBadge.style.display = 'inline-flex';
+      return;
+    }
+
+    const expiryTime = expiresAt.toDate ? expiresAt.toDate().getTime() : new Date(expiresAt).getTime();
+
+    function update() {
+      const now = Date.now();
+      const diff = expiryTime - now;
+
+      if (diff <= 0) {
+        clearInterval(expiryTimerInterval);
+        expiryTimerInterval = null;
+        timerBadge.className = 'inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-full bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30 animate-pulse';
+        if (timerIcon) timerIcon.textContent = 'timer_off';
+        timerText.textContent = 'Expired';
+        showToast('This note has expired!', 'error');
+        if (code) {
+          db.collection('shares').doc(code).delete().catch(() => {});
+        }
+        return;
+      }
+
+      const totalSecs = Math.floor(diff / 1000);
+      const days = Math.floor(totalSecs / 86400);
+      const hours = Math.floor((totalSecs % 86400) / 3600);
+      const mins = Math.floor((totalSecs % 3600) / 60);
+      const secs = totalSecs % 60;
+
+      let timeStr = '';
+      if (days > 0) {
+        timeStr = `${days}d ${hours}h ${mins}m`;
+      } else if (hours > 0) {
+        timeStr = `${hours}h ${mins}m ${secs.toString().padStart(2, '0')}s`;
+      } else {
+        timeStr = `${mins}m ${secs.toString().padStart(2, '0')}s`;
+      }
+
+      timerText.textContent = `Expires in ${timeStr}`;
+
+      if (diff < 3 * 60 * 1000) {
+        timerBadge.className = 'inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-full bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30 animate-pulse';
+        if (timerIcon) timerIcon.textContent = 'alarm';
+      } else if (diff < 15 * 60 * 1000) {
+        timerBadge.className = 'inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30';
+        if (timerIcon) timerIcon.textContent = 'hourglass_bottom';
+      } else {
+        timerBadge.className = 'inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-full bg-primary-container/40 text-primary border border-primary/20';
+        if (timerIcon) timerIcon.textContent = 'timer';
+      }
+
+      timerBadge.style.display = 'inline-flex';
+    }
+
+    update();
+    expiryTimerInterval = setInterval(update, 1000);
+  }
+
   // ----- Display Retrieved Content & Handle Burn-After-Reading -----
   async function displayRetrievedContent(data, code) {
     renderContent(data);
+
+    // Live Expiry Timer
+    if (data.burnAfterReading) {
+      const timerBadge = document.getElementById('contentExpiryTimerBadge');
+      if (timerBadge) timerBadge.style.display = 'none';
+    } else {
+      startContentExpiryTimer(data.expiresAt, code);
+    }
 
     // If Burn-After-Reading: Show badge & immediately delete from Firestore
     if (data.burnAfterReading) {
@@ -230,10 +399,32 @@ function initAccess() {
     const contentBody = document.getElementById('contentBody');
     const copyBtn = document.getElementById('contentCopyBtn');
 
-    const typeLabels = { text: '📝 Text', link: '🔗 Link', image: '🖼️ Image' };
+    const typeLabels = { text: '📝 TEXT', link: '🔗 LINK', image: '🖼️ IMAGE' };
     typeBadge.textContent = typeLabels[data.type] || data.type;
 
     contentBody.innerHTML = '';
+
+    // --- Title & Category header (above content) ---
+    const catMap = { personal: '📝 Personal', work: '💼 Work', ideas: '💡 Ideas', code: '🖥️ Code', links: '🔗 Links', important: '⭐ Important' };
+    const hasTitle = data.title && data.title.trim();
+    const hasCategory = data.category && catMap[data.category];
+    if (hasTitle || hasCategory) {
+      const metaHeader = document.createElement('div');
+      metaHeader.className = 'accessed-note-meta';
+      if (hasTitle) {
+        const titleEl = document.createElement('h2');
+        titleEl.className = 'accessed-note-title';
+        titleEl.textContent = data.title.trim();
+        metaHeader.appendChild(titleEl);
+      }
+      if (hasCategory) {
+        const catEl = document.createElement('span');
+        catEl.className = 'accessed-note-tag';
+        catEl.textContent = catMap[data.category];
+        metaHeader.appendChild(catEl);
+      }
+      contentBody.appendChild(metaHeader);
+    }
 
     if (data.type === 'text') {
       const textDiv = document.createElement('div');
@@ -283,6 +474,7 @@ function initAccess() {
     resultContainer.dataset.content = typeof data.content === 'string' ? data.content : JSON.stringify(data.content);
     resultContainer.dataset.type = data.type;
     resultContainer.dataset.title = data.title || `Accessed ${data.type.charAt(0).toUpperCase() + data.type.slice(1)}`;
+    resultContainer.dataset.category = data.category || '';
   }
 
   function escText(str) {
@@ -382,12 +574,14 @@ function initAccess() {
       const type = resultContainer.dataset.type || 'text';
       let content = resultContainer.dataset.content || '';
       const title = resultContainer.dataset.title || 'Saved Note';
+      const category = resultContainer.dataset.category || '';
 
       if (typeof window.openSaveFolderModal === 'function') {
         window.openSaveFolderModal({
           noteType: type,
           content: content,
           title: title,
+          category: category,
           username: currentUser.username,
           onConfirm: async (folderId, folderName) => {
             contentSaveBtn.classList.add('btn-loading');
@@ -397,12 +591,12 @@ function initAccess() {
               const preview = title || content.substring(0, 100);
 
               if (typeof window.saveNoteToFileManager === 'function') {
-                await window.saveNoteToFileManager({ title, noteType: type, content }, folderId);
+                await window.saveNoteToFileManager({ title, category, noteType: type, content }, folderId);
               }
 
               await db.collection('users').doc(currentUser.username)
                 .collection('savedNotes').doc(noteId)
-                .set({ type, content, title, preview, noteId, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+                .set({ type, content, title, category, preview, noteId, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
 
               const dest = folderName ? `"${folderName}"` : 'My Files';
               showToast(`Note saved to ${dest}! 📁`, 'success');

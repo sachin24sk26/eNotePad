@@ -142,13 +142,14 @@
   <!-- Header -->
   <header class="bg-background/95 sticky top-0 z-30 backdrop-blur-sm border-b border-outline-variant/10">
     <div class="flex justify-between items-center w-full px-6 py-3.5 max-w-5xl mx-auto">
-      <a href="index.html" class="flex items-center gap-2.5 group">
-        <div class="w-8 h-8 rounded-xl bg-primary/15 flex items-center justify-center text-primary group-hover:scale-105 transition-transform">
-          <span class="material-symbols-outlined text-base">edit_note</span>
+      <a href="index.html" class="flex items-center gap-2.5 group" style="text-decoration:none">
+        <div class="relative w-8 h-8 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+          <img src="assets/logo-light.svg" alt="eNotePad Logo" class="w-full h-full object-contain dark:hidden" />
+          <img src="assets/logo-dark.svg" alt="eNotePad Logo" class="w-full h-full object-contain hidden dark:block" />
         </div>
         <div>
-          <span class="font-body italic text-lg text-primary leading-none block">eNotePad</span>
-          <span class="text-[9px] uppercase tracking-widest text-primary/40 font-bold">Digital Curator</span>
+          <span class="font-body italic text-lg text-primary dark:text-[#d4e4f8] leading-none block">eNotePad</span>
+          <span class="text-[9px] uppercase tracking-widest text-primary/40 dark:text-primary-dim/60 font-bold">Digital Curator</span>
         </div>
       </a>
 
@@ -411,28 +412,16 @@
       // Header Scroll Reveal
       const header = document.querySelector('header');
       if (header) {
-        let lastScrollY = window.scrollY;
-        let ticking = false;
-        window.addEventListener('scroll', function() {
-          if (!ticking) {
-            window.requestAnimationFrame(function() {
-              const currentScrollY = window.scrollY;
-              if (currentScrollY > 40) {
-                header.classList.add('header-scrolled');
-                if (currentScrollY > lastScrollY && currentScrollY - lastScrollY > 6) {
-                  header.classList.add('-translate-y-full');
-                } else if (lastScrollY - currentScrollY > 4) {
-                  header.classList.remove('-translate-y-full');
-                }
-              } else {
-                header.classList.remove('-translate-y-full', 'header-scrolled');
-              }
-              lastScrollY = currentScrollY;
-              ticking = false;
-            });
-            ticking = true;
+        header.classList.remove('-translate-y-full');
+        const onScroll = function() {
+          if (window.scrollY > 8) {
+            header.classList.add('header-scrolled');
+          } else {
+            header.classList.remove('header-scrolled');
           }
-        }, { passive: true });
+        };
+        window.addEventListener('scroll', onScroll, { passive: true });
+        onScroll();
       }
     })();
   </script>

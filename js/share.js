@@ -124,13 +124,13 @@ function initShare() {
       shareBtn.setAttribute('data-hidden', 'true');
       shareIconBtn.removeAttribute('data-hidden');
       saveBtn.removeAttribute('data-hidden');
-      if (noteMeta) noteMeta.removeAttribute('data-hidden');
     } else {
       shareBtn.removeAttribute('data-hidden');
       shareIconBtn.setAttribute('data-hidden', 'true');
       saveBtn.setAttribute('data-hidden', 'true');
-      if (noteMeta) noteMeta.setAttribute('data-hidden', 'true');
     }
+    // Title & Category are accessible to all users (both guests and logged-in)
+    if (noteMeta) noteMeta.removeAttribute('data-hidden');
   }
 
   updateActionButtons();
@@ -277,9 +277,17 @@ function initShare() {
         content = await withTimeout(uploadImage(code), 15000, 'Image compression');
       }
 
+      // Capture title & category (visible to all users via noteMeta or global fields)
+      const titleEl = document.getElementById('noteTitle');
+      const categoryEl = document.getElementById('noteCategory');
+      const shareTitle = (titleEl ? titleEl.value.trim() : '') || '';
+      const shareCategory = (categoryEl ? categoryEl.value : '') || '';
+
       const shareData = {
         type: selectedType,
         content: content,
+        title: shareTitle,
+        category: shareCategory,
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
         expiresAt: firebase.firestore.Timestamp.fromDate(expiresAt),
         burnAfterReading: isBurnAfterReading,
@@ -306,7 +314,7 @@ function initShare() {
           });
       }
 
-      displayCode(code, { isBurnAfterReading, expiryMinutes, isProtected });
+      displayCode(code, { isBurnAfterReading, expiryMinutes, isProtected, title: shareTitle, category: shareCategory });
       showToast(isBurnAfterReading ? 'Shared! 🔥 Self-destructs after 1st read' : `Shared! Auto-erases in ${expiryMinutes >= 60 ? (expiryMinutes / 60) + 'h' : expiryMinutes + 'm'} ⏱️`, 'success');
       resetShareForm();
 
@@ -529,6 +537,28 @@ function initShare() {
     const pwdBadge = document.getElementById('codePasswordBadge');
     if (pwdBadge) {
       pwdBadge.style.display = options.isProtected ? 'inline-flex' : 'none';
+    }
+
+    // Title & Category badge on code display
+    const codeTitleBadge = document.getElementById('codeTitleBadge');
+    const codeCategoryBadge = document.getElementById('codeCategoryBadge');
+    if (codeTitleBadge) {
+      const titleTextSpan = codeTitleBadge.querySelector('span:last-child');
+      if (options.title) {
+        if (titleTextSpan) titleTextSpan.textContent = options.title;
+        codeTitleBadge.style.display = 'inline-flex';
+      } else {
+        codeTitleBadge.style.display = 'none';
+      }
+    }
+    if (codeCategoryBadge) {
+      const catMap = { personal: '📝 Personal', work: '💼 Work', ideas: '💡 Ideas', code: '🖥️ Code', links: '🔗 Links', important: '⭐ Important' };
+      if (options.category && catMap[options.category]) {
+        codeCategoryBadge.textContent = catMap[options.category];
+        codeCategoryBadge.style.display = 'inline-flex';
+      } else {
+        codeCategoryBadge.style.display = 'none';
+      }
     }
 
     // Direct Link & QR Code

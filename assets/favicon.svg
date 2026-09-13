@@ -1,14 +1,24 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
   <defs>
-    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#7c3aed"/>
-      <stop offset="100%" stop-color="#3b82f6"/>
+    <linearGradient id="favDark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#2563eb" />
     </linearGradient>
   </defs>
-  <rect x="8" y="4" width="48" height="56" rx="6" fill="url(#g)"/>
-  <rect x="14" y="16" width="28" height="3" rx="1.5" fill="#fff" opacity="0.9"/>
-  <rect x="14" y="24" width="36" height="3" rx="1.5" fill="#fff" opacity="0.7"/>
-  <rect x="14" y="32" width="20" height="3" rx="1.5" fill="#fff" opacity="0.5"/>
-  <circle cx="48" cy="48" r="14" fill="#10b981" stroke="#0f0f1a" stroke-width="2"/>
-  <path d="M42 48 L46 52 L54 44" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <style>
+    path { stroke: #182433; }
+    .arrow { fill: #182433; stroke: none; }
+    @media (prefers-color-scheme: dark) {
+      path { stroke: url(#favDark); }
+      .arrow { fill: #38bdf8; }
+    }
+  </style>
+  <!-- Document Outline -->
+  <path d="M 26 12 H 60 L 82 34 V 80 C 82 85.5 77.5 90 72 90 H 26 C 20.5 90 16 85.5 16 80 V 22 C 16 16.5 20.5 12 26 12 Z" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" />
+  <!-- Document Fold Flap -->
+  <path d="M 60 12 V 26 C 60 30.5 63.5 34 68 34 H 82" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" />
+  <!-- Stylized 'e' Loop -->
+  <path d="M 28 55 H 66 C 66 43 57 35.5 45 35.5 C 32 35.5 22.5 46 22.5 59 C 22.5 73.5 34.5 83 48.5 83 C 58.5 83 66 77 68.5 69" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" />
+  <!-- Arrowhead -->
+  <path class="arrow" d="M 70.5 58 L 74.5 72 L 62.5 69.5 Z" />
 </svg>

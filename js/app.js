@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initGuestNudgeSystem();
   initCustomCursor();
   initPWA();
+  initAiAssist();
   console.log('✨ eNotePad — Digital Curator initialized');
 });
 
@@ -177,42 +178,79 @@ function initCustomCursor() {
 
 
 /**
- * Auto-Revealing Top Header Navigation Bar for all pages.
- * Hides header when scrolling down, reveals top navbar when scrolling UP.
+ * Floating Top Header Navigation Bar.
+ * Adds frosted glass elevation on scroll and smoothly auto-hides after 3 seconds of inactivity.
+ * Reappears instantly on scroll, mouse movement, touch, or top viewport proximity.
  */
 function initHeaderScroll() {
   const header = document.getElementById('topAppBar') || document.querySelector('header');
   if (!header) return;
 
-  let lastScrollY = window.scrollY;
-  let ticking = false;
+  header.classList.remove('-translate-y-full');
 
-  window.addEventListener('scroll', () => {
-    if (!ticking) {
-      window.requestAnimationFrame(() => {
-        const currentScrollY = window.scrollY;
+  let idleTimer = null;
+  let isHovered = false;
+  let isFocused = false;
+  const IDLE_DELAY = 3000; // 3 seconds idle disappearance
 
-        // If scrolled past initial top margin threshold
-        if (currentScrollY > 40) {
-          header.classList.add('header-scrolled');
-          if (currentScrollY > lastScrollY && currentScrollY - lastScrollY > 6) {
-            // Scrolling DOWN -> hide top header navbar
-            header.classList.add('-translate-y-full');
-          } else if (lastScrollY - currentScrollY > 4) {
-            // Scrolling UP -> reveal top header navbar
-            header.classList.remove('-translate-y-full');
-          }
-        } else {
-          // Near top of page -> reveal top header navbar without shadow
-          header.classList.remove('-translate-y-full', 'header-scrolled');
-        }
-
-        lastScrollY = currentScrollY;
-        ticking = false;
-      });
-      ticking = true;
+  const hideHeader = () => {
+    // Only hide if not hovered and not focused
+    if (!isHovered && !isFocused) {
+      header.classList.add('header-hidden');
     }
-  }, { passive: true });
+  };
+
+  const showHeader = () => {
+    header.classList.remove('header-hidden');
+    resetIdleTimer();
+  };
+
+  const resetIdleTimer = () => {
+    if (idleTimer) clearTimeout(idleTimer);
+    if (!isHovered && !isFocused) {
+      idleTimer = setTimeout(hideHeader, IDLE_DELAY);
+    }
+  };
+
+  const onScroll = () => {
+    if (window.scrollY > 8) {
+      header.classList.add('header-scrolled');
+    } else {
+      header.classList.remove('header-scrolled');
+    }
+    showHeader();
+  };
+
+  header.addEventListener('mouseenter', () => {
+    isHovered = true;
+    showHeader();
+    if (idleTimer) clearTimeout(idleTimer);
+  });
+
+  header.addEventListener('mouseleave', () => {
+    isHovered = false;
+    resetIdleTimer();
+  });
+
+  header.addEventListener('focusin', () => {
+    isFocused = true;
+    showHeader();
+    if (idleTimer) clearTimeout(idleTimer);
+  });
+
+  header.addEventListener('focusout', () => {
+    isFocused = false;
+    resetIdleTimer();
+  });
+
+  // User interactions trigger instant reveal & restart the idle timer
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('mousemove', showHeader, { passive: true });
+  window.addEventListener('touchstart', showHeader, { passive: true });
+  window.addEventListener('keydown', showHeader, { passive: true });
+
+  onScroll();
+  resetIdleTimer();
 }
 
 /**
@@ -918,7 +956,6 @@ function initGuestNudgeSystem() {
   if (closeBtn) {
     closeBtn.addEventListener('click', () => {
       hideCard();
-      cardDismissed = true;
       // Resume interval playback after 30s snooze
       setTimeout(() => {
         cardDismissed = false;
