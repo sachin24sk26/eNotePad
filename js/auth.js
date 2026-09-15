@@ -1405,10 +1405,21 @@ function initAuth() {
     newConfirm.textContent = opts.confirmText || 'Confirm';
     newConfirm.className = `flex-1 py-3 rounded-2xl text-sm font-bold transition-all active:scale-[0.98] ${opts.confirmClass || 'bg-primary text-on-primary hover:bg-primary-dim'}`;
 
-    const close = () => { modal.style.display = 'none'; };
+    const onEsc = (e) => {
+      if (e.key === 'Escape' && modal.style.display !== 'none') {
+        close();
+      }
+    };
+    const close = () => {
+      modal.style.display = 'none';
+      document.removeEventListener('keydown', onEsc);
+    };
+    document.addEventListener('keydown', onEsc);
+
     newConfirm.addEventListener('click', () => { close(); opts.onConfirm && opts.onConfirm(); });
     newCancel.addEventListener('click', close);
     backdrop.addEventListener('click', close, { once: true });
+    setTimeout(() => newCancel.focus(), 50);
   }
 
   /**

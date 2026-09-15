@@ -21,8 +21,93 @@ function initAccess() {
   const retrieveAnotherBtn = document.getElementById('retrieveAnotherBtn');
   const statusRetryBtn = document.getElementById('statusRetryBtn');
 
+  // Popup Alert Floating Banner Elements (Top-Left Corner)
+  const accessAlertModal = document.getElementById('accessAlertModal');
+  const accessAlertCloseIconBtn = document.getElementById('accessAlertCloseIconBtn');
+  const accessAlertTitle = document.getElementById('accessAlertTitle');
+  const accessAlertMessage = document.getElementById('accessAlertMessage');
+  const accessAlertIcon = document.getElementById('accessAlertIcon');
+  const accessAlertProgress = document.getElementById('accessAlertProgress');
+
   let pendingDocData = null;
   let pendingCode = null;
+  let accessAlertTimer = null;
+
+  function showAccessAlert(title, message, code = '', icon = 'warning') {
+    if (accessAlertTitle) accessAlertTitle.textContent = title;
+    if (accessAlertMessage) {
+      if (code) {
+        accessAlertMessage.innerHTML = `No note found for code <strong>"${escText(code)}"</strong>.<br><span class="opacity-80">It may have expired or contains a typo.</span>`;
+      } else {
+        accessAlertMessage.textContent = message;
+      }
+    }
+    if (accessAlertIcon) accessAlertIcon.textContent = icon;
+
+    // Trigger tactile shake animation on code input boxes for visual feedback
+    const codeInputGroup = document.getElementById('codeInputGroup');
+    if (codeInputGroup) {
+      codeInputGroup.classList.add('animate-shake');
+      setTimeout(() => codeInputGroup.classList.remove('animate-shake'), 600);
+    }
+
+    if (accessAlertModal) {
+      if (accessAlertTimer) {
+        clearTimeout(accessAlertTimer);
+        accessAlertTimer = null;
+      }
+
+      // Reset progress bar
+      if (accessAlertProgress) {
+        accessAlertProgress.style.transition = 'none';
+        accessAlertProgress.style.width = '100%';
+      }
+
+      accessAlertModal.style.display = 'block';
+
+      // Animate slide-in from top-right
+      requestAnimationFrame(() => {
+        accessAlertModal.classList.remove('opacity-0', 'translate-x-12');
+        accessAlertModal.classList.add('opacity-100', 'translate-x-0');
+
+        if (accessAlertProgress) {
+          setTimeout(() => {
+            accessAlertProgress.style.transition = 'width 3.5s linear';
+            accessAlertProgress.style.width = '0%';
+          }, 30);
+        }
+      });
+
+      // Auto vanish after 3.5 seconds
+      accessAlertTimer = setTimeout(() => {
+        hideAccessAlert();
+      }, 3500);
+    }
+  }
+
+  function hideAccessAlert() {
+    if (accessAlertTimer) {
+      clearTimeout(accessAlertTimer);
+      accessAlertTimer = null;
+    }
+    if (!accessAlertModal) return;
+    accessAlertModal.classList.remove('opacity-100', 'translate-x-0');
+    accessAlertModal.classList.add('opacity-0', 'translate-x-12');
+    setTimeout(() => {
+      accessAlertModal.style.display = 'none';
+    }, 320);
+  }
+
+  if (accessAlertCloseIconBtn) accessAlertCloseIconBtn.addEventListener('click', hideAccessAlert);
+
+  function showStatus(icon, text, type = 'error') {
+    const statusDiv = document.getElementById('accessStatus');
+    const statusIcon = document.getElementById('accessStatusIcon');
+    const statusText = document.getElementById('accessStatusText');
+    if (statusIcon) statusIcon.textContent = icon;
+    if (statusText) statusText.textContent = text;
+    if (statusDiv) showEl('accessStatus');
+  }
 
   function updateClearBtnVisibility() {
     if (!accessClearBtn) return;
@@ -39,10 +124,154 @@ function initAccess() {
     return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
   }
 
+  // ─── Rate Limiter (Brute-Force Attack Prevention) ──────────
+  const RATE_LIMIT = {
+    maxAttempts: 5,
+    windowMs: 60 * 1000,
+    lockoutMs: 30 * 1000,
+    attempts: [],
+    lockedUntil: 0
+  };
+
+  function checkRateLimit() {
+    const now = Date.now();
+    if (now < RATE_LIMIT.lockedUntil) {
+      const remainingSec = Math.ceil((RATE_LIMIT.lockedUntil - now) / 1000);
+      showToast(`Too many attempts. Security lockout active: wait ${remainingSec}s`, 'warning');
+      return false;
+    }
+    return true;
+  }
+
+  function recordFailedAttempt() {
+    const now = Date.now();
+    RATE_LIMIT.attempts = RATE_LIMIT.attempts.filter(t => now - t < RATE_LIMIT.windowMs);
+    RATE_LIMIT.attempts.push(now);
+    if (RATE_LIMIT.attempts.length >= RATE_LIMIT.maxAttempts) {
+      RATE_LIMIT.lockedUntil = now + RATE_LIMIT.lockoutMs;
+      RATE_LIMIT.attempts = [];
+      showToast('⚠️ Too many invalid attempts. Access locked for 30s.', 'error');
+    }
+  }
+
+  function recordSuccessfulAttempt() {
+    RATE_LIMIT.attempts = [];
+    RATE_LIMIT.lockedUntil = 0;
+  }
+
+  // ─── URL & Image Sanitizers (XSS Defense) ──────────────────
+  function sanitizeUrl(rawUrl, allowedProtocols = ['http:', 'https:']) {
+    if (!rawUrl || typeof rawUrl !== 'string') return null;
+    const trimmed = rawUrl.trim();
+    try {
+      const parsed = new URL(trimmed);
+      if (allowedProtocols.includes(parsed.protocol)) {
+        return parsed.href;
+      }
+    } catch (e) {}
+    return null;
+  }
+
+  function isSafeImageSource(url) {
+    if (!url || typeof url !== 'string') return false;
+    const trimmed = url.trim();
+    if (trimmed.startsWith('https://') || trimmed.startsWith('http://')) {
+      return true;
+    }
+    if (/^data:image\/(png|jpeg|jpg|webp|gif);base64,[A-Za-z0-9+/=]+$/i.test(trimmed)) {
+      return true;
+    }
+    return false;
+  }
+
+  // ─── Universal Access Code String Extractor ───────────────
+  // Intelligently parses raw pastes, full URLs, formatted keys (e.g. ABC-123), and standalone tokens.
+  function extractCodeFromRawString(raw) {
+    if (!raw || typeof raw !== 'string') return '';
+    const trimmed = raw.trim();
+
+    const reservedRoutes = ['ACCESS', 'SHARE', 'EDITOR', 'USERS', 'ADMIN', 'LOGIN', 'SIGNUP', 'SETTINGS', 'ROOMS', 'HISTORY', 'SAVED', 'INBOX'];
+
+    // 1. URL parser (detect ?code=, ?c=, or #hash)
+    const isFullUrl = trimmed.includes('://') || /^(https?:)?\/\//i.test(trimmed);
+    try {
+      if (isFullUrl || trimmed.includes('?') || trimmed.includes('#')) {
+        const dummyBase = 'https://enotepad.site/';
+        const url = new URL(isFullUrl ? trimmed : dummyBase + trimmed.replace(/^\/?/, ''));
+        const paramCode = url.searchParams.get('code') || url.searchParams.get('c');
+        if (paramCode) {
+          const cleanParam = paramCode.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+          if (cleanParam.length === 6) return cleanParam;
+        }
+        const hash = url.hash.replace(/^#/, '').trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+        if (hash.length === 6 && !reservedRoutes.includes(hash)) {
+          return hash;
+        }
+        // If it's a full URL and has no valid code param/hash, DO NOT fall through to substring matching!
+        if (isFullUrl) {
+          return '';
+        }
+      }
+    } catch (e) {
+      if (isFullUrl) return '';
+    }
+
+    // 2. Explicit prefix like "code: ABC123", "code is ABC123", "secret code: ABC123"
+    const prefixMatch = trimmed.match(/(?:code|key|pin|secret|access)[\s:=]+(?:is\s+|to\s+)?([A-Za-z0-9]{6})\b/i);
+    if (prefixMatch) return prefixMatch[1].toUpperCase();
+
+    // 3. 3-3 split like ABC-123 or ABC 123
+    const splitMatch = trimmed.match(/\b([A-Za-z0-9]{3})[-_\s]([A-Za-z0-9]{3})\b/);
+    if (splitMatch) return (splitMatch[1] + splitMatch[2]).toUpperCase();
+
+    // 4. Standalone 6-char code containing digits (e.g. P3Q4R5, AB12CD, 123456)
+    const codeWithDigitMatch = trimmed.match(/\b([A-Za-z0-9]{6})\b/g);
+    if (codeWithDigitMatch) {
+      const withDigit = codeWithDigitMatch.find(m => /\d/.test(m) && !reservedRoutes.includes(m.toUpperCase()));
+      if (withDigit) return withDigit.toUpperCase();
+    }
+
+    // 5. If stripped alphanumeric is exactly 6 chars and not a reserved route, return it
+    const stripped = trimmed.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    if (stripped.length === 6 && !reservedRoutes.includes(stripped)) return stripped;
+
+    // 6. Standalone 6-char alphanumeric word
+    if (codeWithDigitMatch && codeWithDigitMatch.length > 0) {
+      const validToken = codeWithDigitMatch.find(m => !reservedRoutes.includes(m.toUpperCase()));
+      if (validToken) return validToken.toUpperCase();
+    }
+
+    // 7. Fallback for manual partial typing (only if not a URL or path)
+    if (!trimmed.includes('/') && !trimmed.includes(':') && stripped.length <= 6) {
+      return stripped;
+    }
+
+    return '';
+  }
+
   // ----- OTP-style Code Input -----
   codeBoxes.forEach((box, index) => {
+    // Auto-select contents on focus for frictionless editing
+    box.addEventListener('focus', () => {
+      box.select();
+    });
+
     box.addEventListener('input', (e) => {
-      const value = e.target.value.toUpperCase();
+      const rawVal = e.target.value;
+
+      // If user pasted or autofilled multiple characters into one box
+      if (rawVal.length > 1) {
+        const extracted = extractCodeFromRawString(rawVal);
+        if (extracted) {
+          setCodeInBoxes(extracted);
+          if (extracted.length === 6) {
+            fetchContent();
+          }
+          return;
+        }
+      }
+
+      const value = rawVal.toUpperCase().replace(/[^A-Z0-9]/g, '').substring(0, 1);
       e.target.value = value;
 
       if (value) {
@@ -57,16 +286,32 @@ function initAccess() {
       updateClearBtnVisibility();
 
       if (getCodeFromBoxes().length === 6) {
+        codeBoxes.forEach(b => {
+          b.classList.add('code-box-pulse');
+          setTimeout(() => b.classList.remove('code-box-pulse'), 350);
+        });
         fetchContent();
       }
     });
 
     box.addEventListener('keydown', (e) => {
-      if (e.key === 'Backspace' && !box.value && index > 0) {
+      if (e.key === 'Backspace') {
+        if (!box.value && index > 0) {
+          e.preventDefault();
+          codeBoxes[index - 1].focus();
+          codeBoxes[index - 1].value = '';
+          codeBoxes[index - 1].classList.remove('filled');
+          updateClearBtnVisibility();
+        } else {
+          box.classList.remove('filled');
+          setTimeout(updateClearBtnVisibility, 0);
+        }
+      } else if (e.key === 'ArrowLeft' && index > 0) {
+        e.preventDefault();
         codeBoxes[index - 1].focus();
-        codeBoxes[index - 1].value = '';
-        codeBoxes[index - 1].classList.remove('filled');
-        updateClearBtnVisibility();
+      } else if (e.key === 'ArrowRight' && index < codeBoxes.length - 1) {
+        e.preventDefault();
+        codeBoxes[index + 1].focus();
       } else if (e.key === 'Enter') {
         e.preventDefault();
         fetchContent();
@@ -75,16 +320,16 @@ function initAccess() {
 
     box.addEventListener('paste', (e) => {
       e.preventDefault();
-      const pasted = (e.clipboardData.getData('text') || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
-      for (let i = 0; i < Math.min(pasted.length, 6); i++) {
-        codeBoxes[i].value = pasted[i];
-        codeBoxes[i].classList.add('filled');
-      }
-      const focusIndex = Math.min(pasted.length, 5);
+      const rawPasted = e.clipboardData ? e.clipboardData.getData('text') : '';
+      const parsed = extractCodeFromRawString(rawPasted);
+      if (!parsed) return;
+
+      setCodeInBoxes(parsed);
+      const focusIndex = Math.min(parsed.length, 5);
       codeBoxes[focusIndex].focus();
       updateClearBtnVisibility();
 
-      if (pasted.length >= 6) {
+      if (parsed.length === 6) {
         fetchContent();
       }
     });
@@ -95,14 +340,14 @@ function initAccess() {
     accessPasteBtn.addEventListener('click', async () => {
       try {
         const text = await navigator.clipboard.readText();
-        const clean = (text || '').toUpperCase().replace(/[^A-Z0-9]/g, '').substring(0, 6);
+        const clean = extractCodeFromRawString(text);
         if (!clean) {
-          showToast('No valid code in clipboard', 'warning');
+          showToast('No valid 6-character code found in clipboard', 'warning');
           return;
         }
         setCodeInBoxes(clean);
         updateClearBtnVisibility();
-        showToast(`Pasted "${clean}"`, 'success');
+        showToast(`Loaded "${clean}"`, 'success');
         if (clean.length === 6) {
           fetchContent();
         }
@@ -157,24 +402,36 @@ function initAccess() {
 
   function setCodeInBoxes(code) {
     if (!code) return;
-    const clean = code.toUpperCase().replace(/[^A-Z0-9]/g, '').substring(0, 6);
-    clean.split('').forEach((char, idx) => {
-      if (codeBoxes[idx]) {
-        codeBoxes[idx].value = char;
-        codeBoxes[idx].classList.add('filled');
+    const clean = extractCodeFromRawString(code);
+    codeBoxes.forEach((box, idx) => {
+      const char = clean[idx] || '';
+      box.value = char;
+      if (char) {
+        box.classList.add('filled');
+      } else {
+        box.classList.remove('filled');
       }
     });
     updateClearBtnVisibility();
+
+    if (clean.length === 6) {
+      codeBoxes.forEach(b => {
+        b.classList.add('code-box-pulse');
+        setTimeout(() => b.classList.remove('code-box-pulse'), 350);
+      });
+    }
   }
 
   fetchBtn.addEventListener('click', fetchContent);
 
   // ----- Fetch Content -----
   async function fetchContent() {
+    if (!checkRateLimit()) return;
+
     const code = getCodeFromBoxes();
 
     if (code.length !== 6) {
-      showToast('Please enter the full 6-character code', 'warning');
+      showAccessAlert('Incomplete Code', 'Please enter all 6 characters of the access code to retrieve content.', code, 'dialpad');
       return;
     }
 
@@ -193,20 +450,24 @@ function initAccess() {
       const doc = await db.collection('shares').doc(code).get();
 
       if (!doc.exists) {
+        recordFailedAttempt();
+        showAccessAlert('Invalid Access Code', '', code, 'warning');
         showStatus('😕', 'No content found for this code. It may have expired, burned, or the code is incorrect.', 'error');
         return;
       }
 
+      recordSuccessfulAttempt();
       const data = doc.data();
 
       // Check Expiration
       if (data.expiresAt && isExpired(data.expiresAt)) {
-        await db.collection('shares').doc(code).delete();
+        await db.collection('shares').doc(code).delete().catch(() => {});
         // Also clean up owner's history entry
         if (data.userId) {
           await db.collection('users').doc(data.userId)
             .collection('history').doc(code).delete().catch(() => {});
         }
+        showAccessAlert('Note Expired', 'This note has reached its expiration time and has been purged.', code, 'timer_off');
         showStatus('⏰', 'This content has expired and is no longer available.', 'expired');
         return;
       }
@@ -219,18 +480,53 @@ function initAccess() {
           accessPasswordPrompt.style.display = 'block';
           if (accessPasswordInput) {
             accessPasswordInput.value = '';
-            setTimeout(() => accessPasswordInput.focus(), 100);
+            setTimeout(() => {
+              accessPasswordInput.focus();
+              accessPasswordPrompt.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 100);
           }
         }
         return;
       }
 
-      // Render Directly if no password
-      await displayRetrievedContent(data, code);
+      // If Burn-After-Reading without password: execute atomic single-reader transaction
+      if (data.burnAfterReading) {
+        let burnedData = null;
+        try {
+          burnedData = await db.runTransaction(async (transaction) => {
+            const shareRef = db.collection('shares').doc(code);
+            const sfDoc = await transaction.get(shareRef);
+            if (!sfDoc.exists) {
+              throw new Error('ALREADY_BURNED');
+            }
+            const current = sfDoc.data();
+            if (current.isBurned) {
+              throw new Error('ALREADY_BURNED');
+            }
+            transaction.delete(shareRef);
+            return current;
+          });
+        } catch (burnErr) {
+          showAccessAlert('Note Already Burned', 'This note was configured to self-destruct upon reading and has already been burned.', code, 'local_fire_department');
+          showStatus('🔥', 'This note was set to self-destruct and has already been burned.', 'expired');
+          return;
+        }
+
+        if (data.userId) {
+          db.collection('users').doc(data.userId)
+            .collection('history').doc(code).delete().catch(() => {});
+        }
+
+        await displayRetrievedContent(burnedData || data, code, true);
+        return;
+      }
+
+      // Render Directly if no password & not burn-after-reading
+      await displayRetrievedContent(data, code, false);
 
     } catch (error) {
       console.error('Fetch error:', error);
-      showToast('Failed to fetch content.', 'error');
+      showAccessAlert('Network Error', 'Failed to retrieve note. Please check your internet connection.', code, 'cloud_off');
     } finally {
       fetchBtn.classList.remove('btn-loading');
       fetchBtn.disabled = false;
@@ -254,17 +550,51 @@ function initAccess() {
         const enteredHash = await hashPassword(enteredPwd);
         if (pendingDocData && enteredHash === pendingDocData.passwordHash) {
           if (accessPasswordPrompt) accessPasswordPrompt.style.display = 'none';
-          await displayRetrievedContent(pendingDocData, pendingCode);
+
+          // If note is Burn-After-Reading, atomically delete & verify in transaction
+          if (pendingDocData.burnAfterReading) {
+            let burnedData = null;
+            try {
+              burnedData = await db.runTransaction(async (transaction) => {
+                const shareRef = db.collection('shares').doc(pendingCode);
+                const sfDoc = await transaction.get(shareRef);
+                if (!sfDoc.exists) {
+                  throw new Error('ALREADY_BURNED');
+                }
+                const current = sfDoc.data();
+                if (current.isBurned) {
+                  throw new Error('ALREADY_BURNED');
+                }
+                transaction.delete(shareRef);
+                return current;
+              });
+            } catch (burnErr) {
+              showAccessAlert('Note Already Burned', 'This note was configured to self-destruct upon reading and has already been burned.', pendingCode, 'local_fire_department');
+              showStatus('🔥', 'This note was set to self-destruct and has already been burned.', 'expired');
+              return;
+            }
+
+            if (pendingDocData.userId) {
+              db.collection('users').doc(pendingDocData.userId)
+                .collection('history').doc(pendingCode).delete().catch(() => {});
+            }
+
+            await displayRetrievedContent(burnedData || pendingDocData, pendingCode, true);
+            showToast('Password verified & note burned! 🔥', 'success');
+            return;
+          }
+
+          await displayRetrievedContent(pendingDocData, pendingCode, false);
           showToast('Password verified!', 'success');
         } else {
-          showToast('Incorrect password. Please try again.', 'error');
+          showAccessAlert('Incorrect Password', 'The passcode or PIN entered is incorrect. Please verify and try again.', pendingCode, 'lock_clock');
           accessPasswordInput.classList.add('ring-2', 'ring-error');
           setTimeout(() => accessPasswordInput.classList.remove('ring-2', 'ring-error'), 1500);
           accessPasswordInput.select();
         }
       } catch (err) {
         console.error('Password verify error:', err);
-        showToast('Verification failed', 'error');
+        showAccessAlert('Verification Failed', 'An error occurred while validating the password. Please try again.', pendingCode, 'error');
       } finally {
         submitAccessPasswordBtn.disabled = false;
         submitAccessPasswordBtn.classList.remove('btn-loading');
@@ -356,41 +686,45 @@ function initAccess() {
   }
 
   // ----- Display Retrieved Content & Handle Burn-After-Reading -----
-  async function displayRetrievedContent(data, code) {
+  async function displayRetrievedContent(data, code, isAlreadyBurned = false) {
     renderContent(data);
 
     // Live Expiry Timer
-    if (data.burnAfterReading) {
+    if (data.burnAfterReading || isAlreadyBurned) {
       const timerBadge = document.getElementById('contentExpiryTimerBadge');
       if (timerBadge) timerBadge.style.display = 'none';
-    } else {
-      startContentExpiryTimer(data.expiresAt, code);
-    }
-
-    // If Burn-After-Reading: Show badge & immediately delete from Firestore
-    if (data.burnAfterReading) {
       if (burnAfterReadingBadge) burnAfterReadingBadge.style.display = 'flex';
-      try {
-        await db.collection('shares').doc(code).delete();
-        console.log(`🔥 Note [${code}] burned after reading.`);
-        // Also delete the history entry from the note owner's account
-        if (data.userId) {
-          await db.collection('users').doc(data.userId)
-            .collection('history').doc(code).delete().catch(() => {});
+
+      // Fallback cleanup if not burned via transaction
+      if (!isAlreadyBurned) {
+        try {
+          await db.collection('shares').doc(code).delete();
+          if (data.userId) {
+            await db.collection('users').doc(data.userId)
+              .collection('history').doc(code).delete().catch(() => {});
+          }
+        } catch (err) {
+          console.warn('Burn deletion notice:', err);
         }
-      } catch (err) {
-        console.warn('Burn deletion notice:', err);
       }
     } else {
       if (burnAfterReadingBadge) burnAfterReadingBadge.style.display = 'none';
+      startContentExpiryTimer(data.expiresAt, code);
     }
 
     showToast('Content retrieved!', 'success');
 
-    // Guest milestone nudge
-    if (!getCurrentUser() && typeof window.showGuestMilestoneToast === 'function') {
-      setTimeout(() => window.showGuestMilestoneToast('code_accessed'), 3000);
-    }
+    // Auto-scroll the page smoothly to the received data / message
+    setTimeout(() => {
+      const resultContainer = document.getElementById('contentResult');
+      if (resultContainer) {
+        if (typeof smoothScrollTo === 'function') {
+          smoothScrollTo(resultContainer, 85);
+        } else {
+          resultContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
+    }, 120);
   }
 
   function renderContent(data) {
@@ -439,12 +773,36 @@ function initAccess() {
       linkContainer.className = 'flex flex-col gap-3';
       
       links.forEach(link => {
+        const linkStr = String(link || '').trim();
+        const safeHref = sanitizeUrl(linkStr);
         const linkEl = document.createElement('a');
         linkEl.className = 'content-link-display flex items-center gap-2 p-3 bg-surface-container-low hover:bg-surface-container rounded-xl text-primary font-medium transition-colors text-sm break-all';
-        linkEl.href = link;
-        linkEl.target = '_blank';
-        linkEl.rel = 'noopener noreferrer';
-        linkEl.innerHTML = `<span class="material-symbols-outlined text-base">open_in_new</span> <span>${escText(link)}</span>`;
+        
+        const iconSpan = document.createElement('span');
+        iconSpan.className = 'material-symbols-outlined text-base';
+
+        const textSpan = document.createElement('span');
+        textSpan.textContent = linkStr;
+
+        if (safeHref) {
+          linkEl.href = safeHref;
+          linkEl.target = '_blank';
+          linkEl.rel = 'noopener noreferrer';
+          iconSpan.textContent = 'open_in_new';
+        } else {
+          linkEl.href = '#';
+          linkEl.title = 'Blocked unsafe or malformed link protocol';
+          linkEl.style.opacity = '0.65';
+          linkEl.style.cursor = 'not-allowed';
+          iconSpan.textContent = 'block';
+          linkEl.addEventListener('click', (e) => {
+            e.preventDefault();
+            showToast('Blocked unsafe link protocol for security.', 'error');
+          });
+        }
+
+        linkEl.appendChild(iconSpan);
+        linkEl.appendChild(textSpan);
         linkContainer.appendChild(linkEl);
       });
       contentBody.appendChild(linkContainer);
@@ -455,12 +813,36 @@ function initAccess() {
     } else if (data.type === 'image') {
       const imageDiv = document.createElement('div');
       imageDiv.className = 'content-image-display flex flex-col items-center';
-      imageDiv.innerHTML = `
-        <img src="${data.content}" alt="Shared image" class="w-full max-h-[400px] object-contain rounded-xl shadow-sm" />
-        <a class="inline-flex items-center gap-2 mt-4 px-6 py-2.5 rounded-full text-xs font-bold text-primary bg-surface-container-low hover:bg-surface-container transition-all" href="${data.content}" target="_blank" download="enotepad-image.png">
-          <span class="material-symbols-outlined text-base">download</span> Download Image
-        </a>
-      `;
+
+      const imgSrc = String(data.content || '').trim();
+      if (isSafeImageSource(imgSrc)) {
+        const img = document.createElement('img');
+        img.src = imgSrc;
+        img.alt = data.title ? `Shared image: ${data.title}` : 'Shared image';
+        img.className = 'w-full max-h-[400px] object-contain rounded-xl shadow-sm';
+        img.loading = 'lazy';
+        imageDiv.appendChild(img);
+
+        const downloadLink = document.createElement('a');
+        downloadLink.className = 'inline-flex items-center gap-2 mt-4 px-6 py-2.5 rounded-full text-xs font-bold text-primary bg-surface-container-low hover:bg-surface-container transition-all';
+        downloadLink.href = imgSrc;
+        downloadLink.target = '_blank';
+        downloadLink.download = 'enotepad-image.png';
+        downloadLink.rel = 'noopener noreferrer';
+
+        const dlIcon = document.createElement('span');
+        dlIcon.className = 'material-symbols-outlined text-base';
+        dlIcon.textContent = 'download';
+
+        downloadLink.appendChild(dlIcon);
+        downloadLink.appendChild(document.createTextNode(' Download Image'));
+        imageDiv.appendChild(downloadLink);
+      } else {
+        const warningDiv = document.createElement('div');
+        warningDiv.className = 'p-6 text-center text-error bg-error/10 rounded-xl text-sm font-semibold';
+        warningDiv.textContent = '⚠️ Blocked untrusted or invalid image data for your security.';
+        imageDiv.appendChild(warningDiv);
+      }
       contentBody.appendChild(imageDiv);
       copyBtn.style.display = 'none';
     }
@@ -615,17 +997,37 @@ function initAccess() {
 
   // ----- Auto-Check URL query param on startup -----
   function checkUrlForCode() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const codeFromUrl = urlParams.get('code') || window.location.hash.replace('#', '').replace('code=', '');
-
-    if (codeFromUrl && codeFromUrl.length === 6) {
-      setTimeout(() => {
-        if (typeof window.switchToTab === 'function') {
-          window.switchToTab('access');
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const paramCode = urlParams.get('code') || urlParams.get('c');
+      if (paramCode) {
+        const clean = extractCodeFromRawString(paramCode);
+        if (clean && clean.length === 6) {
+          setTimeout(() => {
+            if (typeof window.switchToTab === 'function') {
+              window.switchToTab('access');
+            }
+            setCodeInBoxes(clean);
+            fetchContent();
+          }, 350);
+          return;
         }
-        setCodeInBoxes(codeFromUrl);
-        fetchContent();
-      }, 350);
+      }
+
+      // Check hash if valid 6-char code (e.g. #ABC123, not #access, #share, etc.)
+      const hash = window.location.hash.replace(/^#/, '').trim().toUpperCase();
+      const cleanHash = extractCodeFromRawString(hash);
+      if (cleanHash && cleanHash.length === 6) {
+        setTimeout(() => {
+          if (typeof window.switchToTab === 'function') {
+            window.switchToTab('access');
+          }
+          setCodeInBoxes(cleanHash);
+          fetchContent();
+        }, 350);
+      }
+    } catch (e) {
+      console.warn('URL code check error:', e);
     }
   }
 

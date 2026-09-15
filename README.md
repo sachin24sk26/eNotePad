@@ -29,6 +29,7 @@
 | 🛡️ **Admin Command Center** | v3.0 Dashboard with real-time stats and broadcast controls |
 | 👤 **Account System** | Optional registration with username & 4-digit PIN |
 | 💾 **Saved Notes** | Logged-in users can save and categorize permanent notes |
+| ✨ **AI Writing Assist** | Built-in Gemini AI for fixing grammar, rephrasing, beautifying, summarizing, and continuing text |
 | 📱 **Responsive Design** | Bespoke sidebar for desktop + glassmorphic mobile nav |
 
 ---
@@ -96,7 +97,19 @@ const firebaseConfig = {
 };
 ```
 
-### 3. Run Locally
+### 3. Gemini AI Configuration (Optional)
+
+A default Gemini API key is preconfigured in `js/env.js` and `js/ai-assist.js` for instant out-of-the-box usage by all users.
+You can customize the key via `.env` or in `js/env.js`:
+
+```js
+window.__ENV__ = {
+  GEMINI_API_KEY: "YOUR_GEMINI_API_KEY"
+};
+```
+Individual users can also override this with their own personal key directly inside the AI Assist panel (⚙ Key).
+
+### 4. Run Locally
 
 Since this is a static site, you can serve it with any local HTTP server:
 

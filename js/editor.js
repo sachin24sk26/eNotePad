@@ -641,15 +641,6 @@ function initEditor() {
     updateStats();
     updateToolbarState();
     scheduleDraftSave();
-
-    // Trigger guest milestone nudge on note typing
-    if (typeof window.showGuestMilestoneToast === 'function' && !sessionStorage.getItem('enp_nudge_typed_shown')) {
-      const text = editor.innerText ? editor.innerText.trim() : '';
-      if (text.length >= 25) {
-        sessionStorage.setItem('enp_nudge_typed_shown', '1');
-        window.showGuestMilestoneToast('note_typed');
-      }
-    }
   });
 
   // ─── Toolbar active states ───
@@ -827,6 +818,56 @@ function initEditor() {
     }
     closeAllDropdowns();
   });
+
+  // ─── Quick Starter Chips (Blank Canvas Accelerators) ───
+  const starterContainer = document.getElementById('editorStarterChips');
+  if (starterContainer) {
+    starterContainer.addEventListener('click', (e) => {
+      const chip = e.target.closest('.starter-chip');
+      if (!chip) return;
+      const starter = chip.dataset.starter;
+      const titleInput = document.getElementById('noteTitle');
+      const catSelect = document.getElementById('noteCategory');
+      const expirySelect = document.getElementById('shareExpirySelect');
+
+      if (starter === 'secret') {
+        if (titleInput && !titleInput.value) titleInput.value = 'Confidential Message';
+        if (catSelect) catSelect.value = 'important';
+        if (expirySelect) {
+          expirySelect.value = 'burn';
+          expirySelect.dispatchEvent(new Event('change'));
+        }
+        editor.innerHTML = '<p><em>🔒 This note will automatically self-destruct after being opened once.</em></p><p><br></p>';
+      } else if (starter === 'code') {
+        if (titleInput && !titleInput.value) titleInput.value = 'Code Snippet';
+        if (catSelect) catSelect.value = 'code';
+        editor.innerHTML = '<pre class="editor-code-block"><code>// Paste or write code snippet here...\nconsole.log("Hello from eNotePad");\n</code></pre><p><br></p>';
+      } else if (starter === 'meeting') {
+        if (titleInput && !titleInput.value) titleInput.value = 'Team Sync Memo';
+        if (catSelect) catSelect.value = 'work';
+        editor.innerHTML = `<h2>📋 Meeting Notes</h2><p><strong>Date:</strong> ${new Date().toLocaleDateString()}</p><p><strong>Attendees:</strong> </p><h3>Agenda</h3><ul><li>Discussion topic 1</li><li>Discussion topic 2</li></ul><h3>Action Items</h3><div class="editor-checklist-item"><input type="checkbox" class="editor-checkbox" /><span contenteditable="true">Task 1</span></div><p><br></p>`;
+      } else if (starter === 'todo') {
+        if (titleInput && !titleInput.value) titleInput.value = 'Quick Checklist';
+        if (catSelect) catSelect.value = 'personal';
+        editor.innerHTML = `<h2>✅ Tasks (${new Date().toLocaleDateString()})</h2><div class="editor-checklist-item"><input type="checkbox" class="editor-checkbox" /><span contenteditable="true">Priority item 1</span></div><div class="editor-checklist-item"><input type="checkbox" class="editor-checkbox" /><span contenteditable="true">Priority item 2</span></div><div class="editor-checklist-item"><input type="checkbox" class="editor-checkbox" /><span contenteditable="true">Follow-up reminder</span></div><p><br></p>`;
+      }
+
+      updateStats();
+      editor.focus();
+      try {
+        const range = document.createRange();
+        range.selectNodeContents(editor);
+        range.collapse(false);
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+      } catch (err) {}
+
+      if (typeof showToast === 'function') {
+        showToast(`Template applied: ${chip.textContent.trim()}`, 'success');
+      }
+    });
+  }
 
   // ─── Public API for share.js integration ───
   window.getEditorContent = () => {

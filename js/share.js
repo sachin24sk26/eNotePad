@@ -131,6 +131,12 @@ function initShare() {
     }
     // Title & Category are accessible to all users (both guests and logged-in)
     if (noteMeta) noteMeta.removeAttribute('data-hidden');
+
+    // Guest storage notice
+    const guestNotice = document.getElementById('guestShareNotice');
+    if (guestNotice) {
+      guestNotice.style.display = user ? 'none' : 'flex';
+    }
   }
 
   updateActionButtons();
@@ -209,9 +215,12 @@ function initShare() {
       const linkInputs = document.querySelectorAll('.shareLinkInput');
       const content = [];
       for (const input of linkInputs) {
-        const val = input.value.trim();
+        let val = input.value.trim();
         if (val) {
-          if (!isValidURL(val)) { showToast('Please enter a valid URL (https://...)', 'error'); return null; }
+          if (!/^https?:\/\//i.test(val) && !val.includes('://')) {
+            val = 'https://' + val;
+          }
+          if (!isValidURL(val)) { showToast('Please enter a valid web URL (https://...)', 'error'); return null; }
           content.push(val);
         }
       }
@@ -280,8 +289,10 @@ function initShare() {
       // Capture title & category (visible to all users via noteMeta or global fields)
       const titleEl = document.getElementById('noteTitle');
       const categoryEl = document.getElementById('noteCategory');
-      const shareTitle = (titleEl ? titleEl.value.trim() : '') || '';
-      const shareCategory = (categoryEl ? categoryEl.value : '') || '';
+      const shareTitle = (titleEl ? titleEl.value.trim().substring(0, 100) : '') || '';
+      const allowedCategories = ['personal', 'work', 'ideas', 'code', 'links', 'important'];
+      const rawCategory = categoryEl ? categoryEl.value : '';
+      const shareCategory = allowedCategories.includes(rawCategory) ? rawCategory : '';
 
       const shareData = {
         type: selectedType,
@@ -317,11 +328,6 @@ function initShare() {
       displayCode(code, { isBurnAfterReading, expiryMinutes, isProtected, title: shareTitle, category: shareCategory });
       showToast(isBurnAfterReading ? 'Shared! 🔥 Self-destructs after 1st read' : `Shared! Auto-erases in ${expiryMinutes >= 60 ? (expiryMinutes / 60) + 'h' : expiryMinutes + 'm'} ⏱️`, 'success');
       resetShareForm();
-
-      // Guest milestone nudge — fires 2.5s after share to not collide with success toast
-      if (!getCurrentUser() && typeof window.showGuestMilestoneToast === 'function') {
-        setTimeout(() => window.showGuestMilestoneToast('note_shared'), 2500);
-      }
 
     } catch (error) {
       console.error('Share error:', error);
@@ -584,6 +590,18 @@ function initShare() {
     if (shareQrContainer) shareQrContainer.style.display = 'none';
 
     showEl('codeDisplay');
+
+    // Smoothly auto-scroll to the generated code card
+    setTimeout(() => {
+      const codeDisplayEl = document.getElementById('codeDisplay');
+      if (codeDisplayEl) {
+        if (typeof smoothScrollTo === 'function') {
+          smoothScrollTo(codeDisplayEl, 85);
+        } else {
+          codeDisplayEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
+    }, 120);
   }
 
   // ----- QR Code Toggle -----

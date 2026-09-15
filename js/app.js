@@ -178,79 +178,88 @@ function initCustomCursor() {
 
 
 /**
- * Floating Top Header Navigation Bar.
- * Adds frosted glass elevation on scroll and smoothly auto-hides after 3 seconds of inactivity.
- * Reappears instantly on scroll, mouse movement, touch, or top viewport proximity.
+ * Floating Sticky Top Header Navigation Bar.
+ * Provides frosted glass elevation on scroll and smart directional sticky behavior.
+ * Stays visible at top, glides away on continuous fast scroll-down, reveals immediately on scroll-up.
  */
 function initHeaderScroll() {
   const header = document.getElementById('topAppBar') || document.querySelector('header');
   if (!header) return;
 
-  header.classList.remove('-translate-y-full');
+  header.classList.remove('-translate-y-full', 'header-hidden');
 
-  let idleTimer = null;
+  let lastScrollY = window.scrollY || 0;
   let isHovered = false;
   let isFocused = false;
-  const IDLE_DELAY = 3000; // 3 seconds idle disappearance
+  let ticking = false;
 
-  const hideHeader = () => {
-    // Only hide if not hovered and not focused
-    if (!isHovered && !isFocused) {
+  const updateHeader = () => {
+    const currentScrollY = Math.max(0, window.scrollY || 0);
+    const scrollDelta = currentScrollY - lastScrollY;
+
+    // Elevation styling on scroll
+    if (currentScrollY > 10) {
+      header.classList.add('header-scrolled');
+    } else {
+      header.classList.remove('header-scrolled');
+    }
+
+    // Smart sticky visibility:
+    // 1. Near the top of the page (< 60px): Always fully visible
+    // 2. If user is hovering or focusing elements inside header: Always visible
+    // 3. Scrolling Down past 120px with momentum (> 8px): Glide away
+    // 4. Scrolling Up even slightly (< -4px): Reveal immediately
+    if (currentScrollY <= 60 || isHovered || isFocused) {
+      header.classList.remove('header-hidden');
+    } else if (scrollDelta > 8 && currentScrollY > 120) {
       header.classList.add('header-hidden');
+    } else if (scrollDelta < -4) {
+      header.classList.remove('header-hidden');
+    }
+
+    lastScrollY = currentScrollY;
+    ticking = false;
+  };
+
+  const onScroll = () => {
+    if (!ticking) {
+      window.requestAnimationFrame(updateHeader);
+      ticking = true;
     }
   };
 
   const showHeader = () => {
     header.classList.remove('header-hidden');
-    resetIdleTimer();
-  };
-
-  const resetIdleTimer = () => {
-    if (idleTimer) clearTimeout(idleTimer);
-    if (!isHovered && !isFocused) {
-      idleTimer = setTimeout(hideHeader, IDLE_DELAY);
-    }
-  };
-
-  const onScroll = () => {
-    if (window.scrollY > 8) {
-      header.classList.add('header-scrolled');
-    } else {
-      header.classList.remove('header-scrolled');
-    }
-    showHeader();
   };
 
   header.addEventListener('mouseenter', () => {
     isHovered = true;
     showHeader();
-    if (idleTimer) clearTimeout(idleTimer);
   });
 
   header.addEventListener('mouseleave', () => {
     isHovered = false;
-    resetIdleTimer();
   });
 
   header.addEventListener('focusin', () => {
     isFocused = true;
     showHeader();
-    if (idleTimer) clearTimeout(idleTimer);
   });
 
   header.addEventListener('focusout', () => {
     isFocused = false;
-    resetIdleTimer();
   });
 
-  // User interactions trigger instant reveal & restart the idle timer
-  window.addEventListener('scroll', onScroll, { passive: true });
-  window.addEventListener('mousemove', showHeader, { passive: true });
-  window.addEventListener('touchstart', showHeader, { passive: true });
-  window.addEventListener('keydown', showHeader, { passive: true });
+  // Mouse reaching top viewport edge reveals header immediately
+  window.addEventListener('mousemove', (e) => {
+    if (e.clientY <= 50) showHeader();
+  }, { passive: true });
 
-  onScroll();
-  resetIdleTimer();
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('touchstart', () => {}, { passive: true });
+
+  // Initial check
+  updateHeader();
 }
 
 /**
@@ -352,26 +361,61 @@ function initFeedback() {
 
 
 /**
- * Show/hide sidebar based on viewport width.
+ * Show/hide and toggle mobile off-canvas drawer.
  */
 function initSidebar() {
   const sidebar = document.getElementById('sidebar');
-  const mainContent = document.querySelector('main');
+  const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+  const closeSidebarBtn = document.getElementById('closeSidebarDrawerBtn');
+  const headerMenuBtn = document.getElementById('headerMenuBtn');
+  const mobileNavMenuBtn = document.getElementById('mobileNavMenuBtn');
 
-  function updateSidebar() {
-    const isDesktop = window.innerWidth >= 768;
-    sidebar.style.display = isDesktop ? 'flex' : 'none';
-    mainContent.style.marginLeft = isDesktop ? '16rem' : '0';
+  function openMobileDrawer() {
+    if (!sidebar) return;
+    sidebar.classList.add('mobile-open');
+    if (sidebarBackdrop) {
+      sidebarBackdrop.style.display = 'block';
+      requestAnimationFrame(() => {
+        sidebarBackdrop.classList.add('active');
+      });
+    }
+    document.body.style.overflow = 'hidden';
   }
 
-  updateSidebar();
-  window.addEventListener('resize', updateSidebar);
+  function closeMobileDrawer() {
+    if (!sidebar) return;
+    sidebar.classList.remove('mobile-open');
+    if (sidebarBackdrop) {
+      sidebarBackdrop.classList.remove('active');
+      setTimeout(() => {
+        if (!sidebarBackdrop.classList.contains('active')) {
+          sidebarBackdrop.style.display = 'none';
+        }
+      }, 300);
+    }
+    document.body.style.overflow = '';
+  }
+
+  if (headerMenuBtn) headerMenuBtn.addEventListener('click', openMobileDrawer);
+  if (mobileNavMenuBtn) mobileNavMenuBtn.addEventListener('click', openMobileDrawer);
+  if (closeSidebarBtn) closeSidebarBtn.addEventListener('click', closeMobileDrawer);
+  if (sidebarBackdrop) sidebarBackdrop.addEventListener('click', closeMobileDrawer);
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && sidebar && sidebar.classList.contains('mobile-open')) {
+      closeMobileDrawer();
+    }
+  });
+
+  window.openMobileDrawer = openMobileDrawer;
+  window.closeMobileDrawer = closeMobileDrawer;
 
   // Sidebar user profile click → navigate to account tab
   const sidebarUserInfo = document.getElementById('sidebarUserInfo');
   const sidebarLoggedOutBtn = document.getElementById('sidebarLoggedOutBtn');
 
   const onProfileClick = () => {
+    closeMobileDrawer();
     if (typeof window.switchToTab === 'function') {
       window.switchToTab('account');
       setTimeout(() => {
@@ -384,24 +428,29 @@ function initSidebar() {
   if (sidebarUserInfo) sidebarUserInfo.addEventListener('click', onProfileClick);
   if (sidebarLoggedOutBtn) sidebarLoggedOutBtn.addEventListener('click', onProfileClick);
 
-  // Top header left inbox button click → navigate to account tab and open inbox sub-tab
+  // Top header inbox button click → navigate to account tab and open inbox sub-tab
   const topNavInboxBtn = document.getElementById('topNavInboxBtn');
-  if (topNavInboxBtn) {
-    topNavInboxBtn.addEventListener('click', () => {
-      if (typeof window.switchToTab === 'function') {
-        window.switchToTab('account');
-        setTimeout(() => {
-          const inboxTab = document.querySelector('.account-tab[data-account-tab="inbox"]');
-          if (inboxTab) inboxTab.click();
-        }, 50);
-      }
-    });
-  }
+  const mobileTopInboxBtn = document.getElementById('mobileTopInboxBtn');
+
+  const onInboxClick = () => {
+    closeMobileDrawer();
+    if (typeof window.switchToTab === 'function') {
+      window.switchToTab('account');
+      setTimeout(() => {
+        const inboxTab = document.querySelector('.account-tab[data-account-tab="inbox"]');
+        if (inboxTab) inboxTab.click();
+      }, 50);
+    }
+  };
+
+  if (topNavInboxBtn) topNavInboxBtn.addEventListener('click', onInboxClick);
+  if (mobileTopInboxBtn) mobileTopInboxBtn.addEventListener('click', onInboxClick);
 
   // Sidebar quick links for logged-in users
   const quickLinks = document.querySelectorAll('.sidebar-quick-link');
   quickLinks.forEach(link => {
     link.addEventListener('click', () => {
+      closeMobileDrawer();
       const action = link.dataset.sidebarAction;
       if (action === 'files') {
         // Navigate to Account tab and switch to Files sub-tab
@@ -459,6 +508,12 @@ function initNavigation() {
     shareAnotherBtn.addEventListener('click', () => {
       hideEl('codeDisplay');
       showEl('shareForm');
+      setTimeout(() => {
+        const shareFormEl = document.getElementById('shareForm');
+        if (shareFormEl) {
+          shareFormEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
     });
   }
 
@@ -466,6 +521,30 @@ function initNavigation() {
    * Switch to a tab and sync all navigation elements.
    */
   function switchTab(tabName) {
+    // ─── Admin Route Protection Guard ───
+    if (tabName === 'admin') {
+      const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+      const isAdmin = user && (user.role === 'admin' || user.isAdmin === true);
+      if (!isAdmin) {
+        if (typeof showToast === 'function') {
+          showToast('Access restricted. Administrator credentials required.', 'error');
+        }
+        tabName = 'share';
+        if (window.location.hash === '#admin') {
+          try {
+            history.replaceState(null, '', window.location.pathname + window.location.search);
+          } catch (e) {
+            window.location.hash = '';
+          }
+        }
+      }
+    }
+
+    // Close mobile drawer if open
+    if (typeof closeMobileDrawer === 'function') {
+      closeMobileDrawer();
+    }
+
     // Update panels — guard against null
     Object.keys(panels).forEach(key => {
       if (panels[key]) {
@@ -483,11 +562,11 @@ function initNavigation() {
       link.classList.toggle('active', link.dataset.tab === tabName);
     });
 
-    // Sync mobile nav
+    // Sync mobile bottom dock
     mobileBtns.forEach(btn => {
+      if (!btn.dataset.tab) return;
       const isActive = btn.dataset.tab === tabName;
       btn.classList.toggle('active', isActive);
-      btn.classList.toggle('text-primary/40', !isActive);
       const icon = btn.querySelector('.material-symbols-outlined');
       if (icon) icon.style.fontVariationSettings = isActive ? "'FILL' 1" : "'FILL' 0";
     });
@@ -891,7 +970,7 @@ function initGuestNudgeSystem() {
   }
 
   function showCard(forceIndex) {
-    if (!banner || !isGuest() || cardDismissed) return;
+    if (!banner || !isGuest() || cardDismissed || window.innerWidth < 768) return;
 
     if (typeof forceIndex === 'number') {
       cardMsgIndex = forceIndex;
@@ -902,7 +981,6 @@ function initGuestNudgeSystem() {
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         banner.classList.add('gnb-visible');
-        if (typeof updateMilestoneContainerPosition === 'function') updateMilestoneContainerPosition();
       });
     });
 
@@ -915,7 +993,6 @@ function initGuestNudgeSystem() {
     banner.classList.remove('gnb-visible');
     setTimeout(() => {
       if (!banner.classList.contains('gnb-visible')) banner.style.display = 'none';
-      if (typeof updateMilestoneContainerPosition === 'function') updateMilestoneContainerPosition();
     }, 340);
   }
 
@@ -992,8 +1069,16 @@ function initGuestNudgeSystem() {
     });
   }
 
-  // Launch initial card after 1 second
-  setTimeout(() => showCard(0), 1000);
+  // Launch initial card after 1 second (desktop only)
+  setTimeout(() => {
+    if (window.innerWidth >= 768) showCard(0);
+  }, 1000);
+
+  window.addEventListener('resize', () => {
+    if (window.innerWidth < 768) {
+      hideCard();
+    }
+  });
 
 
   // ── 6. GUEST ALERT MODAL DIALOG CONTROLLER ───────────────────────
@@ -1064,171 +1149,19 @@ function initGuestNudgeSystem() {
   }
 
 
-  // ── 7. TOP WELCOME STRIP (shows once per session until dismissed) ───
-  const sessionKey = 'enp_welcome_shown';
-  if (!sessionStorage.getItem(sessionKey)) {
-    sessionStorage.setItem(sessionKey, '1');
-    const strip = document.createElement('div');
-    strip.id = 'guestWelcomeStrip';
-    strip.innerHTML = `
-      <div class="flex items-center justify-between gap-2 max-w-5xl mx-auto px-3 py-2 w-full min-w-0 overflow-hidden box-border">
-        <div class="flex items-center gap-1.5 flex-1 min-w-0">
-          <span class="material-symbols-outlined text-sm sm:text-base flex-shrink-0" style="color:inherit">auto_awesome</span>
-          <span class="text-[11px] sm:text-xs font-semibold truncate min-w-0">
-            <strong>eNotePad</strong> <span class="hidden sm:inline opacity-85">— Free Guest Mode. Sign up to keep notes forever!</span>
-          </span>
-        </div>
-        <div class="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-          <button id="guestStripSignup" class="text-[10px] sm:text-xs font-bold px-2.5 py-1 rounded-full border border-current/30 hover:bg-white/20 transition-all whitespace-nowrap">
-            Sign Up
-          </button>
-          <button id="guestStripLogin" class="text-[10px] sm:text-xs font-semibold px-2 py-1 rounded-full bg-white/10 hover:bg-white/20 transition-all whitespace-nowrap">
-            Sign In
-          </button>
-          <button id="guestStripClose" class="opacity-60 hover:opacity-100 transition-opacity p-0.5 ml-0.5" title="Dismiss header">
-            <span class="material-symbols-outlined text-sm">close</span>
-          </button>
-        </div>
-      </div>
-    `;
-    strip.style.cssText = `
-      position: fixed; top: 0; left: 0; right: 0; width: 100vw; max-width: 100vw; box-sizing: border-box; overflow: hidden; z-index: 99999;
-      background: linear-gradient(135deg, #516070 0%, #575e78 100%);
-      color: #f4f8ff; font-family: Inter, sans-serif;
-      transform: translateY(-100%); transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
-    `;
-    document.body.appendChild(strip);
-
-    setTimeout(() => { strip.style.transform = 'translateY(0)'; }, 500);
-
-    const dismissStrip = () => {
-      strip.style.transform = 'translateY(-100%)';
-      setTimeout(() => strip.remove(), 400);
-    };
-
-    document.getElementById('guestStripClose')?.addEventListener('click', dismissStrip);
-    document.getElementById('guestStripSignup')?.addEventListener('click', () => {
-      dismissStrip();
-      openSignup();
-    });
-    document.getElementById('guestStripLogin')?.addEventListener('click', () => {
-      dismissStrip();
-      openLogin();
-    });
-  }
 
 
-  // ── 8. MILESTONE TOAST NUDGES (STACKABLE MULTI-ALERT CONTAINER) ─
-  const toastMessages = [
-    {
-      trigger: 'note_shared',
-      icon: 'celebration',
-      text: '🎉 Note shared! Create an account or sign in to track all your shared notes and view history.',
-      btnText: 'Save My History'
-    },
-    {
-      trigger: 'note_typed',
-      icon: 'tips_and_updates',
-      text: '💡 Great idea! Register free to keep this note safe — guest notes auto-expire in 20 min.',
-      btnText: 'Keep Note Safe'
-    },
-    {
-      trigger: 'code_accessed',
-      icon: 'lock_open',
-      text: '✅ Note retrieved! Members can organize received notes into custom folders automatically.',
-      btnText: 'Organize My Notes'
-    }
-  ];
-
-  function getMilestoneToastContainer() {
-    let container = document.getElementById('milestoneToastContainer');
-    if (!container) {
-      container = document.createElement('div');
-      container.id = 'milestoneToastContainer';
-      container.className = 'fixed left-5 z-[9960] flex flex-col-reverse gap-2.5 pointer-events-none max-w-[340px] w-[calc(100vw-2.5rem)] transition-all duration-300';
-      const bannerVisible = banner && banner.style.display !== 'none' && banner.classList.contains('gnb-visible');
-      container.style.bottom = bannerVisible ? '180px' : '24px';
-      document.body.appendChild(container);
-    }
-    return container;
-  }
-
-  function updateMilestoneContainerPosition() {
-    const container = document.getElementById('milestoneToastContainer');
-    if (container) {
-      const bannerVisible = banner && banner.style.display !== 'none' && banner.classList.contains('gnb-visible');
-      container.style.bottom = bannerVisible ? '180px' : '24px';
-    }
-  }
-
-  function showMilestoneToast(triggerName) {
-    if (!isGuest()) return;
-    const msg = toastMessages.find(m => m.trigger === triggerName);
-    if (!msg) return;
-
-    const container = getMilestoneToastContainer();
-    updateMilestoneContainerPosition();
-
-    const toast = document.createElement('div');
-    toast.className = 'gnb-milestone-toast pointer-events-auto transition-all duration-300 transform translate-y-4 opacity-0';
-    toast.innerHTML = `
-      <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--gnb-toast-bg,rgba(250,249,245,0.97));border:1px solid rgba(81,96,112,0.15);border-radius:16px;box-shadow:0 8px 24px rgba(47,52,46,0.14);width:100%;font-family:Inter,sans-serif;backdrop-filter:blur(12px);">
-        <span class="material-symbols-outlined" style="color:#516070;font-size:20px;flex-shrink:0">${msg.icon}</span>
-        <div style="flex:1;min-width:0">
-          <p style="font-size:11.5px;color:#2f342e;line-height:1.4;margin:0 0 7px">${msg.text}</p>
-          <div style="display:flex;gap:6px;align-items:center">
-            <button class="gnb-toast-action" style="font-size:10.5px;font-weight:700;color:#516070;background:rgba(81,96,112,0.12);border:none;padding:4px 10px;border-radius:8px;cursor:pointer">${msg.btnText}</button>
-            <button class="gnb-toast-login" style="font-size:10px;font-weight:600;color:#516070;background:none;border:none;cursor:pointer;text-decoration:underline">Sign In</button>
-          </div>
-        </div>
-        <button class="gnb-toast-close" style="color:rgba(47,52,46,0.3);background:none;border:none;cursor:pointer;font-size:18px;line-height:1;flex-shrink:0">×</button>
-      </div>
-    `;
-
-    // Dark mode styling
-    if (document.documentElement.classList.contains('dark')) {
-      const inner = toast.querySelector('div');
-      if (inner) inner.style.background = 'rgba(22,25,33,0.97)';
-      const p = toast.querySelector('p');
-      if (p) p.style.color = '#cbd5e1';
-      const act = toast.querySelector('.gnb-toast-action');
-      if (act) { act.style.color = '#93c5fd'; act.style.background = 'rgba(147,197,253,0.12)'; }
-      const log = toast.querySelector('.gnb-toast-login');
-      if (log) log.style.color = '#93c5fd';
-      const cls = toast.querySelector('.gnb-toast-close');
-      if (cls) cls.style.color = 'rgba(203,213,225,0.4)';
-    }
-
-    container.appendChild(toast);
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      toast.classList.remove('translate-y-4', 'opacity-0');
-      toast.classList.add('translate-y-0', 'opacity-100');
-    }));
-
-    const removeToast = () => {
-      toast.classList.remove('translate-y-0', 'opacity-100');
-      toast.classList.add('translate-y-4', 'opacity-0');
-      setTimeout(() => {
-        if (toast.parentNode) toast.remove();
-      }, 340);
-    };
-
-    toast.querySelector('.gnb-toast-close')?.addEventListener('click', removeToast);
-    toast.querySelector('.gnb-toast-action')?.addEventListener('click', () => { removeToast(); openSignup(); });
-    toast.querySelector('.gnb-toast-login')?.addEventListener('click', () => { removeToast(); openLogin(); });
-    setTimeout(removeToast, 8500);
-  }
-
-  // ── 9. EXPOSE GLOBAL APIS ────────────────────────────────────────
+  // ── 8. EXPOSE GLOBAL APIS ────────────────────────────────────────
   window.hideGuestNudge = hideCard;
   window.showGuestNudge = showCard;
   window.nextGuestNudge = () => { renderMessage(cardMsgIndex + 1); };
   window.prevGuestNudge = () => { renderMessage(cardMsgIndex - 1); };
   window.showGuestAlertModal = showGuestAlertModal;
   window.hideGuestAlertModal = hideGuestAlertModal;
-  window.showGuestMilestoneToast = showMilestoneToast;
+  window.showGuestMilestoneToast = () => {};
   window.triggerGuestNudge = (index) => {
     cardDismissed = false;
     showCard(typeof index === 'number' ? index : undefined);
   };
 }
+

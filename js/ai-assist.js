@@ -9,7 +9,11 @@ function initAiAssist() {
   'use strict';
 
   const STORAGE_KEY = 'enp_gemini_api_key';
-  const DEFAULT_API_KEY = '';
+  const DEFAULT_API_KEY = (typeof window !== 'undefined' && (
+    (window.__ENV__ && window.__ENV__.GEMINI_API_KEY) ||
+    (window.ENV && window.ENV.GEMINI_API_KEY) ||
+    window.GEMINI_API_KEY
+  )) || '';
   const API_BASE = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent';
 
   let currentAction = null;
@@ -29,6 +33,8 @@ function initAiAssist() {
   const aiScopeToggle = document.getElementById('aiScopeToggle');
   const apiKeyInput = document.getElementById('aiApiKeyInput');
   const saveApiKeyBtn = document.getElementById('aiSaveApiKeyBtn');
+  const resetApiKeyBtn = document.getElementById('aiResetApiKeyBtn');
+  const cancelKeyBtn = document.getElementById('aiCancelKeyBtn');
   const changeKeyBtn = document.getElementById('aiChangeKeyBtn');
   const closePanelBtn = document.getElementById('aiAssistCloseBtn');
   const floatingBtn = document.getElementById('aiFloatingBtn');
@@ -81,7 +87,11 @@ function initAiAssist() {
   // ─── API Key management ───────────────────────────────────
   function getApiKey() {
     try {
-      return localStorage.getItem(STORAGE_KEY) || DEFAULT_API_KEY || '';
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored && stored.trim()) {
+        return stored.trim();
+      }
+      return DEFAULT_API_KEY || '';
     } catch (e) {
       return DEFAULT_API_KEY || '';
     }
@@ -106,7 +116,17 @@ function initAiAssist() {
   if (saveApiKeyBtn) {
     saveApiKeyBtn.addEventListener('click', () => {
       const key = apiKeyInput ? apiKeyInput.value.trim() : '';
-      if (!key || key.length < 8) {
+      if (!key) {
+        if (DEFAULT_API_KEY) {
+          try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+          showToast('Using default Gemini API key ✨', 'success');
+          refreshPanelState();
+          return;
+        }
+        showToast('Please enter a valid API key', 'error');
+        return;
+      }
+      if (key.length < 8) {
         showToast('Please enter a valid API key', 'error');
         return;
       }
@@ -116,12 +136,38 @@ function initAiAssist() {
     });
   }
 
+  if (resetApiKeyBtn) {
+    resetApiKeyBtn.addEventListener('click', () => {
+      try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+      if (apiKeyInput) apiKeyInput.value = '';
+      showToast('Reverted to default Gemini API key ✨', 'success');
+      refreshPanelState();
+    });
+  }
+
+  if (cancelKeyBtn) {
+    cancelKeyBtn.addEventListener('click', () => {
+      if (getApiKey()) {
+        if (keySetupSection) keySetupSection.style.display = 'none';
+        if (actionSection) actionSection.style.display = 'block';
+      }
+    });
+  }
+
   if (changeKeyBtn) {
     changeKeyBtn.addEventListener('click', () => {
+      const isShowingSetup = keySetupSection && keySetupSection.style.display === 'block';
+      if (isShowingSetup && getApiKey()) {
+        keySetupSection.style.display = 'none';
+        if (actionSection) actionSection.style.display = 'block';
+        return;
+      }
       if (keySetupSection) keySetupSection.style.display = 'block';
       if (actionSection) actionSection.style.display = 'none';
       if (apiKeyInput) {
-        apiKeyInput.value = getApiKey();
+        const storedKey = localStorage.getItem(STORAGE_KEY);
+        apiKeyInput.value = storedKey || '';
+        apiKeyInput.placeholder = DEFAULT_API_KEY ? 'Default key active (paste custom key to override)...' : 'Paste your Gemini API key...';
         apiKeyInput.focus();
       }
     });
@@ -221,7 +267,13 @@ function initAiAssist() {
       }
 
       const data = await response.json();
-      const rawText = (data && data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0] && data.candidates[0].content.parts[0].text) || '';
+      let rawText = '';
+      if (data && data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) {
+        rawText = data.candidates[0].content.parts
+          .filter(function(p) { return p && p.text; })
+          .map(function(p) { return p.text; })
+          .join('');
+      }
       if (!rawText.trim()) throw new Error('AI returned an empty response. Try again.');
 
       generatedHTML = markdownToRichHTML(rawText.trim());

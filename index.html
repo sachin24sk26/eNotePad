@@ -209,6 +209,9 @@
 </head>
 <body class="bg-background text-on-surface font-label min-h-screen relative">
 
+  <!-- Screen Reader Live Announcer (WCAG 2.1 AA) -->
+  <div id="a11yAnnouncer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
   <!-- Paper Grain Overlay -->
   <div class="fixed inset-0 pointer-events-none paper-grain z-50"></div>
 
@@ -216,7 +219,7 @@
   <div class="fixed top-5 right-5 z-[9999] flex flex-col gap-2 pointer-events-none" id="toastContainer"></div>
 
   <!-- ===== FEEDBACK MODAL ===== -->
-  <div class="fixed inset-0 z-[10000] flex items-end sm:items-center justify-center p-4" id="feedbackModal" style="display:none">
+  <div class="fixed inset-0 z-[10000] flex items-end sm:items-center justify-center p-4" id="feedbackModal" style="display:none" role="dialog" aria-modal="true" aria-labelledby="feedbackModalTitle">
     <div class="absolute inset-0 bg-black/30 backdrop-blur-sm" id="feedbackBackdrop"></div>
     <div class="relative w-full max-w-md bg-surface-container-lowest rounded-2xl editorial-shadow editorial-border overflow-hidden animate-slide-up">
       <!-- Header -->
@@ -225,10 +228,10 @@
           <span class="material-symbols-outlined">chat_bubble_outline</span>
         </div>
         <div class="flex-1">
-          <h3 class="font-body text-lg italic text-primary">Send Feedback</h3>
+          <h3 class="font-body text-lg italic text-primary" id="feedbackModalTitle">Send Feedback</h3>
           <p class="text-xs text-on-surface-variant">Your message goes directly to the developer</p>
         </div>
-        <button class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-container transition-all text-primary/40 hover:text-primary" id="closeFeedbackModal">
+        <button class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-container transition-all text-primary/40 hover:text-primary" id="closeFeedbackModal" aria-label="Close feedback modal">
           <span class="material-symbols-outlined text-lg">close</span>
         </button>
       </div>
@@ -241,7 +244,7 @@
           <button class="feedback-chip px-3 py-1 rounded-full text-xs font-semibold text-primary/50 border border-outline-variant/20 hover:bg-primary/5 transition-all" data-cat="praise">❤️ Praise</button>
         </div>
         <div>
-          <label class="text-[10px] uppercase tracking-widest text-primary/40 font-bold block mb-2">Your Message</label>
+          <label for="feedbackTextarea" class="text-[10px] uppercase tracking-widest text-primary/40 font-bold block mb-2">Your Message</label>
           <textarea class="w-full px-4 py-3 bg-surface-dim/30 rounded-xl border-none shadow-inner focus:ring-2 focus:ring-primary/20 text-on-surface font-body text-sm resize-none placeholder:text-outline-variant/40" id="feedbackTextarea" rows="4" maxlength="500" placeholder="Tell us what you think, found a bug, or suggest an improvement..."></textarea>
           <p class="text-[10px] text-on-surface-variant/50 text-right mt-1"><span id="feedbackCharCount">0</span>/500</p>
         </div>
@@ -258,11 +261,14 @@
 
   <div class="flex min-h-screen w-full max-w-full">
 
-    <!-- ========== SIDEBAR ========== -->
-    <aside class="sidebar-aside flex flex-col w-60 h-screen p-3 bg-surface-container-low rounded-r-3xl fixed left-0 top-0 z-50 transition-all duration-300 ease-out overflow-hidden" id="sidebar">
+    <!-- Mobile Sidebar Drawer Backdrop -->
+    <div id="sidebarBackdrop" class="fixed inset-0 bg-black/50 backdrop-blur-xs z-[55] md:hidden transition-opacity opacity-0 pointer-events-none" style="display: none;"></div>
 
-      <!-- 1. Header & Branding -->
-      <div class="px-3 pt-3 pb-2">
+    <!-- ========== SIDEBAR ========== -->
+    <aside class="sidebar-aside flex flex-col w-64 md:w-60 h-screen p-3 bg-surface-container-low rounded-r-3xl fixed left-0 top-0 z-[60] -translate-x-full md:translate-x-0 transition-transform duration-300 ease-out overflow-hidden shadow-2xl md:shadow-none" id="sidebar">
+
+      <!-- 1. Header & Branding + Mobile Close Button -->
+      <div class="px-3 pt-3 pb-2 flex items-center justify-between">
         <a href="index.html" class="flex items-center gap-2.5 group cursor-pointer" style="text-decoration:none">
           <div class="relative w-8 h-8 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
             <!-- Light mode logo -->
@@ -278,11 +284,14 @@
             <span class="text-[8px] uppercase tracking-widest text-primary/50 dark:text-primary-dim/60 font-bold leading-tight mt-0.5">Digital Curator</span>
           </div>
         </a>
+        <button id="closeSidebarDrawerBtn" class="md:hidden w-8 h-8 rounded-full flex items-center justify-center text-primary/60 hover:text-primary hover:bg-primary/10 transition-colors cursor-pointer" title="Close Menu" aria-label="Close menu">
+          <span class="material-symbols-outlined text-xl">close</span>
+        </button>
       </div>
 
       <!-- 2. Primary CTA: New Note -->
       <div class="px-1 pt-1 pb-3">
-        <button class="w-full py-2.5 px-4 bg-primary text-on-primary rounded-xl font-semibold text-sm shadow-md hover:bg-primary-dim transition-all active:scale-[0.98] flex items-center justify-center gap-2 group cursor-pointer" id="newNoteBtn" title="Create a new note">
+        <button class="w-full py-2.5 px-4 bg-primary text-on-primary rounded-xl font-semibold text-sm shadow-md hover:bg-primary-dim transition-all active:scale-[0.98] flex items-center justify-center gap-2 group cursor-pointer" id="newNoteBtn" title="Create a new note" aria-label="Create a new note">
           <span class="material-symbols-outlined text-lg group-hover:rotate-90 transition-transform duration-200">add</span>
           <span>New Note</span>
         </button>
@@ -354,7 +363,7 @@
       <!-- 4. Fixed Bottom Footer Dock -->
       <div class="pt-2.5 px-1 space-y-2 border-t border-outline-variant/15 dark:border-white/10 flex-shrink-0">
         <!-- Coffee Support Pill -->
-        <button class="sidebar-coffee-pill w-full flex items-center justify-between px-2.5 py-2 rounded-full transition-all group cursor-pointer shadow-sm" id="sidebarCoffeeBtn" onclick="if(typeof openCoffeeModal==='function')openCoffeeModal(2);" title="Fuel late-night code & servers!">
+        <button class="sidebar-coffee-pill w-full flex items-center justify-between px-2.5 py-2 rounded-full transition-all group cursor-pointer shadow-sm" id="sidebarCoffeeBtn" onclick="if(typeof openCoffeeModal==='function')openCoffeeModal(2);" title="Fuel late-night code & servers!" aria-label="Buy eNotePad a Coffee">
           <div class="flex items-center gap-1.5 min-w-0">
             <div class="relative flex items-center justify-center flex-shrink-0 w-7 h-7">
               <!-- Smooth Fluid Rising Vapor / Steam SVG -->
@@ -446,7 +455,7 @@
             </div>
 
             <!-- Utility Action Buttons (Inbox + Find Users) -->
-            <div class="flex items-center gap-0.5 sm:gap-1 pl-1 border-l border-outline-variant/15 dark:border-white/10 ml-0.5 sm:ml-1 flex-shrink-0">
+            <div class="hidden sm:flex items-center gap-0.5 sm:gap-1 pl-1 border-l border-outline-variant/15 dark:border-white/10 ml-0.5 sm:ml-1 flex-shrink-0">
               <button class="top-nav-icon-btn relative p-1.5 sm:p-2 rounded-lg sm:rounded-xl text-primary/70 dark:text-[#a0b2c6] hover:text-primary dark:hover:text-white hover:bg-primary/8 dark:hover:bg-white/8 transition-all flex items-center justify-center" id="topNavInboxBtn" title="Inbox & Direct Messages" aria-label="Inbox">
                 <span class="material-symbols-outlined text-[18px] sm:text-[20px]">mail</span>
                 <span class="inbox-badge absolute -top-0.5 -right-0.5 bg-primary dark:bg-[#3b82f6] text-white text-[9px] font-bold rounded-full h-4 min-w-[16px] px-1 flex items-center justify-center shadow-sm" style="display:none"></span>
@@ -474,17 +483,28 @@
             </a>
           </nav>
 
-          <!-- Right Section: Buy Me a Coffee + Theme Toggle -->
+          <!-- Right Section: Actions & Theme Toggle -->
           <div class="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
-            <button onclick="if(typeof openCoffeeModal==='function')openCoffeeModal(2);" class="header-coffee-btn flex items-center gap-1 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full bg-amber-500/12 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/25 text-xs font-bold transition-all active:scale-95 cursor-pointer shadow-xs" title="Buy eNotePad a Coffee">
-              <span class="text-xs sm:text-sm">☕</span>
-              <span class="hidden sm:inline">Coffee</span>
+            <!-- Mobile Inbox Icon -->
+            <button class="sm:hidden relative p-1.5 rounded-full text-primary/75 dark:text-[#a0b2c6] hover:bg-primary/10 dark:hover:bg-white/10 transition-all flex items-center justify-center" id="mobileTopInboxBtn" title="Inbox" aria-label="Inbox">
+              <span class="material-symbols-outlined text-[19px]">mail</span>
+              <span class="inbox-badge absolute -top-0.5 -right-0.5 bg-primary dark:bg-[#3b82f6] text-white text-[8px] font-bold rounded-full h-3.5 min-w-[14px] px-0.5 flex items-center justify-center shadow-sm" style="display:none"></span>
             </button>
-            <button class="theme-toggle-btn flex items-center justify-center gap-1.5 w-7 h-7 sm:w-auto sm:h-auto sm:px-3 sm:py-1.5 rounded-full border border-primary/20 dark:border-white/15 bg-primary/5 dark:bg-white/5 text-primary dark:text-[#c6d6e9] hover:bg-primary/10 dark:hover:bg-white/10 transition-all active:scale-[0.97] text-xs font-semibold cursor-pointer shadow-xs" id="themeToggle" aria-label="Toggle theme">
-              <span class="material-symbols-outlined text-[16px] sm:text-[17px] theme-icon-dark">dark_mode</span>
-              <span class="material-symbols-outlined text-[16px] sm:text-[17px] theme-icon-light">light_mode</span>
+
+            <button onclick="if(typeof openCoffeeModal==='function')openCoffeeModal(2);" class="header-coffee-btn hidden sm:flex items-center gap-1 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full bg-amber-500/12 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/25 text-xs font-bold transition-all active:scale-95 cursor-pointer shadow-xs" title="Buy eNotePad a Coffee" aria-label="Buy eNotePad a Coffee">
+              <span class="text-xs sm:text-sm">☕</span>
+              <span>Coffee</span>
+            </button>
+            <button class="theme-toggle-btn flex items-center justify-center gap-1.5 w-8 h-8 sm:w-auto sm:h-auto sm:px-3 sm:py-1.5 rounded-full border border-primary/20 dark:border-white/15 bg-primary/5 dark:bg-white/5 text-primary dark:text-[#c6d6e9] hover:bg-primary/10 dark:hover:bg-white/10 transition-all active:scale-[0.97] text-xs font-semibold cursor-pointer shadow-xs" id="themeToggle" aria-label="Toggle theme">
+              <span class="material-symbols-outlined text-[17px] theme-icon-dark">dark_mode</span>
+              <span class="material-symbols-outlined text-[17px] theme-icon-light">light_mode</span>
               <span class="theme-toggle-label text-xs font-semibold theme-label-dark">Dark</span>
               <span class="theme-toggle-label text-xs font-semibold theme-label-light">Light</span>
+            </button>
+
+            <!-- Mobile Drawer Hamburger Trigger -->
+            <button class="md:hidden flex items-center justify-center w-8 h-8 rounded-full border border-primary/20 dark:border-white/15 bg-primary/5 dark:bg-white/5 text-primary dark:text-[#c6d6e9] hover:bg-primary/10 dark:hover:bg-white/10 transition-all active:scale-95 cursor-pointer" id="headerMenuBtn" title="Open Menu" aria-label="Open navigation menu">
+              <span class="material-symbols-outlined text-lg">menu</span>
             </button>
           </div>
 
@@ -515,14 +535,14 @@
             <div class="bg-surface-container-lowest rounded-[28px] editorial-shadow border border-outline-variant/15 overflow-hidden transition-all">
 
               <!-- Note Meta (title + category for notes) -->
-              <div id="noteMeta" class="p-6 pb-2">
-                <div class="flex gap-3 p-4 bg-[#f6f6f6] dark:bg-surface-container-low rounded-2xl border border-outline-variant/15">
-                  <div class="flex-1">
-                    <label class="text-[9px] uppercase tracking-[0.2em] font-bold block mb-1 text-on-surface-variant">Title</label>
-                    <input type="text" class="w-full bg-transparent border-none rounded-md focus:ring-0 text-on-surface font-semibold text-base outline-none placeholder:text-on-surface-variant/40" placeholder="Give your note a title…" id="noteTitle" maxlength="100" autocomplete="off" />
+              <div id="noteMeta" class="p-4 sm:p-6 pb-2 space-y-3">
+                <div class="flex gap-3 p-3 sm:p-4 bg-[#f6f6f6] dark:bg-surface-container-low rounded-2xl border border-outline-variant/15">
+                  <div class="flex-1 min-w-0">
+                    <label for="noteTitle" class="text-[9px] uppercase tracking-[0.2em] font-bold block mb-1 text-on-surface-variant">Title</label>
+                    <input type="text" class="w-full bg-transparent border-none rounded-md focus:ring-0 text-on-surface font-semibold text-sm sm:text-base outline-none placeholder:text-on-surface-variant/40 truncate" placeholder="Give your note a title…" id="noteTitle" maxlength="100" autocomplete="off" />
                   </div>
                   <div class="w-px bg-outline-variant/20"></div>
-                  <div class="w-32 flex-shrink-0">
+                  <div class="w-28 sm:w-32 flex-shrink-0">
                     <label for="noteCategory" class="text-[9px] uppercase tracking-[0.2em] font-bold block mb-1 text-on-surface-variant">Category</label>
                     <select class="w-full bg-transparent border-none rounded-md focus:ring-0 text-primary font-bold text-xs appearance-none cursor-pointer outline-none" id="noteCategory">
                       <option value="">None</option>
@@ -535,6 +555,29 @@
                     </select>
                   </div>
                 </div>
+
+                <!-- Quick Starter Chips (Blank Canvas Accelerators) -->
+                <div id="editorStarterChips" class="flex items-center gap-1.5 p-1.5 rounded-2xl bg-surface-container-low/40 dark:bg-white/[0.02] border border-outline-variant/10 overflow-x-auto no-scrollbar">
+                  <span class="text-[10px] font-bold uppercase tracking-wider text-primary/60 dark:text-white/40 flex-shrink-0 px-2 py-0.5 flex items-center gap-1 select-none">
+                    <span class="material-symbols-outlined text-xs text-primary dark:text-[#60a5fa]">bolt</span> Starters:
+                  </span>
+                  <button type="button" class="starter-chip inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white dark:bg-white/5 hover:bg-primary/10 dark:hover:bg-white/10 text-on-surface-variant hover:text-primary dark:text-[#a0b2c6] dark:hover:text-white border border-outline-variant/15 dark:border-white/10 transition-all cursor-pointer flex-shrink-0 shadow-2xs active:scale-95" data-starter="secret" aria-label="Template: Quick Secret">
+                    <span>🔥</span>
+                    <span>Quick Secret</span>
+                  </button>
+                  <button type="button" class="starter-chip inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white dark:bg-white/5 hover:bg-primary/10 dark:hover:bg-white/10 text-on-surface-variant hover:text-primary dark:text-[#a0b2c6] dark:hover:text-white border border-outline-variant/15 dark:border-white/10 transition-all cursor-pointer flex-shrink-0 shadow-2xs active:scale-95" data-starter="code" aria-label="Template: Code Snippet">
+                    <span>💻</span>
+                    <span>Code Snippet</span>
+                  </button>
+                  <button type="button" class="starter-chip inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white dark:bg-white/5 hover:bg-primary/10 dark:hover:bg-white/10 text-on-surface-variant hover:text-primary dark:text-[#a0b2c6] dark:hover:text-white border border-outline-variant/15 dark:border-white/10 transition-all cursor-pointer flex-shrink-0 shadow-2xs active:scale-95" data-starter="meeting" aria-label="Template: Meeting Memo">
+                    <span>📋</span>
+                    <span>Meeting Memo</span>
+                  </button>
+                  <button type="button" class="starter-chip inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white dark:bg-white/5 hover:bg-primary/10 dark:hover:bg-white/10 text-on-surface-variant hover:text-primary dark:text-[#a0b2c6] dark:hover:text-white border border-outline-variant/15 dark:border-white/10 transition-all cursor-pointer flex-shrink-0 shadow-2xs active:scale-95" data-starter="todo" aria-label="Template: Checklist">
+                    <span>✅</span>
+                    <span>Checklist</span>
+                  </button>
+                </div>
               </div>
 
               <!-- Rich Text Editor -->
@@ -546,17 +589,17 @@
                   <div class="editor-toolbar-row toolbar-primary">
                     <!-- Text Style -->
                     <div class="toolbar-group">
-                      <button class="toolbar-btn" data-cmd="bold" title="Bold (Ctrl+B)"><span class="material-symbols-outlined">format_bold</span></button>
-                      <button class="toolbar-btn" data-cmd="italic" title="Italic (Ctrl+I)"><span class="material-symbols-outlined">format_italic</span></button>
-                      <button class="toolbar-btn" data-cmd="underline" title="Underline (Ctrl+U)"><span class="material-symbols-outlined">format_underlined</span></button>
-                      <button class="toolbar-btn" data-cmd="strikeThrough" title="Strikethrough"><span class="material-symbols-outlined">strikethrough_s</span></button>
+                      <button class="toolbar-btn" data-cmd="bold" title="Bold (Ctrl+B)" aria-label="Bold (Ctrl+B)"><span class="material-symbols-outlined">format_bold</span></button>
+                      <button class="toolbar-btn" data-cmd="italic" title="Italic (Ctrl+I)" aria-label="Italic (Ctrl+I)"><span class="material-symbols-outlined">format_italic</span></button>
+                      <button class="toolbar-btn" data-cmd="underline" title="Underline (Ctrl+U)" aria-label="Underline (Ctrl+U)"><span class="material-symbols-outlined">format_underlined</span></button>
+                      <button class="toolbar-btn" data-cmd="strikeThrough" title="Strikethrough" aria-label="Strikethrough"><span class="material-symbols-outlined">strikethrough_s</span></button>
                     </div>
                     <div class="toolbar-divider"></div>
 
                     <!-- Font & Size -->
                     <div class="toolbar-group">
                       <div class="toolbar-dropdown-wrap">
-                        <button class="toolbar-btn has-caret" data-cmd="fontFamily" title="Font Family"><span class="material-symbols-outlined">font_download</span></button>
+                        <button class="toolbar-btn has-caret" data-cmd="fontFamily" title="Font Family" aria-label="Font Family"><span class="material-symbols-outlined">font_download</span></button>
                         <div class="editor-dropdown" id="fontFamilyDropdown">
                           <button class="dropdown-item" data-font="Newsreader, serif" style="font-family:'Newsreader',serif">Newsreader (Serif)</button>
                           <button class="dropdown-item" data-font="Inter, sans-serif" style="font-family:'Inter',sans-serif">Inter (Sans)</button>
@@ -566,7 +609,7 @@
                         </div>
                       </div>
                       <div class="toolbar-dropdown-wrap">
-                        <button class="toolbar-btn has-caret" data-cmd="fontSize" title="Font Size"><span class="material-symbols-outlined">format_size</span></button>
+                        <button class="toolbar-btn has-caret" data-cmd="fontSize" title="Font Size" aria-label="Font Size"><span class="material-symbols-outlined">format_size</span></button>
                         <div class="editor-dropdown" id="fontSizeDropdown">
                           <button class="dropdown-item" data-size="2">Small</button>
                           <button class="dropdown-item" data-size="3">Normal</button>
@@ -580,21 +623,21 @@
                     <!-- Colors -->
                     <div class="toolbar-group">
                       <div class="toolbar-dropdown-wrap">
-                        <button class="toolbar-btn" data-cmd="foreColor" title="Text Color"><span class="material-symbols-outlined">format_color_text</span></button>
+                        <button class="toolbar-btn" data-cmd="foreColor" title="Text Color" aria-label="Text Color"><span class="material-symbols-outlined">format_color_text</span></button>
                         <div class="editor-dropdown color-dropdown" id="textColorDropdown">
                           <div class="color-grid">
-                            <button class="color-swatch" data-color="#2e3640" style="background:#2e3640" title="Default"></button>
-                            <button class="color-swatch" data-color="#c62828" style="background:#c62828" title="Red"></button>
-                            <button class="color-swatch" data-color="#d84315" style="background:#d84315" title="Orange"></button>
-                            <button class="color-swatch" data-color="#f9a825" style="background:#f9a825" title="Yellow"></button>
-                            <button class="color-swatch" data-color="#2e7d32" style="background:#2e7d32" title="Green"></button>
-                            <button class="color-swatch" data-color="#1565c0" style="background:#1565c0" title="Blue"></button>
-                            <button class="color-swatch" data-color="#6a1b9a" style="background:#6a1b9a" title="Purple"></button>
-                            <button class="color-swatch" data-color="#ad1457" style="background:#ad1457" title="Pink"></button>
-                            <button class="color-swatch" data-color="#00838f" style="background:#00838f" title="Teal"></button>
-                            <button class="color-swatch" data-color="#4e342e" style="background:#4e342e" title="Brown"></button>
-                            <button class="color-swatch" data-color="#546e7a" style="background:#546e7a" title="Slate"></button>
-                            <button class="color-swatch" data-color="#212121" style="background:#212121" title="Black"></button>
+                            <button class="color-swatch" data-color="#2e3640" style="background:#2e3640" title="Default" aria-label="Text color default"></button>
+                            <button class="color-swatch" data-color="#c62828" style="background:#c62828" title="Red" aria-label="Text color red"></button>
+                            <button class="color-swatch" data-color="#d84315" style="background:#d84315" title="Orange" aria-label="Text color orange"></button>
+                            <button class="color-swatch" data-color="#f9a825" style="background:#f9a825" title="Yellow" aria-label="Text color yellow"></button>
+                            <button class="color-swatch" data-color="#2e7d32" style="background:#2e7d32" title="Green" aria-label="Text color green"></button>
+                            <button class="color-swatch" data-color="#1565c0" style="background:#1565c0" title="Blue" aria-label="Text color blue"></button>
+                            <button class="color-swatch" data-color="#6a1b9a" style="background:#6a1b9a" title="Purple" aria-label="Text color purple"></button>
+                            <button class="color-swatch" data-color="#ad1457" style="background:#ad1457" title="Pink" aria-label="Text color pink"></button>
+                            <button class="color-swatch" data-color="#00838f" style="background:#00838f" title="Teal" aria-label="Text color teal"></button>
+                            <button class="color-swatch" data-color="#4e342e" style="background:#4e342e" title="Brown" aria-label="Text color brown"></button>
+                            <button class="color-swatch" data-color="#546e7a" style="background:#546e7a" title="Slate" aria-label="Text color slate"></button>
+                            <button class="color-swatch" data-color="#212121" style="background:#212121" title="Black" aria-label="Text color black"></button>
                           </div>
                           <div class="custom-color-row">
                             <label class="custom-color-label">Custom</label>
@@ -603,21 +646,21 @@
                         </div>
                       </div>
                       <div class="toolbar-dropdown-wrap">
-                        <button class="toolbar-btn" data-cmd="hiliteColor" title="Highlight"><span class="material-symbols-outlined">format_ink_highlighter</span></button>
+                        <button class="toolbar-btn" data-cmd="hiliteColor" title="Highlight" aria-label="Highlight Color"><span class="material-symbols-outlined">format_ink_highlighter</span></button>
                         <div class="editor-dropdown color-dropdown" id="highlightColorDropdown">
                           <div class="color-grid">
-                            <button class="color-swatch" data-color="transparent" title="None" style="background:repeating-conic-gradient(#ccc 0% 25%, transparent 0% 50%) 50%/12px 12px"></button>
-                            <button class="color-swatch" data-color="#fff9c4" style="background:#fff9c4" title="Yellow"></button>
-                            <button class="color-swatch" data-color="#c8e6c9" style="background:#c8e6c9" title="Green"></button>
-                            <button class="color-swatch" data-color="#bbdefb" style="background:#bbdefb" title="Blue"></button>
-                            <button class="color-swatch" data-color="#f8bbd0" style="background:#f8bbd0" title="Pink"></button>
-                            <button class="color-swatch" data-color="#ffe0b2" style="background:#ffe0b2" title="Orange"></button>
-                            <button class="color-swatch" data-color="#e1bee7" style="background:#e1bee7" title="Purple"></button>
-                            <button class="color-swatch" data-color="#d7ccc8" style="background:#d7ccc8" title="Brown"></button>
-                            <button class="color-swatch" data-color="#cfd8dc" style="background:#cfd8dc" title="Grey"></button>
-                            <button class="color-swatch" data-color="#ffcdd2" style="background:#ffcdd2" title="Red"></button>
-                            <button class="color-swatch" data-color="#b2dfdb" style="background:#b2dfdb" title="Teal"></button>
-                            <button class="color-swatch" data-color="#fff3e0" style="background:#fff3e0" title="Cream"></button>
+                            <button class="color-swatch" data-color="transparent" title="None" aria-label="Highlight none" style="background:repeating-conic-gradient(#ccc 0% 25%, transparent 0% 50%) 50%/12px 12px"></button>
+                            <button class="color-swatch" data-color="#fff9c4" style="background:#fff9c4" title="Yellow" aria-label="Highlight yellow"></button>
+                            <button class="color-swatch" data-color="#c8e6c9" style="background:#c8e6c9" title="Green" aria-label="Highlight green"></button>
+                            <button class="color-swatch" data-color="#bbdefb" style="background:#bbdefb" title="Blue" aria-label="Highlight blue"></button>
+                            <button class="color-swatch" data-color="#f8bbd0" style="background:#f8bbd0" title="Pink" aria-label="Highlight pink"></button>
+                            <button class="color-swatch" data-color="#ffe0b2" style="background:#ffe0b2" title="Orange" aria-label="Highlight orange"></button>
+                            <button class="color-swatch" data-color="#e1bee7" style="background:#e1bee7" title="Purple" aria-label="Highlight purple"></button>
+                            <button class="color-swatch" data-color="#d7ccc8" style="background:#d7ccc8" title="Brown" aria-label="Highlight brown"></button>
+                            <button class="color-swatch" data-color="#cfd8dc" style="background:#cfd8dc" title="Grey" aria-label="Highlight grey"></button>
+                            <button class="color-swatch" data-color="#ffcdd2" style="background:#ffcdd2" title="Red" aria-label="Highlight red"></button>
+                            <button class="color-swatch" data-color="#b2dfdb" style="background:#b2dfdb" title="Teal" aria-label="Highlight teal"></button>
+                            <button class="color-swatch" data-color="#fff3e0" style="background:#fff3e0" title="Cream" aria-label="Highlight cream"></button>
                           </div>
                           <div class="custom-color-row">
                             <label class="custom-color-label">Custom</label>
@@ -631,7 +674,7 @@
                     <!-- Structure -->
                     <div class="toolbar-group">
                       <div class="toolbar-dropdown-wrap">
-                        <button class="toolbar-btn has-caret" data-cmd="heading" title="Heading"><span class="material-symbols-outlined">title</span></button>
+                        <button class="toolbar-btn has-caret" data-cmd="heading" title="Heading" aria-label="Heading Level"><span class="material-symbols-outlined">title</span></button>
                         <div class="editor-dropdown" id="headingDropdown">
                           <button class="dropdown-item heading-h1" data-heading="h1">Heading 1</button>
                           <button class="dropdown-item heading-h2" data-heading="h2">Heading 2</button>
@@ -639,21 +682,21 @@
                           <button class="dropdown-item" data-heading="p">Normal Text</button>
                         </div>
                       </div>
-                      <button class="toolbar-btn" data-cmd="insertUnorderedList" title="Bullet List"><span class="material-symbols-outlined">format_list_bulleted</span></button>
-                      <button class="toolbar-btn" data-cmd="insertOrderedList" title="Numbered List"><span class="material-symbols-outlined">format_list_numbered</span></button>
-                      <button class="toolbar-btn" data-cmd="checklist" title="Checklist"><span class="material-symbols-outlined">checklist</span></button>
+                      <button class="toolbar-btn" data-cmd="insertUnorderedList" title="Bullet List" aria-label="Bullet List"><span class="material-symbols-outlined">format_list_bulleted</span></button>
+                      <button class="toolbar-btn" data-cmd="insertOrderedList" title="Numbered List" aria-label="Numbered List"><span class="material-symbols-outlined">format_list_numbered</span></button>
+                      <button class="toolbar-btn" data-cmd="checklist" title="Checklist" aria-label="Checklist"><span class="material-symbols-outlined">checklist</span></button>
                     </div>
                     <div class="toolbar-divider"></div>
 
                     <!-- Undo/Redo -->
                     <div class="toolbar-group">
-                      <button class="toolbar-btn" data-cmd="undo" title="Undo (Ctrl+Z)"><span class="material-symbols-outlined">undo</span></button>
-                      <button class="toolbar-btn" data-cmd="redo" title="Redo (Ctrl+Y)"><span class="material-symbols-outlined">redo</span></button>
+                      <button class="toolbar-btn" data-cmd="undo" title="Undo (Ctrl+Z)" aria-label="Undo (Ctrl+Z)"><span class="material-symbols-outlined">undo</span></button>
+                      <button class="toolbar-btn" data-cmd="redo" title="Redo (Ctrl+Y)" aria-label="Redo (Ctrl+Y)"><span class="material-symbols-outlined">redo</span></button>
                     </div>
 
                     <!-- Toggle secondary row -->
                     <div class="toolbar-spacer"></div>
-                    <button class="toolbar-btn toolbar-expand-btn" id="toggleSecondaryToolbar" title="More tools">
+                    <button class="toolbar-btn toolbar-expand-btn" id="toggleSecondaryToolbar" title="More tools" aria-label="More tools">
                       <span class="material-symbols-outlined">expand_more</span>
                     </button>
                   </div>
@@ -662,29 +705,29 @@
                   <div class="editor-toolbar-row toolbar-secondary" id="secondaryToolbar" data-hidden="true">
                     <!-- Quote, Code, HR -->
                     <div class="toolbar-group">
-                      <button class="toolbar-btn" data-cmd="formatBlock" title="Block Quote" onclick="event.preventDefault(); document.getElementById('richEditor').focus(); document.execCommand('formatBlock', false, '<blockquote>')"><span class="material-symbols-outlined">format_quote</span></button>
-                      <button class="toolbar-btn" data-cmd="codeBlock" title="Code Block"><span class="material-symbols-outlined">code_blocks</span></button>
-                      <button class="toolbar-btn" data-cmd="inlineCode" title="Inline Code"><span class="material-symbols-outlined">code</span></button>
-                      <button class="toolbar-btn" data-cmd="insertHR" title="Horizontal Rule"><span class="material-symbols-outlined">horizontal_rule</span></button>
+                      <button class="toolbar-btn" data-cmd="formatBlock" title="Block Quote" aria-label="Block Quote" onclick="event.preventDefault(); document.getElementById('richEditor').focus(); document.execCommand('formatBlock', false, '<blockquote>')"><span class="material-symbols-outlined">format_quote</span></button>
+                      <button class="toolbar-btn" data-cmd="codeBlock" title="Code Block" aria-label="Code Block"><span class="material-symbols-outlined">code_blocks</span></button>
+                      <button class="toolbar-btn" data-cmd="inlineCode" title="Inline Code" aria-label="Inline Code"><span class="material-symbols-outlined">code</span></button>
+                      <button class="toolbar-btn" data-cmd="insertHR" title="Horizontal Rule" aria-label="Horizontal Rule"><span class="material-symbols-outlined">horizontal_rule</span></button>
                     </div>
                     <div class="toolbar-divider"></div>
 
                     <!-- Alignment -->
                     <div class="toolbar-group">
-                      <button class="toolbar-btn" data-cmd="justifyLeft" title="Align Left"><span class="material-symbols-outlined">format_align_left</span></button>
-                      <button class="toolbar-btn" data-cmd="justifyCenter" title="Align Center"><span class="material-symbols-outlined">format_align_center</span></button>
-                      <button class="toolbar-btn" data-cmd="justifyRight" title="Align Right"><span class="material-symbols-outlined">format_align_right</span></button>
-                      <button class="toolbar-btn" data-cmd="indent" title="Indent"><span class="material-symbols-outlined">format_indent_increase</span></button>
-                      <button class="toolbar-btn" data-cmd="outdent" title="Outdent"><span class="material-symbols-outlined">format_indent_decrease</span></button>
+                      <button class="toolbar-btn" data-cmd="justifyLeft" title="Align Left" aria-label="Align Left"><span class="material-symbols-outlined">format_align_left</span></button>
+                      <button class="toolbar-btn" data-cmd="justifyCenter" title="Align Center" aria-label="Align Center"><span class="material-symbols-outlined">format_align_center</span></button>
+                      <button class="toolbar-btn" data-cmd="justifyRight" title="Align Right" aria-label="Align Right"><span class="material-symbols-outlined">format_align_right</span></button>
+                      <button class="toolbar-btn" data-cmd="indent" title="Indent" aria-label="Increase Indent"><span class="material-symbols-outlined">format_indent_increase</span></button>
+                      <button class="toolbar-btn" data-cmd="outdent" title="Outdent" aria-label="Decrease Indent"><span class="material-symbols-outlined">format_indent_decrease</span></button>
                     </div>
                     <div class="toolbar-divider"></div>
 
                     <!-- Media -->
                     <div class="toolbar-group">
-                      <button class="toolbar-btn" data-cmd="insertLink" title="Insert Link (Ctrl+L)"><span class="material-symbols-outlined">add_link</span></button>
-                      <button class="toolbar-btn" data-cmd="insertImage" title="Inline Image"><span class="material-symbols-outlined">add_photo_alternate</span></button>
+                      <button class="toolbar-btn" data-cmd="insertLink" title="Insert Link (Ctrl+L)" aria-label="Insert Link (Ctrl+L)"><span class="material-symbols-outlined">add_link</span></button>
+                      <button class="toolbar-btn" data-cmd="insertImage" title="Inline Image" aria-label="Inline Image"><span class="material-symbols-outlined">add_photo_alternate</span></button>
                       <div class="toolbar-dropdown-wrap">
-                        <button class="toolbar-btn" data-cmd="insertTable" title="Insert Table"><span class="material-symbols-outlined">table_chart</span></button>
+                        <button class="toolbar-btn" data-cmd="insertTable" title="Insert Table" aria-label="Insert Table"><span class="material-symbols-outlined">table_chart</span></button>
                         <div class="editor-dropdown table-dropdown" id="tableDropdown">
                           <div class="table-grid">
                             <div class="table-grid-cell" data-row="1" data-col="1"></div><div class="table-grid-cell" data-row="1" data-col="2"></div><div class="table-grid-cell" data-row="1" data-col="3"></div><div class="table-grid-cell" data-row="1" data-col="4"></div><div class="table-grid-cell" data-row="1" data-col="5"></div>
@@ -697,7 +740,7 @@
                         </div>
                       </div>
                       <div class="toolbar-dropdown-wrap">
-                        <button class="toolbar-btn" data-cmd="emoji" title="Emoji"><span class="material-symbols-outlined">mood</span></button>
+                        <button class="toolbar-btn" data-cmd="emoji" title="Emoji" aria-label="Insert Emoji"><span class="material-symbols-outlined">mood</span></button>
                         <div class="editor-dropdown emoji-dropdown" id="emojiDropdown">
                           <div class="emoji-grid">
                             <button class="emoji-item">😀</button><button class="emoji-item">😂</button><button class="emoji-item">😍</button><button class="emoji-item">🤔</button>
@@ -716,20 +759,20 @@
 
                     <!-- Utility -->
                     <div class="toolbar-group">
-                      <button class="toolbar-btn" data-cmd="clearFormatting" title="Clear Formatting"><span class="material-symbols-outlined">format_clear</span></button>
-                      <button class="toolbar-btn" data-cmd="findReplace" title="Find & Replace (Ctrl+H)"><span class="material-symbols-outlined">find_replace</span></button>
-                      <button class="toolbar-btn" data-cmd="fullscreen" title="Focus Mode"><span class="material-symbols-outlined">fullscreen</span></button>
-                      <button class="toolbar-btn" data-cmd="print" title="Print / Export"><span class="material-symbols-outlined">print</span></button>
+                      <button class="toolbar-btn" data-cmd="clearFormatting" title="Clear Formatting" aria-label="Clear Formatting"><span class="material-symbols-outlined">format_clear</span></button>
+                      <button class="toolbar-btn" data-cmd="findReplace" title="Find & Replace (Ctrl+H)" aria-label="Find and Replace (Ctrl+H)"><span class="material-symbols-outlined">find_replace</span></button>
+                      <button class="toolbar-btn" data-cmd="fullscreen" title="Focus Mode" aria-label="Toggle Fullscreen Focus Mode"><span class="material-symbols-outlined">fullscreen</span></button>
+                      <button class="toolbar-btn" data-cmd="print" title="Print / Export" aria-label="Print or Export"><span class="material-symbols-outlined">print</span></button>
                     </div>
                     <div class="toolbar-divider"></div>
 
                     <!-- Advanced -->
                     <div class="toolbar-group">
-                      <button class="toolbar-btn" data-cmd="markdownToggle" title="Markdown"><span class="material-symbols-outlined">markdown</span></button>
-                      <button class="toolbar-btn" data-cmd="voiceInput" title="Voice Input"><span class="material-symbols-outlined">mic</span></button>
-                      <button class="toolbar-btn" data-cmd="textToSpeech" title="Read Aloud"><span class="material-symbols-outlined">record_voice_over</span></button>
+                      <button class="toolbar-btn" data-cmd="markdownToggle" title="Markdown" aria-label="Toggle Markdown Mode"><span class="material-symbols-outlined">markdown</span></button>
+                      <button class="toolbar-btn" data-cmd="voiceInput" title="Voice Input" aria-label="Voice Input Speech-to-Text"><span class="material-symbols-outlined">mic</span></button>
+                      <button class="toolbar-btn" data-cmd="textToSpeech" title="Read Aloud" aria-label="Read Aloud"><span class="material-symbols-outlined">record_voice_over</span></button>
                       <div class="toolbar-dropdown-wrap">
-                        <button class="toolbar-btn has-caret" data-cmd="templates" title="Templates"><span class="material-symbols-outlined">description</span></button>
+                        <button class="toolbar-btn has-caret" data-cmd="templates" title="Templates" aria-label="Insert Template"><span class="material-symbols-outlined">description</span></button>
                         <div class="editor-dropdown" id="templateDropdown">
                           <button class="dropdown-item" data-template="meeting">📋 Meeting Notes</button>
                           <button class="dropdown-item" data-template="todo">✅ To-Do List</button>
@@ -737,12 +780,12 @@
                           <button class="dropdown-item" data-template="brainstorm">💡 Brainstorm</button>
                         </div>
                       </div>
-                      <button class="toolbar-btn" data-cmd="shortcuts" title="Shortcuts"><span class="material-symbols-outlined">keyboard</span></button>
+                      <button class="toolbar-btn" data-cmd="shortcuts" title="Shortcuts" aria-label="Keyboard Shortcuts"><span class="material-symbols-outlined">keyboard</span></button>
                     </div>
                     <div class="toolbar-divider"></div>
                     <!-- AI Assist -->
                     <div class="toolbar-group">
-                      <button class="toolbar-btn" data-cmd="aiAssist" title="AI Writing Assist ✨" style="position:relative;">
+                      <button class="toolbar-btn" data-cmd="aiAssist" title="AI Writing Assist ✨" aria-label="AI Writing Assist" style="position:relative;">
                         <span class="material-symbols-outlined">auto_awesome</span>
                         <span style="position:absolute;top:2px;right:2px;width:5px;height:5px;border-radius:50%;background:linear-gradient(135deg,#516070,#8ba4b8);flex-shrink:0;"></span>
                       </button>
@@ -762,7 +805,7 @@
                     </div>
                     <div style="display:flex;align-items:center;gap:6px;">
                       <button id="aiChangeKeyBtn" class="ai-change-key-btn" title="Change API key">⚙ Key</button>
-                      <button id="aiAssistCloseBtn" class="ai-change-key-btn" style="width:24px;height:24px;padding:0;border-radius:50%;display:flex;align-items:center;justify-content:center;" title="Close AI Assist">
+                      <button id="aiAssistCloseBtn" class="ai-change-key-btn" style="width:24px;height:24px;padding:0;border-radius:50%;display:flex;align-items:center;justify-content:center;" title="Close AI Assist" aria-label="Close AI Assist">
                         <span class="material-symbols-outlined" style="font-size:14px;">close</span>
                       </button>
                     </div>
@@ -772,19 +815,25 @@
                   <div id="aiKeySetup" class="ai-key-setup" style="display:none;">
                     <div class="ai-key-title">
                       <span class="material-symbols-outlined" style="font-size:14px;">key</span>
-                      Connect Gemini API
+                      Gemini API Key
                     </div>
-                    <p class="ai-key-desc">Enter your Gemini API key to enable AI writing assistance. Your key is stored locally in your browser.</p>
+                    <p class="ai-key-desc">A default Gemini API key is already configured for all users! You can also paste your personal API key if preferred.</p>
                     <div class="ai-key-input-row">
-                      <input type="password" id="aiApiKeyInput" class="ai-key-input" placeholder="Paste your Gemini API key..." autocomplete="off" />
-                      <button id="aiSaveApiKeyBtn" class="ai-key-save-btn">
+                      <input type="password" id="aiApiKeyInput" class="ai-key-input" placeholder="Paste custom Gemini API key..." aria-label="Custom Gemini API Key" autocomplete="off" />
+                      <button id="aiSaveApiKeyBtn" class="ai-key-save-btn" title="Save custom API key">
                         <span class="material-symbols-outlined" style="font-size:13px;">check</span> Save
                       </button>
+                      <button id="aiResetApiKeyBtn" type="button" class="ai-key-save-btn" style="background:transparent;border:1px solid rgba(175,179,172,0.35);color:inherit;" title="Use default shared API key">
+                        <span class="material-symbols-outlined" style="font-size:13px;">restart_alt</span> Default
+                      </button>
                     </div>
-                    <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" class="ai-key-link">
-                      <span class="material-symbols-outlined" style="font-size:11px;">open_in_new</span>
-                      Get a free Gemini API key at aistudio.google.com
-                    </a>
+                    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
+                      <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" class="ai-key-link">
+                        <span class="material-symbols-outlined" style="font-size:11px;">open_in_new</span>
+                        Get your own Gemini API key
+                      </a>
+                      <button id="aiCancelKeyBtn" type="button" class="ai-change-key-btn" style="border:none;text-decoration:underline;cursor:pointer;">Back to AI tools</button>
+                    </div>
                   </div>
 
                   <!-- Action Section (shown when key is set) -->
@@ -825,32 +874,36 @@
 
                     <!-- Custom prompt row -->
                     <div id="aiCustomPromptRow" class="ai-custom-prompt-row" style="display:none;">
-                      <textarea id="aiCustomPromptInput" class="ai-custom-prompt-input" rows="2" placeholder="e.g. Translate to Hindi, make it formal, add more examples…"></textarea>
+                      <textarea id="aiCustomPromptInput" class="ai-custom-prompt-input" rows="2" placeholder="e.g. Translate to Hindi, make it formal, add more examples…" aria-label="Custom AI prompt instructions"></textarea>
                     </div>
 
                     <!-- Generate button row -->
-                    <div class="ai-run-row">
-                      <button id="aiRunBtn" class="ai-run-btn">
-                        <span class="material-symbols-outlined text-sm">auto_awesome</span> Generate
-                      </button>
-                      <span style="font-size:10px;color:#5c605a;">AI will process your note &amp; show a preview below</span>
-                    </div>
+                      <div class="ai-run-row">
+                        <button id="aiRunBtn" class="ai-run-btn">
+                          <span class="material-symbols-outlined text-sm">auto_awesome</span> Generate
+                        </button>
+                        <span style="font-size:10px;color:#5c605a;">AI will process your note &amp; show a preview below</span>
+                      </div>
+                      <div class="px-3.5 pb-2 text-[10px] text-on-surface-variant/60 flex items-center gap-1.5">
+                        <span class="material-symbols-outlined text-xs text-primary/60">shield_lock</span>
+                        <span>Processed securely via Google Gemini. Never submit private credentials or sensitive secrets.</span>
+                      </div>
 
                     <!-- Preview Section -->
                     <div id="aiPreviewSection" class="ai-preview-section" style="display:none;">
                       <div class="ai-preview-header">
                         <span>✨ AI Result Preview</span>
                         <div class="ai-preview-actions">
-                          <button id="aiRegenerateBtn" class="ai-preview-action-btn regenerate" title="Regenerate">
+                          <button id="aiRegenerateBtn" class="ai-preview-action-btn regenerate" title="Regenerate" aria-label="Regenerate AI result">
                             <span class="material-symbols-outlined" style="font-size:11px;">refresh</span>
                           </button>
-                          <button id="aiCopyBtn" class="ai-preview-action-btn copy" title="Copy result">
+                          <button id="aiCopyBtn" class="ai-preview-action-btn copy" title="Copy result" aria-label="Copy AI result">
                             <span class="material-symbols-outlined" style="font-size:11px;">content_copy</span> Copy
                           </button>
-                          <button id="aiDiscardBtn" class="ai-preview-action-btn discard" title="Discard result">
+                          <button id="aiDiscardBtn" class="ai-preview-action-btn discard" title="Discard result" aria-label="Discard AI result">
                             Discard
                           </button>
-                          <button id="aiApplyBtn" class="ai-preview-action-btn apply" title="Apply to editor">
+                          <button id="aiApplyBtn" class="ai-preview-action-btn apply" title="Apply to editor" aria-label="Apply AI result to editor">
                             <span class="material-symbols-outlined" style="font-size:11px;">check</span> Apply
                           </button>
                         </div>
@@ -863,18 +916,18 @@
 
                 <!-- Find & Replace Panel -->
                 <div class="find-replace-panel" id="findReplacePanel" style="display:none">
-                  <input type="text" class="find-replace-input" id="findInput" placeholder="Find..." />
-                  <input type="text" class="find-replace-input" id="replaceInput" placeholder="Replace..." />
-                  <button class="find-replace-btn" id="findNextBtn" title="Find Next"><span class="material-symbols-outlined text-sm">search</span></button>
-                  <button class="find-replace-btn" id="replaceBtn" title="Replace"><span class="material-symbols-outlined text-sm">find_replace</span></button>
-                  <button class="find-replace-btn" id="replaceAllBtn" title="Replace All"><span class="material-symbols-outlined text-sm">swap_horiz</span></button>
-                  <button class="find-replace-btn" id="closeFindPanel" title="Close"><span class="material-symbols-outlined text-sm">close</span></button>
+                  <input type="text" class="find-replace-input" id="findInput" placeholder="Find..." aria-label="Find text" />
+                  <input type="text" class="find-replace-input" id="replaceInput" placeholder="Replace..." aria-label="Replace with text" />
+                  <button class="find-replace-btn" id="findNextBtn" title="Find Next" aria-label="Find Next"><span class="material-symbols-outlined text-sm">search</span></button>
+                  <button class="find-replace-btn" id="replaceBtn" title="Replace" aria-label="Replace"><span class="material-symbols-outlined text-sm">find_replace</span></button>
+                  <button class="find-replace-btn" id="replaceAllBtn" title="Replace All" aria-label="Replace All"><span class="material-symbols-outlined text-sm">swap_horiz</span></button>
+                  <button class="find-replace-btn" id="closeFindPanel" title="Close" aria-label="Close find and replace"><span class="material-symbols-outlined text-sm">close</span></button>
                 </div>
 
                 <!-- Editor Surface -->
                 <div class="relative px-5 py-5" id="inputText">
-                  <div contenteditable="true" class="rich-editor" id="richEditor" data-placeholder="Start writing your note here…" spellcheck="true"></div>
-                  <textarea class="markdown-textarea" id="markdownArea" style="display:none" placeholder="Write in Markdown..."></textarea>
+                  <div contenteditable="true" class="rich-editor" id="richEditor" role="textbox" aria-multiline="true" aria-label="Note content editor" data-placeholder="Start writing your note here…" spellcheck="true"></div>
+                  <textarea class="markdown-textarea" id="markdownArea" aria-label="Markdown note editor" style="display:none" placeholder="Write in Markdown..."></textarea>
                   <!-- Floating AI Assist Button inside textarea -->
                   <button type="button" id="aiFloatingBtn" class="ai-floating-btn" title="AI Writing Assist ✨" aria-label="AI Writing Assist">
                     <span class="material-symbols-outlined ai-floating-icon">auto_awesome</span>
@@ -886,7 +939,7 @@
                 <div class="link-dialog-overlay" id="linkDialog" style="display:none">
                   <div class="link-dialog">
                     <p class="link-dialog-title">Insert Link</p>
-                    <input type="url" class="link-dialog-input" id="linkDialogUrl" placeholder="https://example.com" />
+                    <input type="url" class="link-dialog-input" id="linkDialogUrl" placeholder="https://example.com" aria-label="Link URL" />
                     <div class="link-dialog-actions">
                       <button class="link-dialog-cancel" id="linkDialogCancel">Cancel</button>
                       <button class="link-dialog-insert" id="linkDialogInsert">Insert</button>
@@ -899,7 +952,7 @@
                   <div class="shortcuts-card">
                     <div class="shortcuts-header">
                       <h3>⌨️ Keyboard Shortcuts</h3>
-                      <button class="shortcuts-close" id="closeShortcutsPanel"><span class="material-symbols-outlined">close</span></button>
+                      <button class="shortcuts-close" id="closeShortcutsPanel" aria-label="Close shortcuts panel"><span class="material-symbols-outlined">close</span></button>
                     </div>
                     <div class="shortcuts-grid">
                       <div class="shortcut-row"><kbd>Ctrl+B</kbd><span>Bold</span></div>
@@ -919,7 +972,7 @@
                 </div>
 
                 <!-- Hidden file input for inline images -->
-                <input type="file" accept="image/*" id="editorInlineImageInput" class="hidden" />
+                <input type="file" accept="image/*" id="editorInlineImageInput" class="hidden" aria-label="Upload inline editor image" />
 
               </div>
 
@@ -928,7 +981,7 @@
                 <div id="linkInputsContainer" class="space-y-2">
                   <div class="flex items-center gap-3 p-4 bg-[#f6f6f6] dark:bg-surface-container-low rounded-2xl link-input-row border border-outline-variant/15">
                     <span class="material-symbols-outlined text-primary/40 text-lg">link</span>
-                    <input type="url" class="flex-1 border-none rounded-md focus:ring-0 font-body text-base placeholder:text-outline-variant/40 outline-none shareLinkInput" placeholder="https://example.com" />
+                    <input type="url" class="flex-1 border-none rounded-md focus:ring-0 font-body text-base placeholder:text-outline-variant/40 outline-none shareLinkInput" placeholder="https://example.com" aria-label="Share URL link" />
                     <button class="remove-link-btn text-error/50 hover:text-error transition-colors hidden" type="button" aria-label="Remove link">
                       <span class="material-symbols-outlined text-base">close</span>
                     </button>
@@ -945,11 +998,11 @@
                   <span class="material-symbols-outlined text-4xl text-primary/30 group-hover:scale-110 group-hover:text-primary/50 transition-all">add_photo_alternate</span>
                   <p class="mt-2 text-sm text-on-surface-variant font-medium">Click or drag to upload an image</p>
                   <p class="text-xs text-on-surface-variant/50 mt-1">JPEG, PNG, WebP</p>
-                  <input type="file" accept="image/*" id="imageFileInput" class="absolute inset-0 opacity-0 cursor-pointer" title="Upload image" />
+                  <input type="file" accept="image/*" id="imageFileInput" class="absolute inset-0 opacity-0 cursor-pointer" title="Upload image" aria-label="Upload image file" />
                 </div>
                 <div class="mt-3 relative" id="imagePreview" data-hidden="true">
                   <img id="imagePreviewImg" alt="Preview" class="w-full max-h-[200px] object-contain rounded-xl shadow-md" />
-                  <button class="absolute top-2 right-2 w-7 h-7 bg-error text-on-error rounded-full flex items-center justify-center shadow-md hover:scale-110 transition-transform" id="removeImageBtn">
+                  <button class="absolute top-2 right-2 w-7 h-7 bg-error text-on-error rounded-full flex items-center justify-center shadow-md hover:scale-110 transition-transform" id="removeImageBtn" aria-label="Remove uploaded image">
                     <span class="material-symbols-outlined text-base">close</span>
                   </button>
                 </div>
@@ -984,7 +1037,7 @@
               <div id="sharePasswordRow" style="display: none;" class="px-6 py-2.5 bg-primary/5 border-t border-primary/10">
                 <div class="flex items-center gap-2 max-w-sm">
                   <span class="material-symbols-outlined text-primary text-base">key</span>
-                  <input type="password" id="sharePasswordInput" placeholder="Set access password / PIN" class="flex-1 px-3 py-1.5 bg-surface-container-lowest border border-primary/30 rounded-xl text-xs text-on-surface placeholder:text-on-surface-variant/40 focus:ring-2 focus:ring-primary/20 outline-none" autocomplete="new-password" />
+                  <input type="password" id="sharePasswordInput" placeholder="Set access password / PIN" aria-label="Set access password or PIN" class="flex-1 px-3 py-1.5 bg-surface-container-lowest border border-primary/30 rounded-xl text-xs text-on-surface placeholder:text-on-surface-variant/40 focus:ring-2 focus:ring-primary/20 outline-none" autocomplete="new-password" />
                   <button type="button" id="clearSharePasswordBtn" class="text-error text-xs hover:underline">Remove</button>
                 </div>
               </div>
@@ -1006,7 +1059,7 @@
 
                 <!-- Send to @user toggle (logged-in only) -->
                 <div id="sendToUserWrapper" data-hidden="true" class="flex items-center gap-2">
-                  <button class="send-to-user-toggle w-10 h-10 bg-surface-container-low border border-outline-variant/15 text-on-surface-variant rounded-full hover:bg-surface-container-high hover:text-primary transition-all flex items-center justify-center shadow-sm" id="sendToUserToggle" title="Send to @username">
+                  <button class="send-to-user-toggle w-10 h-10 bg-surface-container-low border border-outline-variant/15 text-on-surface-variant rounded-full hover:bg-surface-container-high hover:text-primary transition-all flex items-center justify-center shadow-sm" id="sendToUserToggle" title="Send to @username" aria-label="Send to username">
                     <span class="material-symbols-outlined text-base">alternate_email</span>
                   </button>
                 </div>
@@ -1018,13 +1071,25 @@
                 </button>
 
                 <!-- Logged-in: Share icon + Save -->
-                <button class="w-10 h-10 bg-surface-container-low border border-outline-variant/15 text-on-surface-variant rounded-full font-semibold hover:bg-surface-container-high hover:text-primary transition-all active:scale-[0.95] flex items-center justify-center shadow-sm" id="shareIconBtn" data-hidden="true" title="Share with code">
+                <button class="w-10 h-10 bg-surface-container-low border border-outline-variant/15 text-on-surface-variant rounded-full font-semibold hover:bg-surface-container-high hover:text-primary transition-all active:scale-[0.95] flex items-center justify-center shadow-sm" id="shareIconBtn" data-hidden="true" title="Share with code" aria-label="Share with code">
                   <span class="material-symbols-outlined text-base">ios_share</span>
                 </button>
                 <button class="px-7 py-3 bg-primary text-on-primary rounded-full font-bold text-xs shadow-md hover:bg-primary-dim transition-all active:scale-[0.98] flex items-center gap-2" id="saveBtn" data-hidden="true">
                   <span class="material-symbols-outlined text-sm">bookmark</span>
                   Save Note
                 </button>
+              </div>
+
+              <!-- Guest Storage Notice & Sign-In Helper -->
+              <div id="guestShareNotice" class="px-6 py-2.5 bg-surface-container-low/40 dark:bg-white/[0.02] border-t border-outline-variant/10 flex items-center justify-between text-[11px] text-on-surface-variant/70 dark:text-white/50 flex-wrap gap-2">
+                <span class="inline-flex items-center gap-1.5 font-medium">
+                  <span class="material-symbols-outlined text-xs text-primary/70 dark:text-blue-400">lock_reset</span>
+                  <span><strong>Guest Mode:</strong> Generates instant 6-character code. Auto-expires after timer.</span>
+                </span>
+                <a href="#" onclick="if(typeof switchToTab==='function')switchToTab('auth'); return false;" class="text-primary dark:text-[#60a5fa] hover:underline font-semibold inline-flex items-center gap-1 cursor-pointer">
+                  <span>Save permanently to Library? Sign in</span>
+                  <span class="material-symbols-outlined text-xs">arrow_forward</span>
+                </a>
               </div>
 
             </div>
@@ -1036,7 +1101,7 @@
                 <span class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Send directly to a user</span>
               </div>
               <div class="relative mb-3">
-                <input type="text" id="sendToUserInput" class="w-full pl-4 pr-4 py-3 bg-surface-container-low rounded-xl border border-outline-variant/20 text-sm text-on-surface placeholder:text-outline-variant/40 focus:outline-none focus:ring-2 focus:ring-primary/20" placeholder="@username" autocomplete="off" />
+                <input type="text" id="sendToUserInput" class="w-full pl-4 pr-4 py-3 bg-surface-container-low rounded-xl border border-outline-variant/20 text-sm text-on-surface placeholder:text-outline-variant/40 focus:outline-none focus:ring-2 focus:ring-primary/20" placeholder="@username" aria-label="Recipient username" autocomplete="off" />
                 <div id="sendToUserAutocomplete" class="stu-autocomplete" style="display:none"></div>
               </div>
               <button id="sendToUserBtn" class="w-full py-3 bg-primary text-on-primary rounded-full font-bold text-xs hover:bg-primary-dim transition-all flex items-center justify-center gap-2 shadow-md">
@@ -1118,21 +1183,21 @@
                   </p>
                 </div>
 
-                <!-- OTP-style 6-Digit Code Input -->
+                <!-- 6-Character Access Code Input -->
                 <div class="space-y-4">
                   <div class="flex justify-center items-center gap-1.5 sm:gap-2.5 md:gap-3" id="codeInputGroup">
-                    <input aria-label="Secret code digit 1" class="code-input-box w-11 h-14 sm:w-13 sm:h-16 md:w-15 md:h-18 text-center text-2xl sm:text-3xl font-bold rounded-2xl outline-none font-mono uppercase tracking-wider" maxlength="1" type="text" data-index="0" id="codeBox0" autocomplete="off" />
-                    <input aria-label="Secret code digit 2" class="code-input-box w-11 h-14 sm:w-13 sm:h-16 md:w-15 md:h-18 text-center text-2xl sm:text-3xl font-bold rounded-2xl outline-none font-mono uppercase tracking-wider" maxlength="1" type="text" data-index="1" id="codeBox1" autocomplete="off" />
-                    <input aria-label="Secret code digit 3" class="code-input-box w-11 h-14 sm:w-13 sm:h-16 md:w-15 md:h-18 text-center text-2xl sm:text-3xl font-bold rounded-2xl outline-none font-mono uppercase tracking-wider" maxlength="1" type="text" data-index="2" id="codeBox2" autocomplete="off" />
+                    <input aria-label="Access code character 1 of 6" class="code-input-box w-11 h-14 sm:w-13 sm:h-16 md:w-15 md:h-18 text-center text-2xl sm:text-3xl font-bold rounded-2xl outline-none font-mono uppercase tracking-wider" maxlength="1" type="text" data-index="0" id="codeBox0" autocomplete="off" />
+                    <input aria-label="Access code character 2 of 6" class="code-input-box w-11 h-14 sm:w-13 sm:h-16 md:w-15 md:h-18 text-center text-2xl sm:text-3xl font-bold rounded-2xl outline-none font-mono uppercase tracking-wider" maxlength="1" type="text" data-index="1" id="codeBox1" autocomplete="off" />
+                    <input aria-label="Access code character 3 of 6" class="code-input-box w-11 h-14 sm:w-13 sm:h-16 md:w-15 md:h-18 text-center text-2xl sm:text-3xl font-bold rounded-2xl outline-none font-mono uppercase tracking-wider" maxlength="1" type="text" data-index="2" id="codeBox2" autocomplete="off" />
                     
                     <!-- Middle Divider -->
                     <div class="flex items-center justify-center w-2 sm:w-3 text-primary/30 dark:text-white/30 font-bold text-lg select-none">
                       <span>•</span>
                     </div>
 
-                    <input aria-label="Secret code digit 4" class="code-input-box w-11 h-14 sm:w-13 sm:h-16 md:w-15 md:h-18 text-center text-2xl sm:text-3xl font-bold rounded-2xl outline-none font-mono uppercase tracking-wider" maxlength="1" type="text" data-index="3" id="codeBox3" autocomplete="off" />
-                    <input aria-label="Secret code digit 5" class="code-input-box w-11 h-14 sm:w-13 sm:h-16 md:w-15 md:h-18 text-center text-2xl sm:text-3xl font-bold rounded-2xl outline-none font-mono uppercase tracking-wider" maxlength="1" type="text" data-index="4" id="codeBox4" autocomplete="off" />
-                    <input aria-label="Secret code digit 6" class="code-input-box w-11 h-14 sm:w-13 sm:h-16 md:w-15 md:h-18 text-center text-2xl sm:text-3xl font-bold rounded-2xl outline-none font-mono uppercase tracking-wider" maxlength="1" type="text" data-index="5" id="codeBox5" autocomplete="off" />
+                    <input aria-label="Access code character 4 of 6" class="code-input-box w-11 h-14 sm:w-13 sm:h-16 md:w-15 md:h-18 text-center text-2xl sm:text-3xl font-bold rounded-2xl outline-none font-mono uppercase tracking-wider" maxlength="1" type="text" data-index="3" id="codeBox3" autocomplete="off" />
+                    <input aria-label="Access code character 5 of 6" class="code-input-box w-11 h-14 sm:w-13 sm:h-16 md:w-15 md:h-18 text-center text-2xl sm:text-3xl font-bold rounded-2xl outline-none font-mono uppercase tracking-wider" maxlength="1" type="text" data-index="4" id="codeBox4" autocomplete="off" />
+                    <input aria-label="Access code character 6 of 6" class="code-input-box w-11 h-14 sm:w-13 sm:h-16 md:w-15 md:h-18 text-center text-2xl sm:text-3xl font-bold rounded-2xl outline-none font-mono uppercase tracking-wider" maxlength="1" type="text" data-index="5" id="codeBox5" autocomplete="off" />
                   </div>
 
                   <!-- Quick Action Helpers (Paste / Clear) -->
@@ -1154,7 +1219,26 @@
                     <span>Fetch Content</span>
                     <span class="material-symbols-outlined text-xl sm:text-2xl">cloud_download</span>
                   </button>
-                  <p class="text-[11px] text-on-surface-variant/50 font-medium">Auto-fetches on 6th digit or press <kbd class="px-1.5 py-0.5 rounded bg-surface-container-low border border-outline-variant/20 font-mono text-[10px]">Enter ↵</kbd></p>
+                  <p class="text-[11px] text-on-surface-variant/50 font-medium">Auto-fetches on 6th character or press <kbd class="px-1.5 py-0.5 rounded bg-surface-container-low border border-outline-variant/20 font-mono text-[10px]">Enter ↵</kbd></p>
+                </div>
+
+                <!-- 3-Step Instant Relay Explainer (Desktop/Tablet) -->
+                <div class="hidden sm:block pt-4 border-t border-outline-variant/15 dark:border-white/10 max-w-lg mx-auto">
+                  <p class="text-[10px] uppercase tracking-widest font-bold text-primary/50 dark:text-white/40 mb-2.5 select-none">⚡ How Instant Relay Works</p>
+                  <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-left">
+                    <div class="flex items-start gap-2 p-2.5 rounded-xl bg-surface-container-low/60 dark:bg-white/[0.03] border border-outline-variant/10 dark:border-white/10">
+                      <span class="w-4 h-4 rounded-full bg-primary/10 dark:bg-white/10 text-primary dark:text-[#60a5fa] flex items-center justify-center font-bold text-[10px] flex-shrink-0">1</span>
+                      <p class="text-[11px] text-on-surface-variant dark:text-[#94a3b8] leading-snug"><strong>Write:</strong> Paste text &amp; select optional auto-erase timer.</p>
+                    </div>
+                    <div class="flex items-start gap-2 p-2.5 rounded-xl bg-surface-container-low/60 dark:bg-white/[0.03] border border-outline-variant/10 dark:border-white/10">
+                      <span class="w-4 h-4 rounded-full bg-primary/10 dark:bg-white/10 text-primary dark:text-[#60a5fa] flex items-center justify-center font-bold text-[10px] flex-shrink-0">2</span>
+                      <p class="text-[11px] text-on-surface-variant dark:text-[#94a3b8] leading-snug"><strong>Code:</strong> Receive 6-character key or scan direct QR code.</p>
+                    </div>
+                    <div class="flex items-start gap-2 p-2.5 rounded-xl bg-surface-container-low/60 dark:bg-white/[0.03] border border-outline-variant/10 dark:border-white/10">
+                      <span class="w-4 h-4 rounded-full bg-primary/10 dark:bg-white/10 text-primary dark:text-[#60a5fa] flex items-center justify-center font-bold text-[10px] flex-shrink-0">3</span>
+                      <p class="text-[11px] text-on-surface-variant dark:text-[#94a3b8] leading-snug"><strong>Relay:</strong> Open on any phone or laptop to read instantly.</p>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -1169,7 +1253,7 @@
                 </div>
                 <div class="max-w-xs mx-auto space-y-3">
                   <div class="relative">
-                    <input type="password" id="accessPasswordInput" placeholder="Enter password / PIN" class="w-full px-4 py-3 bg-surface-container-lowest dark:bg-[#131720] border border-outline-variant/30 dark:border-white/15 rounded-2xl text-sm text-center focus:ring-2 focus:ring-primary/20 dark:focus:ring-blue-500/30 outline-none text-on-surface" autocomplete="current-password" />
+                    <input type="password" id="accessPasswordInput" placeholder="Enter password / PIN" aria-label="Enter note password or PIN" class="w-full px-4 py-3 bg-surface-container-lowest dark:bg-[#131720] border border-outline-variant/30 dark:border-white/15 rounded-2xl text-sm text-center focus:ring-2 focus:ring-primary/20 dark:focus:ring-blue-500/30 outline-none text-on-surface" autocomplete="current-password" />
                   </div>
                   <button id="submitAccessPasswordBtn" class="w-full py-3 px-4 bg-primary text-on-primary rounded-2xl font-bold text-sm hover:bg-primary-dim transition-all shadow-md active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer">
                     <span class="material-symbols-outlined text-base">lock_open</span>
@@ -1548,21 +1632,21 @@
                     <div class="flex flex-col sm:flex-row items-center sm:items-start gap-4 mb-4 min-w-0">
                       <div class="w-14 h-14 rounded-full flex items-center justify-center font-bold text-2xl text-white cursor-pointer flex-shrink-0" id="profileAvatarPreview" style="background:hsl(215,55%,45%);">U</div>
                       <div class="w-full sm:flex-1 space-y-2 min-w-0">
-                        <input type="text" id="profileDisplayName" maxlength="40" placeholder="Display name (optional)" class="w-full px-3 py-2 bg-surface-container rounded-lg border border-outline-variant/20 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" />
-                        <textarea id="profileBio" maxlength="120" rows="2" placeholder="Bio — 120 chars" class="w-full px-3 py-2 bg-surface-container rounded-lg border border-outline-variant/20 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none"></textarea>
-                        <input type="text" id="profileTags" maxlength="80" placeholder="Hashtags (e.g. #developer #creator #web3)" class="w-full px-3 py-2 bg-surface-container rounded-lg border border-outline-variant/20 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                        <input type="text" id="profileDisplayName" maxlength="40" placeholder="Display name (optional)" aria-label="Profile display name" class="w-full px-3 py-2 bg-surface-container rounded-lg border border-outline-variant/20 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                        <textarea id="profileBio" maxlength="120" rows="2" placeholder="Bio — 120 chars" aria-label="Profile biography" class="w-full px-3 py-2 bg-surface-container rounded-lg border border-outline-variant/20 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none"></textarea>
+                        <input type="text" id="profileTags" maxlength="80" placeholder="Hashtags (e.g. #developer #creator #web3)" aria-label="Profile hashtags and interests" class="w-full px-3 py-2 bg-surface-container rounded-lg border border-outline-variant/20 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20" />
                       </div>
                     </div>
                     <div class="mb-3 min-w-0">
                       <p class="text-[10px] uppercase tracking-widest font-bold text-primary/40 mb-2">Avatar Color</p>
                       <div class="flex gap-2 flex-wrap">
-                        <button class="avatar-color-swatch w-7 h-7 rounded-full transition-all hover:scale-110" data-color="hsl(215,55%,45%)" style="background:hsl(215,55%,45%)" title="Blue"></button>
-                        <button class="avatar-color-swatch w-7 h-7 rounded-full transition-all hover:scale-110" data-color="hsl(160,50%,38%)" style="background:hsl(160,50%,38%)" title="Green"></button>
-                        <button class="avatar-color-swatch w-7 h-7 rounded-full transition-all hover:scale-110" data-color="hsl(280,45%,48%)" style="background:hsl(280,45%,48%)" title="Purple"></button>
-                        <button class="avatar-color-swatch w-7 h-7 rounded-full transition-all hover:scale-110" data-color="hsl(340,50%,45%)" style="background:hsl(340,50%,45%)" title="Pink"></button>
-                        <button class="avatar-color-swatch w-7 h-7 rounded-full transition-all hover:scale-110" data-color="hsl(30,60%,45%)" style="background:hsl(30,60%,45%)" title="Orange"></button>
-                        <button class="avatar-color-swatch w-7 h-7 rounded-full transition-all hover:scale-110" data-color="hsl(190,55%,40%)" style="background:hsl(190,55%,40%)" title="Teal"></button>
-                        <button class="avatar-color-swatch w-7 h-7 rounded-full transition-all hover:scale-110" data-color="hsl(310,45%,48%)" style="background:hsl(310,45%,48%)" title="Magenta"></button>
+                        <button class="avatar-color-swatch w-7 h-7 rounded-full transition-all hover:scale-110" data-color="hsl(215,55%,45%)" style="background:hsl(215,55%,45%)" title="Blue" aria-label="Avatar color blue"></button>
+                        <button class="avatar-color-swatch w-7 h-7 rounded-full transition-all hover:scale-110" data-color="hsl(160,50%,38%)" style="background:hsl(160,50%,38%)" title="Green" aria-label="Avatar color green"></button>
+                        <button class="avatar-color-swatch w-7 h-7 rounded-full transition-all hover:scale-110" data-color="hsl(280,45%,48%)" style="background:hsl(280,45%,48%)" title="Purple" aria-label="Avatar color purple"></button>
+                        <button class="avatar-color-swatch w-7 h-7 rounded-full transition-all hover:scale-110" data-color="hsl(340,50%,45%)" style="background:hsl(340,50%,45%)" title="Pink" aria-label="Avatar color pink"></button>
+                        <button class="avatar-color-swatch w-7 h-7 rounded-full transition-all hover:scale-110" data-color="hsl(30,60%,45%)" style="background:hsl(30,60%,45%)" title="Orange" aria-label="Avatar color orange"></button>
+                        <button class="avatar-color-swatch w-7 h-7 rounded-full transition-all hover:scale-110" data-color="hsl(190,55%,40%)" style="background:hsl(190,55%,40%)" title="Teal" aria-label="Avatar color teal"></button>
+                        <button class="avatar-color-swatch w-7 h-7 rounded-full transition-all hover:scale-110" data-color="hsl(310,45%,48%)" style="background:hsl(310,45%,48%)" title="Magenta" aria-label="Avatar color magenta"></button>
                       </div>
                     </div>
                     <button id="saveProfileBtn" class="w-full py-2.5 bg-primary text-on-primary rounded-full font-bold text-sm hover:bg-primary-dim transition-all flex items-center justify-center gap-2">
@@ -1679,12 +1763,12 @@
                     <span class="material-symbols-outlined">upload_file</span>
                     <span>Import</span>
                   </button>
-                  <input type="file" id="fmImportInput" class="hidden" accept=".txt,.html,.htm,.md" />
+                  <input type="file" id="fmImportInput" class="hidden" accept=".txt,.html,.htm,.md" aria-label="Import note file" />
                   <div class="fm-toolbar-spacer"></div>
                   <!-- Search -->
                   <div class="fm-search-wrap">
                     <span class="material-symbols-outlined">search</span>
-                    <input type="text" class="fm-search-input" id="fmSearchInput" placeholder="Search files…" autocomplete="off" />
+                    <input type="text" class="fm-search-input" id="fmSearchInput" placeholder="Search files…" aria-label="Search files" autocomplete="off" />
                   </div>
                   <!-- Sort -->
                   <div class="fm-sort-wrap">
@@ -1699,7 +1783,7 @@
                     </div>
                   </div>
                   <!-- View toggle -->
-                  <button class="fm-toolbar-btn" id="fmViewToggle" title="Toggle view">
+                  <button class="fm-toolbar-btn" id="fmViewToggle" title="Toggle view" aria-label="Toggle grid or list view">
                     <span class="material-symbols-outlined">view_list</span>
                   </button>
                 </div>
@@ -1721,7 +1805,7 @@
                     <div id="fmEditorPane">
                       <div class="fm-editor-header">
                         <span class="material-symbols-outlined" style="font-size:16px;color:rgba(81,96,112,0.5)">edit_note</span>
-                        <input type="text" id="fmEditorTitle" placeholder="File name…" />
+                        <input type="text" id="fmEditorTitle" placeholder="File name…" aria-label="File name" />
                         <button class="fm-editor-close-btn" id="fmEditorCloseBtn">
                           <span class="material-symbols-outlined">close</span>
                           Close
@@ -1745,19 +1829,19 @@
                   <div>
                     <label class="text-xs uppercase tracking-widest text-primary/50 font-bold block mb-2">Current PIN</label>
                     <div class="flex justify-center gap-3" id="currentPinGroup">
-                      <input class="pin-change-box w-14 h-14 text-center text-xl font-bold bg-surface-dim/30 rounded-xl border-none shadow-inner focus:ring-2 focus:ring-primary/20 text-primary font-headline [-webkit-text-security:disc]" type="tel" maxlength="1" placeholder="•" title="Current PIN digit" />
-                      <input class="pin-change-box w-14 h-14 text-center text-xl font-bold bg-surface-dim/30 rounded-xl border-none shadow-inner focus:ring-2 focus:ring-primary/20 text-primary font-headline [-webkit-text-security:disc]" type="tel" maxlength="1" placeholder="•" title="Current PIN digit" />
-                      <input class="pin-change-box w-14 h-14 text-center text-xl font-bold bg-surface-dim/30 rounded-xl border-none shadow-inner focus:ring-2 focus:ring-primary/20 text-primary font-headline [-webkit-text-security:disc]" type="tel" maxlength="1" placeholder="•" title="Current PIN digit" />
-                      <input class="pin-change-box w-14 h-14 text-center text-xl font-bold bg-surface-dim/30 rounded-xl border-none shadow-inner focus:ring-2 focus:ring-primary/20 text-primary font-headline [-webkit-text-security:disc]" type="tel" maxlength="1" placeholder="•" title="Current PIN digit" />
+                      <input class="pin-change-box w-14 h-14 text-center text-xl font-bold bg-surface-dim/30 rounded-xl border-none shadow-inner focus:ring-2 focus:ring-primary/20 text-primary font-headline [-webkit-text-security:disc]" type="tel" maxlength="1" placeholder="•" title="Current PIN digit" aria-label="Current PIN digit 1 of 4" />
+                      <input class="pin-change-box w-14 h-14 text-center text-xl font-bold bg-surface-dim/30 rounded-xl border-none shadow-inner focus:ring-2 focus:ring-primary/20 text-primary font-headline [-webkit-text-security:disc]" type="tel" maxlength="1" placeholder="•" title="Current PIN digit" aria-label="Current PIN digit 2 of 4" />
+                      <input class="pin-change-box w-14 h-14 text-center text-xl font-bold bg-surface-dim/30 rounded-xl border-none shadow-inner focus:ring-2 focus:ring-primary/20 text-primary font-headline [-webkit-text-security:disc]" type="tel" maxlength="1" placeholder="•" title="Current PIN digit" aria-label="Current PIN digit 3 of 4" />
+                      <input class="pin-change-box w-14 h-14 text-center text-xl font-bold bg-surface-dim/30 rounded-xl border-none shadow-inner focus:ring-2 focus:ring-primary/20 text-primary font-headline [-webkit-text-security:disc]" type="tel" maxlength="1" placeholder="•" title="Current PIN digit" aria-label="Current PIN digit 4 of 4" />
                     </div>
                   </div>
                   <div>
                     <label class="text-xs uppercase tracking-widest text-primary/50 font-bold block mb-2">New PIN</label>
                     <div class="flex justify-center gap-3" id="newPinGroup">
-                      <input class="pin-change-box w-14 h-14 text-center text-xl font-bold bg-surface-dim/30 rounded-xl border-none shadow-inner focus:ring-2 focus:ring-primary/20 text-primary font-headline [-webkit-text-security:disc]" type="tel" maxlength="1" placeholder="•" title="New PIN digit" />
-                      <input class="pin-change-box w-14 h-14 text-center text-xl font-bold bg-surface-dim/30 rounded-xl border-none shadow-inner focus:ring-2 focus:ring-primary/20 text-primary font-headline [-webkit-text-security:disc]" type="tel" maxlength="1" placeholder="•" title="New PIN digit" />
-                      <input class="pin-change-box w-14 h-14 text-center text-xl font-bold bg-surface-dim/30 rounded-xl border-none shadow-inner focus:ring-2 focus:ring-primary/20 text-primary font-headline [-webkit-text-security:disc]" type="tel" maxlength="1" placeholder="•" title="New PIN digit" />
-                      <input class="pin-change-box w-14 h-14 text-center text-xl font-bold bg-surface-dim/30 rounded-xl border-none shadow-inner focus:ring-2 focus:ring-primary/20 text-primary font-headline [-webkit-text-security:disc]" type="tel" maxlength="1" placeholder="•" title="New PIN digit" />
+                      <input class="pin-change-box w-14 h-14 text-center text-xl font-bold bg-surface-dim/30 rounded-xl border-none shadow-inner focus:ring-2 focus:ring-primary/20 text-primary font-headline [-webkit-text-security:disc]" type="tel" maxlength="1" placeholder="•" title="New PIN digit" aria-label="New PIN digit 1 of 4" />
+                      <input class="pin-change-box w-14 h-14 text-center text-xl font-bold bg-surface-dim/30 rounded-xl border-none shadow-inner focus:ring-2 focus:ring-primary/20 text-primary font-headline [-webkit-text-security:disc]" type="tel" maxlength="1" placeholder="•" title="New PIN digit" aria-label="New PIN digit 2 of 4" />
+                      <input class="pin-change-box w-14 h-14 text-center text-xl font-bold bg-surface-dim/30 rounded-xl border-none shadow-inner focus:ring-2 focus:ring-primary/20 text-primary font-headline [-webkit-text-security:disc]" type="tel" maxlength="1" placeholder="•" title="New PIN digit" aria-label="New PIN digit 3 of 4" />
+                      <input class="pin-change-box w-14 h-14 text-center text-xl font-bold bg-surface-dim/30 rounded-xl border-none shadow-inner focus:ring-2 focus:ring-primary/20 text-primary font-headline [-webkit-text-security:disc]" type="tel" maxlength="1" placeholder="•" title="New PIN digit" aria-label="New PIN digit 4 of 4" />
                     </div>
                   </div>
                   <div class="flex gap-3 pt-2">
@@ -1788,8 +1872,9 @@
             <input type="text" id="userSearchInput"
               class="w-full pl-12 pr-12 py-4 bg-surface-container-lowest rounded-2xl editorial-shadow border border-outline-variant/15 text-on-surface text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-outline-variant/40"
               placeholder="Search by @username, display name, bio, or #hashtag…"
+              aria-label="Search people by username, display name, or hashtag"
               autocomplete="off" />
-            <button id="clearUserSearchBtn" class="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant/40 hover:text-on-surface transition-colors hidden" title="Clear search">
+            <button id="clearUserSearchBtn" class="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant/40 hover:text-on-surface transition-colors hidden" title="Clear search" aria-label="Clear user search">
               <span class="material-symbols-outlined text-lg">close</span>
             </button>
           </div>
@@ -2026,7 +2111,7 @@
                   <button class="admin-broadcast-type px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-wider border transition-all bg-surface-container-low text-on-surface-variant border-outline-variant/15 hover:border-outline-variant/30" data-type="maintenance">🔧 Maintenance</button>
                 </div>
                 <div class="space-y-3">
-                  <textarea class="w-full bg-surface-container-low border border-outline-variant/20 rounded-2xl p-6 text-sm text-on-surface focus:ring-1 focus:ring-primary/20 transition-all placeholder:text-on-surface-variant/40 resize-none" id="adminBroadcastInput" rows="4" placeholder="Type message here..." maxlength="500"></textarea>
+                  <textarea class="w-full bg-surface-container-low border border-outline-variant/20 rounded-2xl p-6 text-sm text-on-surface focus:ring-1 focus:ring-primary/20 transition-all placeholder:text-on-surface-variant/40 resize-none" id="adminBroadcastInput" rows="4" placeholder="Type message here..." aria-label="Broadcast message" maxlength="500"></textarea>
                   <div class="flex items-center justify-between">
                     <span class="text-[10px] text-on-surface-variant/60 font-mono" id="adminBroadcastCharCount">0/500</span>
                     <button class="bg-error text-white px-8 py-3.5 rounded-full font-bold text-xs hover:bg-error/90 transition-all active:scale-95 flex items-center gap-2 shadow-xl shadow-error/10" id="adminSendBroadcastBtn">
@@ -2086,10 +2171,10 @@
                 </div>
                 <div class="flex items-center gap-3">
                   <div class="relative w-56">
-                    <input type="text" id="adminUserSearch" class="w-full pl-9 pr-4 py-2.5 bg-surface-container-low rounded-xl text-[11px] text-on-surface border border-outline-variant/15 focus:ring-1 focus:ring-primary/20 placeholder:text-on-surface-variant/40" placeholder="Search users..." />
+                    <input type="text" id="adminUserSearch" class="w-full pl-9 pr-4 py-2.5 bg-surface-container-low rounded-xl text-[11px] text-on-surface border border-outline-variant/15 focus:ring-1 focus:ring-primary/20 placeholder:text-on-surface-variant/40" placeholder="Search users..." aria-label="Search users" />
                     <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant/40 text-base">search</span>
                   </div>
-                  <button class="px-3 py-2.5 rounded-xl bg-surface-container-low border border-outline-variant/15 hover:border-outline-variant/30 transition-all text-on-surface-variant hover:text-on-surface" onclick="adminExportUsersCSV()" title="Export CSV">
+                  <button class="px-3 py-2.5 rounded-xl bg-surface-container-low border border-outline-variant/15 hover:border-outline-variant/30 transition-all text-on-surface-variant hover:text-on-surface" onclick="adminExportUsersCSV()" title="Export CSV" aria-label="Export CSV">
                     <span class="material-symbols-outlined text-base">download</span>
                   </button>
                 </div>
@@ -2100,7 +2185,7 @@
                   <table class="w-full text-left text-[11px] admin-table">
                     <thead class="bg-surface-container-low text-on-surface-variant uppercase tracking-[0.15em] font-bold">
                       <tr>
-                        <th class="px-6 py-4 w-8"><input type="checkbox" id="adminUserSelectAll" class="rounded border-outline-variant/30" onchange="adminToggleAllUsers(this)"></th>
+                        <th class="px-6 py-4 w-8"><input type="checkbox" id="adminUserSelectAll" class="rounded border-outline-variant/30" onchange="adminToggleAllUsers(this)" aria-label="Select all users"></th>
                         <th class="px-6 py-4">Identity</th>
                         <th class="px-6 py-4">Email</th>
                         <th class="px-6 py-4">Role</th>
@@ -2780,19 +2865,19 @@
     </main>
   </div>
 
-  <!-- ========== MOBILE FLOATING BOTTOM NAV (Translucent Blur Capsule) ========== -->
-  <nav class="md:hidden fixed bottom-5 inset-x-4 max-w-[320px] sm:max-w-xs mx-auto bg-[#516070]/35 backdrop-blur-xl border border-white/40 rounded-full p-1.5 flex justify-between items-center z-50 shadow-[0_20px_45px_-10px_rgba(47,52,46,0.35)] transition-all" id="mobileNav">
-    <button class="mobile-nav-btn active w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 active:scale-95" data-tab="share" title="Notes & Share" aria-label="Notes">
+  <!-- ========== MOBILE FLOATING ROUNDED CAPSULE NAV BAR ========== -->
+  <nav class="md:hidden fixed bottom-5 inset-x-4 max-w-[300px] mx-auto rounded-full p-1.5 flex justify-between items-center z-50 transition-all" id="mobileNav">
+    <button class="mobile-nav-btn active w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 active:scale-95 cursor-pointer" data-tab="share" title="Notes & Editor" aria-label="Notes">
       <span class="material-symbols-outlined text-2xl">edit_note</span>
     </button>
-    <button class="mobile-nav-btn w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 active:scale-95" data-tab="access" title="Access Keys" aria-label="Access">
+    <button class="mobile-nav-btn w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 active:scale-95 cursor-pointer" data-tab="access" title="Access Note by Code" aria-label="Access">
       <span class="material-symbols-outlined text-2xl">key</span>
     </button>
-    <button class="mobile-nav-btn w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 active:scale-95" data-tab="account" title="Account & Profile" aria-label="Account">
+    <button class="mobile-nav-btn w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 active:scale-95 cursor-pointer" data-tab="account" title="Account & Profile" aria-label="Account">
       <span class="material-symbols-outlined text-2xl">person</span>
     </button>
-    <button class="w-12 h-12 rounded-full flex items-center justify-center text-[#f0f2ea]/65 hover:text-[#f0f2ea] hover:bg-white/10 transition-all duration-300 active:scale-95" onclick="window.open('convo_room/index.html', '_blank')" title="Convo Room" aria-label="Convo Room">
-      <span class="material-symbols-outlined text-2xl">forum</span>
+    <button class="mobile-nav-btn w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 active:scale-95 cursor-pointer" id="mobileNavMenuBtn" title="More Menu" aria-label="More Menu">
+      <span class="material-symbols-outlined text-2xl">menu</span>
     </button>
   </nav>
 
@@ -2813,7 +2898,7 @@
   </div>
 
   <!-- ========== GENERIC CONFIRM MODAL ========== -->
-  <div id="confirmModal" style="display:none;" class="fixed inset-0 z-[9985] flex items-center justify-center p-4">
+  <div id="confirmModal" style="display:none;" class="fixed inset-0 z-[9985] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="confirmModalTitle">
     <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" id="confirmModalBackdrop"></div>
     <div class="relative w-full max-w-sm bg-surface-container-lowest rounded-3xl p-6 editorial-shadow editorial-border animate-slide-up">
       <div class="text-center mb-5">
@@ -2824,19 +2909,19 @@
         <p class="text-sm text-on-surface-variant mt-1" id="confirmModalMessage">Are you sure?</p>
       </div>
       <div class="flex gap-3">
-        <button id="confirmModalCancel" class="flex-1 py-3 rounded-2xl text-sm font-semibold text-primary/60 bg-surface-container hover:bg-surface-container-high transition-all">Cancel</button>
-        <button id="confirmModalConfirm" class="flex-1 py-3 rounded-2xl text-sm font-bold transition-all active:scale-[0.98]">Confirm</button>
+        <button id="confirmModalCancel" class="flex-1 py-3 rounded-2xl text-sm font-semibold text-primary/60 bg-surface-container hover:bg-surface-container-high transition-all" aria-label="Cancel action">Cancel</button>
+        <button id="confirmModalConfirm" class="flex-1 py-3 rounded-2xl text-sm font-bold transition-all active:scale-[0.98]" aria-label="Confirm action">Confirm</button>
       </div>
     </div>
   </div>
 
   <!-- ========== BROADCAST MODAL OVERLAY ========== -->
-  <div id="broadcastModalOverlay" data-hidden="true" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-md transition-opacity p-6">
+  <div id="broadcastModalOverlay" data-hidden="true" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-md transition-opacity p-6" role="dialog" aria-modal="true" aria-labelledby="broadcastModalTitle">
     <!-- Broadcast Modal Box -->
     <div id="broadcastModalBox" class="bg-surface-container-lowest w-full max-w-md p-8 rounded-[32px] editorial-shadow border border-outline-variant/15 transition-all duration-300 transform scale-95 opacity-0 flex flex-col items-center text-center relative">
       
       <div class="absolute top-6 right-6">
-        <button id="broadcastModalClose" class="text-on-surface-variant/40 hover:text-on-surface transition-colors">
+        <button id="broadcastModalClose" class="text-on-surface-variant/40 hover:text-on-surface transition-colors" aria-label="Close announcement">
           <span class="material-symbols-outlined text-xl">close</span>
         </button>
       </div>
@@ -2847,7 +2932,7 @@
 
       <div class="space-y-1 mb-8">
         <p class="text-[9px] uppercase tracking-[0.2em] text-on-surface-variant/60 font-bold">From the Developer</p>
-        <h3 class="text-2xl font-headline italic text-on-surface">Announcement</h3>
+        <h3 class="text-2xl font-headline italic text-on-surface" id="broadcastModalTitle">Announcement</h3>
       </div>
 
       <div class="w-full bg-surface-container-low rounded-2xl p-6 border border-outline-variant/10 mb-8">
@@ -2864,7 +2949,7 @@
   </div>
 
   <!-- ========== EDIT NOTE MODAL OVERLAY ========== -->
-  <div id="editNoteModalOverlay" class="fixed inset-0 flex items-center justify-center p-4" style="display:none; z-index:9998; background:rgba(0,0,0,0.6); backdrop-filter:blur(6px);">
+  <div id="editNoteModalOverlay" class="fixed inset-0 flex items-center justify-center p-4" style="display:none; z-index:9998; background:rgba(0,0,0,0.6); backdrop-filter:blur(6px);" role="dialog" aria-modal="true" aria-labelledby="editNoteModalTitle">
     <div id="editNoteModalBox" class="bg-surface w-full max-w-lg rounded-[24px] editorial-shadow editorial-border flex flex-col overflow-hidden" style="max-height:92vh;">
 
       <!-- Header -->
@@ -2872,11 +2957,11 @@
         <div class="flex items-center gap-3">
           <span id="editNoteHeaderIcon" class="material-symbols-outlined text-primary text-2xl">edit_note</span>
           <div>
-            <h3 class="text-base font-bold text-on-surface leading-tight">Edit Note</h3>
+            <h3 class="text-base font-bold text-on-surface leading-tight" id="editNoteModalTitle">Edit Note</h3>
             <p id="editNoteTypeLabel" class="text-xs text-on-surface-variant mt-0.5"></p>
           </div>
         </div>
-        <button id="editNoteModalClose" class="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container transition-all">
+        <button id="editNoteModalClose" class="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container transition-all" aria-label="Close edit note modal">
           <span class="material-symbols-outlined text-lg">close</span>
         </button>
       </div>
@@ -2890,7 +2975,7 @@
 
         <!-- Title -->
         <div>
-          <label class="block text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-1.5">Title</label>
+          <label for="editNoteTitle" class="block text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-1.5">Title</label>
           <input type="text" id="editNoteTitle"
             class="w-full bg-surface-container text-on-surface rounded-xl px-4 py-3 text-sm border border-outline-variant/40 focus:border-primary/40 focus:bg-surface outline-none transition-all font-medium"
             placeholder="Note title…" />
@@ -2898,7 +2983,7 @@
 
         <!-- Category -->
         <div>
-          <label class="block text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-1.5">Category / Tag</label>
+          <label for="editNoteCategory" class="block text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-1.5">Category / Tag</label>
           <select id="editNoteCategory"
             class="w-full bg-surface-container text-on-surface rounded-xl px-4 py-3 text-sm border border-outline-variant/40 focus:border-primary/40 outline-none transition-all appearance-none cursor-pointer">
             <option value="">📂 Uncategorized</option>
@@ -2914,7 +2999,7 @@
         <!-- Content textarea -->
         <div id="editNoteContentContainer">
           <div class="flex items-center justify-between mb-1.5">
-            <label class="block text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Content</label>
+            <label for="editNoteContent" class="block text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Content</label>
             <span id="editNoteCharCount" class="text-[10px] text-on-surface-variant/50 font-mono"></span>
           </div>
           <textarea id="editNoteContent" rows="9"
@@ -2974,7 +3059,7 @@
       <!-- New folder row -->
       <div class="sfm-new-folder-row" id="saveFolderNewRow" style="display:none;">
         <span class="material-symbols-outlined sfm-folder-icon" style="color:#516070">create_new_folder</span>
-        <input type="text" class="sfm-new-folder-input" id="saveFolderNewName" placeholder="New folder name…" maxlength="80" />
+        <input type="text" class="sfm-new-folder-input" id="saveFolderNewName" placeholder="New folder name…" aria-label="New folder name" maxlength="80" />
       </div>
 
       <!-- Footer -->
@@ -3006,14 +3091,14 @@
         <span class="fm-modal-title" id="fmNewItemTitle">New File</span>
       </div>
       <div class="fm-modal-body">
-        <input type="text" class="fm-modal-input" id="fmNewItemName" placeholder="Enter name…" maxlength="120" autocomplete="off" />
+        <input type="text" class="fm-modal-input" id="fmNewItemName" placeholder="Enter name…" aria-label="New item name" maxlength="120" autocomplete="off" />
         <div class="fm-file-type-group" id="fmFileTypeGroup">
           <label class="fm-file-type-label">
-            <input type="radio" name="fmFileType" value="note" checked />
+            <input type="radio" name="fmFileType" value="note" aria-label="Note file type" checked />
             <span class="material-symbols-outlined">edit_note</span> Note
           </label>
           <label class="fm-file-type-label">
-            <input type="radio" name="fmFileType" value="link" />
+            <input type="radio" name="fmFileType" value="link" aria-label="Link file type" />
             <span class="material-symbols-outlined">link</span> Link
           </label>
         </div>
@@ -3033,7 +3118,7 @@
         <span class="fm-modal-title">Rename</span>
       </div>
       <div class="fm-modal-body">
-        <input type="text" class="fm-modal-input" id="fmRenameInput" placeholder="New name…" maxlength="120" autocomplete="off" />
+        <input type="text" class="fm-modal-input" id="fmRenameInput" placeholder="New name…" aria-label="New name" maxlength="120" autocomplete="off" />
       </div>
       <div class="fm-modal-footer">
         <button class="fm-btn fm-btn-cancel" id="fmRenameCancel">Cancel</button>
@@ -3115,8 +3200,8 @@
     </div>
   </div>
 
-  <!-- ========== GUEST NUDGE BANNER / NOTIFICATION (Layered behind work panel) ========== -->
-  <div id="guestNudgeBanner" class="fixed bottom-24 md:bottom-6 right-4 md:right-6 z-20 max-w-[350px] w-[calc(100vw-2rem)] transition-all duration-300 transform translate-y-12 opacity-0 pointer-events-none" style="display:none">
+  <!-- ========== GUEST NUDGE BANNER / NOTIFICATION (Desktop only — Layered behind work panel) ========== -->
+  <div id="guestNudgeBanner" class="hidden md:block fixed md:bottom-6 right-4 md:right-6 z-20 max-w-[350px] w-[calc(100vw-2rem)] transition-all duration-300 transform translate-y-12 opacity-0 pointer-events-none" style="display:none">
     <!-- Gradient accent bar -->
     <div style="height:3px;border-radius:16px 16px 0 0;background:linear-gradient(90deg,#516070,#575e78,#516070);background-size:200%;animation:gnbShimmer 2.5s linear infinite"></div>
     <div class="bg-surface-container-lowest/97 backdrop-blur-xl rounded-b-2xl border border-primary/15 border-t-0 shadow-2xl p-4 relative overflow-hidden">
@@ -3179,61 +3264,61 @@
   </div>
 
   <!-- ========== GUEST ALERT MODAL / DIALOG ========== -->
-  <div id="guestAlertModal" class="fixed inset-0 z-[9990] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md transition-all duration-300 opacity-0 pointer-events-none" style="display:none">
-    <div class="bg-surface-container-lowest/98 rounded-3xl border border-primary/20 shadow-2xl max-w-md w-full p-6 relative overflow-hidden transform scale-95 transition-all duration-300">
+  <div id="guestAlertModal" class="fixed inset-0 z-[9990] flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md transition-all duration-300 opacity-0 pointer-events-none" style="display:none">
+    <div class="modal-dialog-card rounded-3xl shadow-2xl max-w-md w-full p-6 relative overflow-hidden transform scale-95 transition-all duration-300">
       <!-- Top Decorative Glow -->
-      <div class="absolute -top-16 -right-16 w-32 h-32 rounded-full bg-primary/20 blur-2xl pointer-events-none"></div>
+      <div class="absolute -top-16 -right-16 w-32 h-32 rounded-full bg-blue-500/10 blur-2xl pointer-events-none"></div>
       
       <!-- Modal Close Button -->
-      <button id="guestAlertModalClose" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface-variant flex items-center justify-center transition-colors">
+      <button id="guestAlertModalClose" class="absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center transition-colors cursor-pointer" aria-label="Close dialog">
         <span class="material-symbols-outlined text-lg">close</span>
       </button>
 
       <div class="text-center space-y-4">
         <!-- Icon Pill -->
-        <div class="w-16 h-16 mx-auto rounded-2xl bg-primary/10 text-primary flex items-center justify-center ring-1 ring-primary/20 shadow-inner">
+        <div class="guest-modal-icon-pill w-16 h-16 mx-auto rounded-2xl flex items-center justify-center shadow-inner">
           <span class="material-symbols-outlined text-3xl" id="guestAlertModalIcon" style="font-variation-settings:'FILL' 1">auto_awesome</span>
         </div>
 
         <div>
-          <span class="inline-block text-[10px] font-extrabold uppercase tracking-widest px-2.5 py-1 rounded-full bg-primary/10 text-primary mb-2">Guest Account Alert</span>
-          <h3 class="text-xl font-bold text-on-surface" id="guestAlertModalTitle">Save Your Notes & Unlock Full Power</h3>
-          <p class="text-xs text-on-surface-variant/80 mt-1.5 leading-relaxed" id="guestAlertModalText">You are currently using Guest Mode. Create a free account or log in to keep your notes permanently, organize custom folders, and send direct messages.</p>
+          <span class="guest-modal-badge inline-block text-[10px] font-extrabold uppercase tracking-widest px-2.5 py-1 rounded-full mb-2">Guest Account Alert</span>
+          <h3 class="text-xl font-bold" id="guestAlertModalTitle">Save Your Notes & Unlock Full Power</h3>
+          <p class="text-xs mt-1.5 leading-relaxed" id="guestAlertModalText">You are currently using Guest Mode. Create a free account or log in to keep your notes permanently, organize custom folders, and send direct messages.</p>
         </div>
 
         <!-- Highlights Grid -->
         <div class="grid grid-cols-2 gap-2 text-left py-2">
-          <div class="p-2.5 rounded-xl bg-surface-container-low border border-outline-variant/15 flex items-center gap-2">
-            <span class="material-symbols-outlined text-primary text-lg">cloud_done</span>
-            <span class="text-[11px] font-semibold text-on-surface">Permanent Cloud Sync</span>
+          <div class="guest-feature-pill p-2.5 rounded-xl flex items-center gap-2">
+            <span class="material-symbols-outlined text-lg">cloud_done</span>
+            <span class="text-[11px] font-semibold">Permanent Cloud Sync</span>
           </div>
-          <div class="p-2.5 rounded-xl bg-surface-container-low border border-outline-variant/15 flex items-center gap-2">
-            <span class="material-symbols-outlined text-primary text-lg">folder</span>
-            <span class="text-[11px] font-semibold text-on-surface">Custom Folders & Tags</span>
+          <div class="guest-feature-pill p-2.5 rounded-xl flex items-center gap-2">
+            <span class="material-symbols-outlined text-lg">folder</span>
+            <span class="text-[11px] font-semibold">Custom Folders & Tags</span>
           </div>
-          <div class="p-2.5 rounded-xl bg-surface-container-low border border-outline-variant/15 flex items-center gap-2">
-            <span class="material-symbols-outlined text-primary text-lg">lock</span>
-            <span class="text-[11px] font-semibold text-on-surface">PIN & Passcode Lock</span>
+          <div class="guest-feature-pill p-2.5 rounded-xl flex items-center gap-2">
+            <span class="material-symbols-outlined text-lg">lock</span>
+            <span class="text-[11px] font-semibold">PIN & Passcode Lock</span>
           </div>
-          <div class="p-2.5 rounded-xl bg-surface-container-low border border-outline-variant/15 flex items-center gap-2">
-            <span class="material-symbols-outlined text-primary text-lg">forum</span>
-            <span class="text-[11px] font-semibold text-on-surface">Encrypted Convo Rooms</span>
+          <div class="guest-feature-pill p-2.5 rounded-xl flex items-center gap-2">
+            <span class="material-symbols-outlined text-lg">forum</span>
+            <span class="text-[11px] font-semibold">Encrypted Convo Rooms</span>
           </div>
         </div>
 
         <!-- Action Buttons -->
         <div class="space-y-2.5 pt-2">
-          <button id="guestAlertModalSignupBtn" class="w-full py-3 px-4 rounded-xl font-bold text-xs flex items-center justify-center gap-2 text-white shadow-lg hover:shadow-xl active:scale-[0.98] transition-all" style="background:linear-gradient(135deg,#516070,#575e78)">
+          <button id="guestAlertModalSignupBtn" class="w-full py-3 px-4 rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-lg active:scale-[0.98] transition-all cursor-pointer">
             <span class="material-symbols-outlined text-base">person_add</span>
             <span>Create Free Account (60 sec)</span>
           </button>
           
-          <button id="guestAlertModalLoginBtn" class="w-full py-2.5 px-4 rounded-xl font-bold text-xs flex items-center justify-center gap-2 text-primary bg-primary/10 hover:bg-primary/15 border border-primary/20 transition-all">
+          <button id="guestAlertModalLoginBtn" class="w-full py-2.5 px-4 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer">
             <span class="material-symbols-outlined text-base">login</span>
             <span>Already Have an Account? Sign In</span>
           </button>
 
-          <button id="guestAlertModalSkipBtn" class="text-[11px] font-medium text-on-surface-variant/50 hover:text-on-surface-variant transition-colors pt-1">
+          <button id="guestAlertModalSkipBtn" class="text-[11px] font-medium transition-colors pt-1 cursor-pointer">
             Continue as Guest for Now
           </button>
         </div>
@@ -3241,8 +3326,34 @@
     </div>
   </div>
 
+  <!-- ========== WRONG CODE / ACCESS ALERT POPUP (TOP-RIGHT CORNER) ========== -->
+  <div id="accessAlertModal" class="fixed top-20 sm:top-24 right-4 sm:right-6 z-[99999] max-w-sm w-[calc(100vw-2rem)] sm:w-84 transition-all duration-300 ease-out pointer-events-none opacity-0 translate-x-12" style="display:none" role="alert" aria-live="assertive">
+    <div class="pointer-events-auto flex items-start gap-3 p-3.5 sm:p-4 rounded-2xl shadow-2xl border border-rose-500/30 backdrop-blur-xl relative overflow-hidden bg-white/95 dark:bg-[#181d28]/95" id="accessAlertCard">
+      <!-- Alert Icon -->
+      <div class="w-9 h-9 rounded-xl bg-rose-500/15 text-rose-600 dark:text-rose-400 flex items-center justify-center flex-shrink-0 border border-rose-500/25">
+        <span class="material-symbols-outlined text-2xl" id="accessAlertIcon">warning</span>
+      </div>
+
+      <!-- Alert Content -->
+      <div class="flex-1 min-w-0 pr-5">
+        <h4 class="text-xs font-bold text-slate-900 dark:text-white" id="accessAlertTitle">Invalid Access Code</h4>
+        <p class="text-[11px] text-slate-600 dark:text-slate-300 mt-0.5 leading-snug break-words" id="accessAlertMessage">No note was found for this code.</p>
+      </div>
+
+      <!-- Close (X) Button -->
+      <button id="accessAlertCloseIconBtn" class="absolute top-2.5 right-2.5 w-6 h-6 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-colors cursor-pointer" aria-label="Dismiss alert">
+        <span class="material-symbols-outlined text-sm">close</span>
+      </button>
+
+      <!-- Auto-dismiss Progress Bar -->
+      <div class="absolute bottom-0 left-0 right-0 h-0.5 bg-rose-500/15 overflow-hidden">
+        <div id="accessAlertProgress" class="h-full bg-rose-500 w-full transition-all duration-300"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- ========== INTERACTIVE BUY ME A COFFEE MODAL ========== -->
-  <div class="fixed inset-0 z-[10001] flex items-end sm:items-center justify-center p-3 sm:p-4" id="coffeeModal" style="display:none">
+  <div class="fixed inset-0 z-[10001] flex items-end sm:items-center justify-center p-3 sm:p-4" id="coffeeModal" style="display:none" role="dialog" aria-modal="true" aria-labelledby="coffeeModalTitle">
     <div class="absolute inset-0 bg-black/40 backdrop-blur-md" id="coffeeModalBackdrop"></div>
     <div class="relative w-full max-w-lg bg-surface-container-lowest rounded-[32px] editorial-shadow border border-outline-variant/20 overflow-hidden animate-slide-up max-h-[92vh] flex flex-col" id="coffeeModalContent">
       
@@ -3274,14 +3385,14 @@
 
           <div>
             <div class="flex items-center gap-2">
-              <h3 class="font-headline text-lg sm:text-xl italic text-on-surface">Buy eNotePad a Coffee</h3>
+              <h3 class="font-headline text-lg sm:text-xl italic text-on-surface" id="coffeeModalTitle">Buy eNotePad a Coffee</h3>
               <span class="text-[9px] font-black uppercase tracking-widest bg-amber-500/15 text-amber-700 dark:text-amber-300 px-2 py-0.5 rounded-full">Creator Fuel</span>
             </div>
             <p class="text-xs text-on-surface-variant mt-0.5">Keep eNotePad 100% independent, fast &amp; privacy-focused.</p>
           </div>
         </div>
 
-        <button class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-container transition-all text-on-surface-variant hover:text-on-surface flex-shrink-0" id="closeCoffeeModal">
+        <button class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-container transition-all text-on-surface-variant hover:text-on-surface flex-shrink-0" id="closeCoffeeModal" aria-label="Close Buy Me a Coffee modal">
           <span class="material-symbols-outlined text-lg">close</span>
         </button>
       </div>
@@ -3341,8 +3452,8 @@
             <label class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold block">
               2. Leave a Note for the Creator (Optional)
             </label>
-            <input type="text" id="coffeeSupporterName" maxlength="30" placeholder="Your name or @handle (or Anonymous)" class="w-full px-4 py-2.5 bg-surface-dim/30 dark:bg-surface-container rounded-xl border border-outline-variant/15 text-xs text-on-surface focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-all placeholder:text-outline-variant/50" />
-            <input type="text" id="coffeeSupporterNote" maxlength="80" placeholder="Say something nice (e.g. Thanks for anonymous notes!)" class="w-full px-4 py-2.5 bg-surface-dim/30 dark:bg-surface-container rounded-xl border border-outline-variant/15 text-xs text-on-surface focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-all placeholder:text-outline-variant/50" />
+            <input type="text" id="coffeeSupporterName" maxlength="30" placeholder="Your name or @handle (or Anonymous)" aria-label="Your name or handle" class="w-full px-4 py-2.5 bg-surface-dim/30 dark:bg-surface-container rounded-xl border border-outline-variant/15 text-xs text-on-surface focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-all placeholder:text-outline-variant/50" />
+            <input type="text" id="coffeeSupporterNote" maxlength="80" placeholder="Say something nice (e.g. Thanks for anonymous notes!)" aria-label="Message for the creator" class="w-full px-4 py-2.5 bg-surface-dim/30 dark:bg-surface-container rounded-xl border border-outline-variant/15 text-xs text-on-surface focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-all placeholder:text-outline-variant/50" />
           </div>
 
           <!-- Step 3: Choose Payment Method -->
@@ -3487,7 +3598,8 @@
   <script src="js/filemanager.js?v=12"></script>
   <script src="js/users.js?v=3"></script>
   <script src="js/coffee.js?v=1"></script>
-  <script src="js/ai-assist.js?v=1"></script>
+  <script src="js/env.js"></script>
+  <script src="js/ai-assist.js?v=2"></script>
   <script src="js/app.js?v=15"></script>
 </body>
 </html>

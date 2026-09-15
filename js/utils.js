@@ -73,7 +73,7 @@ function showToast(message, type = 'success') {
   if (!container) {
     container = document.createElement('div');
     container.id = 'toastContainer';
-    container.className = 'fixed top-5 right-5 z-[9999] flex flex-col gap-2 pointer-events-none';
+    container.className = 'fixed top-20 sm:top-24 right-4 sm:right-6 z-[9999] flex flex-col gap-2 pointer-events-none max-w-sm w-[calc(100vw-2rem)]';
     document.body.appendChild(container);
   }
 
@@ -93,7 +93,17 @@ function showToast(message, type = 'success') {
     <span>${message}</span>
   `;
 
-  container.appendChild(toast);
+  // Announce to screen readers via aria-live polite region
+  let announcer = document.getElementById('a11yAnnouncer');
+  if (!announcer) {
+    announcer = document.createElement('div');
+    announcer.id = 'a11yAnnouncer';
+    announcer.className = 'sr-only';
+    announcer.setAttribute('aria-live', 'polite');
+    announcer.setAttribute('aria-atomic', 'true');
+    document.body.appendChild(announcer);
+  }
+  announcer.textContent = message;
 
   // Auto-remove with smooth exit animation after 4 seconds
   setTimeout(() => {
@@ -105,6 +115,22 @@ function showToast(message, type = 'success') {
       }
     }, 300);
   }, 4000);
+}
+
+/**
+ * Smoothly scroll to an element with offset for fixed navigation headers.
+ * @param {HTMLElement|string} target - Target element or element ID
+ * @param {number} offset - Pixel offset from top (default 85px)
+ */
+function smoothScrollTo(target, offset = 85) {
+  const el = typeof target === 'string' ? document.getElementById(target) : target;
+  if (!el) return;
+  const elementPosition = el.getBoundingClientRect().top;
+  const offsetPosition = elementPosition + window.pageYOffset - offset;
+  window.scrollTo({
+    top: Math.max(0, offsetPosition),
+    behavior: 'smooth'
+  });
 }
 
 /**

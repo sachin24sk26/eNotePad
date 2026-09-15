@@ -4,6 +4,7 @@ Allow: /
 User-agent: *
 Allow: /
 Disallow: /scratch/
+Disallow: /functions/
 
 # Google Search Console Sitemap for https://enotepad.vercel.app/
 Sitemap: https://enotepad.vercel.app/sitemap.xml

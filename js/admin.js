@@ -53,6 +53,13 @@ function closeAdminConfirm(result) {
 // INITIALIZATION
 // ============================================================
 function initAdmin() {
+  const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+  const isAdmin = user && (user.role === 'admin' || user.isAdmin === true);
+  if (!isAdmin) {
+    console.warn('🛡️ initAdmin() blocked: User is not an authorized administrator.');
+    return;
+  }
+
   if (window.adminInitialized) {
     console.log('🛡️ Admin already initialized, skipping...');
     return;

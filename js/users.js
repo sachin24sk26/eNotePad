@@ -33,40 +33,10 @@ function initUserSearch() {
   async function fetchAllUsers() {
     if (cachedUsers) return cachedUsers;
     try {
-      const snap = await db.collection('userSearch').where('isPublic', '==', true).limit(500).get().catch(() => ({ docs: [] }));
-      let users = snap.docs.map(d => d.data());
-
-      // Fallback merge from main users collection to ensure no registered user is missing
-      const usersSnap = await db.collection('users').limit(500).get().catch(() => ({ docs: [] }));
-      const userMap = new Map();
-
-      users.forEach(u => { if (u && u.username) userMap.set(u.username, u); });
-
-      usersSnap.docs.forEach(d => {
-        const data = d.data();
-        const uname = d.id;
-        if (!userMap.has(uname)) {
-          userMap.set(uname, {
-            username: uname,
-            displayName: data.displayName || uname,
-            bio: data.bio || '',
-            avatarColor: data.avatarColor || generateAvatarColor(uname),
-            tags: data.tags || [],
-            followersCount: data.followersCount || 0,
-            followingCount: data.followingCount || 0,
-            isPublic: true
-          });
-        } else {
-          const existing = userMap.get(uname);
-          if (!existing.displayName) existing.displayName = data.displayName || uname;
-          if (!existing.bio) existing.bio = data.bio || '';
-          if (!existing.avatarColor) existing.avatarColor = data.avatarColor || generateAvatarColor(uname);
-          if (!existing.tags || existing.tags.length === 0) existing.tags = data.tags || [];
-          if (data.followersCount) existing.followersCount = data.followersCount;
-        }
-      });
-
-      cachedUsers = Array.from(userMap.values());
+      // Query only the public search index projection (never the root users collection)
+      const snap = await db.collection('userSearch').where('isPublic', '==', true).limit(300).get().catch(() => ({ docs: [] }));
+      const users = snap.docs.map(d => d.data()).filter(u => u && u.username);
+      cachedUsers = users;
       return cachedUsers;
     } catch (e) {
       console.warn('userSearch fetch error:', e);
