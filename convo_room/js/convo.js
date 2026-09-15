@@ -7,22 +7,32 @@ let currentUserInfo = null;
 let roomTimerInterval = null;
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Theme toggle
+    // Theme toggle & Sync
     const themeToggle = document.getElementById('themeToggle');
     const htmlEl = document.documentElement;
-    if (localStorage.getItem('theme') === 'dark') {
+    const savedTheme = localStorage.getItem('enp-theme') || localStorage.getItem('enotpad_theme') || localStorage.getItem('theme');
+    if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
         htmlEl.classList.add('dark');
         htmlEl.classList.remove('light');
+    } else {
+        htmlEl.classList.add('light');
+        htmlEl.classList.remove('dark');
     }
+
     if (themeToggle) {
         themeToggle.addEventListener('click', () => {
-             if (htmlEl.classList.contains('dark')) {
+             const isDark = htmlEl.classList.contains('dark');
+             if (isDark) {
                  htmlEl.classList.remove('dark');
                  htmlEl.classList.add('light');
+                 localStorage.setItem('enp-theme', 'light');
+                 localStorage.setItem('enotpad_theme', 'light');
                  localStorage.setItem('theme', 'light');
              } else {
                  htmlEl.classList.add('dark');
                  htmlEl.classList.remove('light');
+                 localStorage.setItem('enp-theme', 'dark');
+                 localStorage.setItem('enotpad_theme', 'dark');
                  localStorage.setItem('theme', 'dark');
              }
         });

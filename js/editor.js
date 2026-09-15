@@ -821,6 +821,46 @@ function initEditor() {
 
   // ─── Quick Starter Chips (Blank Canvas Accelerators) ───
   const starterContainer = document.getElementById('editorStarterChips');
+  const starterToggleBtn = document.getElementById('starterToggleBtn');
+  const starterOptionsList = document.getElementById('starterOptionsList');
+  const starterToggleIcon = document.getElementById('starterToggleIcon');
+
+  const collapseStarters = () => {
+    if (starterOptionsList) {
+      starterOptionsList.classList.add('hidden');
+      starterOptionsList.classList.remove('flex');
+      if (starterToggleBtn) starterToggleBtn.setAttribute('aria-expanded', 'false');
+      if (starterToggleIcon) starterToggleIcon.textContent = 'expand_more';
+    }
+  };
+
+  const expandStarters = () => {
+    if (starterOptionsList) {
+      starterOptionsList.classList.remove('hidden');
+      starterOptionsList.classList.add('flex');
+      if (starterToggleBtn) starterToggleBtn.setAttribute('aria-expanded', 'true');
+      if (starterToggleIcon) starterToggleIcon.textContent = 'expand_less';
+    }
+  };
+
+  if (starterToggleBtn && starterOptionsList) {
+    starterToggleBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isHidden = starterOptionsList.classList.contains('hidden');
+      if (isHidden) {
+        expandStarters();
+      } else {
+        collapseStarters();
+      }
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!starterContainer || (!starterContainer.contains(e.target))) {
+        collapseStarters();
+      }
+    });
+  }
+
   if (starterContainer) {
     starterContainer.addEventListener('click', (e) => {
       const chip = e.target.closest('.starter-chip');
@@ -862,6 +902,9 @@ function initEditor() {
         sel.removeAllRanges();
         sel.addRange(range);
       } catch (err) {}
+
+      // Auto-collapse after selecting a starter
+      collapseStarters();
 
       if (typeof showToast === 'function') {
         showToast(`Template applied: ${chip.textContent.trim()}`, 'success');

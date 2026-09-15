@@ -1,0 +1,416 @@
+/* ============================================================
+   eNotePad — CodeShare (Collaborative Real-Time Code Editor)
+   Tactile Editorial Design System + Modern Developer IDE
+   ============================================================ */
+
+/* ---------- Base Layout ---------- */
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: #faf9f5;
+  color: #22292f;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.font-serif {
+  font-family: 'Newsreader', serif;
+}
+
+.font-mono {
+  font-family: 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+}
+
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ---------- Editorial Tokens ---------- */
+.editorial-border {
+  border: 1px solid rgba(81, 96, 112, 0.15);
+}
+
+.editorial-shadow {
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+/* ---------- CodeMirror Editor Overrides ---------- */
+.CodeMirror {
+  height: 100% !important;
+  font-family: 'Fira Code', 'JetBrains Mono', 'Consolas', 'Courier New', monospace !important;
+  font-size: 14px;
+  line-height: 1.6;
+  background: transparent !important;
+  color: #2b3a4a !important;
+}
+
+.CodeMirror-gutters {
+  background-color: rgba(81, 96, 112, 0.04) !important;
+  border-right: 1px solid rgba(81, 96, 112, 0.12) !important;
+  padding-right: 4px;
+}
+
+.CodeMirror-linenumber {
+  color: rgba(81, 96, 112, 0.45) !important;
+  padding: 0 8px 0 4px !important;
+}
+
+.CodeMirror-cursor {
+  border-left: 2px solid #2563eb !important;
+}
+
+.CodeMirror-selected {
+  background: rgba(81, 96, 112, 0.15) !important;
+}
+
+.CodeMirror-focused .CodeMirror-selected {
+  background: rgba(37, 99, 235, 0.18) !important;
+}
+
+.CodeMirror-line::selection, .CodeMirror-line > span::selection, .CodeMirror-line > span > span::selection {
+  background: rgba(37, 99, 235, 0.2) !important;
+}
+
+/* Scrollbar in Editor */
+.CodeMirror-scrollbar-filler, .CodeMirror-gutter-filler {
+  background-color: transparent !important;
+}
+
+.CodeMirror-vscrollbar, .CodeMirror-hscrollbar {
+  scrollbar-width: thin;
+}
+
+.CodeMirror-vscrollbar::-webkit-scrollbar, .CodeMirror-hscrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.CodeMirror-vscrollbar::-webkit-scrollbar-thumb, .CodeMirror-hscrollbar::-webkit-scrollbar-thumb {
+  background: rgba(81, 96, 112, 0.2);
+  border-radius: 9999px;
+}
+
+/* ---------- Tool Buttons & Hover Glow ---------- */
+.tool-btn {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid transparent;
+  user-select: none;
+}
+
+.tool-btn:hover {
+  background-color: rgba(81, 96, 112, 0.1);
+  color: #2b3a4a;
+  transform: translateY(-1px);
+}
+
+.tool-btn.active {
+  background-color: #2563eb !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 14px rgba(37, 99, 235, 0.4) !important;
+}
+
+/* ---------- Live Status Pulse ---------- */
+@keyframes livePulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.3); opacity: 0.7; }
+}
+
+.status-dot-live {
+  animation: livePulse 2s ease-in-out infinite;
+}
+
+/* ---------- Chat & Preview Drawers ---------- */
+.drawer-panel {
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease;
+}
+
+.drawer-panel.hidden-drawer {
+  transform: translateX(100%);
+  pointer-events: none;
+  opacity: 0;
+}
+
+/* ============================================================
+   LIGHT MODE SPECIFICS
+   ============================================================ */
+html:not(.dark) body {
+  background-color: #faf9f5 !important;
+  color: #22292f !important;
+}
+
+html:not(.dark) header {
+  background-color: #ffffff !important;
+  border-color: rgba(81, 96, 112, 0.12) !important;
+}
+
+html:not(.dark) #joinView {
+  background-color: rgba(250, 249, 245, 0.96) !important;
+}
+
+html:not(.dark) #createRoomModalBtn {
+  background-color: #2563eb !important;
+  color: #ffffff !important;
+}
+
+html:not(.dark) #createRoomModalBtn:hover {
+  background-color: #1d4ed8 !important;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3) !important;
+}
+
+/* ============================================================
+   DARK MODE COMPREHENSIVE OVERRIDES
+   ============================================================ */
+.dark body {
+  background-color: #0d1117 !important;
+  color: #f0f6fc !important;
+}
+
+.dark header {
+  background-color: #161c24 !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.dark main {
+  background-color: #0d1117 !important;
+}
+
+/* Surfaces & Backgrounds */
+.dark .bg-surface {
+  background-color: #0d1117 !important;
+}
+
+.dark .bg-surface\/95,
+.dark .bg-surface\/90 {
+  background-color: rgba(13, 17, 23, 0.96) !important;
+}
+
+.dark .bg-surface-container-lowest {
+  background-color: #161c24 !important;
+}
+
+.dark .bg-surface-container-low {
+  background-color: #1a222c !important;
+}
+
+.dark .bg-surface-container {
+  background-color: #1f2834 !important;
+}
+
+.dark .bg-surface-container-high {
+  background-color: #263242 !important;
+}
+
+.dark .bg-surface-dim {
+  background-color: #11161d !important;
+}
+
+/* Join Modal Backdrop & Card */
+.dark #joinView {
+  background-color: rgba(13, 17, 23, 0.96) !important;
+}
+
+.dark #joinView > div > div {
+  background-color: #161c24 !important;
+  border-color: rgba(112, 180, 248, 0.18) !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7) !important;
+}
+
+/* Text Colors */
+.dark .text-on-surface {
+  color: #f0f6fc !important;
+}
+
+.dark .text-on-surface-variant {
+  color: #91a4b7 !important;
+}
+
+.dark .text-on-surface-variant\/80 {
+  color: rgba(145, 164, 183, 0.8) !important;
+}
+
+.dark .text-on-surface-variant\/70 {
+  color: rgba(145, 164, 183, 0.7) !important;
+}
+
+.dark .text-on-surface-variant\/60 {
+  color: rgba(145, 164, 183, 0.6) !important;
+}
+
+.dark .text-on-surface-variant\/50 {
+  color: rgba(145, 164, 183, 0.5) !important;
+}
+
+.dark .text-on-surface-variant\/40 {
+  color: rgba(145, 164, 183, 0.4) !important;
+}
+
+.dark .text-primary {
+  color: #70b4f8 !important;
+}
+
+.dark .text-primary\/80 {
+  color: rgba(112, 180, 248, 0.8) !important;
+}
+
+.dark .text-primary\/70 {
+  color: rgba(112, 180, 248, 0.7) !important;
+}
+
+.dark .text-primary\/40 {
+  color: rgba(112, 180, 248, 0.4) !important;
+}
+
+.dark .text-on-primary {
+  color: #ffffff !important;
+}
+
+.dark .bg-primary {
+  background-color: #2563eb !important;
+}
+
+.dark .bg-primary\/10 {
+  background-color: rgba(112, 180, 248, 0.12) !important;
+}
+
+.dark .bg-primary\/20 {
+  background-color: rgba(112, 180, 248, 0.2) !important;
+}
+
+/* Borders */
+.dark .editorial-border {
+  border-color: rgba(112, 180, 248, 0.15) !important;
+}
+
+.dark .border-outline-variant\/10 {
+  border-color: rgba(255, 255, 255, 0.07) !important;
+}
+
+.dark .border-outline-variant\/15 {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.dark .border-outline-variant\/20 {
+  border-color: rgba(255, 255, 255, 0.14) !important;
+}
+
+.dark .border-outline-variant\/30 {
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.dark .editorial-shadow {
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Form Controls & Inputs */
+.dark #roomCodeModalInput,
+.dark #roomShareUrlInput,
+.dark #chatInput,
+.dark #languageSelect,
+.dark #tabSizeSelect {
+  background-color: #11161d !important;
+  color: #70b4f8 !important;
+  border-color: rgba(112, 180, 248, 0.3) !important;
+}
+
+.dark #roomCodeModalInput::placeholder,
+.dark #chatInput::placeholder {
+  color: rgba(145, 164, 183, 0.4) !important;
+}
+
+/* Buttons in Dark Mode */
+.dark #createRoomModalBtn,
+.dark #runCodeBtn {
+  background-color: #2563eb !important;
+  color: #ffffff !important;
+}
+
+.dark #createRoomModalBtn:hover,
+.dark #runCodeBtn:hover {
+  background-color: #1d4ed8 !important;
+  box-shadow: 0 0 18px rgba(37, 99, 235, 0.6) !important;
+}
+
+.dark #joinRoomModalBtn {
+  background-color: #1f2834 !important;
+  color: #70b4f8 !important;
+  border-color: rgba(112, 180, 248, 0.3) !important;
+}
+
+.dark #joinRoomModalBtn:hover {
+  background-color: #263242 !important;
+  box-shadow: 0 0 12px rgba(112, 180, 248, 0.25) !important;
+}
+
+.dark .tool-btn {
+  color: #91a4b7;
+}
+
+.dark .tool-btn:hover {
+  background-color: rgba(112, 180, 248, 0.14) !important;
+  border-color: rgba(112, 180, 248, 0.35) !important;
+  color: #70b4f8 !important;
+  box-shadow: 0 0 12px rgba(112, 180, 248, 0.2) !important;
+  transform: translateY(-1px);
+}
+
+.dark .tool-btn.active:hover {
+  background-color: #1d4ed8 !important;
+  box-shadow: 0 0 18px rgba(37, 99, 235, 0.6) !important;
+}
+
+/* Dark Mode CodeMirror */
+.dark .CodeMirror {
+  color: #e6edf3 !important;
+  background-color: #0d1117 !important;
+}
+
+.dark .CodeMirror-gutters {
+  background-color: #11161d !important;
+  border-right: 1px solid rgba(112, 180, 248, 0.15) !important;
+}
+
+.dark .CodeMirror-linenumber {
+  color: rgba(145, 164, 183, 0.45) !important;
+}
+
+.dark .CodeMirror-cursor {
+  border-left: 2px solid #70b4f8 !important;
+}
+
+.dark .CodeMirror-selected {
+  background: rgba(112, 180, 248, 0.2) !important;
+}
+
+.dark .CodeMirror-focused .CodeMirror-selected {
+  background: rgba(112, 180, 248, 0.28) !important;
+}
+
+.dark .CodeMirror-vscrollbar::-webkit-scrollbar-thumb, 
+.dark .CodeMirror-hscrollbar::-webkit-scrollbar-thumb {
+  background: rgba(112, 180, 248, 0.25);
+}
+
+/* Session Timer Badge */
+#sessionTimerBadge {
+  background-color: #edeae2;
+  color: #2b3a4a;
+  border-color: rgba(81, 96, 112, 0.15);
+}
+
+.dark #sessionTimerBadge {
+  background-color: #19202a !important;
+  color: #70b4f8 !important;
+  border-color: rgba(112, 180, 248, 0.25) !important;
+  box-shadow: 0 0 10px rgba(112, 180, 248, 0.08) !important;
+}
+
+.dark #sessionTimerBadge button:hover {
+  background-color: rgba(112, 180, 248, 0.2) !important;
+  color: #ffffff !important;
+}

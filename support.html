@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-  <meta name="description" content="eNotePad Support & FAQ — Get help, browse FAQs, and contact support for eNotePad digital curator services." />
-  <meta name="keywords" content="eNotePad support, help center, FAQs, contact eNotePad, note sharing help, secret code troubleshooting" />
+  <meta name="description" content="eNotePad Support & FAQ — Get help, browse troubleshooting guides, and find quick answers for note sharing and digital curation." />
+  <meta name="keywords" content="eNotePad support, help center, FAQs, contact eNotePad, note sharing help, secret code troubleshooting, convo room guide" />
   <meta name="author" content="eNotePad — Digital Curator" />
   <meta name="robots" content="index, follow, max-image-preview:large" />
   <meta name="theme-color" id="themeColorMeta" content="#516070" />
@@ -36,7 +36,7 @@
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "ContactPage",
+    "@type": "FAQPage",
     "name": "Support & FAQ — eNotePad",
     "url": "https://enotepad.vercel.app/support.html",
     "description": "Support center and frequently asked questions for eNotePad digital curator service.",
@@ -48,14 +48,20 @@
   }
   </script>
 
+  <!-- Preconnect & DNS-Prefetch -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin />
+  <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com" />
+
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 
   <!-- Google Fonts: Inter + Newsreader -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet" />
 
-  <!-- Material Symbols -->
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <!-- Material Symbols Outlined -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400..700,0..1,0&display=swap" rel="stylesheet" />
 
   <!-- Tailwind Config -->
   <script>
@@ -64,57 +70,22 @@
       theme: {
         extend: {
           colors: {
-            "primary-dim": "#455464",
-            "on-tertiary": "#faf8ff",
-            "tertiary-fixed": "#d5dcfb",
-            "on-secondary-fixed": "#3e3f42",
-            "on-surface": "#2f342e",
-            "inverse-primary": "#daeafe",
-            "primary-fixed": "#d4e4f8",
-            "error": "#9f403d",
-            "on-tertiary-fixed": "#343b53",
-            "secondary-dim": "#525356",
-            "surface-container-low": "#f4f4ef",
-            "surface": "#faf9f5",
-            "surface-container-highest": "#e0e4dc",
-            "surface-tint": "#516070",
-            "inverse-surface": "#0d0f0d",
-            "on-secondary-container": "#505255",
-            "secondary-fixed-dim": "#d4d4d7",
-            "on-background": "#2f342e",
-            "error-container": "#fe8983",
-            "surface-bright": "#faf9f5",
-            "on-tertiary-container": "#474d67",
-            "on-surface-variant": "#5c605a",
-            "outline-variant": "#afb3ac",
-            "tertiary": "#575e78",
-            "tertiary-dim": "#4b526c",
-            "inverse-on-surface": "#9d9d9a",
-            "secondary-fixed": "#e2e2e5",
-            "on-error": "#fff7f6",
-            "on-primary": "#f4f8ff",
             "primary": "#516070",
-            "outline": "#787c75",
-            "tertiary-fixed-dim": "#c7ceec",
-            "secondary": "#5e5f62",
-            "error-dim": "#4e0309",
-            "on-secondary-fixed-variant": "#5a5b5e",
-            "surface-variant": "#e0e4dc",
-            "on-tertiary-fixed-variant": "#505771",
-            "surface-container-lowest": "#ffffff",
-            "on-primary-fixed-variant": "#4e5d6d",
-            "on-secondary": "#f9f8fc",
-            "surface-container": "#edeee8",
-            "background": "#faf9f5",
-            "tertiary-container": "#d5dcfb",
-            "secondary-container": "#e2e2e5",
-            "on-error-container": "#752121",
-            "on-primary-container": "#445363",
-            "surface-container-high": "#e6e9e2",
-            "on-primary-fixed": "#324150",
-            "primary-fixed-dim": "#c6d6e9",
+            "primary-dim": "#455464",
             "primary-container": "#d4e4f8",
-            "surface-dim": "#d6dcd2"
+            "on-primary": "#f4f8ff",
+            "surface": "#faf9f5",
+            "on-surface": "#2f342e",
+            "surface-container-lowest": "#ffffff",
+            "surface-container-low": "#f4f4ef",
+            "surface-container": "#edeee8",
+            "surface-container-high": "#e6e9e2",
+            "surface-dim": "#d6dcd2",
+            "on-surface-variant": "#5c605a",
+            "outline": "#787c75",
+            "outline-variant": "#afb3ac",
+            "error": "#9f403d",
+            "on-error": "#fff7f6"
           },
           borderRadius: {
             DEFAULT: "0.25rem",
@@ -132,9 +103,230 @@
     };
   </script>
 
-  <link rel="stylesheet" href="css/styles.css?v=1.6" />
+  <link rel="stylesheet" href="css/styles.css?v=1.7" />
+
+  <style>
+    /* ── Light Mode Base Refinements ── */
+    body { background-color: #faf9f5; color: #22292f; }
+    .bg-surface { background-color: #ffffff; }
+    .bg-surface-container-lowest { background-color: #ffffff; }
+    .bg-surface-container-low { background-color: #f4f4ef; }
+    .bg-surface-container { background-color: #edeee8; }
+    .bg-surface-container-high { background-color: #e6e9e2; }
+    .editorial-border { border: 1px solid rgba(81, 96, 112, 0.15); }
+    .editorial-shadow { box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05); }
+
+    /* ── Comprehensive Dark Mode Color Overrides ── */
+    .dark body { background-color: #0d1117 !important; color: #f0f6fc !important; }
+    .dark .bg-background { background-color: #0d1117 !important; }
+    .dark .bg-surface { background-color: #161c24 !important; }
+    .dark .bg-surface-container-lowest { background-color: #161c24 !important; }
+    .dark .bg-surface-container-low { background-color: #1a222c !important; }
+    .dark .bg-surface-container { background-color: #1f2834 !important; }
+    .dark .bg-surface-container-high { background-color: #263242 !important; }
+    .dark .bg-surface-dim { background-color: #11161d !important; }
+    .dark .text-on-surface { color: #f0f6fc !important; }
+    .dark .text-on-surface-variant { color: #91a4b7 !important; }
+    .dark .text-on-surface-variant\/60 { color: rgba(145,164,183,0.6) !important; }
+    .dark .text-on-surface-variant\/70 { color: rgba(145,164,183,0.7) !important; }
+    .dark .text-primary { color: #70b4f8 !important; }
+    .dark .text-primary\/70 { color: rgba(112,180,248,0.7) !important; }
+    .dark .text-primary\/60 { color: rgba(112,180,248,0.6) !important; }
+    .dark .text-primary\/50 { color: rgba(112,180,248,0.5) !important; }
+    .dark .text-primary\/40 { color: rgba(112,180,248,0.4) !important; }
+    .dark .text-on-primary { color: #ffffff !important; }
+    .dark .bg-primary { background-color: #2563eb !important; }
+    .dark .bg-primary\/10 { background-color: rgba(112,180,248,0.12) !important; }
+    .dark .bg-primary\/5 { background-color: rgba(112,180,248,0.06) !important; }
+    .dark .bg-surface-container\/40 { background-color: rgba(31,40,52,0.5) !important; }
+    
+    /* Header, Mobile Menu & Footer */
+    .dark header { background-color: rgba(13,17,23,0.92) !important; border-color: rgba(255,255,255,0.08) !important; }
+    .dark #mobileMenu { background-color: rgba(13,17,23,0.97) !important; border-color: rgba(255,255,255,0.08) !important; }
+    .dark footer { background-color: #11161d !important; border-color: rgba(255,255,255,0.08) !important; }
+    
+    /* Inputs, Selects & Textareas in Dark Mode */
+    .dark input, .dark select, .dark textarea {
+      background-color: #11161d !important;
+      color: #f0f6fc !important;
+      border-color: rgba(112, 180, 248, 0.22) !important;
+    }
+    .dark input::placeholder, .dark textarea::placeholder {
+      color: rgba(145, 164, 183, 0.5) !important;
+    }
+
+    /* Borders & Shadows */
+    .dark .editorial-border { border-color: rgba(112,180,248,0.14) !important; }
+    .dark .border-outline-variant\/10 { border-color: rgba(255,255,255,0.07) !important; }
+    .dark .border-outline-variant\/20 { border-color: rgba(112,180,248,0.15) !important; }
+    .dark .editorial-shadow { box-shadow: 0 12px 36px rgba(0,0,0,0.5) !important; }
+
+    /* Mobile menu hover in dark mode */
+    .dark #mobileMenu a { transition: all 0.2s ease; }
+    .dark #mobileMenu a:hover { background-color: rgba(112,180,248,0.14) !important; color: #70b4f8 !important; }
+
+    /* Theme toggle & Mobile menu btn hover in dark mode */
+    .dark .theme-toggle-btn:hover, .dark #mobileMenuBtn:hover {
+      background-color: rgba(112, 180, 248, 0.14) !important;
+      border-color: rgba(112, 180, 248, 0.35) !important;
+      color: #70b4f8 !important;
+      box-shadow: 0 0 12px rgba(112, 180, 248, 0.2) !important;
+    }
+
+    /* ── Navigation Links (Both Modes) ── */
+    .nav-link {
+      color: rgba(81, 96, 112, 0.75);
+      background: transparent;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: 0.75rem;
+      border: 1px solid transparent;
+      text-decoration: none;
+    }
+    .nav-link:hover {
+      color: #2b3a4a;
+      background: rgba(81, 96, 112, 0.08);
+      border-color: rgba(81, 96, 112, 0.12);
+    }
+    .nav-link.active {
+      color: #2b3a4a !important;
+      background: rgba(81, 96, 112, 0.12) !important;
+      border: 1px solid rgba(81, 96, 112, 0.2) !important;
+      font-weight: 700;
+    }
+    .nav-link.active:hover {
+      background: rgba(81, 96, 112, 0.16) !important;
+    }
+
+    .dark .nav-link {
+      color: #91a4b7 !important;
+    }
+    .dark .nav-link:hover {
+      color: #70b4f8 !important;
+      background: rgba(112, 180, 248, 0.12) !important;
+      border-color: rgba(112, 180, 248, 0.25) !important;
+      box-shadow: 0 0 12px rgba(112, 180, 248, 0.15) !important;
+    }
+    .dark .nav-link.active {
+      color: #70b4f8 !important;
+      background: rgba(112, 180, 248, 0.16) !important;
+      border: 1px solid rgba(112, 180, 248, 0.35) !important;
+      box-shadow: 0 0 14px rgba(112, 180, 248, 0.2) !important;
+      font-weight: 700;
+    }
+    .dark .nav-link.active:hover {
+      color: #ffffff !important;
+      background: rgba(112, 180, 248, 0.25) !important;
+      border-color: rgba(112, 180, 248, 0.5) !important;
+      box-shadow: 0 0 18px rgba(112, 180, 248, 0.35) !important;
+    }
+
+    /* Filter Pills (Clean, dedicated styling) */
+    .faq-filter-pill {
+      background-color: #edeee8;
+      color: #516070;
+      border: 1px solid rgba(81, 96, 112, 0.18);
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      user-select: none;
+      text-decoration: none;
+    }
+    .faq-filter-pill:hover {
+      background-color: #e2e6de;
+      color: #2b3a4a;
+      border-color: rgba(81, 96, 112, 0.35);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    }
+    .faq-filter-pill.active {
+      background-color: #516070 !important;
+      color: #ffffff !important;
+      border-color: #516070 !important;
+      box-shadow: 0 2px 8px rgba(81, 96, 112, 0.25) !important;
+    }
+    .faq-filter-pill.active:hover {
+      background-color: #445363 !important;
+      border-color: #445363 !important;
+      box-shadow: 0 4px 14px rgba(81, 96, 112, 0.35) !important;
+    }
+
+    /* Dark Mode Filter Pills with vibrant hover glow */
+    .dark .faq-filter-pill {
+      background-color: #161c24 !important;
+      color: #91a4b7 !important;
+      border: 1px solid rgba(112, 180, 248, 0.18) !important;
+      box-shadow: none !important;
+    }
+    .dark .faq-filter-pill:hover {
+      background-color: rgba(112, 180, 248, 0.18) !important;
+      color: #70b4f8 !important;
+      border-color: rgba(112, 180, 248, 0.5) !important;
+      box-shadow: 0 0 16px rgba(112, 180, 248, 0.3) !important;
+      transform: translateY(-1.5px);
+    }
+    .dark .faq-filter-pill.active {
+      background-color: #2563eb !important;
+      color: #ffffff !important;
+      border: 1px solid #3b82f6 !important;
+      box-shadow: 0 0 16px rgba(37, 99, 235, 0.5) !important;
+    }
+    .dark .faq-filter-pill.active:hover {
+      background-color: #1d4ed8 !important;
+      color: #ffffff !important;
+      border-color: #60a5fa !important;
+      box-shadow: 0 0 22px rgba(37, 99, 235, 0.75) !important;
+      transform: translateY(-1.5px);
+    }
+
+    /* FAQ Hover in Dark Mode */
+    .dark .faq-item {
+      transition: all 0.2s ease;
+    }
+    .dark .faq-item:hover {
+      border-color: rgba(112, 180, 248, 0.35) !important;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 0 14px rgba(112, 180, 248, 0.08) !important;
+    }
+    .dark .faq-trigger:hover {
+      background-color: rgba(112, 180, 248, 0.08) !important;
+    }
+    .dark .faq-trigger:hover span, .dark .faq-trigger:hover .font-bold {
+      color: #70b4f8 !important;
+    }
+
+    /* Trouble & Quick Card Hover in Dark Mode */
+    .dark .trouble-card, .dark .quick-card {
+      transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .dark .trouble-card:hover, .dark .quick-card:hover {
+      border-color: rgba(112, 180, 248, 0.35) !important;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6), 0 0 16px rgba(112, 180, 248, 0.1) !important;
+      transform: translateY(-3px);
+    }
+
+    .dark footer a:hover {
+      color: #70b4f8 !important;
+    }
+
+    .faq-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .animated-underline { position: relative; display: inline-block; }
+    .animated-underline::after {
+      content: '';
+      position: absolute;
+      left: 0; bottom: -2px;
+      width: 100%; height: 2px;
+      background: currentColor;
+      border-radius: 2px;
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.3s ease;
+    }
+    .animated-underline:hover::after { transform: scaleX(1); }
+  </style>
 </head>
-<body class="bg-background text-on-surface font-label min-h-screen relative overflow-x-clip flex flex-col">
+<body class="bg-background text-on-surface font-label min-h-screen relative overflow-x-hidden flex flex-col">
 
   <!-- Paper Grain Overlay -->
   <div class="fixed inset-0 pointer-events-none paper-grain z-50"></div>
@@ -143,106 +335,154 @@
   <div class="fixed top-5 right-5 z-[9999] flex flex-col gap-2 pointer-events-none" id="toastContainer"></div>
 
   <!-- Header -->
-  <header class="bg-background/95 sticky top-0 z-30 backdrop-blur-sm border-b border-outline-variant/10">
-    <div class="flex justify-between items-center w-full px-6 py-3.5 max-w-5xl mx-auto">
-      <a href="index.html" class="flex items-center gap-2.5 group" style="text-decoration:none">
+  <header class="bg-background/95 sticky top-0 z-30 backdrop-blur-md border-b border-outline-variant/10 transition-colors">
+    <div class="flex justify-between items-center w-full px-4 sm:px-6 py-3 max-w-6xl mx-auto">
+      <a href="index.html" class="flex items-center gap-2.5 group no-underline" style="text-decoration:none">
         <div class="relative w-8 h-8 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
           <img src="assets/logo-light.svg" alt="eNotePad Logo" class="w-full h-full object-contain dark:hidden" />
           <img src="assets/logo-dark.svg" alt="eNotePad Logo" class="w-full h-full object-contain hidden dark:block" />
         </div>
         <div>
-          <span class="font-body italic text-lg text-primary dark:text-[#d4e4f8] leading-none block">eNotePad</span>
-          <span class="text-[9px] uppercase tracking-widest text-primary/40 dark:text-primary-dim/60 font-bold">Digital Curator</span>
+          <div class="flex items-baseline leading-none">
+            <span style="color:#00a8ff" class="text-lg font-bold">e</span>
+            <span class="text-primary text-lg font-bold">NotePad</span>
+          </div>
+          <span class="text-[8px] uppercase tracking-widest text-primary/40 font-bold block">Digital Curator</span>
         </div>
       </a>
 
-      <nav class="flex items-center gap-1 sm:gap-2">
-        <a href="index.html" class="text-xs sm:text-sm px-3 py-1.5 rounded-lg text-primary/60 hover:text-primary hover:bg-surface-container transition-all">Notes</a>
-        <a href="privacy.html" class="text-xs sm:text-sm px-3 py-1.5 rounded-lg text-primary/60 hover:text-primary hover:bg-surface-container transition-all">Privacy</a>
-        <a href="terms.html" class="text-xs sm:text-sm px-3 py-1.5 rounded-lg text-primary/60 hover:text-primary hover:bg-surface-container transition-all">Terms</a>
-        <a href="support.html" class="text-xs sm:text-sm px-3 py-1.5 rounded-lg text-primary font-bold bg-primary/10">Support</a>
+      <!-- Desktop Nav -->
+      <nav class="hidden md:flex items-center gap-1 sm:gap-1.5">
+        <a href="how-it-works.html" class="nav-link text-xs font-medium px-3 py-1.5">How It Works</a>
+        <a href="convo_room/index.html" class="nav-link text-xs font-medium px-3 py-1.5 flex items-center gap-1">
+          <span class="material-symbols-outlined text-[15px]">forum</span> Convo Room
+        </a>
+        <a href="codeshare/index.html" class="nav-link text-xs font-medium px-3 py-1.5 flex items-center gap-1">
+          <span class="material-symbols-outlined text-[15px]">code</span> CodeShare
+        </a>
+        <a href="support.html" class="nav-link active text-xs font-bold px-3 py-1.5">Help & FAQs</a>
+        <a href="privacy.html" class="nav-link text-xs font-medium px-3 py-1.5">Privacy</a>
+        <a href="terms.html" class="nav-link text-xs font-medium px-3 py-1.5">Terms</a>
         
-        <button class="theme-toggle-btn ml-2 flex items-center gap-2 px-3 py-1.5 rounded-full border border-outline-variant/20 transition-all active:scale-[0.97]" id="themeToggle" aria-label="Toggle theme">
-          <span class="material-symbols-outlined text-base theme-icon-dark">dark_mode</span>
-          <span class="material-symbols-outlined text-base theme-icon-light">light_mode</span>
-          <span class="theme-toggle-label text-xs font-semibold theme-label-dark">Dark</span>
-          <span class="theme-toggle-label text-xs font-semibold theme-label-light">Light</span>
+        <button class="theme-toggle-btn ml-1 flex items-center justify-center w-8 h-8 rounded-full border border-outline-variant/20 hover:bg-surface-container transition-all" id="themeToggle" aria-label="Toggle theme">
+          <span class="material-symbols-outlined text-base dark:hidden">dark_mode</span>
+          <span class="material-symbols-outlined text-base hidden dark:block">light_mode</span>
         </button>
+
+        <a href="index.html" class="ml-2 inline-flex items-center gap-1 px-4 py-1.5 bg-primary text-on-primary rounded-full text-xs font-bold hover:bg-primary-dim transition-all shadow-sm">
+          Open App <span class="material-symbols-outlined text-xs">arrow_forward</span>
+        </a>
       </nav>
+
+      <!-- Mobile Nav Buttons -->
+      <div class="flex items-center gap-2 md:hidden">
+        <button class="theme-toggle-btn w-8 h-8 flex items-center justify-center rounded-full border border-outline-variant/20" id="themeToggleMobile" aria-label="Toggle theme">
+          <span class="material-symbols-outlined text-base dark:hidden">dark_mode</span>
+          <span class="material-symbols-outlined text-base hidden dark:block">light_mode</span>
+        </button>
+        <button id="mobileMenuBtn" class="w-8 h-8 flex items-center justify-center rounded-lg bg-surface-container border border-outline-variant/20 text-primary" aria-label="Open Menu">
+          <span class="material-symbols-outlined text-xl">menu</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Dropdown Menu -->
+    <div id="mobileMenu" class="hidden md:hidden px-4 pb-4 pt-2 border-t border-outline-variant/10 bg-background/95 backdrop-blur-lg flex flex-col gap-2">
+      <a href="index.html" class="px-3 py-2 rounded-xl text-sm font-semibold text-primary bg-surface-container flex items-center justify-between">
+        <span>✏️ Open App & Editor</span>
+        <span class="material-symbols-outlined text-sm">arrow_forward</span>
+      </a>
+      <a href="how-it-works.html" class="px-3 py-2 rounded-xl text-sm text-primary/80 hover:bg-surface-container">📖 How It Works Guide</a>
+      <a href="convo_room/index.html" class="px-3 py-2 rounded-xl text-sm text-primary/80 hover:bg-surface-container">💬 Live Convo Room</a>
+      <a href="codeshare/index.html" class="px-3 py-2 rounded-xl text-sm text-primary/80 hover:bg-surface-container">💻 Collaborative CodeShare</a>
+      <a href="support.html" class="px-3 py-2 rounded-xl text-sm font-bold text-primary bg-primary/10">🎧 Help & FAQs</a>
+      <a href="privacy.html" class="px-3 py-2 rounded-xl text-sm text-primary/80 hover:bg-surface-container">🛡️ Privacy Policy</a>
+      <a href="terms.html" class="px-3 py-2 rounded-xl text-sm text-primary/80 hover:bg-surface-container">⚖️ Terms of Service</a>
     </div>
   </header>
 
   <!-- Content Container -->
-  <main class="flex-1 max-w-5xl w-full mx-auto px-6 py-10 md:py-14 space-y-12">
+  <main class="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-10 sm:space-y-12">
 
     <!-- Hero Header with Search -->
-    <div class="bg-surface rounded-3xl p-8 md:p-12 editorial-shadow editorial-border text-center relative overflow-hidden space-y-6">
-      <div class="w-14 h-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mx-auto">
-        <span class="material-symbols-outlined text-2xl">support_agent</span>
+    <div class="bg-surface rounded-3xl p-6 sm:p-10 md:p-12 editorial-shadow editorial-border text-center relative overflow-hidden space-y-6">
+      <div class="w-14 h-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mx-auto shadow-inner">
+        <span class="material-symbols-outlined text-3xl">support_agent</span>
       </div>
-      <div>
-        <span class="text-[10px] uppercase tracking-widest text-primary/50 font-bold bg-primary/8 px-3 py-1 rounded-full inline-block mb-3">Help Center & Knowledge Base</span>
-        <h1 class="font-body italic text-3xl sm:text-4xl text-primary font-normal">How can we help you today?</h1>
-        <p class="text-sm text-on-surface-variant max-w-xl mx-auto mt-2">Search our knowledge base or browse help topics below for quick answers.</p>
+      <div class="space-y-2">
+        <span class="text-[10px] uppercase tracking-widest text-primary font-bold bg-primary/10 px-3 py-1 rounded-full inline-block">Help Center & Knowledge Base</span>
+        <h1 class="font-body italic text-3xl sm:text-4xl md:text-5xl text-primary font-normal">How can we help you today?</h1>
+        <p class="text-xs sm:text-sm text-on-surface-variant max-w-xl mx-auto leading-relaxed">
+          Find fast answers to common questions about secret codes, note access, editor features, Convo rooms, and troubleshooting.
+        </p>
       </div>
 
       <!-- Live Search Bar -->
       <div class="max-w-xl mx-auto relative">
         <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-primary/40 text-xl pointer-events-none">search</span>
-        <input type="text" id="faqSearchInput" placeholder="Search questions (e.g. secret codes, PINs, export)..." class="w-full pl-12 pr-4 py-3.5 bg-surface-container-low rounded-2xl border border-outline-variant/20 focus:ring-2 focus:ring-primary/20 text-on-surface font-label text-sm outline-none shadow-inner placeholder:text-outline-variant/60 transition-all" />
+        <input type="text" id="faqSearchInput" placeholder="Search questions (e.g. secret codes, PINs, 20m expiry, print to PDF)..." class="w-full pl-12 pr-10 py-3.5 bg-surface-container-low rounded-2xl border border-outline-variant/20 focus:ring-2 focus:ring-primary/20 text-on-surface font-label text-sm outline-none shadow-inner placeholder:text-outline-variant/60 transition-all" />
+        <button id="clearSearchBtn" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant/40 hover:text-primary hidden" title="Clear search">
+          <span class="material-symbols-outlined text-sm">close</span>
+        </button>
+      </div>
+
+      <!-- Live Search Results Counter -->
+      <div id="searchResultsCount" class="text-xs text-primary font-medium hidden"></div>
+
+      <!-- Category Filter Pills (Horizontal Scrollable on Mobile) -->
+      <div class="flex items-center justify-center gap-2 overflow-x-auto pb-1 max-w-full no-scrollbar" id="categoryPills">
+        <button class="faq-filter-pill active px-3.5 py-1.5 rounded-full text-xs font-semibold flex-shrink-0" data-category="all">All Topics</button>
+        <button class="faq-filter-pill px-3.5 py-1.5 rounded-full text-xs font-semibold flex-shrink-0" data-category="codes">Secret Codes</button>
+        <button class="faq-filter-pill px-3.5 py-1.5 rounded-full text-xs font-semibold flex-shrink-0" data-category="codeshare">💻 CodeShare</button>
+        <button class="faq-filter-pill px-3.5 py-1.5 rounded-full text-xs font-semibold flex-shrink-0" data-category="security">PIN & Privacy</button>
+        <button class="faq-filter-pill px-3.5 py-1.5 rounded-full text-xs font-semibold flex-shrink-0" data-category="editor">Editor & Styling</button>
+        <button class="faq-filter-pill px-3.5 py-1.5 rounded-full text-xs font-semibold flex-shrink-0" data-category="convo">Convo Rooms</button>
+        <button class="faq-filter-pill px-3.5 py-1.5 rounded-full text-xs font-semibold flex-shrink-0" data-category="troubleshoot">Troubleshooting</button>
       </div>
     </div>
 
-    <!-- Quick Assistance Categories -->
-    <div class="space-y-4">
-      <h2 class="text-xs font-bold uppercase tracking-widest text-primary/50 text-center sm:text-left">Explore Topics</h2>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <!-- Quick Troubleshooting & Resolution Cards -->
+    <div class="space-y-3">
+      <div class="flex items-center justify-between">
+        <h2 class="text-xs font-bold uppercase tracking-widest text-primary/50">⚡ Quick Troubleshooting</h2>
+        <span class="text-[11px] text-on-surface-variant/60">Top 3 common issues</span>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         
-        <div class="bg-surface p-5 rounded-2xl editorial-shadow editorial-border hover:border-primary/30 transition-all group cursor-pointer" onclick="filterFaqCategory('codes')">
-          <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-            <span class="material-symbols-outlined text-lg">key</span>
+        <div class="bg-surface p-5 rounded-2xl editorial-shadow editorial-border space-y-2.5">
+          <div class="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold text-xs">
+            <span class="material-symbols-outlined text-lg">key_off</span>
           </div>
-          <h3 class="font-bold text-sm text-primary mb-1">Secret Codes & Access</h3>
-          <p class="text-xs text-on-surface-variant">Sharing notes across devices instantly with custom secret passcodes.</p>
+          <h3 class="font-bold text-sm text-primary">Secret Code Not Found?</h3>
+          <ul class="text-xs text-on-surface-variant space-y-1.5 leading-relaxed">
+            <li>• Confirm the 6-character code matches exact letters.</li>
+            <li>• Check if the <strong>20-minute expiry window</strong> has elapsed.</li>
+            <li>• Make sure you are connected to the internet.</li>
+          </ul>
         </div>
 
-        <div class="bg-surface p-5 rounded-2xl editorial-shadow editorial-border hover:border-primary/30 transition-all group cursor-pointer" onclick="filterFaqCategory('editor')">
-          <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-            <span class="material-symbols-outlined text-lg">edit_note</span>
+        <div class="bg-surface p-5 rounded-2xl editorial-shadow editorial-border space-y-2.5">
+          <div class="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold text-xs">
+            <span class="material-symbols-outlined text-lg">lock_reset</span>
           </div>
-          <h3 class="font-bold text-sm text-primary mb-1">Rich Text & Editor</h3>
-          <p class="text-xs text-on-surface-variant">Formatting, serif fonts, checklists, link cards, and image attachments.</p>
+          <h3 class="font-bold text-sm text-primary">Forgotten Note PIN?</h3>
+          <ul class="text-xs text-on-surface-variant space-y-1.5 leading-relaxed">
+            <li>• Private note PINs are hashed client-side for zero-knowledge privacy.</li>
+            <li>• For anonymous shares, lost PINs cannot be recovered.</li>
+            <li>• Registered accounts can reset PINs in <strong>Account Settings</strong>.</li>
+          </ul>
         </div>
 
-        <div class="bg-surface p-5 rounded-2xl editorial-shadow editorial-border hover:border-primary/30 transition-all group cursor-pointer" onclick="filterFaqCategory('files')">
-          <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-            <span class="material-symbols-outlined text-lg">folder_open</span>
+        <div class="bg-surface p-5 rounded-2xl editorial-shadow editorial-border space-y-2.5">
+          <div class="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-xs">
+            <span class="material-symbols-outlined text-lg">sync_problem</span>
           </div>
-          <h3 class="font-bold text-sm text-primary mb-1">File Manager & Library</h3>
-          <p class="text-xs text-on-surface-variant">Organizing folders, category tagging, search, and document export.</p>
-        </div>
-
-        <div class="bg-surface p-5 rounded-2xl editorial-shadow editorial-border hover:border-primary/30 transition-all group cursor-pointer" onclick="filterFaqCategory('security')">
-          <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-            <span class="material-symbols-outlined text-lg">lock</span>
-          </div>
-          <h3 class="font-bold text-sm text-primary mb-1">PIN Protection & Account</h3>
-          <p class="text-xs text-on-surface-variant">Setting private 4-digit PINs, resetting credentials, and account settings.</p>
-        </div>
-
-        <div class="bg-surface p-5 rounded-2xl editorial-shadow editorial-border hover:border-primary/30 transition-all group cursor-pointer" onclick="filterFaqCategory('convo')">
-          <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-            <span class="material-symbols-outlined text-lg">forum</span>
-          </div>
-          <h3 class="font-bold text-sm text-primary mb-1">Convo Rooms</h3>
-          <p class="text-xs text-on-surface-variant">Real-time collaborative chat rooms and live multi-user notes.</p>
-        </div>
-
-        <div class="bg-primary/5 p-5 rounded-2xl border border-primary/20 flex flex-col justify-center text-center">
-          <span class="material-symbols-outlined text-primary text-xl mb-1">mark_email_unread</span>
-          <h3 class="font-body italic text-sm text-primary font-bold">Still need help?</h3>
-          <p class="text-xs text-on-surface-variant/70 mb-2">Send us a direct support request below.</p>
-          <a href="#contact-form" class="text-xs font-bold text-primary underline underline-offset-4">Jump to Contact Form</a>
+          <h3 class="font-bold text-sm text-primary">Convo Room Connection?</h3>
+          <ul class="text-xs text-on-surface-variant space-y-1.5 leading-relaxed">
+            <li>• Ensure both users enter the exact same room key.</li>
+            <li>• Convo rooms stay active during live chat and auto-clear after 20m idle.</li>
+            <li>• Click <strong>Re-join</strong> or refresh if disconnected.</li>
+          </ul>
         </div>
 
       </div>
@@ -251,98 +491,181 @@
     <!-- FAQ Accordion Section -->
     <div class="space-y-4">
       <div class="flex items-center justify-between">
-        <h2 class="text-xs font-bold uppercase tracking-widest text-primary/50">Frequently Asked Questions</h2>
-        <button id="resetFaqFilterBtn" class="text-xs text-primary font-semibold hover:underline hidden" onclick="resetFaqFilter()">Show All Questions</button>
+        <h2 class="text-xs font-bold uppercase tracking-widest text-primary/50">Comprehensive FAQs</h2>
+        <span class="text-xs text-primary/60 font-semibold" id="faqCountLabel">Showing 8 questions</span>
       </div>
 
       <div class="space-y-3" id="faqContainer">
         
         <!-- FAQ 1 -->
-        <div class="faq-item bg-surface rounded-2xl editorial-shadow editorial-border overflow-hidden transition-all" data-category="codes" data-keywords="secret code share instant access sync device">
-          <button class="faq-trigger w-full px-6 py-4 text-left flex items-center justify-between gap-4 hover:bg-surface-container/40 transition-colors">
+        <div class="faq-item bg-surface rounded-2xl editorial-shadow editorial-border overflow-hidden transition-all" data-category="codes" data-keywords="secret code share instant access sync device no login 6 char">
+          <button class="faq-trigger w-full px-5 sm:px-6 py-4 text-left flex items-center justify-between gap-4 hover:bg-surface-container/40 transition-colors">
             <span class="font-bold text-sm text-primary flex items-center gap-2.5">
               <span class="material-symbols-outlined text-base text-primary/60">key</span>
-              How do secret codes work for instant note sharing?
+              How does instant secret code note sharing work?
             </span>
             <span class="material-symbols-outlined text-primary/40 faq-icon transition-transform">expand_more</span>
           </button>
-          <div class="faq-answer hidden px-6 pb-5 text-xs sm:text-sm text-on-surface-variant leading-relaxed border-t border-outline-variant/10 pt-3">
-            Secret codes allow instant content sharing without needing to log in. When you save a note with a unique secret word (e.g. <code>my-meeting-notes</code>), anyone with that exact code can enter it on the <strong>Access</strong> panel on another device to view and retrieve the note immediately.
+          <div class="faq-body">
+            <div class="px-5 sm:px-6 pb-5 text-xs sm:text-sm text-on-surface-variant leading-relaxed border-t border-outline-variant/10 pt-3 space-y-2">
+              <p>When you click <strong>Share</strong> on eNotePad, the system generates a unique 6-character code (e.g. <code>K9M2P4</code>) or you can type your own memorable word. Anyone who visits eNotePad on another phone, PC, or tablet and enters that code in the <strong>Access</strong> panel instantly receives the note without signing up or logging in.</p>
+              <div class="p-3 bg-surface-container-low rounded-xl border border-outline-variant/10 text-xs">
+                💡 <strong>Tip:</strong> Share text, formatted links, or high-res images directly without opening email or chat apps!
+              </div>
+            </div>
           </div>
         </div>
 
         <!-- FAQ 2 -->
-        <div class="faq-item bg-surface rounded-2xl editorial-shadow editorial-border overflow-hidden transition-all" data-category="security" data-keywords="pin code forgotten reset private account lock">
-          <button class="faq-trigger w-full px-6 py-4 text-left flex items-center justify-between gap-4 hover:bg-surface-container/40 transition-colors">
+        <div class="faq-item bg-surface rounded-2xl editorial-shadow editorial-border overflow-hidden transition-all" data-category="codes" data-keywords="20 minutes expiry auto delete privacy ephemeral vanish timer">
+          <button class="faq-trigger w-full px-5 sm:px-6 py-4 text-left flex items-center justify-between gap-4 hover:bg-surface-container/40 transition-colors">
             <span class="font-bold text-sm text-primary flex items-center gap-2.5">
-              <span class="material-symbols-outlined text-base text-primary/60">lock</span>
-              What should I do if I forget my secret PIN?
+              <span class="material-symbols-outlined text-base text-primary/60">timer</span>
+              Why do anonymous notes expire after 20 minutes?
             </span>
             <span class="material-symbols-outlined text-primary/40 faq-icon transition-transform">expand_more</span>
           </button>
-          <div class="faq-answer hidden px-6 pb-5 text-xs sm:text-sm text-on-surface-variant leading-relaxed border-t border-outline-variant/10 pt-3">
-            For security and privacy reasons, private note PINs are hashed before saving. If you set a PIN on an anonymous secret code note, it cannot be retrieved without the PIN. If you have a registered account, you can change your PIN from the <strong>Account Settings</strong> tab while logged in.
+          <div class="faq-body">
+            <div class="px-5 sm:px-6 pb-5 text-xs sm:text-sm text-on-surface-variant leading-relaxed border-t border-outline-variant/10 pt-3 space-y-2">
+              <p>Auto-expiry is a core privacy feature of eNotePad. It ensures temporary passwords, one-time links, clipboard text, or sensitive snippets leave zero digital footprint on servers once retrieved.</p>
+              <p>If you want permanent storage, you can create a free account with just a username and PIN to save notes permanently in your personal <strong>Library</strong>.</p>
+            </div>
           </div>
         </div>
 
         <!-- FAQ 3 -->
-        <div class="faq-item bg-surface rounded-2xl editorial-shadow editorial-border overflow-hidden transition-all" data-category="convo" data-keywords="convo room chat live collaborative invite group">
-          <button class="faq-trigger w-full px-6 py-4 text-left flex items-center justify-between gap-4 hover:bg-surface-container/40 transition-colors">
+        <div class="faq-item bg-surface rounded-2xl editorial-shadow editorial-border overflow-hidden transition-all" data-category="security" data-keywords="pin protection hash privacy private note lock secure">
+          <button class="faq-trigger w-full px-5 sm:px-6 py-4 text-left flex items-center justify-between gap-4 hover:bg-surface-container/40 transition-colors">
             <span class="font-bold text-sm text-primary flex items-center gap-2.5">
-              <span class="material-symbols-outlined text-base text-primary/60">forum</span>
-              How do I create or join a Convo Room?
+              <span class="material-symbols-outlined text-base text-primary/60">lock</span>
+              How does the 4-digit PIN lock protect my notes?
             </span>
             <span class="material-symbols-outlined text-primary/40 faq-icon transition-transform">expand_more</span>
           </button>
-          <div class="faq-answer hidden px-6 pb-5 text-xs sm:text-sm text-on-surface-variant leading-relaxed border-t border-outline-variant/10 pt-3">
-            You can launch the Convo Room by clicking <strong>Convo Room</strong> in the top navigation or sidebar. You can create a new room with a room key and share the link/key with colleagues or friends to start real-time messaging and note curation together.
+          <div class="faq-body">
+            <div class="px-5 sm:px-6 pb-5 text-xs sm:text-sm text-on-surface-variant leading-relaxed border-t border-outline-variant/10 pt-3 space-y-2">
+              <p>When sharing a secret code note, you can optionally toggle <strong>Set Private PIN</strong>. The note is encrypted and secured with your 4-digit PIN. Anyone attempting to access the code on another device will be prompted to enter the PIN before the content is unlocked.</p>
+            </div>
           </div>
         </div>
 
         <!-- FAQ 4 -->
-        <div class="faq-item bg-surface rounded-2xl editorial-shadow editorial-border overflow-hidden transition-all" data-category="files" data-keywords="export download print pdf file manager backup">
-          <button class="faq-trigger w-full px-6 py-4 text-left flex items-center justify-between gap-4 hover:bg-surface-container/40 transition-colors">
+        <div class="faq-item bg-surface rounded-2xl editorial-shadow editorial-border overflow-hidden transition-all" data-category="editor" data-keywords="rich text editor formatting serif fonts checklists shortcuts pdf export">
+          <button class="faq-trigger w-full px-5 sm:px-6 py-4 text-left flex items-center justify-between gap-4 hover:bg-surface-container/40 transition-colors">
             <span class="font-bold text-sm text-primary flex items-center gap-2.5">
-              <span class="material-symbols-outlined text-base text-primary/60">download</span>
-              Can I export or download my notes and files?
+              <span class="material-symbols-outlined text-base text-primary/60">format_paint</span>
+              What formatting and export tools are available in the editor?
             </span>
             <span class="material-symbols-outlined text-primary/40 faq-icon transition-transform">expand_more</span>
           </button>
-          <div class="faq-answer hidden px-6 pb-5 text-xs sm:text-sm text-on-surface-variant leading-relaxed border-t border-outline-variant/10 pt-3">
-            Yes! In the rich text editor or File Manager, you can download notes as formatted HTML, plain text (.txt), or print them to PDF directly from your browser.
+          <div class="faq-body">
+            <div class="px-5 sm:px-6 pb-5 text-xs sm:text-sm text-on-surface-variant leading-relaxed border-t border-outline-variant/10 pt-3 space-y-2">
+              <p>eNotePad features a full-featured Tactile Editorial rich text studio:</p>
+              <ul class="list-disc list-inside space-y-1">
+                <li><strong>Typography:</strong> Switch between Editorial Serif (Newsreader), Modern Sans (Inter), and Monospace code.</li>
+                <li><strong>Formatting:</strong> Bold (<code>Ctrl+B</code>), Italic (<code>Ctrl+I</code>), Underline (<code>Ctrl+U</code>), Blockquotes, Headings, and Checklists.</li>
+                <li><strong>Exporting:</strong> Download as HTML, raw Plain Text (<code>.txt</code>), or Print directly to formatted PDF.</li>
+              </ul>
+            </div>
           </div>
         </div>
 
         <!-- FAQ 5 -->
-        <div class="faq-item bg-surface rounded-2xl editorial-shadow editorial-border overflow-hidden transition-all" data-category="editor" data-keywords="editor rich text images limit size font style">
-          <button class="faq-trigger w-full px-6 py-4 text-left flex items-center justify-between gap-4 hover:bg-surface-container/40 transition-colors">
+        <div class="faq-item bg-surface rounded-2xl editorial-shadow editorial-border overflow-hidden transition-all" data-category="convo" data-keywords="convo room live collaboration real-time messaging media group chat">
+          <button class="faq-trigger w-full px-5 sm:px-6 py-4 text-left flex items-center justify-between gap-4 hover:bg-surface-container/40 transition-colors">
             <span class="font-bold text-sm text-primary flex items-center gap-2.5">
-              <span class="material-symbols-outlined text-base text-primary/60">image</span>
-              What types of content can I share?
+              <span class="material-symbols-outlined text-base text-primary/60">forum</span>
+              How do Convo Rooms differ from regular note sharing?
             </span>
             <span class="material-symbols-outlined text-primary/40 faq-icon transition-transform">expand_more</span>
           </button>
-          <div class="faq-answer hidden px-6 pb-5 text-xs sm:text-sm text-on-surface-variant leading-relaxed border-t border-outline-variant/10 pt-3">
-            eNotePad supports three main share modes:
-            <ul class="list-disc list-inside mt-2 space-y-1">
-              <li><strong>Text / Rich Notes:</strong> Full rich formatting, custom fonts, lists, and highlighting.</li>
-              <li><strong>Links:</strong> Instant web link sharing with auto URL formatting.</li>
-              <li><strong>Images:</strong> High-resolution image uploads with preview support.</li>
-            </ul>
+          <div class="faq-body">
+            <div class="px-5 sm:px-6 pb-5 text-xs sm:text-sm text-on-surface-variant leading-relaxed border-t border-outline-variant/10 pt-3 space-y-2">
+              <p>Regular note sharing is asynchronous (send a code, retrieve later). <strong>Convo Rooms</strong> are real-time, live collaborative chat rooms where multiple teammates or friends can exchange messages, images, code snippets, and live emoji reactions simultaneously.</p>
+              <a href="convo_room/index.html" class="inline-flex items-center gap-1 text-xs font-bold text-primary underline underline-offset-4 mt-1">Open Convo Room →</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- FAQ: CodeShare 1 -->
+        <div class="faq-item bg-surface rounded-2xl editorial-shadow editorial-border overflow-hidden transition-all" data-category="codeshare" data-keywords="codeshare code editor real time collaboration programming sync languages">
+          <button class="faq-trigger w-full px-5 sm:px-6 py-4 text-left flex items-center justify-between gap-4 hover:bg-surface-container/40 transition-colors">
+            <span class="font-bold text-sm text-primary flex items-center gap-2.5">
+              <span class="material-symbols-outlined text-base text-primary/60">code</span>
+              What is eNotePad CodeShare and how does collaboration work?
+            </span>
+            <span class="material-symbols-outlined text-primary/40 faq-icon transition-transform">expand_more</span>
+          </button>
+          <div class="faq-body">
+            <div class="px-5 sm:px-6 pb-5 text-xs sm:text-sm text-on-surface-variant leading-relaxed border-t border-outline-variant/10 pt-3 space-y-2">
+              <p><strong>CodeShare</strong> is a real-time collaborative code editor built into eNotePad. Anyone can start a code session, share the unique 6-character room URL with teammates or interviewers, and write code together simultaneously with syntax highlighting and zero typing delay.</p>
+              <a href="codeshare/index.html" class="inline-flex items-center gap-1 text-xs font-bold text-primary underline underline-offset-4 mt-1">Open CodeShare Editor →</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- FAQ: CodeShare 2 -->
+        <div class="faq-item bg-surface rounded-2xl editorial-shadow editorial-border overflow-hidden transition-all" data-category="codeshare" data-keywords="languages supported python javascript html css cpp rust java sql typescript markdown">
+          <button class="faq-trigger w-full px-5 sm:px-6 py-4 text-left flex items-center justify-between gap-4 hover:bg-surface-container/40 transition-colors">
+            <span class="font-bold text-sm text-primary flex items-center gap-2.5">
+              <span class="material-symbols-outlined text-base text-primary/60">terminal</span>
+              Which programming languages and execution features are supported?
+            </span>
+            <span class="material-symbols-outlined text-primary/40 faq-icon transition-transform">expand_more</span>
+          </button>
+          <div class="faq-body">
+            <div class="px-5 sm:px-6 pb-5 text-xs sm:text-sm text-on-surface-variant leading-relaxed border-t border-outline-variant/10 pt-3 space-y-2">
+              <p>CodeShare supports over 14 languages including <strong>JavaScript, Python, HTML/CSS, TypeScript, C++, Java, Rust, Go, SQL, PHP, JSON, and Markdown</strong>. It features a live in-browser Python (Skulpt) execution engine, a JavaScript runner terminal, and an instant split-screen HTML/CSS web preview runner.</p>
+            </div>
           </div>
         </div>
 
         <!-- FAQ 6 -->
-        <div class="faq-item bg-surface rounded-2xl editorial-shadow editorial-border overflow-hidden transition-all" data-category="security" data-keywords="privacy security storage firebase encrypted">
-          <button class="faq-trigger w-full px-6 py-4 text-left flex items-center justify-between gap-4 hover:bg-surface-container/40 transition-colors">
+        <div class="faq-item bg-surface rounded-2xl editorial-shadow editorial-border overflow-hidden transition-all" data-category="troubleshoot" data-keywords="offline mode cache local storage disconnected service worker">
+          <button class="faq-trigger w-full px-5 sm:px-6 py-4 text-left flex items-center justify-between gap-4 hover:bg-surface-container/40 transition-colors">
             <span class="font-bold text-sm text-primary flex items-center gap-2.5">
-              <span class="material-symbols-outlined text-base text-primary/60">shield_lock</span>
-              Is my content private and secure?
+              <span class="material-symbols-outlined text-base text-primary/60">cloud_off</span>
+              Can I draft notes while offline?
             </span>
             <span class="material-symbols-outlined text-primary/40 faq-icon transition-transform">expand_more</span>
           </button>
-          <div class="faq-answer hidden px-6 pb-5 text-xs sm:text-sm text-on-surface-variant leading-relaxed border-t border-outline-variant/10 pt-3">
-            Yes. All network communications use TLS 1.3 encryption in transit. Notes stored in Firebase Firestore follow security rules. You can also set a 4-digit PIN on any secret code note to restrict retrieval.
+          <div class="faq-body">
+            <div class="px-5 sm:px-6 pb-5 text-xs sm:text-sm text-on-surface-variant leading-relaxed border-t border-outline-variant/10 pt-3 space-y-2">
+              <p>Yes! eNotePad automatically persists your active draft to browser LocalStorage. If your internet connection drops, you can continue typing. Once your connection restores, you can sync or share your note with a secret code.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- FAQ 7 -->
+        <div class="faq-item bg-surface rounded-2xl editorial-shadow editorial-border overflow-hidden transition-all" data-category="security" data-keywords="privacy security google cloud firestore data protection">
+          <button class="faq-trigger w-full px-5 sm:px-6 py-4 text-left flex items-center justify-between gap-4 hover:bg-surface-container/40 transition-colors">
+            <span class="font-bold text-sm text-primary flex items-center gap-2.5">
+              <span class="material-symbols-outlined text-base text-primary/60">shield_lock</span>
+              Is my content encrypted and protected?
+            </span>
+            <span class="material-symbols-outlined text-primary/40 faq-icon transition-transform">expand_more</span>
+          </button>
+          <div class="faq-body">
+            <div class="px-5 sm:px-6 pb-5 text-xs sm:text-sm text-on-surface-variant leading-relaxed border-t border-outline-variant/10 pt-3 space-y-2">
+              <p>All data transmitted between your browser and our servers is secured via HTTPS / TLS 1.3 protocol encryption in transit. We store zero tracking cookies and never sell or monetize personal data.</p>
+              <a href="privacy.html" class="inline-flex items-center gap-1 text-xs font-bold text-primary underline underline-offset-4 mt-1">Read our full Privacy Policy →</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- FAQ 8 -->
+        <div class="faq-item bg-surface rounded-2xl editorial-shadow editorial-border overflow-hidden transition-all" data-category="editor" data-keywords="images files attach size limit upload formats">
+          <button class="faq-trigger w-full px-5 sm:px-6 py-4 text-left flex items-center justify-between gap-4 hover:bg-surface-container/40 transition-colors">
+            <span class="font-bold text-sm text-primary flex items-center gap-2.5">
+              <span class="material-symbols-outlined text-base text-primary/60">upload_file</span>
+              What are the file and image attachment limits?
+            </span>
+            <span class="material-symbols-outlined text-primary/40 faq-icon transition-transform">expand_more</span>
+          </button>
+          <div class="faq-body">
+            <div class="px-5 sm:px-6 pb-5 text-xs sm:text-sm text-on-surface-variant leading-relaxed border-t border-outline-variant/10 pt-3 space-y-2">
+              <p>You can attach images (PNG, JPG, WEBP, GIF) and documents up to <strong>2MB</strong> per file for instant sharing. Files are served via Google Cloud CDN for ultra-fast download on mobile and desktop.</p>
+            </div>
           </div>
         </div>
 
@@ -352,39 +675,45 @@
     <!-- Contact Support Form Widget -->
     <div id="contact-form" class="bg-surface rounded-3xl p-6 sm:p-10 editorial-shadow editorial-border space-y-6">
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-          <span class="material-symbols-outlined text-xl">chat</span>
+        <div class="w-11 h-11 rounded-2xl bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
+          <span class="material-symbols-outlined text-2xl">mail</span>
         </div>
         <div>
-          <h2 class="font-body italic text-2xl text-primary">Direct Support Request</h2>
-          <p class="text-xs text-on-surface-variant">Send a message to our support team and developer</p>
+          <h2 class="font-body italic text-2xl sm:text-3xl text-primary font-normal">Direct Support Desk</h2>
+          <p class="text-xs sm:text-sm text-on-surface-variant">Need assistance or want to suggest a new feature? Send us a message.</p>
         </div>
       </div>
 
       <form id="supportForm" class="space-y-4">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label class="text-[10px] uppercase tracking-widest text-primary/50 font-bold block mb-1.5">Category</label>
+            <label class="text-[10px] uppercase tracking-widest text-primary/60 font-bold block mb-1.5">Inquiry Topic</label>
             <select id="supportCategory" class="w-full px-4 py-3 bg-surface-container-low rounded-xl border border-outline-variant/20 focus:ring-2 focus:ring-primary/20 text-on-surface font-label text-sm outline-none">
-              <option value="general">💬 General Inquiry</option>
+              <option value="general">💬 General Question</option>
+              <option value="secret_code">🔑 Secret Code & Sharing Help</option>
+              <option value="convo_room">👥 Convo Room Issue</option>
+              <option value="account_pin">🔒 PIN or Account Assistance</option>
               <option value="bug">🐛 Bug Report</option>
-              <option value="account">👤 Account & PIN Help</option>
-              <option value="feature">✨ Feature Request</option>
+              <option value="feature">✨ Feature Suggestion</option>
             </select>
           </div>
           <div>
-            <label class="text-[10px] uppercase tracking-widest text-primary/50 font-bold block mb-1.5">Your Email (Optional)</label>
+            <label class="text-[10px] uppercase tracking-widest text-primary/60 font-bold block mb-1.5">Your Email (Optional for reply)</label>
             <input type="email" id="supportEmail" placeholder="you@example.com" class="w-full px-4 py-3 bg-surface-container-low rounded-xl border border-outline-variant/20 focus:ring-2 focus:ring-primary/20 text-on-surface font-label text-sm outline-none placeholder:text-outline-variant/50" />
           </div>
         </div>
 
         <div>
-          <label class="text-[10px] uppercase tracking-widest text-primary/50 font-bold block mb-1.5">Describe your issue or question</label>
-          <textarea id="supportMessage" rows="4" maxlength="600" required placeholder="Provide details about what you're experiencing or asking..." class="w-full px-4 py-3 bg-surface-container-low rounded-xl border border-outline-variant/20 focus:ring-2 focus:ring-primary/20 text-on-surface font-label text-sm outline-none resize-none placeholder:text-outline-variant/50"></textarea>
-          <p class="text-[10px] text-on-surface-variant/50 text-right mt-1"><span id="supportCharCount">0</span>/600</p>
+          <label class="text-[10px] uppercase tracking-widest text-primary/60 font-bold block mb-1.5">Your Message or Issue Description</label>
+          <textarea id="supportMessage" rows="4" maxlength="600" required placeholder="Describe your question or issue in detail..." class="w-full px-4 py-3 bg-surface-container-low rounded-xl border border-outline-variant/20 focus:ring-2 focus:ring-primary/20 text-on-surface font-label text-sm outline-none resize-none placeholder:text-outline-variant/50"></textarea>
+          <div class="flex justify-between items-center text-[10px] text-on-surface-variant/60 mt-1">
+            <span>Minimum 10 characters</span>
+            <span><span id="supportCharCount">0</span>/600</span>
+          </div>
         </div>
 
-        <div class="flex justify-end pt-2">
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
+          <p class="text-xs text-on-surface-variant/60">Response time: Typically within 24 hours</p>
           <button type="submit" class="w-full sm:w-auto px-8 py-3.5 bg-primary text-on-primary rounded-full font-bold text-sm shadow-md hover:bg-primary-dim transition-all active:scale-[0.98] flex items-center justify-center gap-2">
             <span class="material-symbols-outlined text-sm">send</span> Send Support Message
           </button>
@@ -393,26 +722,38 @@
     </div>
 
     <!-- System Status Indicator Card -->
-    <div class="bg-surface-container-lowest p-6 rounded-2xl editorial-border editorial-shadow flex flex-col sm:flex-row items-center justify-between gap-4">
+    <div class="bg-surface-container-lowest p-5 sm:p-6 rounded-2xl editorial-border editorial-shadow flex flex-col sm:flex-row items-center justify-between gap-4">
       <div class="flex items-center gap-3">
-        <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span class="w-3.5 h-3.5 rounded-full bg-emerald-500 animate-pulse flex-shrink-0"></span>
         <div>
           <h4 class="font-bold text-sm text-primary">All Systems Operational</h4>
-          <p class="text-xs text-on-surface-variant/70">Real-time sync, Firebase services, and Convo Rooms running smoothly.</p>
+          <p class="text-xs text-on-surface-variant/70">Real-time sync, Firebase services, and Convo Rooms running smoothly at 100% uptime.</p>
         </div>
       </div>
-      <span class="text-[10px] uppercase tracking-widest font-bold bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 px-3 py-1 rounded-full">100% Uptime</span>
+      <div class="flex items-center gap-2 text-xs">
+        <span class="text-[10px] uppercase tracking-widest font-bold bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 px-3 py-1 rounded-full">v3.2 Stable</span>
+      </div>
     </div>
 
   </main>
 
   <!-- Footer -->
-  <footer class="flex flex-col sm:flex-row justify-center items-center gap-4 py-8 w-full opacity-70 bg-transparent text-primary font-label text-sm border-t border-outline-variant/10 mt-10">
-    <span>© eNotePad — Digital Curator</span>
-    <div class="flex gap-4">
-      <a class="text-primary/60 hover:text-primary transition-colors underline-offset-4 hover:underline" href="privacy.html">Privacy</a>
-      <a class="text-primary/60 hover:text-primary transition-colors underline-offset-4 hover:underline" href="terms.html">Terms</a>
-      <a class="text-primary/60 hover:text-primary transition-colors underline-offset-4 hover:underline font-bold" href="support.html">Support</a>
+  <footer class="border-t border-outline-variant/10 bg-surface-container-low py-10 mt-12">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-6">
+      <div class="flex items-center gap-2">
+        <span style="color:#00a8ff" class="font-bold text-base">e</span>
+        <span class="text-primary font-bold text-base">NotePad</span>
+        <span class="text-on-surface-variant/50 text-xs">— Digital Curator</span>
+      </div>
+      <div class="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs text-on-surface-variant/70">
+        <a href="how-it-works.html" class="hover:text-primary transition-colors animated-underline" style="text-decoration:none;">How It Works</a>
+        <a href="convo_room/index.html" class="hover:text-primary transition-colors animated-underline" style="text-decoration:none;">Convo Room</a>
+        <a href="support.html" class="text-primary font-bold animated-underline" style="text-decoration:none;">Help & FAQs</a>
+        <a href="privacy.html" class="hover:text-primary transition-colors animated-underline" style="text-decoration:none;">Privacy Policy</a>
+        <a href="terms.html" class="hover:text-primary transition-colors animated-underline" style="text-decoration:none;">Terms of Service</a>
+        <a href="index.html" class="hover:text-primary transition-colors animated-underline font-semibold" style="text-decoration:none;">Open App →</a>
+      </div>
+      <p class="text-xs text-on-surface-variant/40">© 2026 eNotePad. All rights reserved.</p>
     </div>
   </footer>
 
@@ -420,8 +761,8 @@
   <script>
     // Theme Switcher
     (function() {
-      const savedTheme = localStorage.getItem('enotpad_theme') || 'light';
-      if (savedTheme === 'dark') {
+      const savedTheme = localStorage.getItem('enp-theme') || localStorage.getItem('enotpad_theme') || 'light';
+      if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
         document.documentElement.classList.add('dark');
         document.documentElement.classList.remove('light');
       } else {
@@ -429,86 +770,137 @@
         document.documentElement.classList.remove('dark');
       }
 
-      const toggleBtn = document.getElementById('themeToggle');
-      if (toggleBtn) {
-        toggleBtn.addEventListener('click', function() {
-          const isDark = document.documentElement.classList.contains('dark');
-          if (isDark) {
-            document.documentElement.classList.remove('dark');
-            document.documentElement.classList.add('light');
-            localStorage.setItem('enotpad_theme', 'light');
-          } else {
-            document.documentElement.classList.remove('light');
-            document.documentElement.classList.add('dark');
-            localStorage.setItem('enotpad_theme', 'dark');
-          }
-        });
+      function toggleTheme() {
+        const isDark = document.documentElement.classList.contains('dark');
+        if (isDark) {
+          document.documentElement.classList.remove('dark');
+          document.documentElement.classList.add('light');
+          localStorage.setItem('enp-theme', 'light');
+          localStorage.setItem('enotpad_theme', 'light');
+        } else {
+          document.documentElement.classList.remove('light');
+          document.documentElement.classList.add('dark');
+          localStorage.setItem('enp-theme', 'dark');
+          localStorage.setItem('enotpad_theme', 'dark');
+        }
       }
+
+      const toggleBtn = document.getElementById('themeToggle');
+      const toggleBtnMobile = document.getElementById('themeToggleMobile');
+      if (toggleBtn) toggleBtn.addEventListener('click', toggleTheme);
+      if (toggleBtnMobile) toggleBtnMobile.addEventListener('click', toggleTheme);
     })();
 
+    // Mobile Menu Toggle
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+    if (mobileMenuBtn && mobileMenu) {
+      mobileMenuBtn.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+      });
+    }
+
     // FAQ Accordion Toggle
+    let activeOpenFaq = null;
     document.querySelectorAll('.faq-trigger').forEach(trigger => {
       trigger.addEventListener('click', () => {
         const item = trigger.closest('.faq-item');
-        const answer = item.querySelector('.faq-answer');
+        const body = item.querySelector('.faq-body');
         const icon = item.querySelector('.faq-icon');
-        
-        const isOpen = !answer.classList.contains('hidden');
-        
-        // Close all answers
-        document.querySelectorAll('.faq-answer').forEach(a => a.classList.add('hidden'));
-        document.querySelectorAll('.faq-icon').forEach(i => i.style.transform = 'rotate(0deg)');
-        
+        const isOpen = body.style.maxHeight && body.style.maxHeight !== '0px';
+
+        // Close all other items
+        document.querySelectorAll('.faq-item').forEach(otherItem => {
+          if (otherItem !== item) {
+            const otherBody = otherItem.querySelector('.faq-body');
+            const otherIcon = otherItem.querySelector('.faq-icon');
+            if (otherBody) otherBody.style.maxHeight = '0px';
+            if (otherIcon) otherIcon.style.transform = 'rotate(0deg)';
+          }
+        });
+
         if (!isOpen) {
-          answer.classList.remove('hidden');
+          body.style.maxHeight = body.scrollHeight + 'px';
           icon.style.transform = 'rotate(180deg)';
+        } else {
+          body.style.maxHeight = '0px';
+          icon.style.transform = 'rotate(0deg)';
         }
       });
     });
 
-    // Realtime FAQ Search Filter
+    // Realtime FAQ Search & Category Filter
     const searchInput = document.getElementById('faqSearchInput');
+    const clearSearchBtn = document.getElementById('clearSearchBtn');
+    const searchResultsCount = document.getElementById('searchResultsCount');
     const faqItems = document.querySelectorAll('.faq-item');
-    const resetBtn = document.getElementById('resetFaqFilterBtn');
+    const filterPills = document.querySelectorAll('.faq-filter-pill');
+    const faqCountLabel = document.getElementById('faqCountLabel');
 
-    if (searchInput) {
-      searchInput.addEventListener('input', (e) => {
-        const term = e.target.value.toLowerCase().trim();
-        let visibleCount = 0;
-        
-        faqItems.forEach(item => {
-          const text = item.textContent.toLowerCase();
-          const keywords = item.getAttribute('data-keywords') || '';
-          if (text.includes(term) || keywords.includes(term)) {
-            item.classList.remove('hidden');
-            visibleCount++;
-          } else {
-            item.classList.add('hidden');
-          }
-        });
+    let currentCategory = 'all';
 
-        if (resetBtn) {
-          resetBtn.classList.toggle('hidden', term === '');
-        }
-      });
-    }
+    function applyFaqFilter() {
+      const query = (searchInput ? searchInput.value : '').toLowerCase().trim();
+      let visibleCount = 0;
 
-    function filterFaqCategory(cat) {
       faqItems.forEach(item => {
-        if (item.getAttribute('data-category') === cat) {
+        const cat = item.getAttribute('data-category');
+        const text = item.textContent.toLowerCase();
+        const keywords = item.getAttribute('data-keywords') || '';
+
+        const matchesCat = (currentCategory === 'all' || cat === currentCategory);
+        const matchesQuery = !query || text.includes(query) || keywords.includes(query);
+
+        if (matchesCat && matchesQuery) {
           item.classList.remove('hidden');
+          visibleCount++;
         } else {
           item.classList.add('hidden');
+          const body = item.querySelector('.faq-body');
+          const icon = item.querySelector('.faq-icon');
+          if (body) body.style.maxHeight = '0px';
+          if (icon) icon.style.transform = 'rotate(0deg)';
         }
       });
-      if (resetBtn) resetBtn.classList.remove('hidden');
+
+      if (faqCountLabel) {
+        faqCountLabel.textContent = `Showing ${visibleCount} question${visibleCount === 1 ? '' : 's'}`;
+      }
+
+      if (clearSearchBtn) {
+        clearSearchBtn.classList.toggle('hidden', query === '');
+      }
+
+      if (searchResultsCount) {
+        if (query) {
+          searchResultsCount.classList.remove('hidden');
+          searchResultsCount.textContent = `Found ${visibleCount} result${visibleCount === 1 ? '' : 's'} for "${query}"`;
+        } else {
+          searchResultsCount.classList.add('hidden');
+        }
+      }
     }
 
-    function resetFaqFilter() {
-      if (searchInput) searchInput.value = '';
-      faqItems.forEach(item => item.classList.remove('hidden'));
-      if (resetBtn) resetBtn.classList.add('hidden');
+    if (searchInput) {
+      searchInput.addEventListener('input', applyFaqFilter);
     }
+
+    if (clearSearchBtn) {
+      clearSearchBtn.addEventListener('click', () => {
+        if (searchInput) searchInput.value = '';
+        applyFaqFilter();
+      });
+    }
+
+    filterPills.forEach(pill => {
+      pill.addEventListener('click', () => {
+        filterPills.forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+
+        currentCategory = pill.getAttribute('data-category') || 'all';
+        applyFaqFilter();
+      });
+    });
 
     // Support Form Handling & Toast Notification
     const supportForm = document.getElementById('supportForm');
@@ -524,7 +916,12 @@
     if (supportForm) {
       supportForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        showToast('Thank you! Your support message has been sent successfully.', 'success');
+        const msg = (supportMsg ? supportMsg.value.trim() : '');
+        if (msg.length < 10) {
+          showToast('Please provide at least 10 characters in your message.', 'error');
+          return;
+        }
+        showToast('Thank you! Your support ticket has been received.', 'success');
         supportForm.reset();
         if (charCount) charCount.textContent = '0';
       });
@@ -535,27 +932,18 @@
       if (!container) return;
       
       const toast = document.createElement('div');
-      toast.className = `pointer-events-auto px-5 py-3 rounded-2xl shadow-xl border text-xs sm:text-sm font-semibold flex items-center gap-3 animate-slide-up bg-surface text-primary border-primary/20`;
+      const isSuccess = type === 'success';
+      toast.className = `pointer-events-auto px-5 py-3 rounded-2xl shadow-xl border text-xs sm:text-sm font-semibold flex items-center gap-3 animate-slide-up bg-surface text-primary ${isSuccess ? 'border-emerald-500/30' : 'border-error/30'}`;
       toast.innerHTML = `
-        <span class="material-symbols-outlined text-emerald-600">check_circle</span>
+        <span class="material-symbols-outlined ${isSuccess ? 'text-emerald-600' : 'text-error'}">${isSuccess ? 'check_circle' : 'error'}</span>
         <span>${message}</span>
       `;
       container.appendChild(toast);
-      
-      // Header Scroll Reveal
-      const header = document.querySelector('header');
-      if (header) {
-        header.classList.remove('-translate-y-full');
-        const onScroll = function() {
-          if (window.scrollY > 8) {
-            header.classList.add('header-scrolled');
-          } else {
-            header.classList.remove('header-scrolled');
-          }
-        };
-        window.addEventListener('scroll', onScroll, { passive: true });
-        onScroll();
-      }
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'transition-opacity');
+        setTimeout(() => toast.remove(), 300);
+      }, 4000);
     }
   </script>
 </body>

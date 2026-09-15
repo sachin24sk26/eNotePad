@@ -15,14 +15,20 @@
   <!-- Google AdSense -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4282755745845869" crossorigin="anonymous"></script>
 
+  <!-- Preconnect & DNS-Prefetch for lightning-fast font and asset delivery -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin />
+  <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com" />
+
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
 
   <!-- Google Fonts: Inter + Newsreader -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,600&display=swap" rel="stylesheet" />
 
-  <!-- Material Symbols -->
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <!-- Material Symbols Outlined (Optimized Font Payload) -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400..700,0..1,0&display=swap" rel="stylesheet" />
 
   <!-- Tailwind Config: Tactile Editorial Design System -->
   <script>
@@ -129,57 +135,77 @@
     }
     .timeline-dot { animation: dotPulse 2s ease-in-out infinite; }
 
-    /* ── Comprehensive Dark Mode ── */
-    .dark body { background-color: #0e1210 !important; color: #dde3da !important; }
-    .dark .bg-background { background-color: #0e1210 !important; }
-    .dark .bg-surface-container-lowest { background-color: #1b1f1a !important; }
-    .dark .bg-surface-container-low { background-color: #181c17 !important; }
-    .dark .bg-surface-container-low\/60 { background-color: rgba(24,28,23,0.6) !important; }
-    .dark .bg-surface-container { background-color: #1f241e !important; }
-    .dark .bg-surface-container-high { background-color: #262b25 !important; }
-    .dark .bg-surface-dim { background-color: #141714 !important; }
-    .dark .text-on-surface { color: #dde3da !important; }
-    .dark .text-on-surface\/40 { color: rgba(221,227,218,0.4) !important; }
-    .dark .text-on-surface-variant { color: #8b9388 !important; }
-    .dark .text-on-surface-variant\/60 { color: rgba(139,147,136,0.6) !important; }
-    .dark .text-on-surface-variant\/70 { color: rgba(139,147,136,0.7) !important; }
-    .dark .text-primary { color: #b8cee2 !important; }
-    .dark .text-primary\/50 { color: rgba(184,206,226,0.5) !important; }
-    .dark .text-primary\/40 { color: rgba(184,206,226,0.4) !important; }
-    .dark .text-on-primary { color: #e8f0f8 !important; }
-    .dark .text-on-primary-container { color: #b8cee2 !important; }
-    .dark .text-tertiary { color: #9aa4c0 !important; }
-    .dark .text-on-tertiary { color: #e8f0f8 !important; }
-    .dark .bg-primary { background-color: #3d5262 !important; }
-    .dark .bg-primary\/10 { background-color: rgba(184,206,226,0.08) !important; }
-    .dark .bg-primary\/5 { background-color: rgba(184,206,226,0.04) !important; }
-    .dark .bg-primary-container { background-color: rgba(184,206,226,0.1) !important; }
-    .dark .bg-primary-container\/60 { background-color: rgba(184,206,226,0.08) !important; }
-    .dark .bg-primary-container\/80 { background-color: rgba(184,206,226,0.1) !important; }
-    .dark .bg-tertiary\/10 { background-color: rgba(154,164,192,0.1) !important; }
-    .dark .bg-surface-container\/40 { background-color: rgba(31,36,30,0.4) !important; }
-    /* nav */
-    .dark .bg-background\/80 { background-color: rgba(14,18,16,0.8) !important; }
-    /* borders */
-    .dark .editorial-border { border-color: rgba(184,206,226,0.1) !important; }
-    .dark .border-outline-variant\/10 { border-color: rgba(184,206,226,0.08) !important; }
-    .dark .border-outline-variant\/20 { border-color: rgba(184,206,226,0.12) !important; }
-    .dark .border-primary\/15 { border-color: rgba(184,206,226,0.12) !important; }
-    /* shadows */
-    .dark .editorial-shadow { box-shadow: 0 12px 32px rgba(0,0,0,0.35) !important; }
-    .dark .feature-card:hover { transform: translateY(-4px); box-shadow: 0 20px 48px rgba(0,0,0,0.4) !important; }
+    /* ── Comprehensive Dark Mode Color Overrides ── */
+    .dark body { background-color: #0d1117 !important; color: #f0f6fc !important; }
+    .dark .bg-background { background-color: #0d1117 !important; }
+    .dark .bg-surface { background-color: #161c24 !important; }
+    .dark .bg-surface-container-lowest { background-color: #161c24 !important; }
+    .dark .bg-surface-container-low { background-color: #1a222c !important; }
+    .dark .bg-surface-container-low\/60 { background-color: rgba(26,34,44,0.7) !important; }
+    .dark .bg-surface-container { background-color: #1f2834 !important; }
+    .dark .bg-surface-container-high { background-color: #263242 !important; }
+    .dark .bg-surface-dim { background-color: #11161d !important; }
+    .dark .text-on-surface { color: #f0f6fc !important; }
+    .dark .text-on-surface\/40 { color: rgba(240,246,252,0.4) !important; }
+    .dark .text-on-surface-variant { color: #91a4b7 !important; }
+    .dark .text-on-surface-variant\/60 { color: rgba(145,164,183,0.6) !important; }
+    .dark .text-on-surface-variant\/70 { color: rgba(145,164,183,0.7) !important; }
+    .dark .text-primary { color: #70b4f8 !important; }
+    .dark .text-primary\/70 { color: rgba(112,180,248,0.7) !important; }
+    .dark .text-primary\/50 { color: rgba(112,180,248,0.5) !important; }
+    .dark .text-primary\/40 { color: rgba(112,180,248,0.4) !important; }
+    .dark .text-on-primary { color: #ffffff !important; }
+    .dark .text-on-primary-container { color: #d4e4f8 !important; }
+    .dark .text-tertiary { color: #a5b4fc !important; }
+    .dark .text-on-tertiary { color: #ffffff !important; }
+    .dark .bg-primary { background-color: #2563eb !important; }
+    .dark .bg-primary\/10 { background-color: rgba(112,180,248,0.12) !important; }
+    .dark .bg-primary\/5 { background-color: rgba(112,180,248,0.06) !important; }
+    .dark .bg-primary-container { background-color: rgba(112,180,248,0.15) !important; }
+    .dark .bg-primary-container\/60 { background-color: rgba(112,180,248,0.1) !important; }
+    .dark .bg-primary-container\/80 { background-color: rgba(112,180,248,0.14) !important; }
+    .dark .bg-tertiary\/10 { background-color: rgba(165,180,252,0.12) !important; }
+    .dark .bg-surface-container\/40 { background-color: rgba(31,40,52,0.5) !important; }
+    /* nav & header */
+    .dark nav { background-color: rgba(13,17,23,0.9) !important; border-color: rgba(255,255,255,0.08) !important; }
+    .dark .bg-background\/80 { background-color: rgba(13,17,23,0.85) !important; }
+    .dark .bg-background\/90 { background-color: rgba(13,17,23,0.92) !important; }
+    .dark #mobileMenu { background-color: rgba(13,17,23,0.97) !important; border-color: rgba(255,255,255,0.08) !important; }
+    .dark #mobileMenu a { transition: all 0.2s ease; }
+    .dark #mobileMenu a:hover { background-color: rgba(112,180,248,0.14) !important; color: #70b4f8 !important; }
+    /* borders & shadows */
+    .dark .editorial-border { border-color: rgba(112,180,248,0.14) !important; }
+    .dark .border-outline-variant\/10 { border-color: rgba(255,255,255,0.07) !important; }
+    .dark .border-outline-variant\/20 { border-color: rgba(112,180,248,0.15) !important; }
+    .dark .border-outline-variant\/30 { border-color: rgba(112,180,248,0.2) !important; }
+    .dark .border-primary\/15 { border-color: rgba(112,180,248,0.18) !important; }
+    .dark .editorial-shadow { box-shadow: 0 12px 36px rgba(0,0,0,0.5) !important; }
+    .dark .feature-card:hover { transform: translateY(-4px); border-color: rgba(112,180,248,0.35) !important; box-shadow: 0 20px 48px rgba(0,0,0,0.65), 0 0 20px rgba(112,180,248,0.12) !important; }
     /* code badge pulse */
-    .dark .code-badge { background-color: rgba(184,206,226,0.1) !important; }
-    /* comparison table alternating row */
-    .dark .bg-surface-container\/40 { background-color: rgba(31,36,30,0.5) !important; }
-    /* FAQ */
-    .dark .faq-body p { color: #8b9388 !important; }
-    /* CTA section tint */
-    .dark .bg-primary\/5 { background-color: rgba(61,82,98,0.15) !important; }
-    /* footer */
-    .dark footer { background-color: #181c17 !important; }
+    .dark .code-badge { background-color: rgba(112,180,248,0.12) !important; border-color: rgba(112,180,248,0.2) !important; }
+    /* comparison table alternating row & hover */
+    .dark .bg-surface-container\/40 { background-color: rgba(31,40,52,0.5) !important; }
+    .dark tbody tr { transition: background-color 0.2s ease; }
+    .dark tbody tr:hover { background-color: rgba(112,180,248,0.08) !important; }
+    /* FAQ hover */
+    .dark .faq-item { transition: all 0.2s ease; }
+    .dark .faq-item:hover { border-color: rgba(112,180,248,0.35) !important; box-shadow: 0 8px 24px rgba(0,0,0,0.5), 0 0 14px rgba(112,180,248,0.08) !important; }
+    .dark .faq-trigger:hover { background-color: rgba(112,180,248,0.08) !important; }
+    .dark .faq-trigger:hover span { color: #70b4f8 !important; }
+    .dark .faq-body p { color: #91a4b7 !important; }
+    /* footer hover */
+    .dark footer { background-color: #11161d !important; border-color: rgba(255,255,255,0.08) !important; }
+    .dark footer a:hover { color: #70b4f8 !important; }
     /* "access" mockup green */
     .dark .text-green-600 { color: #4ade80 !important; }
+
+    /* Theme toggle & Mobile menu btn hover in dark mode */
+    .dark #themeToggle:hover, .dark #themeToggleMobile:hover, .dark #mobileMenuBtn:hover {
+      background-color: rgba(112, 180, 248, 0.14) !important;
+      border-color: rgba(112, 180, 248, 0.35) !important;
+      color: #70b4f8 !important;
+      box-shadow: 0 0 12px rgba(112, 180, 248, 0.2) !important;
+    }
 
     .nav-blur {
       backdrop-filter: blur(20px) saturate(1.6);
@@ -214,7 +240,54 @@
       pointer-events: none;
     }
 
-    /* FAQ transitions */
+    /* ── Navigation Links (Both Modes) ── */
+    .nav-link {
+      color: rgba(81, 96, 112, 0.75);
+      background: transparent;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: 0.75rem;
+      border: 1px solid transparent;
+      text-decoration: none;
+    }
+    .nav-link:hover {
+      color: #2b3a4a;
+      background: rgba(81, 96, 112, 0.08);
+      border-color: rgba(81, 96, 112, 0.12);
+    }
+    .nav-link.active {
+      color: #2b3a4a !important;
+      background: rgba(81, 96, 112, 0.12) !important;
+      border: 1px solid rgba(81, 96, 112, 0.2) !important;
+      font-weight: 700;
+    }
+    .nav-link.active:hover {
+      background: rgba(81, 96, 112, 0.16) !important;
+    }
+
+    .dark .nav-link {
+      color: #91a4b7 !important;
+    }
+    .dark .nav-link:hover {
+      color: #70b4f8 !important;
+      background: rgba(112, 180, 248, 0.12) !important;
+      border-color: rgba(112, 180, 248, 0.25) !important;
+      box-shadow: 0 0 12px rgba(112, 180, 248, 0.15) !important;
+    }
+    .dark .nav-link.active {
+      color: #70b4f8 !important;
+      background: rgba(112, 180, 248, 0.16) !important;
+      border: 1px solid rgba(112, 180, 248, 0.35) !important;
+      box-shadow: 0 0 14px rgba(112, 180, 248, 0.2) !important;
+      font-weight: 700;
+    }
+    .dark .nav-link.active:hover {
+      color: #ffffff !important;
+      background: rgba(112, 180, 248, 0.25) !important;
+      border-color: rgba(112, 180, 248, 0.5) !important;
+      box-shadow: 0 0 18px rgba(112, 180, 248, 0.35) !important;
+    }
+
+    /* FAQ Transitions */
     .faq-body { max-height: 0; overflow: hidden; transition: max-height 0.35s cubic-bezier(0.22,1,0.36,1); }
     /* ad containers */
     .dark .ad-unit-wrap { background: rgba(184,206,226,0.03) !important; }
@@ -227,8 +300,8 @@
   <div class="fixed inset-0 pointer-events-none paper-grain z-50"></div>
 
   <!-- ===== STICKY NAV ===== -->
-  <nav class="fixed top-0 left-0 right-0 z-40 bg-background/80 nav-blur border-b border-outline-variant/10">
-    <div class="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
+  <nav class="fixed top-0 left-0 right-0 z-40 bg-background/90 nav-blur border-b border-outline-variant/10">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
       <a href="index.html" class="flex items-center gap-2 no-underline" style="text-decoration:none;">
         <div class="relative w-7 h-7 flex items-center justify-center flex-shrink-0">
           <img src="assets/logo-light.svg" alt="eNotePad Logo" class="w-full h-full object-contain dark:hidden" />
@@ -241,15 +314,50 @@
         <span class="text-[8px] uppercase tracking-widest text-primary/40 font-bold self-end mb-0.5 hidden sm:inline">Digital Curator</span>
       </a>
 
-      <div class="flex items-center gap-2.5">
-        <button id="themeToggle" class="w-9 h-9 rounded-full flex items-center justify-center border border-outline-variant/20 text-primary/60 hover:text-primary hover:bg-surface-container transition-all" title="Toggle theme">
+      <!-- Desktop Nav -->
+      <div class="hidden md:flex items-center gap-1 sm:gap-1.5">
+        <a href="how-it-works.html" class="nav-link active text-xs font-bold px-3 py-1.5">How It Works</a>
+        <a href="convo_room/index.html" class="nav-link text-xs font-medium px-3 py-1.5 flex items-center gap-1">
+          <span class="material-symbols-outlined text-[15px]">forum</span> Convo Room
+        </a>
+        <a href="codeshare/index.html" class="nav-link text-xs font-medium px-3 py-1.5 flex items-center gap-1">
+          <span class="material-symbols-outlined text-[15px]">code</span> CodeShare
+        </a>
+        <a href="support.html" class="nav-link text-xs font-medium px-3 py-1.5">Help & FAQs</a>
+        <a href="privacy.html" class="nav-link text-xs font-medium px-3 py-1.5">Privacy</a>
+        <a href="terms.html" class="nav-link text-xs font-medium px-3 py-1.5">Terms</a>
+
+        <button id="themeToggle" class="w-8 h-8 ml-1 rounded-full flex items-center justify-center border border-outline-variant/20 text-primary/70 hover:text-primary hover:bg-surface-container transition-all" title="Toggle theme">
           <span class="material-symbols-outlined text-base" id="themeIcon">dark_mode</span>
         </button>
-        <a href="index.html" class="cta-btn inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-on-primary rounded-full text-sm font-semibold shadow-sm" style="text-decoration:none;">
-          <span class="material-symbols-outlined text-sm">arrow_forward</span>
-          Open App
+        <a href="index.html" class="cta-btn ml-2 inline-flex items-center gap-1 px-4 py-1.5 bg-primary text-on-primary rounded-full text-xs font-bold shadow-sm" style="text-decoration:none;">
+          Open App <span class="material-symbols-outlined text-xs">arrow_forward</span>
         </a>
       </div>
+
+      <!-- Mobile Nav Buttons -->
+      <div class="flex items-center gap-2 md:hidden">
+        <button id="themeToggleMobile" class="w-8 h-8 rounded-full flex items-center justify-center border border-outline-variant/20 text-primary/70 hover:text-primary" title="Toggle theme">
+          <span class="material-symbols-outlined text-base">dark_mode</span>
+        </button>
+        <button id="mobileMenuBtn" class="w-8 h-8 flex items-center justify-center rounded-lg bg-surface-container border border-outline-variant/20 text-primary" aria-label="Open Menu">
+          <span class="material-symbols-outlined text-xl">menu</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Dropdown Menu -->
+    <div id="mobileMenu" class="hidden md:hidden px-4 pb-4 pt-2 border-t border-outline-variant/10 bg-background/95 backdrop-blur-lg flex flex-col gap-2">
+      <a href="index.html" class="px-3 py-2 rounded-xl text-sm font-semibold text-primary bg-surface-container flex items-center justify-between">
+        <span>✏️ Open App & Editor</span>
+        <span class="material-symbols-outlined text-sm">arrow_forward</span>
+      </a>
+      <a href="how-it-works.html" class="px-3 py-2 rounded-xl text-sm font-bold text-primary bg-primary/10">📖 How It Works Guide</a>
+      <a href="convo_room/index.html" class="px-3 py-2 rounded-xl text-sm text-primary/80 hover:bg-surface-container">💬 Live Convo Room</a>
+      <a href="codeshare/index.html" class="px-3 py-2 rounded-xl text-sm text-primary/80 hover:bg-surface-container">💻 Collaborative CodeShare</a>
+      <a href="support.html" class="px-3 py-2 rounded-xl text-sm text-primary/80 hover:bg-surface-container">🎧 Help & FAQs</a>
+      <a href="privacy.html" class="px-3 py-2 rounded-xl text-sm text-primary/80 hover:bg-surface-container">🛡️ Privacy Policy</a>
+      <a href="terms.html" class="px-3 py-2 rounded-xl text-sm text-primary/80 hover:bg-surface-container">⚖️ Terms of Service</a>
     </div>
   </nav>
 
@@ -421,7 +529,69 @@
     </div>
   </section>
 
+  <!-- ===== CODESHARE FEATURE SHOWCASE ===== -->
+  <section class="py-20 bg-surface-container-low border-y border-outline-variant/10 relative overflow-hidden">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+        <div class="lg:col-span-6 space-y-6 reveal">
+          <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-wider">
+            <span class="material-symbols-outlined text-sm">code</span>
+            <span>Real-Time Code Collaboration</span>
+          </div>
+          <h2 class="font-body text-4xl sm:text-5xl italic text-on-surface leading-tight">CodeShare — Write & Execute Together</h2>
+          <p class="text-on-surface-variant text-base leading-relaxed">Collaborative in-browser code editor with instant room sharing. Write in 14+ programming languages with syntax highlighting, live HTML/CSS web preview, and in-browser Python (Skulpt) and JavaScript execution.</p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+            <div class="p-4 rounded-2xl bg-surface-container-lowest border border-outline-variant/15 space-y-1">
+              <div class="flex items-center gap-2 text-primary font-bold text-xs">
+                <span class="material-symbols-outlined text-lg">sync</span>
+                <span>Zero-Latency Sync</span>
+              </div>
+              <p class="text-[11px] text-on-surface-variant/80">Keystroke-safe peer sync powered by Firestore and BroadcastChannel.</p>
+            </div>
+            <div class="p-4 rounded-2xl bg-surface-container-lowest border border-outline-variant/15 space-y-1">
+              <div class="flex items-center gap-2 text-primary font-bold text-xs">
+                <span class="material-symbols-outlined text-lg">terminal</span>
+                <span>In-Browser Runner</span>
+              </div>
+              <p class="text-[11px] text-on-surface-variant/80">Execute Python and JS snippets with live output in the execution terminal.</p>
+            </div>
+          </div>
+          <div class="pt-2 flex flex-wrap gap-3">
+            <a href="codeshare/index.html" class="inline-flex items-center gap-2 px-6 py-3 bg-primary text-on-primary font-bold text-sm rounded-xl hover:bg-primary-dim transition-all shadow-md active:scale-95">
+              <span>Launch CodeShare</span>
+              <span class="material-symbols-outlined text-base">arrow_forward</span>
+            </a>
+            <a href="support.html" class="inline-flex items-center gap-2 px-5 py-3 bg-surface-container-lowest text-primary font-bold text-sm rounded-xl border border-outline-variant/15 hover:bg-surface-container-high transition-all">
+              <span>Read CodeShare FAQs</span>
+            </a>
+          </div>
+        </div>
+        <div class="lg:col-span-6 reveal delay-2">
+          <!-- Code Editor Preview Mockup Card -->
+          <div class="bg-[#0d1117] rounded-3xl p-6 border border-outline-variant/20 shadow-2xl font-mono text-xs space-y-4">
+            <div class="flex items-center justify-between border-b border-white/10 pb-3">
+              <div class="flex items-center gap-2">
+                <span class="w-3 h-3 rounded-full bg-red-500/80"></span>
+                <span class="w-3 h-3 rounded-full bg-yellow-500/80"></span>
+                <span class="w-3 h-3 rounded-full bg-green-500/80"></span>
+                <span class="ml-2 text-white/50 text-[11px]">codeshare.py</span>
+              </div>
+              <span class="text-emerald-400 text-[10px] font-bold bg-emerald-500/10 px-2.5 py-0.5 rounded-full">● 2 Online</span>
+            </div>
+            <pre class="text-white/90 overflow-x-auto leading-relaxed"><code><span class="text-purple-400">def</span> <span class="text-blue-400">solve_problem</span>(team):
+    <span class="text-emerald-400">print</span>(<span class="text-amber-300">f"Collaborating with {team} in real-time..."</span>)
+    <span class="text-purple-400">return</span> <span class="text-emerald-400">True</span>
 
+solve_problem(<span class="text-amber-300">"eNotePad Team"</span>)</code></pre>
+            <div class="pt-3 border-t border-white/10 flex items-center justify-between text-[11px] text-white/60">
+              <span>Python 3 · Skulpt Runtime</span>
+              <span class="text-emerald-400">⚡ Execution: 4.12ms</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <!-- ===== USE CASES ===== -->
   <section class="py-24 bg-background">
@@ -439,7 +609,7 @@
             <span class="material-symbols-outlined filled text-blue-400">smartphone</span>
           </div>
           <h3 class="font-headline font-semibold text-on-surface mb-2">Phone → PC transfer</h3>
-          <p class="text-sm text-on-surface-variant leading-relaxed">Copy a link on your phone and need it on your laptop? Share it with eNotePad — no cable, no email, no AirDrop needed.</p>
+          <p class="text-sm text-on-surface-variant leading-relaxed">Copy a link on your phone and need it on your laptop? Share it with eNotePad — no cables, bluetooth pairing, or local file transfers needed.</p>
           <div class="mt-4 pt-4 border-t border-outline-variant/10 flex items-center gap-2 text-xs text-on-surface-variant/50">
             <span class="material-symbols-outlined text-sm">timer</span> Takes under 10 seconds
           </div>
@@ -450,7 +620,7 @@
             <span class="material-symbols-outlined filled text-green-500">group</span>
           </div>
           <h3 class="font-headline font-semibold text-on-surface mb-2">Quick share with a friend</h3>
-          <p class="text-sm text-on-surface-variant leading-relaxed">Share a WiFi password, a meeting link, or an address with someone nearby — no WhatsApp group, no contact saving needed.</p>
+          <p class="text-sm text-on-surface-variant leading-relaxed">Share a WiFi password, a meeting link, or an address with someone nearby — no contact saving or chat group creation required.</p>
           <div class="mt-4 pt-4 border-t border-outline-variant/10 flex items-center gap-2 text-xs text-on-surface-variant/50">
             <span class="material-symbols-outlined text-sm">lock</span> Auto-deletes in 20 min
           </div>
@@ -472,7 +642,7 @@
             <span class="material-symbols-outlined filled text-orange-400">image</span>
           </div>
           <h3 class="font-headline font-semibold text-on-surface mb-2">Send a photo quickly</h3>
-          <p class="text-sm text-on-surface-variant leading-relaxed">Upload a photo and share the code. The other person downloads it without WhatsApp compression — full quality, no app needed.</p>
+          <p class="text-sm text-on-surface-variant leading-relaxed">Upload a photo and share the code. The other person downloads it in original resolution — full quality, zero file compression, no app needed.</p>
           <div class="mt-4 pt-4 border-t border-outline-variant/10 flex items-center gap-2 text-xs text-on-surface-variant/50">
             <span class="material-symbols-outlined text-sm">hd</span> High quality uploads
           </div>
@@ -507,75 +677,85 @@
 
 
   <!-- ===== COMPARISON TABLE ===== -->
-  <section class="py-24 bg-surface-container-low/60">
-    <div class="max-w-4xl mx-auto px-6">
-      <div class="text-center mb-14 reveal">
-        <p class="text-xs uppercase tracking-widest text-primary/50 font-bold mb-3">Why not just...</p>
-        <h2 class="font-body text-4xl sm:text-5xl italic text-on-surface mb-4">How is this different?</h2>
-        <p class="text-on-surface-variant max-w-lg mx-auto">Good question. Here's how eNotePad compares to the alternatives you already use.</p>
+  <section class="py-20 sm:py-24 bg-surface-container-low/60">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6">
+      <div class="text-center mb-12 sm:mb-14 reveal">
+        <p class="text-xs uppercase tracking-widest text-primary/60 font-bold mb-3">Feature Matrix</p>
+        <h2 class="font-body text-3xl sm:text-5xl italic text-on-surface mb-4">How is eNotePad different?</h2>
+        <p class="text-on-surface-variant max-w-lg mx-auto text-sm sm:text-base">Compare instant ephemeral sharing against traditional messaging apps and email attachments.</p>
       </div>
 
       <div class="reveal bg-surface-container-lowest rounded-3xl editorial-shadow editorial-border overflow-hidden">
-        <div class="grid grid-cols-4 text-xs font-bold uppercase tracking-widest text-on-surface-variant/50 bg-surface-container px-6 py-4 gap-4">
-          <div>Feature</div>
-          <div class="text-center text-primary">eNotePad</div>
-          <div class="text-center">WhatsApp</div>
-          <div class="text-center">Email</div>
+        <div class="overflow-x-auto">
+          <div class="min-w-[540px]">
+            <div class="grid grid-cols-4 text-[11px] sm:text-xs font-bold uppercase tracking-widest text-on-surface-variant/60 bg-surface-container px-4 sm:px-6 py-4 gap-2 sm:gap-4 border-b border-outline-variant/10">
+              <div>Capability</div>
+              <div class="text-center text-primary font-black">eNotePad</div>
+              <div class="text-center">Chat Apps</div>
+              <div class="text-center">Email & Cloud</div>
+            </div>
+            <div id="comparisonTable"></div>
+          </div>
         </div>
-        <div id="comparisonTable"></div>
       </div>
     </div>
   </section>
 
   <!-- ===== FAQ ===== -->
-  <section class="py-24 bg-background">
-    <div class="max-w-3xl mx-auto px-6">
-      <div class="text-center mb-14 reveal">
-        <p class="text-xs uppercase tracking-widest text-primary/50 font-bold mb-3">Questions</p>
-        <h2 class="font-body text-4xl sm:text-5xl italic text-on-surface mb-4">Frequently asked</h2>
-        <p class="text-on-surface-variant">Everything you might want to know before getting started.</p>
+  <section class="py-20 sm:py-24 bg-background">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6">
+      <div class="text-center mb-12 sm:mb-14 reveal">
+        <p class="text-xs uppercase tracking-widest text-primary/60 font-bold mb-3">Questions & Answers</p>
+        <h2 class="font-body text-3xl sm:text-5xl italic text-on-surface mb-4">Frequently Asked</h2>
+        <p class="text-on-surface-variant text-sm sm:text-base">Everything you need to know about secret codes, privacy, and notes.</p>
       </div>
       <div class="space-y-3" id="faqContainer"></div>
     </div>
   </section>
 
-
-
   <!-- ===== FINAL CTA ===== -->
-  <section class="py-28 relative overflow-hidden">
+  <section class="py-20 sm:py-28 relative overflow-hidden">
     <div class="absolute inset-0 bg-primary/5"></div>
     <div class="hero-orb w-96 h-96 top-0 left-1/2 -translate-x-1/2" style="background:radial-gradient(circle,rgba(81,96,112,0.1) 0%,transparent 70%);"></div>
 
-    <div class="relative max-w-2xl mx-auto px-6 text-center reveal">
-      <div class="w-20 h-20 rounded-3xl bg-primary/10 flex items-center justify-center mx-auto mb-6">
-        <span class="material-symbols-outlined text-4xl text-primary filled">bolt</span>
+    <div class="relative max-w-2xl mx-auto px-4 sm:px-6 text-center reveal">
+      <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-3xl bg-primary/10 flex items-center justify-center mx-auto mb-6">
+        <span class="material-symbols-outlined text-3xl sm:text-4xl text-primary filled">bolt</span>
       </div>
-      <h2 class="font-body text-4xl sm:text-5xl italic text-on-surface mb-4">Ready to try it?</h2>
-      <p class="text-on-surface-variant text-lg mb-8 max-w-xl mx-auto">No setup. No account. Just open the app and share something in under 30 seconds.</p>
-      <a href="index.html" class="cta-btn inline-flex items-center gap-2.5 px-10 py-4 bg-primary text-on-primary rounded-full text-lg font-bold shadow-xl" style="text-decoration:none;">
-        <span class="material-symbols-outlined">edit_note</span>
-        Open eNotePad
-        <span class="material-symbols-outlined">arrow_forward</span>
-      </a>
-      <p class="text-xs text-on-surface-variant/40 mt-5">Free forever &middot; No login required &middot; Works on all devices</p>
+      <h2 class="font-body text-3xl sm:text-5xl italic text-on-surface mb-4">Ready to share friction-free?</h2>
+      <p class="text-on-surface-variant text-sm sm:text-lg mb-8 max-w-xl mx-auto">No setup. No account. Just write and receive your 6-character code in seconds.</p>
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+        <a href="index.html" class="cta-btn inline-flex items-center justify-center gap-2.5 px-8 sm:px-10 py-3.5 sm:py-4 bg-primary text-on-primary rounded-full text-base sm:text-lg font-bold shadow-xl w-full sm:w-auto" style="text-decoration:none;">
+          <span class="material-symbols-outlined">edit_note</span>
+          Open eNotePad
+          <span class="material-symbols-outlined">arrow_forward</span>
+        </a>
+        <a href="convo_room/index.html" class="cta-btn inline-flex items-center justify-center gap-2 px-6 py-3.5 border border-outline-variant/30 bg-surface-container-lowest rounded-full text-sm font-bold text-primary hover:bg-surface-container transition-all w-full sm:w-auto" style="text-decoration:none;">
+          <span class="material-symbols-outlined text-base">forum</span>
+          Live Convo Room
+        </a>
+      </div>
+      <p class="text-xs text-on-surface-variant/40 mt-5">Free forever &middot; No login required &middot; Works on all mobile & desktop browsers</p>
     </div>
   </section>
 
   <!-- ===== FOOTER ===== -->
-  <footer class="border-t border-outline-variant/10 bg-surface-container-low py-8">
-    <div class="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+  <footer class="border-t border-outline-variant/10 bg-surface-container-low py-10">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-6">
       <div class="flex items-center gap-2">
-        <span style="color:#00a8ff" class="font-bold text-sm">e</span>
-        <span class="text-primary font-bold text-sm">NotePad</span>
-        <span class="text-on-surface-variant/40 text-xs">— Digital Curator</span>
+        <span style="color:#00a8ff" class="font-bold text-base">e</span>
+        <span class="text-primary font-bold text-base">NotePad</span>
+        <span class="text-on-surface-variant/50 text-xs">— Digital Curator</span>
       </div>
-      <div class="flex items-center gap-5 text-xs text-on-surface-variant/50">
-        <a href="privacy.html" class="hover:text-primary transition-colors animated-underline" style="text-decoration:none;">Privacy</a>
-        <a href="terms.html" class="hover:text-primary transition-colors animated-underline" style="text-decoration:none;">Terms</a>
-        <a href="support.html" class="hover:text-primary transition-colors animated-underline" style="text-decoration:none;">Support</a>
-        <a href="index.html" class="hover:text-primary transition-colors animated-underline" style="text-decoration:none;">Open App</a>
+      <div class="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs text-on-surface-variant/70">
+        <a href="how-it-works.html" class="text-primary font-bold animated-underline" style="text-decoration:none;">How It Works</a>
+        <a href="convo_room/index.html" class="hover:text-primary transition-colors animated-underline" style="text-decoration:none;">Convo Room</a>
+        <a href="support.html" class="hover:text-primary transition-colors animated-underline" style="text-decoration:none;">Support & FAQs</a>
+        <a href="privacy.html" class="hover:text-primary transition-colors animated-underline" style="text-decoration:none;">Privacy Policy</a>
+        <a href="terms.html" class="hover:text-primary transition-colors animated-underline" style="text-decoration:none;">Terms of Service</a>
+        <a href="index.html" class="hover:text-primary transition-colors animated-underline font-semibold" style="text-decoration:none;">Open App →</a>
       </div>
-      <p class="text-xs text-on-surface-variant/30">Made with ❤️ by eNotePad</p>
+      <p class="text-xs text-on-surface-variant/40">© 2026 eNotePad. All rights reserved.</p>
     </div>
   </footer>
 
@@ -583,18 +763,34 @@
     // ── Theme Toggle ──────────────────────────────
     const root = document.documentElement;
     const themeBtn = document.getElementById('themeToggle');
+    const themeBtnMobile = document.getElementById('themeToggleMobile');
     const themeIcon = document.getElementById('themeIcon');
-    const savedTheme = localStorage.getItem('enp-theme');
+    const savedTheme = localStorage.getItem('enp-theme') || localStorage.getItem('enotpad_theme');
+    
     if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
       root.classList.add('dark');
-      themeIcon.textContent = 'light_mode';
+      if (themeIcon) themeIcon.textContent = 'light_mode';
     }
-    themeBtn.addEventListener('click', () => {
+
+    function toggleAppTheme() {
       root.classList.toggle('dark');
       const isDark = root.classList.contains('dark');
-      themeIcon.textContent = isDark ? 'light_mode' : 'dark_mode';
+      if (themeIcon) themeIcon.textContent = isDark ? 'light_mode' : 'dark_mode';
       localStorage.setItem('enp-theme', isDark ? 'dark' : 'light');
-    });
+      localStorage.setItem('enotpad_theme', isDark ? 'dark' : 'light');
+    }
+
+    if (themeBtn) themeBtn.addEventListener('click', toggleAppTheme);
+    if (themeBtnMobile) themeBtnMobile.addEventListener('click', toggleAppTheme);
+
+    // ── Mobile Menu Toggle ────────────────────────
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+    if (mobileMenuBtn && mobileMenu) {
+      mobileMenuBtn.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+      });
+    }
 
     // ── Scroll Reveal ─────────────────────────────
     const revealEls = document.querySelectorAll('.reveal');
@@ -641,7 +837,7 @@
       { q: "Do I need to install anything?", a: "No. eNotePad is a web app — it works in any browser on any device (phone, PC, tablet). Just open the website. No app store needed." },
       { q: "Why does the content disappear after 20 minutes?", a: "Auto-expiry is a privacy feature. Once it's gone, it's gone — no trace left on any server. Perfect for sensitive notes, passwords, or one-time links." },
       { q: "What exactly is the 6-character code?", a: "Every time you share content, eNotePad generates a unique 6-character code (like 'A4X7K2'). Anyone who enters this code on the Access tab within the expiry window instantly gets your content." },
-      { q: "Can I use this instead of sending a WhatsApp message?", a: "Absolutely! For quick one-time shares (links, notes, images), eNotePad is faster — no opening WhatsApp, finding a contact, or waiting for delivery. Just share the code!" },
+      { q: "Can I use this for instant peer-to-peer sharing without contact info?", a: "Absolutely! For quick one-time shares (links, notes, snippets, images), eNotePad is friction-free — no sharing personal phone numbers, exchanging handles, or installing native apps. Just share the 6-character code!" },
       { q: "What if I want to keep notes permanently?", a: "Create a free account with just a username and 4-digit PIN (no email or phone needed). Logged-in users can save notes indefinitely in their personal library." },
       { q: "Is my data private and secure?", a: "Yes. Temporary content is auto-deleted after expiry. No login is required, so your identity is never attached to what you share. We store as little data as possible." },
     ];

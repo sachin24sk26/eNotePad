@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <meta name="description" content="eNotePad CodeShare — Real-time collaborative code editor. Share and write code with peers across any device instantly with zero setup." />
+  <meta name="author" content="eNotePad — Digital Curator" />
+  <title>eNotePad | CodeShare — Real-Time Collaborative Code Editor</title>
+  <link rel="icon" href="../assets/Favicon.png" type="image/png" />
+  <link rel="canonical" href="https://enotepad.vercel.app/codeshare/index.html" />
+
+  <!-- Preconnect & Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700;800&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400..700,0..1,0&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+  <!-- CodeMirror CSS & Themes -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css" />
+
+  <!-- Custom CodeShare Styling -->
+  <link rel="stylesheet" href="css/codeshare.css?v=2.2" />
+
+  <!-- Tailwind Config: Tactile Editorial Design System -->
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#516070",
+            "primary-dim": "#455464",
+            "on-primary": "#f4f8ff",
+            "primary-container": "#d4e4f8",
+            "on-primary-container": "#445363",
+            "surface": "#faf9f5",
+            "on-surface": "#2f342e",
+            "surface-container-lowest": "#ffffff",
+            "surface-container-low": "#f4f4ef",
+            "surface-container": "#edeee8",
+            "surface-container-high": "#e6e9e2",
+            "on-surface-variant": "#5c605a",
+            "outline-variant": "#afb3ac"
+          },
+          fontFamily: {
+            headline: ["Inter", "sans-serif"],
+            body: ["Newsreader", "serif"],
+            mono: ["Fira Code", "monospace"],
+            label: ["Inter", "sans-serif"]
+          }
+        }
+      }
+    };
+  </script>
+</head>
+
+<body class="bg-surface text-on-surface font-label min-h-screen flex flex-col h-screen overflow-hidden relative">
+
+  <!-- Paper Grain Overlay -->
+  <div class="fixed inset-0 pointer-events-none paper-grain z-50"></div>
+
+  <!-- Toast Container -->
+  <div class="fixed top-5 right-5 z-[9999] flex flex-col gap-2 pointer-events-none" id="toastContainer"></div>
+
+  <!-- ===== TOP APP BAR / IDE HEADER ===== -->
+  <header class="bg-surface-container-lowest border-b border-outline-variant/15 z-30 px-3 sm:px-5 py-2.5 flex items-center justify-between shadow-xs flex-shrink-0">
+    
+    <!-- Left Section: Logo & Room Pill -->
+    <div class="flex items-center gap-3 sm:gap-4">
+      <a href="../index.html" class="flex items-center gap-2 group no-underline" title="Return to eNotePad Home">
+        <div class="relative w-7 h-7 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+          <img src="../assets/logo-light.svg" alt="eNotePad Logo" class="w-full h-full object-contain dark:hidden" />
+          <img src="../assets/logo-dark.svg" alt="eNotePad Logo" class="w-full h-full object-contain hidden dark:block" />
+        </div>
+        <div class="flex items-baseline leading-none">
+          <span style="color:#00a8ff" class="text-base font-bold">e</span>
+          <span class="text-primary text-base font-bold">CodeShare</span>
+        </div>
+      </a>
+
+      <!-- Active Room Pill -->
+      <div class="flex items-center gap-2 bg-surface-container px-2.5 py-1 rounded-full border border-outline-variant/15 text-xs">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 status-dot-live"></span>
+        <span class="text-on-surface-variant font-medium hidden sm:inline">Room:</span>
+        <span class="font-mono font-bold text-primary" id="roomCodeDisplay">READY</span>
+        <button id="shareRoomBtn" class="ml-1 text-primary/70 hover:text-primary transition-colors flex items-center" title="Share Room Link">
+          <span class="material-symbols-outlined text-sm">share</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Center Section: Language Selector & Live Actions -->
+    <div class="flex items-center gap-1.5 sm:gap-2">
+      <!-- Language Dropdown -->
+      <div class="relative">
+        <select id="languageSelect" class="bg-surface-container-low border border-outline-variant/20 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-primary outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer pr-7">
+          <option value="javascript">JavaScript</option>
+          <option value="typescript">TypeScript</option>
+          <option value="python">Python</option>
+          <option value="html">HTML / CSS / JS</option>
+          <option value="css">CSS</option>
+          <option value="cpp">C / C++</option>
+          <option value="java">Java</option>
+          <option value="csharp">C#</option>
+          <option value="rust">Rust</option>
+          <option value="go">Go</option>
+          <option value="sql">SQL</option>
+          <option value="json">JSON</option>
+          <option value="markdown">Markdown</option>
+          <option value="php">PHP</option>
+        </select>
+      </div>
+
+      <!-- Action Buttons -->
+      <button id="runCodeBtn" class="tool-btn px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold bg-primary text-on-primary shadow-xs flex items-center gap-1" title="Execute Code Snippet">
+        <span class="material-symbols-outlined text-base">play_arrow</span>
+        <span class="hidden md:inline">Run</span>
+      </button>
+
+      <button id="togglePreviewBtn" class="tool-btn px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-semibold bg-surface-container text-primary flex items-center gap-1" title="Toggle Live HTML Preview">
+        <span class="material-symbols-outlined text-base">visibility</span>
+        <span class="hidden md:inline">Preview</span>
+      </button>
+
+      <button id="copyCodeBtn" class="tool-btn p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl text-xs font-medium bg-surface-container text-primary flex items-center gap-1" title="Copy Code to Clipboard">
+        <span class="material-symbols-outlined text-base">content_copy</span>
+        <span class="hidden lg:inline">Copy</span>
+      </button>
+
+      <button id="downloadCodeBtn" class="tool-btn p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl text-xs font-medium bg-surface-container text-primary flex items-center gap-1" title="Download File">
+        <span class="material-symbols-outlined text-base">download</span>
+        <span class="hidden lg:inline">Download</span>
+      </button>
+    </div>
+
+    <!-- Right Section: Collaborators, Chat & Theme -->
+    <div class="flex items-center gap-1.5 sm:gap-2">
+      <!-- Live Session Stopwatch Timer -->
+      <div id="sessionTimerBadge" class="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 bg-surface-container rounded-full text-xs font-mono font-medium text-primary border border-outline-variant/15 select-none transition-all duration-200" title="Session Duration">
+        <span class="material-symbols-outlined text-sm text-primary/70">timer</span>
+        <span id="sessionTimerDisplay" class="font-bold tracking-tight">00:00</span>
+        <button id="sessionTimerToggleBtn" class="p-0.5 rounded-full hover:bg-surface-variant/40 hover:text-primary transition-colors flex items-center justify-center text-primary/70" title="Pause / Resume Timer">
+          <span class="material-symbols-outlined text-xs" id="sessionTimerToggleIcon">pause</span>
+        </button>
+        <button id="sessionTimerResetBtn" class="p-0.5 rounded-full hover:bg-surface-variant/40 hover:text-primary transition-colors flex items-center justify-center text-primary/70" title="Reset Timer">
+          <span class="material-symbols-outlined text-xs">restart_alt</span>
+        </button>
+      </div>
+
+      <!-- Live Collaborators Counter -->
+      <div class="hidden sm:flex items-center gap-1.5 px-2.5 py-1 bg-surface-container rounded-full text-xs font-semibold text-primary/80" title="Active collaborators in this room">
+        <span class="material-symbols-outlined text-sm">group</span>
+        <span id="activeCollaboratorsCount">1 online</span>
+      </div>
+
+      <!-- Chat Drawer Toggle -->
+      <button id="toggleChatBtn" class="tool-btn p-1.5 rounded-xl bg-surface-container text-primary flex items-center justify-center relative" title="Toggle Collaborative Chat">
+        <span class="material-symbols-outlined text-lg">forum</span>
+      </button>
+
+      <!-- New Room Button -->
+      <button id="newRoomBtn" class="tool-btn p-1.5 rounded-xl bg-surface-container text-primary flex items-center justify-center" title="Create New Session">
+        <span class="material-symbols-outlined text-lg">add_box</span>
+      </button>
+
+      <!-- Theme Toggle -->
+      <button id="themeToggle" class="tool-btn p-1.5 rounded-xl bg-surface-container text-primary flex items-center justify-center" title="Toggle Dark/Light Mode">
+        <span class="material-symbols-outlined text-lg dark:hidden">dark_mode</span>
+        <span class="material-symbols-outlined text-lg hidden dark:block">light_mode</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ===== MAIN WORKSPACE (EDITOR + PREVIEW + CHAT) ===== -->
+  <main class="flex-1 flex relative overflow-hidden bg-surface">
+    
+    <!-- JOIN / CREATE ROOM VIEW OVERLAY -->
+    <div id="joinView" class="absolute inset-0 flex items-center justify-center bg-surface/95 backdrop-blur-md z-40 p-4 overflow-y-auto hidden">
+      <div class="max-w-md w-full my-auto">
+        <div class="bg-surface-container-lowest rounded-2xl sm:rounded-3xl p-6 sm:p-8 text-center shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-outline-variant/15 editorial-shadow space-y-4">
+          <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mx-auto mb-2 shadow-inner">
+            <span class="material-symbols-outlined text-3xl sm:text-4xl">code</span>
+          </div>
+          <div>
+            <h2 class="font-serif italic text-2xl sm:text-3xl text-primary mb-1">eNotePad CodeShare</h2>
+            <p class="text-xs sm:text-sm font-sans text-on-surface-variant/80 border-b border-outline-variant/10 pb-3">Real-time collaborative code editor. Share and write code with peers across any device instantly with zero setup.</p>
+          </div>
+          
+          <div class="grid grid-cols-2 gap-2 text-[11px] text-left">
+            <div class="p-2.5 rounded-xl bg-surface-container flex items-start gap-1.5">
+              <span class="material-symbols-outlined text-[15px] text-primary flex-shrink-0 mt-0.5">bolt</span>
+              <span class="text-on-surface-variant leading-snug">Zero-latency peer & cloud synchronization</span>
+            </div>
+            <div class="p-2.5 rounded-xl bg-surface-container flex items-start gap-1.5">
+              <span class="material-symbols-outlined text-[15px] text-primary flex-shrink-0 mt-0.5">terminal</span>
+              <span class="text-on-surface-variant leading-snug">In-browser Python & JS live execution</span>
+            </div>
+          </div>
+          
+          <div class="flex flex-col gap-3.5 items-center w-full pt-1">
+            <button id="createRoomModalBtn" class="w-full bg-primary text-on-primary font-bold px-4 py-3 rounded-xl text-base sm:text-lg hover:bg-primary-dim transition-all shadow-md active:scale-95 flex items-center justify-center gap-2">
+              <span class="material-symbols-outlined">add_circle</span>
+              Create New Code Room
+            </button>
+            
+            <div class="flex items-center w-full my-0.5">
+              <hr class="flex-1 border-outline-variant/30">
+              <span class="px-3 text-[10px] font-bold uppercase tracking-widest text-outline">Or Join Existing Room</span>
+              <hr class="flex-1 border-outline-variant/30">
+            </div>
+
+            <div class="w-full space-y-2">
+              <input id="roomCodeModalInput" class="bg-surface-container-low editorial-border rounded-xl py-3 px-4 text-center text-lg sm:text-xl font-bold tracking-widest focus:ring-2 focus:ring-primary/20 w-full font-mono uppercase code-input-box" placeholder="ENTER 6-CHAR CODE" type="text" maxlength="6" autocomplete="off"/>
+              <button id="joinRoomModalBtn" class="w-full bg-surface-container text-primary font-bold px-4 py-2.5 rounded-xl text-sm sm:text-base hover:bg-surface-container-high transition-all shadow-sm editorial-border active:scale-95 flex items-center justify-center gap-1.5">
+                <span>Join Room</span>
+                <span class="material-symbols-outlined text-base">arrow_forward</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-outline-variant/10 flex flex-wrap items-center justify-center gap-3 text-xs text-primary/70">
+            <a href="../how-it-works.html" class="hover:text-primary transition-colors font-medium">How It Works</a>
+            <span>·</span>
+            <a href="../convo_room/index.html" class="hover:text-primary transition-colors font-medium">Convo Room</a>
+            <span>·</span>
+            <a href="../support.html" class="hover:text-primary transition-colors font-medium">Help & FAQs</a>
+            <span>·</span>
+            <a href="../privacy.html" class="hover:text-primary transition-colors font-medium">Privacy</a>
+            <span>·</span>
+            <a href="../terms.html" class="hover:text-primary transition-colors font-medium">Terms</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Code Editor Section -->
+    <div class="flex-1 flex flex-col h-full relative overflow-hidden">
+      <!-- Editor Toolbar Header -->
+      <div class="bg-surface-container-low border-b border-outline-variant/10 px-4 py-1.5 flex items-center justify-between text-[11px] text-on-surface-variant/70 flex-shrink-0">
+        <div class="flex items-center gap-3">
+          <span id="editorLanguageBadge" class="font-bold text-primary uppercase tracking-wider">JavaScript</span>
+          <span class="hidden sm:inline">•</span>
+          <button id="insertTemplateBtn" class="hover:text-primary transition-colors hover:underline hidden sm:inline">Insert Template</button>
+        </div>
+        <div class="flex items-center gap-4">
+          <div class="flex items-center gap-1.5">
+            <span>Tab:</span>
+            <select id="tabSizeSelect" class="bg-transparent border-none text-[11px] font-bold p-0 text-primary cursor-pointer outline-none">
+              <option value="4" selected>4 spaces</option>
+              <option value="2">2 spaces</option>
+            </select>
+          </div>
+          <label class="flex items-center gap-1 cursor-pointer select-none">
+            <input type="checkbox" id="wordWrapToggle" class="rounded text-primary focus:ring-0 w-3 h-3" checked />
+            <span>Wrap</span>
+          </label>
+          <label class="flex items-center gap-1 cursor-pointer select-none">
+            <input type="checkbox" id="readOnlyToggle" class="rounded text-primary focus:ring-0 w-3 h-3" />
+            <span>Lock</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- CodeMirror Mount Area -->
+      <div class="flex-1 relative overflow-hidden" id="editorContainer">
+        <textarea id="codeEditor" class="hidden"></textarea>
+      </div>
+
+      <!-- Status Bar Footer -->
+      <div class="bg-surface-container-low border-t border-outline-variant/10 px-4 py-1 flex items-center justify-between text-[11px] text-on-surface-variant/60 flex-shrink-0 font-mono">
+        <div class="flex items-center gap-3">
+          <span id="cursorPosDisplay">Ln 1, Col 1</span>
+          <span>UTF-8</span>
+          <span class="hidden sm:inline">eNotePad Realtime Sync</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-[10px] text-primary/70">Author:</span>
+          <span id="currentUserBadge" class="font-bold text-primary">Coder</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Preview Split Panel (Collapsible) -->
+    <div id="previewPanel" class="w-full md:w-1/2 border-l border-outline-variant/15 flex flex-col bg-white dark:bg-[#0d1117] hidden z-10 transition-all duration-300">
+      <div class="bg-surface-container-low border-b border-outline-variant/10 px-4 py-2 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-sm text-primary">visibility</span>
+          <span class="text-xs font-bold text-primary">Live Web Preview</span>
+        </div>
+        <button id="closePreviewBtn" class="text-on-surface-variant/60 hover:text-primary" title="Close Preview">
+          <span class="material-symbols-outlined text-sm">close</span>
+        </button>
+      </div>
+      <iframe id="previewIframe" class="w-full flex-1 border-none bg-white" sandbox="allow-scripts allow-modals"></iframe>
+    </div>
+
+    <!-- Live Chat & Collaborative Comments Drawer -->
+    <aside id="chatDrawer" class="drawer-panel hidden-drawer absolute top-0 right-0 bottom-0 w-80 max-w-full bg-surface-container-lowest border-l border-outline-variant/15 z-20 flex flex-col shadow-2xl">
+      <div class="p-3.5 border-b border-outline-variant/15 flex items-center justify-between bg-surface-container-low">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary text-base">forum</span>
+          <h3 class="font-bold text-xs text-primary">Collaborator Chat</h3>
+        </div>
+        <button id="closeChatBtn" class="text-on-surface-variant/60 hover:text-primary">
+          <span class="material-symbols-outlined text-base">close</span>
+        </button>
+      </div>
+
+      <!-- Messages Stream -->
+      <div id="chatMessagesList" class="flex-1 p-3 overflow-y-auto space-y-2.5">
+        <!-- Messages dynamically rendered -->
+      </div>
+
+      <!-- Chat Input -->
+      <div class="p-2.5 border-t border-outline-variant/15 bg-surface-container-low">
+        <div class="flex items-center gap-1.5 bg-surface-container-lowest rounded-xl border border-outline-variant/20 p-1.5 shadow-inner">
+          <input type="text" id="chatInput" placeholder="Comment or message..." class="flex-1 bg-transparent border-none text-xs text-on-surface px-2 focus:ring-0 outline-none" />
+          <button id="sendChatBtn" class="w-7 h-7 rounded-lg bg-primary text-on-primary flex items-center justify-center hover:bg-primary-dim transition-transform active:scale-95">
+            <span class="material-symbols-outlined text-xs">send</span>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+  </main>
+
+  <!-- ===== SHARE ROOM MODAL ===== -->
+  <div id="shareModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-surface-container-lowest rounded-3xl max-w-md w-full p-6 sm:p-7 editorial-shadow editorial-border space-y-5 relative">
+      <button id="closeShareModalBtn" class="absolute top-5 right-5 text-on-surface-variant/50 hover:text-primary">
+        <span class="material-symbols-outlined text-xl">close</span>
+      </button>
+
+      <div class="text-center space-y-1">
+        <div class="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mx-auto mb-2">
+          <span class="material-symbols-outlined text-2xl">share</span>
+        </div>
+        <h3 class="font-headline font-bold text-lg text-primary">Share This Code Room</h3>
+        <p class="text-xs text-on-surface-variant leading-relaxed">Anyone with this link can view and write code with you in real-time.</p>
+      </div>
+
+      <!-- QR Code Container -->
+      <div id="qrcodeContainer" class="p-3 bg-surface-container-low rounded-2xl border border-outline-variant/15 flex items-center justify-center">
+        <!-- QR generated via JS -->
+      </div>
+
+      <!-- Copyable URL Input -->
+      <div class="space-y-2">
+        <div class="flex items-center gap-2 bg-surface-container-low rounded-2xl border border-outline-variant/20 p-1.5">
+          <input type="text" id="roomShareUrlInput" readonly class="flex-1 bg-transparent border-none text-xs font-mono px-3 text-on-surface outline-none" />
+          <button id="copyShareUrlBtn" class="px-4 py-2 bg-primary text-on-primary rounded-xl text-xs font-bold hover:bg-primary-dim transition-all flex items-center gap-1 shadow-sm">
+            <span class="material-symbols-outlined text-xs">content_copy</span>
+            Copy
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== RUNNER OUTPUT MODAL ===== -->
+  <div id="runnerOutputModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-surface-container-lowest rounded-3xl max-w-xl w-full p-6 editorial-shadow editorial-border space-y-4 relative flex flex-col max-h-[85vh]">
+      <div class="flex items-center justify-between border-b border-outline-variant/15 pb-3">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary text-lg">terminal</span>
+          <h3 class="font-headline font-bold text-sm text-primary">Execution Terminal</h3>
+        </div>
+        <button id="closeTerminalBtn" class="text-on-surface-variant/50 hover:text-primary">
+          <span class="material-symbols-outlined text-base">close</span>
+        </button>
+      </div>
+      <pre id="terminalOutputText" class="flex-1 bg-black text-emerald-400 p-4 rounded-2xl font-mono text-xs overflow-y-auto whitespace-pre-wrap leading-relaxed border border-emerald-900/30"></pre>
+    </div>
+  </div>
+
+  <!-- CodeMirror Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/xml/xml.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/css/css.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/htmlmixed/htmlmixed.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/clike/clike.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/sql/sql.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/rust/rust.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/go/go.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/markdown/markdown.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/php/php.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
+
+  <!-- Skulpt In-Browser Python Runtime -->
+  <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js"></script>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+  <!-- eNotePad Firebase Config -->
+  <script src="../js/firebase-config.js"></script>
+  <script src="../js/utils.js"></script>
+
+  <!-- CodeShare Engine -->
+  <script src="js/codeshare.js?v=2.2"></script>
+</body>
+</html>

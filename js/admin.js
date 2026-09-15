@@ -18,6 +18,7 @@ const adminState = {
   users: { page: 1, perPage: 25, lastDoc: null, firstDoc: null, stack: [], allDocs: [] },
   feedback: { lastDoc: null, filter: 'all', selectedIds: new Set() },
   rooms: { lastDoc: null },
+  codeshare: { lastDoc: null },
   shares: { lastDoc: null },
   logs: { lastDoc: null },
   broadcastType: 'announcement',
@@ -103,6 +104,7 @@ function initAdmin() {
         case 'feedback': loadAdminFeedback(); break;
         case 'broadcast': loadBroadcastHistory(); break;
         case 'rooms': loadAdminRooms(); break;
+        case 'codeshare': loadAdminCodeShareRooms(); break;
         case 'shares': loadAdminShares(); break;
         case 'monetize': break;
         case 'logs': loadAdminLogs(); break;
@@ -229,18 +231,20 @@ async function loadAdminStats() {
   }
 
   try {
-    const [usersSnap, sharesSnap, feedbackSnap, roomsSnap] = await Promise.allSettled([
+    const [usersSnap, sharesSnap, feedbackSnap, roomsSnap, codeshareSnap] = await Promise.allSettled([
       db.collection('users').get(),
       db.collection('shares').get(),
       db.collection('feedback').get(),
-      db.collection('convo_rooms').get()
+      db.collection('convo_rooms').get(),
+      db.collection('codeshare_rooms').get()
     ]);
 
     const stats = {
       users: usersSnap.status === 'fulfilled' ? usersSnap.value.size : 0,
       notes: sharesSnap.status === 'fulfilled' ? sharesSnap.value.size : 0,
       feedback: feedbackSnap.status === 'fulfilled' ? feedbackSnap.value.size : 0,
-      rooms: roomsSnap.status === 'fulfilled' ? roomsSnap.value.size : 0
+      rooms: roomsSnap.status === 'fulfilled' ? roomsSnap.value.size : 0,
+      codeshare: codeshareSnap.status === 'fulfilled' ? codeshareSnap.value.size : 0
     };
 
     adminState.statsCache = { data: stats, timestamp: now };
@@ -261,6 +265,7 @@ function applyStats(stats) {
   animateCounter('adminStatNotes', stats.notes);
   animateCounter('adminStatFeedback', stats.feedback);
   animateCounter('adminStatRooms', stats.rooms);
+  animateCounter('adminStatCodeShare', stats.codeshare);
 }
 
 function animateCounter(id, target) {
@@ -1145,6 +1150,145 @@ async function adminBulkDeleteExpiredRooms() {
   } catch (e) {
     console.error('Bulk cleanup failed:', e);
     showToast('Cleanup failed', 'error');
+  }
+}
+
+// ============================================================
+// CODESHARE — Live Code Rooms Management
+// ============================================================
+async function loadAdminCodeShareRooms(reset = true) {
+  const container = document.getElementById('adminCodeShareList');
+  if (!container) return;
+
+  if (reset) {
+    container.innerHTML = '<div class="col-span-full py-16 flex justify-center"><div class="w-10 h-10 border-3 border-primary/20 border-t-primary rounded-full animate-spin"></div></div>';
+    adminState.codeshare.lastDoc = null;
+  }
+
+  try {
+    let query = db.collection('codeshare_rooms').orderBy('lastUpdated', 'desc').limit(20);
+    if (adminState.codeshare.lastDoc) {
+      query = query.startAfter(adminState.codeshare.lastDoc);
+    }
+
+    const snapshot = await query.get();
+
+    if (snapshot.empty && !adminState.codeshare.lastDoc) {
+      container.innerHTML = `
+        <div class="col-span-full py-16 flex flex-col items-center gap-3 text-center">
+          <span class="material-symbols-outlined text-4xl text-on-surface-variant/20">code</span>
+          <p class="text-on-surface-variant/40 italic text-xs">No active CodeShare rooms found.</p>
+        </div>`;
+      const countEl = document.getElementById('adminCodeShareCount');
+      if (countEl) countEl.textContent = '0 rooms';
+      return;
+    }
+
+    if (reset) container.innerHTML = '';
+
+    snapshot.docs.forEach(doc => {
+      const data = doc.data();
+      const codeSnippet = (data.code || '').substring(0, 140) + ((data.code && data.code.length > 140) ? '...' : '');
+      const lang = data.language || 'javascript';
+
+      const card = document.createElement('div');
+      card.className = 'bg-surface-container-lowest p-6 rounded-[28px] border border-outline-variant/15 space-y-4 hover:border-primary/30 transition-all editorial-shadow flex flex-col justify-between';
+      card.innerHTML = `
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <div class="w-9 h-9 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center font-mono font-bold text-xs">
+                &lt;/&gt;
+              </div>
+              <div>
+                <p class="font-mono font-bold text-on-surface text-sm tracking-wider">Room: ${escapeHTML(doc.id)}</p>
+                <p class="text-[9px] text-on-surface-variant uppercase tracking-wider">Author: ${escapeHTML(data.author || data.lastEditor || 'Anonymous')}</p>
+              </div>
+            </div>
+            <span class="px-2.5 py-1 rounded-full text-[9px] font-bold uppercase bg-primary/10 text-primary font-mono">${escapeHTML(lang)}</span>
+          </div>
+
+          <div class="bg-surface-container-low p-3 rounded-xl border border-outline-variant/10 font-mono text-[11px] text-on-surface-variant/80 overflow-hidden text-ellipsis whitespace-pre leading-relaxed">
+            ${escapeHTML(codeSnippet || '// Empty session')}
+          </div>
+
+          <div class="text-[9px] text-on-surface-variant/60 font-mono flex items-center justify-between pt-1">
+            <span>Last Active: ${data.lastUpdated ? formatTimestamp(data.lastUpdated) : 'Recently'}</span>
+            <span>Chars: ${(data.code || '').length}</span>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 justify-end pt-3 border-t border-outline-variant/10">
+          <a href="codeshare/index.html?room=${doc.id}" target="_blank" class="px-3 py-1.5 rounded-xl text-[10px] font-bold text-primary hover:bg-primary/10 transition-all flex items-center gap-1">
+            <span class="material-symbols-outlined text-sm">open_in_new</span> Join Room
+          </a>
+          <button class="px-3 py-1.5 rounded-xl text-[10px] font-bold text-on-surface-variant hover:text-primary border border-outline-variant/15 hover:border-primary/30 hover:bg-primary/5 transition-all flex items-center gap-1" onclick="viewCodeShareRoomCode('${doc.id}', '${escapeHTML(lang)}')">
+            <span class="material-symbols-outlined text-sm">visibility</span> Inspect
+          </button>
+          <button class="px-3 py-1.5 rounded-xl text-[10px] font-bold text-on-surface-variant hover:text-error border border-outline-variant/15 hover:border-error/30 hover:bg-error/5 transition-all flex items-center gap-1" onclick="deleteCodeShareRoom('${doc.id}')">
+            <span class="material-symbols-outlined text-sm">delete</span> Delete
+          </button>
+        </div>`;
+      container.appendChild(card);
+    });
+
+    const countEl = document.getElementById('adminCodeShareCount');
+    if (countEl) countEl.textContent = `${container.children.length} rooms`;
+  } catch (e) {
+    console.error('CodeShare load failed:', e);
+    container.innerHTML = '<div class="col-span-full py-16 text-center text-error/50 text-xs">Failed to load CodeShare rooms.</div>';
+  }
+}
+
+async function viewCodeShareRoomCode(roomId, lang) {
+  const modal = document.getElementById('adminCodeShareViewerModal');
+  const title = document.getElementById('adminCodeShareViewerTitle');
+  const codeEl = document.getElementById('adminCodeShareViewerCode');
+  if (!modal || !codeEl) return;
+
+  if (title) title.textContent = `CodeShare Room: ${roomId} (${lang.toUpperCase()})`;
+  codeEl.textContent = 'Loading code snippet...';
+  modal.style.display = 'flex';
+
+  try {
+    const docSnap = await db.collection('codeshare_rooms').doc(roomId).get();
+    if (!docSnap.exists) {
+      codeEl.textContent = '// Room document not found.';
+      return;
+    }
+    const data = docSnap.data();
+    codeEl.textContent = data.code || '// Empty code file';
+  } catch (e) {
+    codeEl.textContent = '// Failed to fetch room code: ' + e.message;
+  }
+}
+
+function closeAdminCodeShareViewer() {
+  const modal = document.getElementById('adminCodeShareViewerModal');
+  if (modal) modal.style.display = 'none';
+}
+
+async function deleteCodeShareRoom(roomId) {
+  const confirmed = await showAdminConfirm('Delete CodeShare Room?', `Room ${roomId} and its collaborative chat will be permanently deleted.`);
+  if (!confirmed) return;
+
+  try {
+    const chatDocs = await db.collection('codeshare_rooms').doc(roomId).collection('chat').limit(200).get();
+    if (!chatDocs.empty) {
+      const batch = db.batch();
+      chatDocs.forEach(d => batch.delete(d.ref));
+      await batch.commit();
+    }
+
+    await db.collection('codeshare_rooms').doc(roomId).delete();
+    showToast(`CodeShare room ${roomId} deleted`, 'warning');
+    logAdminAction('codeshare_deleted', `Deleted CodeShare room ${roomId}`);
+    adminState.statsCache.timestamp = 0;
+    loadAdminCodeShareRooms();
+    loadAdminStats();
+  } catch (e) {
+    console.error('CodeShare deletion failed:', e);
+    showToast('Failed to delete CodeShare room', 'error');
   }
 }
 

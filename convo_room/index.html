@@ -12,12 +12,18 @@
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4282755745845869" crossorigin="anonymous"></script>
     <title>eNotePad | Convo Room</title>
     
+    <!-- Preconnect & DNS-Prefetch for lightning-fast font and asset delivery -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin />
+    <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com" />
+
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400..700,0..1,0&display=swap" rel="stylesheet"/>
     <link rel="stylesheet" href="../css/styles.css" />
     
     <!-- Tailwind Config: Tactile Editorial -->
@@ -53,11 +59,107 @@
       }
     </script>
     <style>
-        body { font-family: 'Inter', sans-serif; }
+        body { font-family: 'Inter', sans-serif; background-color: #faf9f5; color: #22292f; }
         .font-serif { font-family: 'Newsreader', serif; }
         .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
-
         .no-scrollbar::-webkit-scrollbar { display: none; }
+
+        /* ── Light Mode Refinements ── */
+        .bg-surface { background-color: #faf9f5; }
+        .bg-surface-container-lowest { background-color: #ffffff; }
+        .bg-surface-container-low { background-color: #f4f4ef; }
+        .bg-surface-container { background-color: #edeee8; }
+        .bg-surface-container-high { background-color: #e6e9e2; }
+        .editorial-border { border: 1px solid rgba(81, 96, 112, 0.15); }
+        .editorial-shadow { box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05); }
+
+        /* ── Comprehensive Dark Mode Color Overrides ── */
+        .dark body { background-color: #0d1117 !important; color: #f0f6fc !important; }
+        .dark .bg-surface { background-color: #0d1117 !important; }
+        .dark .bg-surface-container-lowest { background-color: #161c24 !important; }
+        .dark .bg-surface-container-low { background-color: #1a222c !important; }
+        .dark .bg-surface-container { background-color: #1f2834 !important; }
+        .dark .bg-surface-container-high { background-color: #263242 !important; }
+        .dark .bg-surface-dim { background-color: #11161d !important; }
+        .dark .text-on-surface { color: #f0f6fc !important; }
+        .dark .text-on-surface-variant { color: #91a4b7 !important; }
+        .dark .text-on-surface-variant\/70 { color: rgba(145,164,183,0.7) !important; }
+        .dark .text-on-surface-variant\/50 { color: rgba(145,164,183,0.5) !important; }
+        .dark .text-on-surface-variant\/40 { color: rgba(145,164,183,0.4) !important; }
+        .dark .text-primary { color: #70b4f8 !important; }
+        .dark .text-primary\/70 { color: rgba(112,180,248,0.7) !important; }
+        .dark .text-on-primary { color: #ffffff !important; }
+        .dark .bg-primary { background-color: #2563eb !important; }
+        .dark .bg-primary\/10 { background-color: rgba(112,180,248,0.12) !important; }
+        .dark .bg-primary\/20 { background-color: rgba(112,180,248,0.2) !important; }
+
+        /* Dark Mode Header & Stream Dock */
+        .dark header { background-color: rgba(13,17,23,0.92) !important; border-color: rgba(255,255,255,0.08) !important; }
+        .dark #joinView { background-color: #0d1117 !important; }
+        .dark #streamView { background-color: #0d1117 !important; }
+        
+        /* Dark Mode Room Code Input & Chat Box */
+        .dark #roomCodeInput {
+            background-color: #11161d !important;
+            color: #70b4f8 !important;
+            border-color: rgba(112, 180, 248, 0.3) !important;
+        }
+        .dark #roomCodeInput::placeholder {
+            color: rgba(145, 164, 183, 0.4) !important;
+        }
+        .dark #messageInput {
+            color: #f0f6fc !important;
+        }
+        .dark #messageInput::placeholder {
+            color: rgba(145, 164, 183, 0.45) !important;
+        }
+
+        /* Dark Mode Hover Effects */
+        .dark #themeToggle:hover {
+            background-color: rgba(112, 180, 248, 0.14) !important;
+            border-color: rgba(112, 180, 248, 0.35) !important;
+            color: #70b4f8 !important;
+            box-shadow: 0 0 12px rgba(112, 180, 248, 0.2) !important;
+        }
+        .dark #authBtn:hover {
+            background-color: rgba(112, 180, 248, 0.12) !important;
+            border-color: rgba(112, 180, 248, 0.35) !important;
+            color: #70b4f8 !important;
+            box-shadow: 0 0 12px rgba(112, 180, 248, 0.15) !important;
+        }
+        .dark #createRoomBtn:hover {
+            background-color: rgba(112, 180, 248, 0.14) !important;
+            border-color: rgba(112, 180, 248, 0.4) !important;
+            color: #70b4f8 !important;
+            box-shadow: 0 0 14px rgba(112, 180, 248, 0.2) !important;
+        }
+        .dark #joinRoomBtn:hover {
+            background-color: #1d4ed8 !important;
+            box-shadow: 0 0 18px rgba(37, 99, 235, 0.6) !important;
+        }
+        .dark .quick-emoji-btn:hover {
+            background-color: rgba(112, 180, 248, 0.15) !important;
+            transform: scale(1.1);
+        }
+        .dark #shareInviteBtn:hover {
+            background-color: rgba(112, 180, 248, 0.25) !important;
+            color: #ffffff !important;
+            box-shadow: 0 0 12px rgba(112, 180, 248, 0.25) !important;
+        }
+        .dark #leaveRoomBtn:hover {
+            background-color: rgba(239, 68, 68, 0.2) !important;
+            color: #f87171 !important;
+        }
+        .dark a:hover {
+            color: #70b4f8 !important;
+        }
+
+        /* Dark Mode Borders & Shadows */
+        .dark .editorial-border { border-color: rgba(112,180,248,0.14) !important; }
+        .dark .border-outline-variant\/10 { border-color: rgba(255,255,255,0.07) !important; }
+        .dark .border-outline-variant\/15 { border-color: rgba(255,255,255,0.09) !important; }
+        .dark .border-outline-variant\/30 { border-color: rgba(112,180,248,0.18) !important; }
+        .dark .editorial-shadow { box-shadow: 0 12px 36px rgba(0,0,0,0.5) !important; }
     </style>
 </head>
 <body class="bg-surface text-on-surface min-h-screen flex flex-col relative overflow-x-clip">
@@ -95,66 +197,87 @@
     <main class="flex-1 flex flex-col max-w-screen-xl mx-auto w-full relative">
 
         <!-- VIEW 1: JOIN ROOM (Access Code) -->
-        <div id="joinView" class="absolute inset-0 flex items-center justify-center bg-surface z-20">
-            <div class="max-w-md w-full p-8 mx-auto">
-                <div class="bg-surface-container-lowest rounded-xl p-8 text-center shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-surface-container">
-                    <span class="material-symbols-outlined text-primary text-5xl mb-4">forum</span>
-                    <h2 class="font-serif italic text-3xl text-primary mb-2">Secure Connection</h2>
-                    <p class="text-sm font-sans text-on-surface-variant mb-4 border-b border-outline-variant/10 pb-4">Enter a room code to join the conversation. Max 2 anonymous users allowed.</p>
-                    <div class="bg-surface-container text-on-surface-variant p-3 rounded-lg text-xs text-left mb-6 flex items-start gap-2">
-                        <span class="material-symbols-outlined text-[16px] mt-0.5 text-primary">security</span>
-                        <p><strong>Auto-Destruction:</strong> Chats and attached files are permanently destroyed as soon as everyone leaves, or automatically after 20 minutes of inactivity.</p>
+        <div id="joinView" class="absolute inset-0 flex items-center justify-center bg-surface z-20 p-4 overflow-y-auto">
+            <div class="max-w-md w-full my-auto">
+                <div class="bg-surface-container-lowest rounded-2xl sm:rounded-3xl p-6 sm:p-8 text-center shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-surface-container editorial-shadow">
+                    <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mx-auto mb-4">
+                        <span class="material-symbols-outlined text-3xl sm:text-4xl">forum</span>
+                    </div>
+                    <h2 class="font-serif italic text-2xl sm:text-3xl text-primary mb-1.5">Convo Room</h2>
+                    <p class="text-xs sm:text-sm font-sans text-on-surface-variant mb-4 border-b border-outline-variant/10 pb-3">Real-time ephemeral workspace for live note collaboration and media exchange.</p>
+                    
+                    <div class="grid grid-cols-2 gap-2 text-[11px] text-left mb-5">
+                        <div class="p-2.5 rounded-xl bg-surface-container flex items-start gap-1.5">
+                            <span class="material-symbols-outlined text-[15px] text-primary flex-shrink-0 mt-0.5">timer</span>
+                            <span class="text-on-surface-variant leading-snug">Auto-purged on room exit or 20m idle</span>
+                        </div>
+                        <div class="p-2.5 rounded-xl bg-surface-container flex items-start gap-1.5">
+                            <span class="material-symbols-outlined text-[15px] text-primary flex-shrink-0 mt-0.5">lock</span>
+                            <span class="text-on-surface-variant leading-snug">Private 6-character room code</span>
+                        </div>
                     </div>
                     
-                    <div class="flex flex-col gap-4 items-center w-full">
-                        <button id="createRoomBtn" class="w-full bg-surface-container text-primary font-bold px-4 py-3 rounded-xl text-lg hover:bg-surface-container-high transition-all shadow-sm editorial-border active:scale-95 flex items-center justify-center gap-2">
+                    <div class="flex flex-col gap-3.5 items-center w-full">
+                        <button id="createRoomBtn" class="w-full bg-surface-container text-primary font-bold px-4 py-3 rounded-xl text-base sm:text-lg hover:bg-surface-container-high transition-all shadow-sm editorial-border active:scale-95 flex items-center justify-center gap-2">
                             <span class="material-symbols-outlined">add_circle</span>
-                            Create a Room
+                            Create New Room
                         </button>
                         
-                        <div class="flex items-center w-full my-1">
+                        <div class="flex items-center w-full my-0.5">
                             <hr class="flex-1 border-outline-variant/30">
-                            <span class="px-3 text-[10px] font-bold uppercase tracking-widest text-outline">Or Join</span>
+                            <span class="px-3 text-[10px] font-bold uppercase tracking-widest text-outline">Or Join Existing</span>
                             <hr class="flex-1 border-outline-variant/30">
                         </div>
 
-                        <input id="roomCodeInput" class="bg-surface-container-low editorial-border rounded-lg py-3 px-6 text-center text-xl font-bold tracking-widest focus:ring-2 focus:ring-primary/20 w-full font-sans uppercase code-input-box" placeholder="Enter Code" type="text" maxlength="6" autocomplete="off"/>
+                        <input id="roomCodeInput" class="bg-surface-container-low editorial-border rounded-xl py-3 px-4 text-center text-lg sm:text-xl font-bold tracking-widest focus:ring-2 focus:ring-primary/20 w-full font-sans uppercase code-input-box" placeholder="ENTER 6-CHAR CODE" type="text" maxlength="6" autocomplete="off"/>
                         
-                        <div id="loginWarning" class="hidden w-full bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-300 p-4 rounded-xl text-xs text-left space-y-2">
-                            <div class="font-bold flex items-center gap-1.5 text-sm">
+                        <div id="loginWarning" class="hidden w-full bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-300 p-3.5 rounded-xl text-xs text-left space-y-2">
+                            <div class="font-bold flex items-center gap-1.5 text-xs sm:text-sm">
                                 <span class="material-symbols-outlined text-base">warning</span> Anonymous Guest Limit Reached
                             </div>
-                            <p class="text-on-surface-variant text-[11px] leading-relaxed">This room already has 2 anonymous guests. Please log in via your eNotePad account to join as a verified member!</p>
-                            <a href="../index.html" class="inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-on-primary font-bold text-xs rounded-xl hover:bg-primary-dim transition-all shadow-sm">
+                            <p class="text-on-surface-variant text-[11px] leading-relaxed">This room already has 2 anonymous guests. Log in via your eNotePad account to join as a verified member!</p>
+                            <a href="../index.html" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-primary text-on-primary font-bold text-xs rounded-lg hover:bg-primary-dim transition-all shadow-sm">
                                 <span class="material-symbols-outlined text-sm">login</span> Log In via eNotePad
                             </a>
                         </div>
 
-                        <button id="joinRoomBtn" class="w-full bg-primary text-on-primary font-bold px-4 py-3 rounded-xl text-lg hover:bg-primary-dim transition-all shadow-md active:scale-95">
-                            Join Stream
+                        <button id="joinRoomBtn" class="w-full bg-primary text-on-primary font-bold px-4 py-3 rounded-xl text-base sm:text-lg hover:bg-primary-dim transition-all shadow-md active:scale-95">
+                            Join Stream →
                         </button>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-t border-outline-variant/10 flex flex-wrap items-center justify-center gap-3 text-xs text-primary/70">
+                        <a href="../how-it-works.html" class="hover:text-primary transition-colors font-medium">How It Works</a>
+                        <span>·</span>
+                        <a href="../codeshare/index.html" class="hover:text-primary transition-colors font-medium">CodeShare</a>
+                        <span>·</span>
+                        <a href="../support.html" class="hover:text-primary transition-colors font-medium">Help & FAQs</a>
+                        <span>·</span>
+                        <a href="../privacy.html" class="hover:text-primary transition-colors font-medium">Privacy</a>
+                        <span>·</span>
+                        <a href="../terms.html" class="hover:text-primary transition-colors font-medium">Terms</a>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- VIEW 2: ACTIVE STREAM -->
-        <div id="streamView" class="hidden flex-1 flex flex-col w-full h-full relative" style="height: calc(100vh - 73px);">
+        <div id="streamView" class="hidden flex-1 flex flex-col w-full h-[calc(100dvh-64px)] sm:h-[calc(100vh-73px)] relative overflow-hidden">
             
             <!-- Stream Header -->
-            <div class="px-6 md:px-8 py-4 flex items-center justify-between bg-surface-container-lowest z-10 border-b border-outline-variant/15 shadow-sm flex-wrap gap-2">
-                <div class="flex items-center gap-3">
+            <div class="px-4 sm:px-6 md:px-8 py-3 sm:py-4 flex items-center justify-between bg-surface-container-lowest z-10 border-b border-outline-variant/15 shadow-sm flex-wrap gap-2">
+                <div class="flex items-center gap-2 sm:gap-3">
                     <div>
-                        <h1 class="text-xl md:text-2xl font-serif italic text-on-surface flex items-center gap-2">
-                            <span class="material-symbols-outlined text-primary text-xl">lock</span>
+                        <h1 class="text-lg sm:text-2xl font-serif italic text-on-surface flex items-center gap-1.5 sm:gap-2">
+                            <span class="material-symbols-outlined text-primary text-base sm:text-xl">lock</span>
                             #stream-<span id="currentRoomCodeDisplay">...</span>
                         </h1>
                         <div class="flex items-center gap-2 mt-0.5">
-                            <p class="text-xs font-sans text-on-surface-variant tracking-wide flex items-center gap-1" id="participantsCountDisplay">
-                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> 1 participant online
+                            <p class="text-[11px] sm:text-xs font-sans text-on-surface-variant tracking-wide flex items-center gap-1" id="participantsCountDisplay">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> 1 online
                             </p>
                             <span class="text-outline-variant/40">·</span>
-                            <div class="flex items-center gap-1 text-[11px] font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20" id="roomTimerBadge">
+                            <div class="flex items-center gap-1 text-[10px] sm:text-[11px] font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20" id="roomTimerBadge">
                                 <span class="material-symbols-outlined text-xs">timer</span>
                                 <span id="roomTimerCountdown">20:00</span>
                             </div>
@@ -163,11 +286,11 @@
                 </div>
 
                 <div class="flex items-center gap-2">
-                    <button id="shareInviteBtn" class="px-3.5 py-1.5 rounded-full bg-primary/10 hover:bg-primary/20 text-primary text-xs font-bold font-sans flex items-center gap-1.5 transition-all shadow-sm active:scale-95" title="Copy Invite Link">
+                    <button id="shareInviteBtn" class="px-3 sm:px-3.5 py-1.5 rounded-full bg-primary/10 hover:bg-primary/20 text-primary text-xs font-bold font-sans flex items-center gap-1 sm:gap-1.5 transition-all shadow-sm active:scale-95" title="Copy Invite Link">
                         <span class="material-symbols-outlined text-sm">share</span>
-                        <span>Invite</span>
+                        <span class="hidden sm:inline">Invite</span>
                     </button>
-                    <button id="leaveRoomBtn" class="px-4 py-1.5 rounded-full border border-error/40 text-error text-xs font-bold font-sans flex items-center gap-1.5 hover:bg-error/10 transition-all shadow-sm active:scale-95">
+                    <button id="leaveRoomBtn" class="px-3 sm:px-4 py-1.5 rounded-full border border-error/40 text-error text-xs font-bold font-sans flex items-center gap-1 sm:gap-1.5 hover:bg-error/10 transition-all shadow-sm active:scale-95">
                         <span class="material-symbols-outlined text-sm">logout</span>
                         <span>Leave</span>
                     </button>
@@ -175,45 +298,44 @@
             </div>
 
             <!-- Scrollable Messages Area -->
-            <div id="messagesContainer" class="flex-1 overflow-y-auto px-4 md:px-12 py-6 space-y-5 pb-36 relative">
+            <div id="messagesContainer" class="flex-1 overflow-y-auto px-3 sm:px-6 md:px-12 py-4 sm:py-6 space-y-4 pb-36 relative">
                 <!-- Messages injected dynamically -->
             </div>
 
             <!-- Scroll To Bottom Floating Button -->
-            <button id="scrollToBottomBtn" class="absolute bottom-28 right-8 z-20 w-10 h-10 rounded-full bg-primary text-on-primary shadow-xl border border-white/20 flex items-center justify-center transition-all opacity-0 pointer-events-none transform translate-y-2 hover:scale-105 active:scale-95" title="Scroll to latest messages">
-                <span class="material-symbols-outlined text-lg">arrow_downward</span>
+            <button id="scrollToBottomBtn" class="absolute bottom-28 right-4 sm:right-8 z-20 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-primary text-on-primary shadow-xl border border-white/20 flex items-center justify-center transition-all opacity-0 pointer-events-none transform translate-y-2 hover:scale-105 active:scale-95" title="Scroll to latest messages">
+                <span class="material-symbols-outlined text-base sm:text-lg">arrow_downward</span>
             </button>
 
             <!-- Enhanced Input Area (The Writing Desk) -->
-            <div class="absolute bottom-0 left-0 right-0 p-4 md:p-6 bg-surface-container-lowest border-t border-outline-variant/15 z-10 space-y-2 shadow-lg">
+            <div class="absolute bottom-0 left-0 right-0 p-2.5 sm:p-4 bg-surface-container-lowest border-t border-outline-variant/15 z-10 space-y-1.5 shadow-lg">
                 <!-- Live Typing Indicator -->
-                <div id="typingIndicator" class="text-xs text-on-surface-variant/70 italic px-2 flex items-center gap-1.5 min-h-[18px]" style="display:none">
+                <div id="typingIndicator" class="text-[11px] sm:text-xs text-on-surface-variant/70 italic px-2 flex items-center gap-1.5 min-h-[16px]" style="display:none">
                     <span class="w-1.5 h-1.5 rounded-full bg-primary animate-ping"></span>
                     <span id="typingIndicatorText">Someone is typing...</span>
                 </div>
 
                 <!-- Quick Reaction Emoji Bar -->
-                <div class="flex items-center gap-1.5 px-2 overflow-x-auto no-scrollbar" id="quickEmojiBar">
-                    <span class="text-[10px] uppercase font-bold tracking-wider text-on-surface-variant/50 mr-1 flex-shrink-0">Quick React:</span>
-                    <button class="quick-emoji-btn text-base px-2 py-1 rounded-lg hover:bg-surface-container-low transition-transform active:scale-125" data-emoji="👍">👍</button>
-                    <button class="quick-emoji-btn text-base px-2 py-1 rounded-lg hover:bg-surface-container-low transition-transform active:scale-125" data-emoji="❤️">❤️</button>
-                    <button class="quick-emoji-btn text-base px-2 py-1 rounded-lg hover:bg-surface-container-low transition-transform active:scale-125" data-emoji="😂">😂</button>
-                    <button class="quick-emoji-btn text-base px-2 py-1 rounded-lg hover:bg-surface-container-low transition-transform active:scale-125" data-emoji="🔥">🔥</button>
-                    <button class="quick-emoji-btn text-base px-2 py-1 rounded-lg hover:bg-surface-container-low transition-transform active:scale-125" data-emoji="🎉">🎉</button>
-                    <button class="quick-emoji-btn text-base px-2 py-1 rounded-lg hover:bg-surface-container-low transition-transform active:scale-125" data-emoji="💡">💡</button>
-                    <button class="quick-emoji-btn text-base px-2 py-1 rounded-lg hover:bg-surface-container-low transition-transform active:scale-125" data-emoji="📌">📌</button>
+                <div class="flex items-center gap-1 px-1 overflow-x-auto no-scrollbar" id="quickEmojiBar">
+                    <span class="text-[9px] uppercase font-bold tracking-wider text-on-surface-variant/50 mr-1 flex-shrink-0">React:</span>
+                    <button class="quick-emoji-btn text-sm sm:text-base px-1.5 py-0.5 rounded-lg hover:bg-surface-container-low transition-transform active:scale-125" data-emoji="👍">👍</button>
+                    <button class="quick-emoji-btn text-sm sm:text-base px-1.5 py-0.5 rounded-lg hover:bg-surface-container-low transition-transform active:scale-125" data-emoji="❤️">❤️</button>
+                    <button class="quick-emoji-btn text-sm sm:text-base px-1.5 py-0.5 rounded-lg hover:bg-surface-container-low transition-transform active:scale-125" data-emoji="😂">😂</button>
+                    <button class="quick-emoji-btn text-sm sm:text-base px-1.5 py-0.5 rounded-lg hover:bg-surface-container-low transition-transform active:scale-125" data-emoji="🔥">🔥</button>
+                    <button class="quick-emoji-btn text-sm sm:text-base px-1.5 py-0.5 rounded-lg hover:bg-surface-container-low transition-transform active:scale-125" data-emoji="🎉">🎉</button>
+                    <button class="quick-emoji-btn text-sm sm:text-base px-1.5 py-0.5 rounded-lg hover:bg-surface-container-low transition-transform active:scale-125" data-emoji="💡">💡</button>
                 </div>
 
-                <div class="max-w-4xl mx-auto bg-surface-container-low rounded-2xl border border-outline-variant/15 p-2 flex items-center gap-2 shadow-inner">
-                    <button id="attachBtn" class="w-10 h-10 flex items-center justify-center rounded-xl text-primary/70 hover:text-primary hover:bg-surface-container-high transition-colors flex-shrink-0" title="Attach Image or File (Max 2MB)">
-                        <span class="material-symbols-outlined">attach_file</span>
+                <div class="max-w-4xl mx-auto bg-surface-container-low rounded-2xl border border-outline-variant/15 p-1.5 sm:p-2 flex items-center gap-1.5 sm:gap-2 shadow-inner">
+                    <button id="attachBtn" class="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-xl text-primary/70 hover:text-primary hover:bg-surface-container-high transition-colors flex-shrink-0" title="Attach Image or File (Max 2MB)">
+                        <span class="material-symbols-outlined text-lg sm:text-xl">attach_file</span>
                     </button>
                     <input type="file" id="fileInput" class="hidden" />
 
-                    <textarea id="messageInput" class="flex-1 bg-transparent border-none focus:ring-0 font-serif text-base md:text-lg py-2.5 px-2 resize-none h-[48px] max-h-[120px] text-on-surface placeholder:text-on-surface-variant/40 outline-none" placeholder="Draft your message..."></textarea>
+                    <textarea id="messageInput" class="flex-1 bg-transparent border-none focus:ring-0 font-serif text-sm sm:text-base md:text-lg py-2 px-1.5 resize-none h-[40px] sm:h-[48px] max-h-[100px] sm:max-h-[120px] text-on-surface placeholder:text-on-surface-variant/40 outline-none" placeholder="Draft your message..."></textarea>
                     
-                    <button id="sendBtn" class="bg-primary text-on-primary w-11 h-11 flex items-center justify-center rounded-xl hover:bg-primary-dim shadow-md transition-transform active:scale-95 disabled:opacity-50 flex-shrink-0">
-                        <span class="material-symbols-outlined text-lg">send</span>
+                    <button id="sendBtn" class="bg-primary text-on-primary w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center rounded-xl hover:bg-primary-dim shadow-md transition-transform active:scale-95 disabled:opacity-50 flex-shrink-0">
+                        <span class="material-symbols-outlined text-base sm:text-lg">send</span>
                     </button>
                 </div>
             </div>

@@ -5,26 +5,36 @@
 // Manages dark mode, sidebar, and periodic cleanup.
 // ============================================================
 
-document.addEventListener('DOMContentLoaded', () => {
-  initNavigation();
-  initHeaderScroll();
-  initTheme();
-  initSidebar();
-  initEditor();
-  initShare();
-  initAccess();
-  initAuth();
-  initFileManager();
-  initUsers();
-  initPeriodicCleanup();
-  initBroadcastListener();
-  initFeedback();
-  initGuestNudgeSystem();
-  initCustomCursor();
-  initPWA();
-  initAiAssist();
+function startApp() {
+  const safeInit = (fn, name) => {
+    try { if (typeof fn === 'function') fn(); } catch (err) { console.warn(`Module init warning [${name}]:`, err); }
+  };
+
+  safeInit(initCustomCursor, 'initCustomCursor');
+  safeInit(initNavigation, 'initNavigation');
+  safeInit(initHeaderScroll, 'initHeaderScroll');
+  safeInit(initTheme, 'initTheme');
+  safeInit(initSidebar, 'initSidebar');
+  safeInit(initEditor, 'initEditor');
+  safeInit(initShare, 'initShare');
+  safeInit(initAccess, 'initAccess');
+  safeInit(initAuth, 'initAuth');
+  safeInit(initFileManager, 'initFileManager');
+  safeInit(initUsers, 'initUsers');
+  safeInit(initPeriodicCleanup, 'initPeriodicCleanup');
+  safeInit(initBroadcastListener, 'initBroadcastListener');
+  safeInit(initFeedback, 'initFeedback');
+  safeInit(initGuestNudgeSystem, 'initGuestNudgeSystem');
+  safeInit(initPWA, 'initPWA');
+  safeInit(initAiAssist, 'initAiAssist');
   console.log('✨ eNotePad — Digital Curator initialized');
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', startApp);
+} else {
+  startApp();
+}
 
 /**
  * PWA Service Worker Registration
@@ -44,67 +54,90 @@ function initPWA() {
 }
 
 /**
- * Custom Creative Cursor Follower
+ * Custom Creative Cursor Follower with Beautiful Morphing I-Beam
  */
 function initCustomCursor() {
-  // Only initialize on devices that support hovering (e.g., desktops/laptops)
-  if (!window.matchMedia("(any-hover: hover)").matches) {
-    return; // Leave native cursor completely alone for pure touch devices
+  // Wait for body if called early
+  if (!document.body) {
+    document.addEventListener('DOMContentLoaded', initCustomCursor);
+    return;
   }
 
+  // Prevent duplicate initialization
+  if (document.getElementById('customCursorDot')) return;
+
   // 1. DYNAMIC DOM INJECTION
-  // Create dot
   const cursorDot = document.createElement('div');
+  cursorDot.id = 'customCursorDot';
   cursorDot.className = 'custom-cursor-dot';
-  // Enforce bulletproof inline styles
-  cursorDot.style.cssText = `
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    pointer-events: none !important;
-    z-index: 999999 !important;
-    opacity: 0;
-  `;
 
-  // Create outline
   const cursorOutline = document.createElement('div');
+  cursorOutline.id = 'customCursorOutline';
   cursorOutline.className = 'custom-cursor-outline';
-  // Enforce bulletproof inline styles
-  cursorOutline.style.cssText = `
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    pointer-events: none !important;
-    z-index: 999998 !important;
-    opacity: 0;
+  cursorOutline.innerHTML = `
+    <svg class="custom-cursor-ibeam-svg" viewBox="0 0 12 20" width="12" height="20" fill="none">
+      <path d="M 1.5,2 Q 6,2 6,6 L 6,14 Q 6,18 1.5,18" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+      <path d="M 10.5,2 Q 6,2 6,6 L 6,14 Q 6,18 10.5,18" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+    </svg>
   `;
 
-  // Inject into DOM at the very end
   document.body.appendChild(cursorDot);
   document.body.appendChild(cursorOutline);
 
-  // 2. FORCE HIDE NATIVE CURSOR
-  // Instead of @media queries, we dynamically attach this to guarantee sync
   document.body.classList.add('hide-native-cursor');
 
-  let mouseX = window.innerWidth / 2;
-  let mouseY = window.innerHeight / 2;
-  let outlineX = mouseX;
-  let outlineY = mouseY;
+  let mouseX = -100;
+  let mouseY = -100;
+  let outlineX = -100;
+  let outlineY = -100;
   let isVisible = false;
+  let isIBeam = false;
   let idleTimeout = null;
 
-  const hideCursor = () => {
-    isVisible = false;
-    cursorDot.style.opacity = '0';
-    cursorOutline.style.opacity = '0';
+  // Detect whether an element is an editable text input or textarea
+  const isTextInput = (el) => {
+    if (!el) return false;
+    let node = el.nodeType === 3 ? el.parentElement : el;
+    if (!node || typeof node.closest !== 'function') return false;
+
+    if (node.closest('[contenteditable="true"], [contenteditable=""], #richEditor, .rich-editor, .monaco-editor, .ql-editor, .cm-editor')) {
+      return true;
+    }
+    const input = node.closest('input, textarea');
+    if (input) {
+      if (input.tagName === 'TEXTAREA') return true;
+      const type = (input.getAttribute('type') || 'text').toLowerCase();
+      const nonTextTypes = ['button', 'submit', 'reset', 'checkbox', 'radio', 'range', 'color', 'file', 'image', 'hidden'];
+      return !nonTextTypes.includes(type);
+    }
+    return false;
   };
 
-  const showCursor = () => {
-    if (!isVisible) {
-      isVisible = true;
-      cursorDot.style.opacity = '1';
-      cursorOutline.style.opacity = '1';
+  // Detect whether an element is an interactive/clickable control
+  const isClickable = (el) => {
+    if (!el) return false;
+    let node = el.nodeType === 3 ? el.parentElement : el;
+    if (!node || typeof node.closest !== 'function') return false;
+    return !!node.closest('a, button, select, label, .clickable, .account-tab, .sidebar-nav-btn, input[type="button"], input[type="submit"], input[type="reset"], input[type="checkbox"], input[type="radio"], input[type="range"], input[type="color"], input[type="file"], [role="button"], [role="tab"], .task-cb, .task-item, .custom-select, .dropdown-trigger, [tabindex="0"]');
+  };
+
+  const updateCursorState = (target) => {
+    if (!isVisible) return;
+    
+    if (isTextInput(target)) {
+      isIBeam = true;
+      cursorDot.classList.add('cursor-hidden');
+      cursorOutline.classList.remove('hover');
+      cursorOutline.classList.add('ibeam');
+    } else if (isClickable(target)) {
+      isIBeam = false;
+      cursorDot.classList.remove('cursor-hidden');
+      cursorOutline.classList.remove('ibeam');
+      cursorOutline.classList.add('hover');
+    } else {
+      isIBeam = false;
+      cursorDot.classList.remove('cursor-hidden');
+      cursorOutline.classList.remove('ibeam', 'hover');
     }
   };
 
@@ -113,68 +146,65 @@ function initCustomCursor() {
     clearTimeout(idleTimeout);
 
     if (!isVisible) {
-      showCursor();
+      isVisible = true;
       outlineX = e.clientX;
       outlineY = e.clientY;
-      console.log('✨ eNotePad Cursor Activated');
+      cursorDot.style.opacity = '1';
+      cursorOutline.style.opacity = '1';
     }
     mouseX = e.clientX;
     mouseY = e.clientY;
-    
-    // The inner dot follows instantly
-    cursorDot.style.left = `${mouseX}px`;
-    cursorDot.style.top = `${mouseY}px`;
 
-    // Set timeout to hide cursor after 3 seconds of inactivity
-    idleTimeout = setTimeout(hideCursor, 3000);
-  });
+    cursorDot.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0) translate(-50%, -50%)`;
+
+    updateCursorState(e.target);
+
+    // Set timeout to hide cursor after 4 seconds of inactivity
+    idleTimeout = setTimeout(() => {
+      isVisible = false;
+      cursorDot.style.opacity = '0';
+      cursorOutline.style.opacity = '0';
+    }, 4000);
+  }, { passive: true });
 
   document.addEventListener('mouseleave', () => {
     clearTimeout(idleTimeout);
-    hideCursor();
+    isVisible = false;
+    cursorDot.style.opacity = '0';
+    cursorOutline.style.opacity = '0';
   });
 
-  // Smooth animation for the outline
+  // Smooth animation for the outline with instant snap on I-beam
   function animateCursor() {
-    let dx = mouseX - outlineX;
-    let dy = mouseY - outlineY;
-    outlineX += dx * 0.15;
-    outlineY += dy * 0.15;
+    if (isVisible) {
+      if (isIBeam) {
+        // Instant zero-lag tracking over text inputs for maximum precision
+        outlineX = mouseX;
+        outlineY = mouseY;
+      } else {
+        outlineX += (mouseX - outlineX) * 0.22;
+        outlineY += (mouseY - outlineY) * 0.22;
+      }
 
-    cursorOutline.style.left = `${outlineX}px`;
-    cursorOutline.style.top = `${outlineY}px`;
+      cursorOutline.style.transform = `translate3d(${outlineX}px, ${outlineY}px, 0) translate(-50%, -50%)`;
+    }
 
     requestAnimationFrame(animateCursor);
   }
   animateCursor();
 
-  // 3. EVENT DELEGATION FOR HOVER STATES
+  // Hover state delegation
   document.addEventListener('mouseover', (e) => {
-    if (!isVisible || !e.target || typeof e.target.matches !== 'function') return;
-    
-    try {
-      if (e.target.matches('input[type="text"], input[type="password"], textarea, [contenteditable="true"]')) {
-        cursorOutline.classList.add('text-hover');
-        cursorDot.style.opacity = '0';
-      } else if (e.target.closest('a, button, select, .clickable, .account-tab, .sidebar-nav-btn, label')) {
-        cursorOutline.classList.add('hover');
-      }
-    } catch (err) { /* safely ignore node errors */ }
-  });
+    if (!isVisible) return;
+    updateCursorState(e.target);
+  }, { passive: true });
 
   document.addEventListener('mouseout', (e) => {
-    if (!isVisible || !e.target || typeof e.target.matches !== 'function') return;
-    
-    try {
-      if (e.target.matches('input[type="text"], input[type="password"], textarea, [contenteditable="true"]')) {
-        cursorOutline.classList.remove('text-hover');
-        cursorDot.style.opacity = '1';
-      } else if (e.target.closest('a, button, select, .clickable, .account-tab, .sidebar-nav-btn, label')) {
-        cursorOutline.classList.remove('hover');
-      }
-    } catch (err) { /* safely ignore node errors */ }
-  });
+    if (!isVisible) return;
+    updateCursorState(e.relatedTarget);
+  }, { passive: true });
 }
+
 
 
 /**
@@ -596,8 +626,9 @@ function initNavigation() {
     }
   });
 
-  // Attach click handlers (deduplicated)
+  // Attach click handlers (only for tab-switching elements with a valid data-tab)
   [...sidebarBtns, ...topnavLinks, ...mobileBtns, ...inlineTabs].forEach(el => {
+    if (!el.dataset || !el.dataset.tab) return;
     el.addEventListener('click', (e) => {
       e.preventDefault();
       switchTab(el.dataset.tab);

@@ -148,23 +148,51 @@ function initUserSearch() {
     });
   }
 
+  // Filter buttons listener
   filterBtns.forEach(btn => {
     btn.addEventListener('click', () => {
       filterBtns.forEach(b => {
         b.classList.remove('active', 'bg-primary', 'text-on-primary', 'shadow-sm');
-        b.classList.add('bg-surface-container-low', 'text-on-surface-variant');
+        b.classList.add('text-on-surface-variant');
       });
       btn.classList.add('active', 'bg-primary', 'text-on-primary', 'shadow-sm');
-      btn.classList.remove('bg-surface-container-low', 'text-on-surface-variant');
+      btn.classList.remove('text-on-surface-variant');
       currentFilter = btn.dataset.filter || 'discover';
       doSearch(searchInput.value);
     });
+  });
+
+  // Popular Trending Tags buttons
+  document.querySelectorAll('.popular-tag-pill').forEach(pill => {
+    pill.addEventListener('click', (e) => {
+      e.preventDefault();
+      const tag = pill.dataset.tag;
+      if (tag) {
+        searchInput.value = tag;
+        toggleClearButton();
+        doSearch(tag);
+        searchInput.focus();
+      }
+    });
+  });
+
+  // Global '/' keyboard shortcut to focus search when on Find People tab
+  document.addEventListener('keydown', (e) => {
+    if (e.key === '/' && document.activeElement !== searchInput && !['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) {
+      const panelSearch = document.getElementById('panelSearch');
+      if (panelSearch && panelSearch.dataset.active === 'true') {
+        e.preventDefault();
+        searchInput.focus();
+        searchInput.select();
+      }
+    }
   });
 
   window.refreshUserSearch = () => { cachedUsers = null; doSearch(searchInput.value); };
   window.filterUsersByTag = (tag) => {
     if (typeof window.switchToTab === 'function') window.switchToTab('search');
     searchInput.value = tag;
+    toggleClearButton();
     doSearch(tag);
   };
 
@@ -182,23 +210,43 @@ function renderUserCard(user, currentUser) {
 
   let tagsList = [];
   if (Array.isArray(user.tags)) {
-    tagsList = user.tags.slice(0, 3);
+    tagsList = user.tags.slice(0, 4);
   } else if (typeof user.tags === 'string' && user.tags.trim()) {
-    tagsList = user.tags.split(/[\s,]+/).filter(Boolean).slice(0, 3);
+    tagsList = user.tags.split(/[\s,]+/).filter(Boolean).slice(0, 4);
   }
 
   card.innerHTML = `
     <div class="usc-avatar shadow-sm" style="background:${color};">${initial}</div>
     <div class="usc-info">
-      <div class="usc-name flex items-center gap-1.5 flex-wrap">
-        <span>${escapeHTMLStr(user.displayName || user.username)}</span>
-        ${isSelf ? '<span class="usc-self-badge">You</span>' : ''}
-        ${user.username.toLowerCase().includes('sachin') ? '<span class="text-[9px] px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-500 font-bold border border-indigo-500/20">DEV</span>' : ''}
+      <div class="flex items-start justify-between gap-2">
+        <div class="min-w-0">
+          <div class="usc-name flex items-center gap-1.5 flex-wrap">
+            <span>${escapeHTMLStr(user.displayName || user.username)}</span>
+            ${isSelf ? '<span class="usc-self-badge">You</span>' : ''}
+            ${user.username.toLowerCase().includes('sachin') ? '<span class="usc-dev-badge"><span class="material-symbols-outlined text-[10px]">code</span> DEV</span>' : ''}
+          </div>
+          <div class="usc-handle">@${escapeHTMLStr(user.username)}</div>
+        </div>
+        <div class="usc-actions flex items-center gap-1">
+          ${isLoggedIn && !isSelf ? `
+            <button class="usc-action-btn usc-follow-btn" data-username="${escapeHTMLStr(user.username)}" title="Follow / Unfollow" aria-label="Follow user">
+              <span class="material-symbols-outlined text-[16px]">person_add</span>
+            </button>
+            <button class="usc-action-btn usc-dm-btn" data-username="${escapeHTMLStr(user.username)}" title="Send Direct Note to @${escapeHTMLStr(user.username)}" aria-label="Send direct note">
+              <span class="material-symbols-outlined text-[16px]">alternate_email</span>
+            </button>
+          ` : ''}
+          <button class="usc-action-btn usc-share-btn" data-username="${escapeHTMLStr(user.username)}" title="Share Profile Link" aria-label="Share profile link">
+            <span class="material-symbols-outlined text-[16px]">share</span>
+          </button>
+          <button class="usc-action-btn usc-profile-btn" data-username="${escapeHTMLStr(user.username)}" title="View Full Profile" aria-label="View full profile">
+            <span class="material-symbols-outlined text-[16px]">open_in_new</span>
+          </button>
+        </div>
       </div>
-      <div class="usc-handle">@${escapeHTMLStr(user.username)}</div>
       ${user.bio ? `<div class="usc-bio">${escapeHTMLStr(user.bio)}</div>` : ''}
       ${tagsList.length > 0 ? `
-        <div class="flex items-center gap-1 mt-1.5 flex-wrap">
+        <div class="flex items-center gap-1.5 mt-2.5 flex-wrap">
           ${tagsList.map(t => {
             const tagStr = t.startsWith('#') ? t : `#${t}`;
             return `<span class="usc-tag-chip" data-tag="${escapeHTMLStr(tagStr)}">${escapeHTMLStr(tagStr)}</span>`;
@@ -206,31 +254,17 @@ function renderUserCard(user, currentUser) {
         </div>
       ` : ''}
     </div>
-    <div class="usc-actions flex items-center gap-1.5">
-      ${isLoggedIn && !isSelf ? `
-        <button class="usc-follow-btn" data-username="${escapeHTMLStr(user.username)}" title="Follow / Unfollow">
-          <span class="material-symbols-outlined">person_add</span>
-        </button>
-        <button class="usc-dm-btn w-8 h-8 rounded-full bg-surface-container-low hover:bg-surface-container-high border border-outline-variant/15 text-on-surface-variant hover:text-primary transition-all flex items-center justify-center text-sm" data-username="${escapeHTMLStr(user.username)}" title="Send Note to @${escapeHTMLStr(user.username)}">
-          <span class="material-symbols-outlined text-base">alternate_email</span>
-        </button>
-      ` : ''}
-      <button class="usc-share-btn w-8 h-8 rounded-full bg-surface-container-low hover:bg-surface-container-high border border-outline-variant/15 text-on-surface-variant hover:text-primary transition-all flex items-center justify-center text-sm" data-username="${escapeHTMLStr(user.username)}" title="Share Profile">
-        <span class="material-symbols-outlined text-base">share</span>
-      </button>
-      <button class="usc-profile-btn" data-username="${escapeHTMLStr(user.username)}" title="View Full Profile">
-        <span class="material-symbols-outlined">open_in_new</span>
-      </button>
-    </div>
   `;
 
   if (isLoggedIn && !isSelf) {
     const followBtn = card.querySelector('.usc-follow-btn');
-    updateFollowButtonState(followBtn, currentUser.username, user.username);
-    followBtn.addEventListener('click', async (e) => {
-      e.stopPropagation();
-      await toggleFollow(currentUser.username, user.username, followBtn);
-    });
+    if (followBtn) {
+      updateFollowButtonState(followBtn, currentUser.username, user.username);
+      followBtn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        await toggleFollow(currentUser.username, user.username, followBtn);
+      });
+    }
 
     const dmBtn = card.querySelector('.usc-dm-btn');
     if (dmBtn) {
@@ -260,10 +294,13 @@ function renderUserCard(user, currentUser) {
     });
   });
 
-  card.querySelector('.usc-profile-btn').addEventListener('click', (e) => {
-    e.stopPropagation();
-    openUserProfile(user.username);
-  });
+  const profileBtn = card.querySelector('.usc-profile-btn');
+  if (profileBtn) {
+    profileBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openUserProfile(user.username);
+    });
+  }
 
   card.addEventListener('click', () => openUserProfile(user.username));
   return card;
