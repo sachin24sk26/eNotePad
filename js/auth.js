@@ -17,6 +17,34 @@ function initAuth() {
   const togglePasswordIcon = document.getElementById('togglePasswordIcon');
   const usernameStatus = document.getElementById('usernameStatus');
   const usernameIcon = document.getElementById('usernameIcon');
+  const passwordErrorMsg = document.getElementById('passwordErrorMsg');
+  const passwordErrorText = document.getElementById('passwordErrorText');
+
+  function showPasswordError(message) {
+    if (passwordErrorText) {
+      passwordErrorText.textContent = message || 'Incorrect password. Please try again.';
+    }
+    if (passwordErrorMsg) {
+      passwordErrorMsg.classList.remove('hidden');
+    }
+    if (passwordInput) {
+      passwordInput.classList.add('auth-input-error', 'animate-shake');
+      passwordInput.focus();
+      passwordInput.select();
+      setTimeout(() => {
+        passwordInput.classList.remove('animate-shake');
+      }, 500);
+    }
+  }
+
+  function clearPasswordError() {
+    if (passwordErrorMsg) {
+      passwordErrorMsg.classList.add('hidden');
+    }
+    if (passwordInput) {
+      passwordInput.classList.remove('auth-input-error', 'animate-shake');
+    }
+  }
 
   let authMode = 'login';
   let isUsernameAvailable = false;
@@ -24,32 +52,130 @@ function initAuth() {
   // Admin email — this account always gets admin role
   const ADMIN_EMAIL = '24sk26sachin@gmail.com';
 
-  // ----- Auth State Observer -----
-  firebase.auth().onAuthStateChanged(async (user) => {
-    if (user) {
-      console.log('Auth state: signed in as', user.email);
-      let userProfile = await fetchUserProfileByUid(user.uid);
+  async function fetchUserProfile(user) {
+    if (!user) return null;
+    const uid = user.uid;
+    const email = (user.email || '').toLowerCase().trim();
 
-      // Auto-provision: if admin email has no doc, create it
-      if (!userProfile && user.email === ADMIN_EMAIL) {
-        console.log('Admin profile missing — auto-creating...');
-        await db.collection('users').doc('sachin24sk26').set({
-          username: 'sachin24sk26',
-          uid: user.uid,
-          role: 'admin',
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        }, { merge: true });
-        userProfile = { username: 'sachin24sk26', uid: user.uid, role: 'admin' };
+    // 1. Try finding by uid
+    try {
+      const snapshot = await db.collection('users').where('uid', '==', uid).limit(1).get();
+      if (!snapshot.empty) {
+        return snapshot.docs[0].data();
+      }
+    } catch (e) {
+      console.warn('fetchUserProfile by uid error:', e);
+    }
+
+    // 2. Try finding by email
+    if (email) {
+      try {
+        const snapEmail = await db.collection('users').where('email', '==', email).limit(1).get();
+        if (!snapEmail.empty) {
+          const data = snapEmail.docs[0].data();
+          if (!data.uid) {
+            await db.collection('users').doc(data.username).update({ uid: uid }).catch(() => {});
+            data.uid = uid;
+          }
+          return data;
+        }
+      } catch (e) {
+        console.warn('fetchUserProfile by email error:', e);
       }
 
-      if (userProfile) {
+      // 3. Try finding admin doc directly
+      if (email === ADMIN_EMAIL.toLowerCase()) {
+        try {
+          const adminDoc = await db.collection('users').doc('sachin24sk26').get();
+          if (adminDoc.exists) {
+            const data = adminDoc.data();
+            if (!data.uid) {
+              await db.collection('users').doc('sachin24sk26').update({ uid: uid, email: user.email }).catch(() => {});
+              data.uid = uid;
+            }
+            return data;
+          }
+        } catch (e) {}
+      }
+
+      // 4. Try finding by username matching email prefix
+      const emailPrefix = email.split('@')[0].replace(/[^a-zA-Z0-9_]/g, '').toLowerCase();
+      try {
+        const prefixDoc = await db.collection('users').doc(emailPrefix).get();
+        if (prefixDoc.exists) {
+          const data = prefixDoc.data();
+          if (!data.uid || data.uid === uid) {
+            if (!data.uid) {
+              await db.collection('users').doc(emailPrefix).update({ uid: uid, email: user.email }).catch(() => {});
+              data.uid = uid;
+            }
+            return data;
+          }
+        }
+      } catch (e) {}
+    }
+
+    return null;
+  }
+
+  // Backwards compat helper
+  const fetchUserProfileByUid = (uid) => fetchUserProfile({ uid, email: '' });
+
+  // ----- Auth State Observer -----
+  firebase.auth().onAuthStateChanged(async (user) => {
+    try {
+      if (user) {
+        const userEmail = (user.email || '').toLowerCase().trim();
+        console.log('Auth state: signed in as', userEmail || user.uid);
+        let userProfile = await fetchUserProfile(user);
+
+        // Auto-provision user profile for ANY validly authenticated user
+        if (!userProfile) {
+          console.log('User profile missing for authenticated user — auto-creating...');
+          const isUserAdmin = userEmail === ADMIN_EMAIL.toLowerCase();
+          const baseName = isUserAdmin 
+            ? 'sachin24sk26'
+            : (user.displayName || (user.email ? user.email.split('@')[0] : 'user'))
+                .replace(/[^a-zA-Z0-9_]/g, '')
+                .toLowerCase()
+                .substring(0, 15) || 'user';
+          
+          let finalUsername = baseName;
+          let suffix = 1;
+          try {
+            while ((await db.collection('users').doc(finalUsername).get().catch(() => ({ exists: false }))).exists) {
+              finalUsername = `${baseName}${suffix}`;
+              suffix++;
+            }
+          } catch (e) {
+            finalUsername = isUserAdmin ? 'sachin24sk26' : `${baseName}_${user.uid.substring(0, 5)}`;
+          }
+
+          const newToken = generateSessionToken();
+          localStorage.setItem('enotepad_session_token', newToken);
+
+          const newProfile = {
+            username: finalUsername,
+            email: user.email || '',
+            uid: user.uid,
+            role: isUserAdmin ? 'admin' : 'member',
+            sessionToken: newToken,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          };
+
+          try {
+            await db.collection('users').doc(finalUsername).set(newProfile, { merge: true });
+          } catch (err) {
+            console.error('Failed to auto-create user profile:', err);
+          }
+          userProfile = newProfile;
+        }
+
         // Always enforce admin role for the admin email
-        let isAdmin = userProfile.role === 'admin';
-        if (!isAdmin && user.email === ADMIN_EMAIL) {
-          console.log('Admin email detected — patching role in Firestore...');
-          await db.collection('users').doc(userProfile.username).update({ role: 'admin' });
-          isAdmin = true;
+        let isAdmin = (userProfile.role === 'admin') || (userEmail === ADMIN_EMAIL.toLowerCase());
+        if (isAdmin && userProfile.role !== 'admin') {
           userProfile.role = 'admin';
+          await db.collection('users').doc(userProfile.username).update({ role: 'admin' }).catch(() => {});
         }
 
         // Backfill email if missing for existing users
@@ -62,64 +188,69 @@ function initAuth() {
           }
         }
 
+        // Backfill uid if missing
+        if (!userProfile.uid && user.uid) {
+          try {
+            await db.collection('users').doc(userProfile.username).update({ uid: user.uid }).catch(() => {});
+            userProfile.uid = user.uid;
+          } catch (e) {}
+        }
+
         console.log('User profile loaded:', userProfile.username, '| isAdmin:', isAdmin);
-        setCurrentUser({ username: userProfile.username, email: user.email, uid: user.uid, role: userProfile.role });
+        setCurrentUser({ username: userProfile.username, email: user.email || userProfile.email, uid: user.uid, role: userProfile.role });
+
+        // Ensure active session token exists
+        let myToken = localStorage.getItem('enotepad_session_token');
+        if (!myToken) {
+          myToken = userProfile.sessionToken || generateSessionToken();
+          localStorage.setItem('enotepad_session_token', myToken);
+          await db.collection('users').doc(userProfile.username).update({ sessionToken: myToken }).catch(() => {});
+        }
 
         // === Session Token Validation (Logout Other Devices) ===
-        // Only attach listener after a short delay to avoid race condition on first login
         if (window.currentSessionUnsub) window.currentSessionUnsub();
         let sessionListenerReady = false;
-        // Give the login flow 1.5s to write the session token before we start validating
-        setTimeout(() => { sessionListenerReady = true; }, 1500);
+        setTimeout(() => { sessionListenerReady = true; }, 3000);
 
         window.currentSessionUnsub = db.collection('users').doc(userProfile.username).onSnapshot(doc => {
           if (!sessionListenerReady) return;
           const data = doc.data();
           if (data && data.sessionToken) {
-            const myToken = localStorage.getItem('enotepad_session_token');
-            if (myToken && myToken !== data.sessionToken) {
-              // Another device rotated the token — sign out this device
+            const activeToken = localStorage.getItem('enotepad_session_token');
+            if (activeToken && activeToken !== data.sessionToken) {
               if (window.currentSessionUnsub) window.currentSessionUnsub();
               firebase.auth().signOut().then(() => {
                 showToast('You were signed out from another device', 'warning');
               });
             }
           }
-        });
+        }, (err) => console.warn('Session snapshot error:', err));
 
         showLoggedInView(userProfile.username, isAdmin);
-        // Start inactivity timer now that user is signed in
         if (typeof window.resetInactivityTimer === 'function') window.resetInactivityTimer();
-      } else if (authMode !== 'register') {
-        console.warn('User authenticated but no Firestore profile found for uid:', user.uid);
-        // Don't call showLoggedOutView here — user is still authenticated, just missing a profile
+      } else {
+        // User is signed out
+        if (window.currentSessionUnsub) {
+          window.currentSessionUnsub();
+          window.currentSessionUnsub = null;
+        }
+        if (typeof window.cancelInactivityTimer === 'function') window.cancelInactivityTimer();
+        if (typeof window.cleanupAdminListeners === 'function') window.cleanupAdminListeners();
+        setCurrentUser(null);
+        showLoggedOutView();
       }
-    } else {
-      // User is signed out — clean up session subscription
-      if (window.currentSessionUnsub) {
-        window.currentSessionUnsub();
-        window.currentSessionUnsub = null;
+    } catch (authErr) {
+      console.error('Error in onAuthStateChanged observer:', authErr);
+      if (user) {
+        const fallbackName = (user.email ? user.email.split('@')[0] : 'member').replace(/[^a-zA-Z0-9_]/g, '').toLowerCase() || 'member';
+        const isAdm = (user.email || '').toLowerCase() === ADMIN_EMAIL.toLowerCase();
+        setCurrentUser({ username: fallbackName, email: user.email || '', uid: user.uid, role: isAdm ? 'admin' : 'member' });
+        showLoggedInView(fallbackName, isAdm);
+      } else {
+        showLoggedOutView();
       }
-      // Cancel inactivity timer
-      if (typeof window.cancelInactivityTimer === 'function') window.cancelInactivityTimer();
-      // Clean up admin listeners to prevent memory leaks
-      if (typeof window.cleanupAdminListeners === 'function') window.cleanupAdminListeners();
-      setCurrentUser(null);
-      showLoggedOutView();
     }
   });
-
-  async function fetchUserProfileByUid(uid) {
-    try {
-      const snapshot = await db.collection('users').where('uid', '==', uid).limit(1).get();
-      if (!snapshot.empty) {
-        return snapshot.docs[0].data();
-      }
-    } catch (e) {
-      console.error('fetchUserProfileByUid error:', e);
-    }
-    return null;
-  }
 
   // ----- Username Availability Check -----
   const checkUsername = debounce(async (username) => {
@@ -191,8 +322,14 @@ function initAuth() {
       if (authBtn) authBtn.click();
     }
   };
-  if (emailInput) emailInput.addEventListener('keydown', handleEnterKey);
-  if (passwordInput) passwordInput.addEventListener('keydown', handleEnterKey);
+  if (emailInput) {
+    emailInput.addEventListener('keydown', handleEnterKey);
+    emailInput.addEventListener('input', clearPasswordError);
+  }
+  if (passwordInput) {
+    passwordInput.addEventListener('keydown', handleEnterKey);
+    passwordInput.addEventListener('input', clearPasswordError);
+  }
   if (usernameInput) usernameInput.addEventListener('keydown', handleEnterKey);
 
   // ----- Toggle Login/Register Tabs & Modes -----
@@ -200,6 +337,7 @@ function initAuth() {
   const authTabRegister = document.getElementById('authTabRegister');
 
   function switchAuthMode(targetMode) {
+    clearPasswordError();
     authMode = targetMode;
     const unameGroup = document.getElementById('usernameFieldGroup');
     const emailLabel = document.querySelector('label[for="authEmail"]');
@@ -265,11 +403,12 @@ function initAuth() {
   // ----- Auth Button -----
   if (authBtn) {
     authBtn.addEventListener('click', async () => {
-      let email = emailInput ? emailInput.value.trim() : '';
+      clearPasswordError();
+      let emailOrUname = emailInput ? emailInput.value.trim() : '';
       const password = passwordInput ? passwordInput.value : '';
       const username = usernameInput ? usernameInput.value.trim().toLowerCase() : '';
 
-      if (!email || !password) {
+      if (!emailOrUname || !password) {
         showToast('Please fill in all fields', 'warning');
         return;
       }
@@ -290,14 +429,15 @@ function initAuth() {
 
       try {
         if (authMode === 'register') {
-          const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
+          const userCredential = await firebase.auth().createUserWithEmailAndPassword(emailOrUname, password);
           const newToken = generateSessionToken();
           localStorage.setItem('enotepad_session_token', newToken);
           await db.collection('users').doc(username).set({
             username: username,
-            email: email,
+            email: emailOrUname,
             uid: userCredential.user.uid,
             sessionToken: newToken,
+            role: emailOrUname.toLowerCase() === ADMIN_EMAIL.toLowerCase() ? 'admin' : 'member',
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
           });
           // Write to public search index
@@ -306,36 +446,82 @@ function initAuth() {
           }
           showToast('Welcome to eNotePad! 🎉', 'success');
         } else {
-          let loginEmail = email;
+          let loginEmail = emailOrUname;
           if (!loginEmail.includes('@')) {
             loginEmail = loginEmail.toLowerCase();
-            const userDoc = await db.collection('users').doc(loginEmail).get();
-            if (userDoc.exists && userDoc.data() && userDoc.data().email) {
-              loginEmail = userDoc.data().email;
+            let foundEmail = null;
+
+            // Direct check for admin username
+            if (loginEmail === 'sachin24sk26') {
+              foundEmail = ADMIN_EMAIL;
             } else {
-              const querySnap = await db.collection('users').where('username', '==', loginEmail).limit(1).get();
-              if (!querySnap.empty && querySnap.docs[0].data() && querySnap.docs[0].data().email) {
-                loginEmail = querySnap.docs[0].data().email;
-              } else {
-                showToast('Username not found. Please check your username or login with your email address.', 'warning');
-                authBtn.classList.remove('btn-loading');
-                authBtn.disabled = false;
-                return;
+              try {
+                const userDoc = await db.collection('users').doc(loginEmail).get();
+                if (userDoc.exists && userDoc.data() && userDoc.data().email) {
+                  foundEmail = userDoc.data().email;
+                }
+              } catch (err) {
+                console.warn('Doc lookup error by username:', err);
+              }
+
+              if (!foundEmail) {
+                try {
+                  const querySnap = await db.collection('users').where('username', '==', loginEmail).limit(1).get();
+                  if (!querySnap.empty && querySnap.docs[0].data() && querySnap.docs[0].data().email) {
+                    foundEmail = querySnap.docs[0].data().email;
+                  }
+                } catch (err) {
+                  console.warn('Query lookup error by username:', err);
+                }
               }
             }
+
+            if (!foundEmail) {
+              showToast('Username not found. Please check your username or login with your email address.', 'warning');
+              authBtn.classList.remove('btn-loading');
+              authBtn.disabled = false;
+              return;
+            }
+            loginEmail = foundEmail;
           }
-          await firebase.auth().signInWithEmailAndPassword(loginEmail, password);
+
+          // Generate active session token before signing in
+          const newToken = generateSessionToken();
+          localStorage.setItem('enotepad_session_token', newToken);
+
+          const userCredential = await firebase.auth().signInWithEmailAndPassword(loginEmail, password);
+          
+          // Eagerly update session token in Firestore
+          if (userCredential && userCredential.user) {
+            try {
+              const prof = await fetchUserProfile(userCredential.user);
+              if (prof && prof.username) {
+                await db.collection('users').doc(prof.username).update({ sessionToken: newToken }).catch(() => {});
+              }
+            } catch (e) {}
+          }
+
           showToast('Successfully logged in!', 'success');
         }
       } catch (error) {
         console.error('Auth error:', error);
         let errorMsg = error.message;
-        if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found' || error.code === 'auth/invalid-email') {
+        const isWrongPassword = (error.code === 'auth/wrong-password') || 
+                               (error.code === 'auth/invalid-credential' && authMode === 'login');
+
+        if (isWrongPassword) {
+          errorMsg = 'Incorrect password. Please try again.';
+          showPasswordError('Incorrect password. Please try again.');
+        } else if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-email') {
           errorMsg = 'Incorrect username/email or password.';
         } else if (error.code === 'auth/email-already-in-use') {
           errorMsg = 'This email address is already registered. Please sign in instead.';
         } else if (error.code === 'auth/weak-password') {
           errorMsg = 'Password should be at least 6 characters.';
+        } else if (error.code === 'auth/too-many-requests') {
+          errorMsg = 'Access temporarily disabled due to multiple failed attempts. Please reset password or try again later.';
+        } else if (error.code === 'auth/network-request-failed') {
+          errorMsg = 'Network error. Please check your internet connection.';
         }
         showToast(errorMsg, 'error');
       } finally {
@@ -350,35 +536,62 @@ function initAuth() {
     googleAuthBtn.addEventListener('click', async () => {
       const provider = new firebase.auth.GoogleAuthProvider();
       try {
+        googleAuthBtn.classList.add('btn-loading');
+        googleAuthBtn.disabled = true;
         const result = await firebase.auth().signInWithPopup(provider);
         const user = result.user;
-        const userProfile = await fetchUserProfileByUid(user.uid);
+        const newToken = generateSessionToken();
+        localStorage.setItem('enotepad_session_token', newToken);
+
+        let userProfile = await fetchUserProfile(user);
         if (!userProfile) {
-          const baseName = (user.displayName || user.email.split('@')[0]).replace(/\s+/g, '').toLowerCase().substring(0, 15);
+          const isUserAdmin = (user.email || '').toLowerCase() === ADMIN_EMAIL.toLowerCase();
+          const baseName = isUserAdmin 
+            ? 'sachin24sk26'
+            : (user.displayName || (user.email ? user.email.split('@')[0] : 'user'))
+                .replace(/[^a-zA-Z0-9_]/g, '')
+                .toLowerCase()
+                .substring(0, 15) || 'user';
           let finalUsername = baseName;
           let suffix = 1;
-          while ((await db.collection('users').doc(finalUsername).get()).exists) {
-            finalUsername = baseName + suffix;
-            suffix++;
+          try {
+            while ((await db.collection('users').doc(finalUsername).get().catch(() => ({ exists: false }))).exists) {
+              finalUsername = `${baseName}${suffix}`;
+              suffix++;
+            }
+          } catch (e) {
+            finalUsername = isUserAdmin ? 'sachin24sk26' : `${baseName}_${user.uid.substring(0, 5)}`;
           }
-          const newToken = generateSessionToken();
-          localStorage.setItem('enotepad_session_token', newToken);
-          await db.collection('users').doc(finalUsername).set({
+
+          const newProfile = {
             username: finalUsername,
             email: user.email,
             uid: user.uid,
             sessionToken: newToken,
+            role: isUserAdmin ? 'admin' : 'member',
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
-          });
-          // Write to public search index
+          };
+          await db.collection('users').doc(finalUsername).set(newProfile, { merge: true });
           if (typeof window.writeUserSearchIndex === 'function') {
             await window.writeUserSearchIndex(finalUsername, { displayName: user.displayName || finalUsername });
           }
-          showToast(`Welcome, ${finalUsername}!`, 'success');
+          showToast(`Welcome, ${finalUsername}! 🎉`, 'success');
+        } else {
+          await db.collection('users').doc(userProfile.username).update({ sessionToken: newToken }).catch(() => {});
+          showToast('Successfully logged in with Google!', 'success');
         }
       } catch (error) {
         console.error('Google Auth error:', error);
-        showToast(error.message || 'Google login failed', 'error');
+        if (error.code === 'auth/popup-closed-by-user') {
+          showToast('Sign-in popup closed', 'info');
+        } else if (error.code === 'auth/cancelled-popup-request') {
+          // ignore double clicks
+        } else {
+          showToast(error.message || 'Google login failed', 'error');
+        }
+      } finally {
+        googleAuthBtn.classList.remove('btn-loading');
+        googleAuthBtn.disabled = false;
       }
     });
   }
@@ -509,6 +722,8 @@ function initAuth() {
     if (sidebarLinks) sidebarLinks.removeAttribute('data-hidden');
     const sidebarLoggedOutBtn = document.getElementById('sidebarLoggedOutBtn');
     if (sidebarLoggedOutBtn) sidebarLoggedOutBtn.setAttribute('data-hidden', 'true');
+    const sidebarGuestLinks = document.getElementById('sidebarGuestLinks');
+    if (sidebarGuestLinks) sidebarGuestLinks.setAttribute('data-hidden', 'true');
 
     if (typeof window.hideGuestNudge === 'function') {
       window.hideGuestNudge();
@@ -536,14 +751,14 @@ function initAuth() {
       sidebarAdmin.style.display = 'flex';
     }
 
-    loadUserProfile(username);
-    loadHistory(username);
-    loadSavedNotes(username);
-    recordLoginSession(username);
+    try { loadUserProfile(username); } catch(e) { console.warn('loadUserProfile error:', e); }
+    try { loadHistory(username); } catch(e) { console.warn('loadHistory error:', e); }
+    try { loadSavedNotes(username); } catch(e) { console.warn('loadSavedNotes error:', e); }
+    try { recordLoginSession(username); } catch(e) { console.warn('recordLoginSession error:', e); }
 
     // Load inbox badge (real-time listener)
     if (typeof window.loadInboxBadge === 'function') {
-      window.loadInboxBadge(username);
+      try { window.loadInboxBadge(username); } catch(e) {}
     }
 
     // Show send-to-user button (logged-in only)
@@ -552,18 +767,22 @@ function initAuth() {
 
     // Refresh file manager for the logged-in user
     if (typeof window.fileManagerRefresh === 'function') {
-      window.fileManagerRefresh(username);
+      try { window.fileManagerRefresh(username); } catch(e) {}
     }
 
     // Initialize Admin Features if admin
     if (isAdmin && typeof initAdmin === 'function') {
-      initAdmin();
+      try { initAdmin(); } catch(e) {}
     }
 
     // Initialize profile settings panel
     if (typeof window.initProfileSettings === 'function') {
-      window.initProfileSettings();
+      try { window.initProfileSettings(); } catch(e) {}
     }
+
+    // Hide marketing guide when logged in
+    const guideSection = document.getElementById('editorialGuideSection');
+    if (guideSection) guideSection.style.display = 'none';
   }
 
   function showLoggedOutView() {
@@ -581,21 +800,39 @@ function initAuth() {
     if (sidebarLinks) sidebarLinks.setAttribute('data-hidden', 'true');
     const sidebarLoggedOutBtn = document.getElementById('sidebarLoggedOutBtn');
     if (sidebarLoggedOutBtn) sidebarLoggedOutBtn.removeAttribute('data-hidden');
+    const sidebarGuestLinks = document.getElementById('sidebarGuestLinks');
+    if (sidebarGuestLinks) sidebarGuestLinks.removeAttribute('data-hidden');
     if (sidebarAdmin) {
       sidebarAdmin.style.display = 'none';
     }
 
     // Stop file manager listeners
     if (typeof window.fileManagerRefresh === 'function') {
-      window.fileManagerRefresh(null);
+      try { window.fileManagerRefresh(null); } catch(e) {}
+    }
+
+    // Hide send-to-user button for logged-out / guest users
+    const stuWrapper = document.getElementById('sendToUserWrapper');
+    if (stuWrapper) stuWrapper.setAttribute('data-hidden', 'true');
+
+    // Update share composer options (removes password protection for guests)
+    if (typeof window.updateShareButtons === 'function') {
+      try { window.updateShareButtons(); } catch(e) {}
     }
 
     // Reset fields & switch to login tab
-    emailInput.value = '';
-    passwordInput.value = '';
-    usernameInput.value = '';
+    if (emailInput) emailInput.value = '';
+    if (passwordInput) passwordInput.value = '';
+    if (usernameInput) usernameInput.value = '';
     switchAuthMode('login');
     updateUsernameUI(null);
+
+    // Restore marketing guide for guest on share tab
+    const guideSection = document.getElementById('editorialGuideSection');
+    if (guideSection) {
+      const activeTab = document.querySelector('.sidebar-nav-btn.active')?.dataset?.tab || 'share';
+      guideSection.style.display = (activeTab === 'share') ? '' : 'none';
+    }
   }
 
   // ----- Profile & Data Loaders -----
@@ -1092,9 +1329,9 @@ function initAuth() {
       if (!myToken) {
         myToken = generateSessionToken();
         localStorage.setItem('enotepad_session_token', myToken);
-        // Also update Firestore with this new token
-        await db.collection('users').doc(username).update({ sessionToken: myToken }).catch(() => {});
       }
+      // Always keep Firestore sessionToken in sync with this active session
+      await db.collection('users').doc(username).update({ sessionToken: myToken }).catch(() => {});
 
       const sessionData = {
         sessionId,

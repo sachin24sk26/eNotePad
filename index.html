@@ -211,7 +211,7 @@
     };
   </script>
 
-  <link rel="stylesheet" href="css/styles.css?v=3.2" />
+  <link rel="stylesheet" href="css/styles.css?v=3.9" />
 </head>
 <body class="bg-background text-on-surface font-label min-h-screen relative">
 
@@ -273,13 +273,11 @@
     <!-- ========== SIDEBAR ========== -->
     <aside class="sidebar-aside flex flex-col w-64 md:w-60 h-screen p-3 bg-surface-container-low rounded-r-3xl fixed left-0 top-0 z-[60] -translate-x-full md:translate-x-0 transition-transform duration-300 ease-out overflow-hidden shadow-2xl md:shadow-none" id="sidebar">
 
-      <!-- 1. Header & Branding + Mobile Close Button -->
+      <!-- 1. Brand + Mobile Close -->
       <div class="px-3 pt-3 pb-2 flex items-center justify-between">
         <a href="index.html" class="flex items-center gap-2.5 group cursor-pointer" style="text-decoration:none">
           <div class="relative w-8 h-8 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
-            <!-- Light mode logo -->
             <img src="assets/logo-light.svg" alt="eNotePad Logo" width="32" height="32" decoding="async" class="w-full h-full object-contain dark:hidden" />
-            <!-- Dark mode logo -->
             <img src="assets/logo-dark.svg" alt="eNotePad Logo" width="32" height="32" decoding="async" class="w-full h-full object-contain hidden dark:block" />
           </div>
           <div class="flex flex-col justify-center">
@@ -287,7 +285,7 @@
               <span class="text-[#00a8ff]">e</span>
               <span class="text-primary dark:text-[#d4e4f8]">NotePad</span>
             </div>
-            <span class="text-[8px] uppercase tracking-widest text-primary/50 dark:text-primary-dim/60 font-bold leading-tight mt-0.5">Digital Curator</span>
+            <span class="text-[10px] text-primary/50 dark:text-primary-dim/70 font-medium leading-tight mt-0.5">Share notes in seconds</span>
           </div>
         </a>
         <button id="closeSidebarDrawerBtn" class="md:hidden w-8 h-8 rounded-full flex items-center justify-center text-primary/60 hover:text-primary hover:bg-primary/10 transition-colors cursor-pointer" title="Close Menu" aria-label="Close menu">
@@ -295,162 +293,132 @@
         </button>
       </div>
 
-      <!-- 2. Primary CTA: New Note -->
+      <!-- 2. Primary action -->
       <div class="px-1 pt-1 pb-3">
-        <button class="w-full py-2.5 px-4 bg-primary text-on-primary rounded-xl font-semibold text-sm shadow-md hover:bg-primary-dim transition-all active:scale-[0.98] flex items-center justify-center gap-2 group cursor-pointer" id="newNoteBtn" title="Create a new note" aria-label="Create a new note">
+        <button class="w-full py-2.5 px-4 bg-primary text-on-primary rounded-xl font-semibold text-sm shadow-md hover:bg-primary-dim transition-all active:scale-[0.98] flex items-center justify-center gap-2 group cursor-pointer" id="newNoteBtn" title="Write and share a new note" aria-label="Create a new note">
           <span class="material-symbols-outlined text-lg group-hover:rotate-90 transition-transform duration-200">add</span>
           <span>New Note</span>
         </button>
       </div>
 
-      <!-- 3. Scrollable Navigation Body -->
-      <div class="flex-1 overflow-y-auto overflow-x-hidden space-y-4 px-1 pr-1.5 custom-scrollbar" id="sidebarNavContainer">
-        
-        <!-- Main Navigation Section -->
-        <nav class="space-y-0.5" id="sidebarNav">
-          <p class="text-[9px] uppercase tracking-widest text-primary/40 dark:text-primary-dim/60 font-bold px-3 py-1">Main Menu</p>
-          <button class="sidebar-nav-btn active w-full flex items-center gap-3 px-3.5 py-2 rounded-xl font-semibold transition-all text-sm" data-tab="share" id="sidebarShare">
+      <!-- 3. Navigation -->
+      <div class="flex-1 overflow-y-auto overflow-x-hidden space-y-3 px-1 pr-1.5 custom-scrollbar" id="sidebarNavContainer">
+
+        <nav class="space-y-0.5" id="sidebarNav" aria-label="Main">
+          <button class="sidebar-nav-btn active w-full flex items-center gap-3 px-3.5 py-2 rounded-xl font-semibold transition-all text-sm" data-tab="share" id="sidebarShare" title="Write a note and get a share code">
             <span class="material-symbols-outlined text-lg">edit_note</span>
-            <span>Notes</span>
+            <span>Write &amp; Share</span>
           </button>
-          <button class="sidebar-nav-btn w-full flex items-center gap-3 px-3.5 py-2 transition-all rounded-xl text-sm" data-tab="access" id="sidebarAccess">
+          <button class="sidebar-nav-btn w-full flex items-center gap-3 px-3.5 py-2 transition-all rounded-xl text-sm" data-tab="access" id="sidebarAccess" title="Open a note using its code">
             <span class="material-symbols-outlined text-lg">key</span>
-            <span>Access Note</span>
+            <span>Open with Code</span>
           </button>
+          <a href="convo_room/index.html" target="_blank" rel="noopener" class="sidebar-footer-btn w-full flex items-center gap-3 px-3.5 py-2 text-primary/70 dark:text-primary-dim/75 transition-all rounded-xl text-sm" style="text-decoration:none" title="Live group chat room (opens in new tab)">
+            <span class="material-symbols-outlined text-lg">forum</span>
+            <span class="flex-1 text-left">Chat Room</span>
+            <span class="material-symbols-outlined text-sm opacity-40">open_in_new</span>
+          </a>
+          <a href="codeshare/index.html" target="_blank" rel="noopener" class="sidebar-footer-btn w-full flex items-center gap-3 px-3.5 py-2 text-primary/70 dark:text-primary-dim/75 transition-all rounded-xl text-sm" style="text-decoration:none" title="Code together in real time (opens in new tab)">
+            <span class="material-symbols-outlined text-lg">code</span>
+            <span class="flex-1 text-left">Code Room</span>
+            <span class="material-symbols-outlined text-sm opacity-40">open_in_new</span>
+          </a>
           <button class="sidebar-nav-btn w-full flex items-center gap-3 px-3.5 py-2 transition-all rounded-xl text-sm" data-tab="search" id="sidebarSearch">
             <span class="material-symbols-outlined text-lg">group_search</span>
-            <span>Find Users</span>
-          </button>
-          <button class="sidebar-nav-btn w-full flex items-center gap-3 px-3.5 py-2 transition-all rounded-xl text-sm" onclick="window.open('convo_room/index.html', '_blank')">
-            <span class="material-symbols-outlined text-lg">forum</span>
-            <span class="flex-1 text-left">Convo Room</span>
-            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" title="Live Room"></span>
-          </button>
-          <button class="sidebar-nav-btn w-full flex items-center gap-3 px-3.5 py-2 text-error hover:bg-error/5 transition-all rounded-xl text-sm" data-tab="admin" id="sidebarAdmin" style="display: none;">
-            <span class="material-symbols-outlined text-lg">admin_panel_settings</span>
-            <span>Admin Panel</span>
+            <span>Find People</span>
           </button>
         </nav>
 
-        <!-- Logged-in Library Section -->
-        <div id="sidebarLoggedInLinks" data-hidden="true" class="space-y-0.5 pt-2 border-t border-outline-variant/15 dark:border-white/10">
-          <p class="text-[9px] uppercase tracking-widest text-primary/40 dark:text-primary-dim/60 font-bold px-3 py-1">Your Library</p>
-          <button class="sidebar-quick-link w-full flex items-center gap-3 px-3.5 py-2 text-primary/65 dark:text-primary-dim/75 hover:text-primary hover:bg-white/50 dark:hover:bg-white/5 transition-all rounded-xl text-sm" data-sidebar-action="history">
-            <span class="material-symbols-outlined text-base">history</span>
-            <span>History</span>
+        <!-- Signed-in only -->
+        <div id="sidebarLoggedInLinks" data-hidden="true" class="space-y-0.5 pt-3 border-t border-outline-variant/15 dark:border-white/10">
+          <p class="text-[10px] uppercase tracking-wider text-primary/40 dark:text-primary-dim/60 font-bold px-3.5 pb-1">My Stuff</p>
+          <button class="sidebar-quick-link w-full flex items-center gap-3 px-3.5 py-2 text-primary/70 dark:text-primary-dim/75 transition-all rounded-xl text-sm" data-sidebar-action="history">
+            <span class="material-symbols-outlined text-lg">history</span>
+            <span>Recent</span>
           </button>
-          <button class="sidebar-quick-link w-full flex items-center gap-3 px-3.5 py-2 text-primary/65 dark:text-primary-dim/75 hover:text-primary hover:bg-white/50 dark:hover:bg-white/5 transition-all rounded-xl text-sm" data-sidebar-action="saved">
-            <span class="material-symbols-outlined text-base">bookmark</span>
-            <span class="flex-1 text-left">Saved Notes</span>
-            <span class="text-[9px] font-bold bg-primary/10 dark:bg-primary-container/20 text-primary dark:text-[#c6d6e9] rounded-full px-2 py-0.5" id="sidebarSavedCount"></span>
+          <button class="sidebar-quick-link w-full flex items-center gap-3 px-3.5 py-2 text-primary/70 dark:text-primary-dim/75 transition-all rounded-xl text-sm" data-sidebar-action="saved">
+            <span class="material-symbols-outlined text-lg">bookmark</span>
+            <span class="flex-1 text-left">Saved</span>
+            <span class="text-[10px] font-bold bg-primary/10 dark:bg-primary-container/20 text-primary dark:text-[#c6d6e9] rounded-full px-2 py-0.5 empty:hidden" id="sidebarSavedCount"></span>
           </button>
-          <button class="sidebar-quick-link w-full flex items-center gap-3 px-3.5 py-2 text-primary/65 dark:text-primary-dim/75 hover:text-primary hover:bg-white/50 dark:hover:bg-white/5 transition-all rounded-xl text-sm" data-sidebar-action="files">
-            <span class="material-symbols-outlined text-base">folder_open</span>
-            <span>My Files</span>
+          <button class="sidebar-quick-link w-full flex items-center gap-3 px-3.5 py-2 text-primary/70 dark:text-primary-dim/75 transition-all rounded-xl text-sm" data-sidebar-action="files">
+            <span class="material-symbols-outlined text-lg">folder_open</span>
+            <span>Files</span>
+          </button>
+          <button class="sidebar-quick-link w-full flex items-center gap-3 px-3.5 py-2 text-primary/70 dark:text-primary-dim/75 transition-all rounded-xl text-sm" data-sidebar-action="inbox">
+            <span class="material-symbols-outlined text-lg">inbox</span>
+            <span>Inbox</span>
+          </button>
+          <button class="sidebar-nav-btn w-full flex items-center gap-3 px-3.5 py-2 text-error hover:bg-error/5 transition-all rounded-xl text-sm" data-tab="admin" id="sidebarAdmin" style="display: none;">
+            <span class="material-symbols-outlined text-lg">admin_panel_settings</span>
+            <span>Admin</span>
           </button>
         </div>
 
-        <!-- Help & Tools Section -->
-        <div class="space-y-0.5 pt-2 border-t border-outline-variant/15 dark:border-white/10">
-          <p class="text-[9px] uppercase tracking-widest text-primary/40 dark:text-primary-dim/60 font-bold px-3 py-1">Resources & Guides</p>
-          <a href="how-it-works.html" class="sidebar-footer-btn w-full flex items-center gap-3 px-3.5 py-2 text-primary/65 dark:text-primary-dim/75 hover:text-primary hover:bg-white/50 dark:hover:bg-white/5 transition-all rounded-xl text-sm group" style="text-decoration:none">
-            <span class="material-symbols-outlined text-base group-hover:scale-110 transition-transform">menu_book</span>
-            <span class="flex-1 text-left">How It Works</span>
+        <!-- Signed-out only -->
+        <div id="sidebarGuestLinks" class="space-y-0.5 pt-3 border-t border-outline-variant/15 dark:border-white/10">
+          <p class="text-[10px] uppercase tracking-wider text-primary/40 dark:text-primary-dim/60 font-bold px-3.5 pb-1">Resources &amp; Guides</p>
+          <a href="how-it-works.html" class="sidebar-footer-btn w-full flex items-center gap-3 px-3.5 py-2 text-primary/70 dark:text-primary-dim/75 transition-all rounded-xl text-sm" style="text-decoration:none">
+            <span class="material-symbols-outlined text-lg">menu_book</span>
+            <span>How It Works</span>
           </a>
-          <a href="codeshare/index.html" class="sidebar-footer-btn w-full flex items-center gap-3 px-3.5 py-2 text-primary/65 dark:text-primary-dim/75 hover:text-primary hover:bg-white/50 dark:hover:bg-white/5 transition-all rounded-xl text-sm group" style="text-decoration:none">
-            <span class="material-symbols-outlined text-base group-hover:scale-110 transition-transform">code</span>
-            <span class="flex-1 text-left">CodeShare IDE</span>
-            <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+          <a href="codeshare/index.html" class="sidebar-footer-btn w-full flex items-center gap-3 px-3.5 py-2 text-primary/70 dark:text-primary-dim/75 transition-all rounded-xl text-sm" style="text-decoration:none">
+            <span class="material-symbols-outlined text-lg">code</span>
+            <span>CodeShare IDE</span>
           </a>
-          <a href="support.html" class="sidebar-footer-btn w-full flex items-center gap-3 px-3.5 py-2 text-primary/65 dark:text-primary-dim/75 hover:text-primary hover:bg-white/50 dark:hover:bg-white/5 transition-all rounded-xl text-sm group" style="text-decoration:none">
-            <span class="material-symbols-outlined text-base group-hover:scale-110 transition-transform">support_agent</span>
-            <span class="flex-1 text-left">Help & FAQs</span>
+          <a href="support.html" class="sidebar-footer-btn w-full flex items-center gap-3 px-3.5 py-2 text-primary/70 dark:text-primary-dim/75 transition-all rounded-xl text-sm" style="text-decoration:none">
+            <span class="material-symbols-outlined text-lg">support_agent</span>
+            <span>Help &amp; FAQs</span>
           </a>
-          <div class="flex items-center gap-1 px-3 py-1 text-[11px] text-primary/40 dark:text-primary-dim/50">
-            <a href="privacy.html" class="hover:text-primary dark:hover:text-white transition-colors">Privacy</a>
-            <span>•</span>
-            <a href="terms.html" class="hover:text-primary dark:hover:text-white transition-colors">Terms</a>
-            <span>•</span>
-            <button id="sidebarFeedbackBtn" class="hover:text-primary dark:hover:text-white transition-colors cursor-pointer">Feedback</button>
-          </div>
         </div>
-
       </div>
 
-      <!-- 4. Fixed Bottom Footer Dock -->
-      <div class="pt-2.5 px-1 space-y-2 border-t border-outline-variant/15 dark:border-white/10 flex-shrink-0">
-        <!-- Coffee Support Pill -->
-        <button class="sidebar-coffee-pill w-full flex items-center justify-between px-2.5 py-2 rounded-full transition-all group cursor-pointer shadow-sm" id="sidebarCoffeeBtn" onclick="if(typeof openCoffeeModal==='function')openCoffeeModal(2);" title="Fuel late-night code & servers!" aria-label="Buy eNotePad a Coffee">
-          <div class="flex items-center gap-1.5 min-w-0">
-            <div class="relative flex items-center justify-center flex-shrink-0 w-7 h-7">
-              <!-- Smooth Fluid Rising Vapor / Steam SVG -->
-              <svg class="sidebar-coffee-steam-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path class="steam-path-1" d="M8 22C6 16.5 10.5 12 7.5 7C5.5 3.5 8.5 1 7.5 0" stroke="url(#steamGrad1)" stroke-width="2.6" stroke-linecap="round" fill="none" />
-                <path class="steam-path-2" d="M14 22C16 16.5 11.5 12 14.5 7C16.5 3.5 13.5 1 14.5 0" stroke="url(#steamGrad2)" stroke-width="2.6" stroke-linecap="round" fill="none" />
-                <defs>
-                  <linearGradient id="steamGrad1" x1="0" y1="1" x2="0" y2="0">
-                    <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95" />
-                    <stop offset="55%" stop-color="#ffffff" stop-opacity="0.75" />
-                    <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
-                  </linearGradient>
-                  <linearGradient id="steamGrad2" x1="0" y1="1" x2="0" y2="0">
-                    <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95" />
-                    <stop offset="55%" stop-color="#ffffff" stop-opacity="0.75" />
-                    <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
-                  </linearGradient>
-                </defs>
-              </svg>
-              <!-- Detailed Ceramic Coffee Cup & Saucer SVG -->
-              <svg class="w-7 h-7 drop-shadow-md select-none group-hover:scale-110 group-hover:-rotate-3 transition-transform" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <ellipse cx="16" cy="24.5" rx="12" ry="3.5" fill="#D5DCF5" />
-                <ellipse cx="16" cy="24" rx="9.5" ry="2.2" fill="#B4BFE8" opacity="0.8" />
-                <ellipse cx="16" cy="21" rx="7.5" ry="2.2" fill="#7986CB" opacity="0.35" />
-                <path d="M7.5 12C7.5 17.5 11 21.5 16 21.5C21 21.5 24.5 17.5 24.5 12V11H7.5V12Z" fill="#F0F4FF" />
-                <path d="M23 12.5C25.5 12.5 28 14.5 28 16.5C28 18.5 25.5 20.5 23 20.5" stroke="#D5DCF5" stroke-width="2.5" stroke-linecap="round" fill="none" />
-                <ellipse cx="16" cy="11" rx="8.5" ry="3" fill="#F0F4FF" />
-                <ellipse cx="16" cy="11.2" rx="7" ry="2.2" fill="#3B1706" />
-                <ellipse cx="15" cy="11" rx="5" ry="1.3" fill="#6B3410" />
-                <ellipse cx="14" cy="10.8" rx="2.5" ry="0.7" fill="#B45309" opacity="0.8" />
-              </svg>
-            </div>
-            <span class="text-[11px] font-black text-white tracking-tight leading-none whitespace-nowrap">Buy me a coffee</span>
-          </div>
-          <span class="sidebar-coffee-badge">SUPPORT</span>
-        </button>
-
-        <!-- User Profile (Logged In) -->
-        <div class="flex items-center gap-2.5 p-2 bg-white/60 dark:bg-white/[0.04] rounded-2xl cursor-pointer hover:bg-white/90 dark:hover:bg-white/[0.08] transition-all border border-outline-variant/15 dark:border-white/[0.06]" id="sidebarUserInfo" data-hidden="true" title="View Account & Settings">
-          <div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-primary font-bold text-sm flex-shrink-0 shadow-sm" id="sidebarUserAvatar"></div>
+      <!-- 4. Footer & Account -->
+      <div class="pt-2 px-1.5 pb-1 space-y-2 border-t border-outline-variant/15 dark:border-white/10 flex-shrink-0">
+        <!-- Signed in -->
+        <div class="flex items-center gap-2.5 p-2 bg-white/70 dark:bg-white/[0.04] rounded-2xl cursor-pointer hover:bg-white/95 dark:hover:bg-white/[0.08] transition-all border border-outline-variant/15 dark:border-white/[0.08] shadow-xs" id="sidebarUserInfo" data-hidden="true" title="Account &amp; settings">
+          <div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-primary font-bold text-sm flex-shrink-0 shadow-xs" id="sidebarUserAvatar"></div>
           <div class="flex flex-col flex-1 min-w-0">
             <span class="text-xs font-bold text-on-surface truncate" id="sidebarUserName"></span>
-            <span class="text-[9px] text-on-surface-variant" id="sidebarUserRole">Member</span>
+            <span class="text-[10px] text-on-surface-variant" id="sidebarUserRole">Member</span>
           </div>
-          <span class="material-symbols-outlined text-primary/30 text-base">chevron_right</span>
+          <span class="material-symbols-outlined text-primary/40 text-base">settings</span>
         </div>
 
-        <!-- User Profile (Logged Out) -->
-        <button class="w-full flex items-center gap-2.5 p-2 bg-white/60 dark:bg-white/[0.04] rounded-2xl cursor-pointer hover:bg-white/90 dark:hover:bg-white/[0.08] transition-all border border-outline-variant/15 dark:border-white/[0.06]" id="sidebarLoggedOutBtn" title="Sign In / Register">
-          <div class="w-8 h-8 rounded-full bg-primary/10 dark:bg-white/10 flex items-center justify-center text-primary dark:text-[#c6d6e9] font-bold text-sm flex-shrink-0">
+        <!-- Signed out -->
+        <button class="w-full flex items-center gap-2.5 p-2 bg-white/70 dark:bg-white/[0.04] rounded-2xl cursor-pointer hover:bg-white/95 dark:hover:bg-white/[0.08] transition-all border border-outline-variant/15 dark:border-white/[0.08] group text-left shadow-xs active:scale-[0.98]" id="sidebarLoggedOutBtn" title="Sign in or create an account">
+          <div class="w-8 h-8 rounded-full bg-primary/10 dark:bg-[#70b4f8]/15 flex items-center justify-center text-primary dark:text-[#70b4f8] flex-shrink-0 transition-transform group-hover:scale-105">
             <span class="material-symbols-outlined text-base">account_circle</span>
           </div>
-          <div class="flex flex-col flex-1 min-w-0 text-left">
-            <span class="text-xs font-bold text-on-surface">Sign In / Register</span>
-            <span class="text-[9px] text-on-surface-variant">Manage profile & notes</span>
+          <div class="flex flex-col flex-1 min-w-0">
+            <span class="text-xs font-bold text-on-surface dark:text-[#e2e8f0]">Sign in</span>
+            <span class="text-[10px] text-on-surface-variant dark:text-[#94a3b8] leading-tight">Save notes &amp; files</span>
           </div>
-          <span class="material-symbols-outlined text-primary/30 text-base">chevron_right</span>
+          <span class="material-symbols-outlined text-primary/30 dark:text-white/30 text-base group-hover:translate-x-0.5 transition-transform">chevron_right</span>
         </button>
+
+
+        <!-- Subtle Legal & Help Links (Centered, clean) -->
+        <div class="flex items-center justify-center gap-2 pt-0.5 pb-1 text-[11px] text-primary/50 dark:text-[#8899aa]">
+          <a href="how-it-works.html" class="hover:text-primary dark:hover:text-white transition-colors">Help</a>
+          <span class="opacity-40">·</span>
+          <button id="sidebarFeedbackBtn" class="hover:text-primary dark:hover:text-white transition-colors cursor-pointer">Feedback</button>
+          <span class="opacity-40">·</span>
+          <a href="privacy.html" class="hover:text-primary dark:hover:text-white transition-colors">Privacy</a>
+        </div>
       </div>
+
     </aside>
 
     <!-- ========== MAIN CONTENT ========== -->
-    <main class="flex-1 md:ml-60 flex flex-col min-h-screen w-full min-w-0 pt-[72px] sm:pt-[76px] pb-24 md:pb-0">
+    <main class="flex-1 md:ml-60 flex flex-col min-h-screen w-full min-w-0 pt-20 sm:pt-24 md:pt-24 pb-24 md:pb-0">
 
-      <!-- Top App Bar (Floating Top Header Navbar with space from sidebar) -->
+      <!-- Top App Bar (Floating Top Header Navbar matching user design) -->
       <header class="bg-surface/85 dark:bg-[#0f1218]/85 fixed top-2 sm:top-2.5 left-2 sm:left-3 md:left-[calc(15rem+1rem)] right-2 sm:right-3 md:right-5 z-40 backdrop-blur-2xl border border-outline-variant/15 dark:border-white/[0.08] rounded-2xl sm:rounded-3xl transition-all duration-300 shadow-sm" id="topAppBar">
-        <div class="flex justify-between items-center w-full px-2.5 sm:px-6 py-1.5 sm:py-2 max-w-5xl mx-auto">
+        <div class="flex justify-between items-center w-full px-2.5 sm:px-5 py-3 sm:py-4 max-w-5xl mx-auto">
           
-          <!-- Left Section: Mobile Brand + Utility Action Icons -->
-          <div class="flex items-center gap-1.5 sm:gap-3 min-w-0">
+          <!-- Left Section: Mobile Brand (mobile only) & Segmented Nav (desktop/tablet) -->
+          <div class="flex items-center gap-2 sm:gap-3 min-w-0">
             <!-- Mobile Brand (shown only on mobile/tablet where sidebar is hidden) -->
             <div class="flex items-center gap-1.5 md:hidden flex-shrink-0">
               <div class="relative w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center flex-shrink-0">
@@ -463,56 +431,35 @@
               </div>
             </div>
 
-            <!-- Desktop Workspace Badge (shown on desktop) -->
-            <div class="hidden md:flex items-center">
-              <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/6 dark:bg-white/[0.05] border border-primary/12 dark:border-white/[0.08] text-primary dark:text-[#c6d6e9] font-bold text-[11px] tracking-wide uppercase">
-                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span>Curator Workspace</span>
-              </span>
-            </div>
-
-            <!-- Utility Action Buttons (Inbox + Find Users) -->
-            <div class="hidden sm:flex items-center gap-0.5 sm:gap-1 pl-1 border-l border-outline-variant/15 dark:border-white/10 ml-0.5 sm:ml-1 flex-shrink-0">
-              <button class="top-nav-icon-btn relative p-1.5 sm:p-2 rounded-lg sm:rounded-xl text-primary/70 dark:text-[#a0b2c6] hover:text-primary dark:hover:text-[#70b4f8] hover:bg-primary/8 dark:hover:bg-[#70b4f8]/12 transition-all flex items-center justify-center" id="topNavInboxBtn" title="Inbox & Direct Messages" aria-label="Inbox">
-                <span class="material-symbols-outlined text-[18px] sm:text-[20px]">mail</span>
-                <span class="inbox-badge absolute -top-0.5 -right-0.5 bg-primary dark:bg-[#3b82f6] text-white text-[9px] font-bold rounded-full h-4 min-w-[16px] px-1 flex items-center justify-center shadow-sm" style="display:none"></span>
-              </button>
-
-              <button class="top-nav-icon-btn topnav-link relative p-1.5 sm:p-2 rounded-lg sm:rounded-xl text-primary/70 dark:text-[#a0b2c6] hover:text-primary dark:hover:text-[#70b4f8] hover:bg-primary/8 dark:hover:bg-[#70b4f8]/12 transition-all flex items-center justify-center" data-tab="search" id="topNavSearchBtn" title="Find Users & Profiles" aria-label="Find Users">
-                <span class="material-symbols-outlined text-[18px] sm:text-[20px]">person_search</span>
-              </button>
-            </div>
+            <!-- Segmented Floating Navigation Capsule [Notes | Access | Convo | CodeShare] -->
+            <nav class="absolute left-1/2 -translate-x-1/2 hidden sm:flex items-center p-1 rounded-full bg-primary/[0.06] dark:bg-white/[0.05] border border-primary/12 dark:border-white/[0.08] shadow-xs" id="topSegmentedNav">
+              <a class="topnav-link flex items-center gap-1.5 text-xs px-3.5 py-1.5 rounded-full font-semibold transition-all active" href="#" data-tab="share" id="topnavShare">
+                <span class="material-symbols-outlined text-sm">edit_note</span>
+                <span>Notes</span>
+              </a>
+              <a class="topnav-link flex items-center gap-1.5 text-xs px-3.5 py-1.5 rounded-full font-medium transition-all" href="#" data-tab="access" id="topnavAccess">
+                <span class="material-symbols-outlined text-sm">key</span>
+                <span>Access</span>
+              </a>
+              <a class="topnav-link flex items-center gap-1.5 text-xs px-3.5 py-1.5 rounded-full font-medium text-primary/75 dark:text-[#a0b2c6] hover:text-primary dark:hover:text-[#70b4f8] hover:bg-primary/8 dark:hover:bg-[#70b4f8]/12 transition-all cursor-pointer" href="convo_room/index.html" target="_blank" rel="noopener" id="topnavConvoBtn" title="Launch Real-Time Convo Room">
+                <span class="material-symbols-outlined text-sm">forum</span>
+                <span>Convo</span>
+              </a>
+              <a class="topnav-link flex items-center gap-1.5 text-xs px-3.5 py-1.5 rounded-full font-medium text-primary/75 dark:text-[#a0b2c6] hover:text-primary dark:hover:text-[#70b4f8] hover:bg-primary/8 dark:hover:bg-[#70b4f8]/12 transition-all cursor-pointer" href="codeshare/index.html" target="_blank" rel="noopener" id="topnavCodeShareBtn" title="Collaborative Coding Room">
+                <span class="material-symbols-outlined text-sm">code</span>
+                <span>CodeShare</span>
+              </a>
+            </nav>
           </div>
 
-          <!-- Center Section: Segmented Floating Navigation Capsule -->
-          <nav class="hidden sm:flex items-center p-1 rounded-full bg-primary/[0.06] dark:bg-white/[0.05] border border-primary/12 dark:border-white/[0.08] shadow-xs" id="topSegmentedNav">
-            <a class="topnav-link flex items-center gap-1.5 text-xs px-3.5 py-1.5 rounded-full font-semibold transition-all active" href="#" data-tab="share" id="topnavShare">
-              <span class="material-symbols-outlined text-sm">edit_note</span>
-              <span>Notes</span>
-            </a>
-            <a class="topnav-link flex items-center gap-1.5 text-xs px-3.5 py-1.5 rounded-full font-medium transition-all" href="#" data-tab="access" id="topnavAccess">
-              <span class="material-symbols-outlined text-sm">key</span>
-              <span>Access</span>
-            </a>
-            <a class="topnav-link flex items-center gap-1.5 text-xs px-3.5 py-1.5 rounded-full font-medium text-primary/75 dark:text-[#a0b2c6] hover:text-primary dark:hover:text-[#70b4f8] hover:bg-primary/8 dark:hover:bg-[#70b4f8]/12 transition-all cursor-pointer" href="convo_room/index.html" target="_blank" rel="noopener" id="topnavConvoBtn" title="Launch Real-Time Convo Room">
-              <span class="material-symbols-outlined text-sm">forum</span>
-              <span>Convo</span>
-            </a>
-            <a class="topnav-link flex items-center gap-1.5 text-xs px-3.5 py-1.5 rounded-full font-medium text-primary/75 dark:text-[#a0b2c6] hover:text-primary dark:hover:text-[#70b4f8] hover:bg-primary/8 dark:hover:bg-[#70b4f8]/12 transition-all cursor-pointer" href="codeshare/index.html" target="_blank" rel="noopener" id="topnavCodeShareBtn" title="Collaborative CodeShare">
-              <span class="material-symbols-outlined text-sm">code</span>
-              <span>CodeShare</span>
-            </a>
-          </nav>
+          <!-- Hidden title/inbox references for script compatibility -->
+          <span class="hidden" id="topBarTitle">Write &amp; Share</span>
+          <span class="hidden" id="topBarSubtitle"></span>
+          <button class="hidden" id="mobileTopInboxBtn" aria-hidden="true"><span class="inbox-badge" style="display:none"></span></button>
 
           <!-- Right Section: Actions & Theme Toggle -->
           <div class="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
-            <!-- Mobile Inbox Icon -->
-            <button class="sm:hidden relative p-1.5 rounded-full text-primary/75 dark:text-[#a0b2c6] hover:bg-primary/10 dark:hover:bg-[#70b4f8]/12 dark:hover:text-[#70b4f8] transition-all flex items-center justify-center" id="mobileTopInboxBtn" title="Inbox" aria-label="Inbox">
-              <span class="material-symbols-outlined text-[19px]">mail</span>
-              <span class="inbox-badge absolute -top-0.5 -right-0.5 bg-primary dark:bg-[#3b82f6] text-white text-[8px] font-bold rounded-full h-3.5 min-w-[14px] px-0.5 flex items-center justify-center shadow-sm" style="display:none"></span>
-            </button>
-
-            <button class="theme-toggle-btn flex items-center justify-center gap-1.5 w-8 h-8 sm:w-auto sm:h-auto sm:px-3 sm:py-1.5 rounded-full border border-primary/20 dark:border-white/15 bg-primary/5 dark:bg-white/5 text-primary dark:text-[#c6d6e9] hover:bg-primary/10 dark:hover:bg-[#70b4f8]/14 dark:hover:text-[#70b4f8] dark:hover:border-[#70b4f8]/35 transition-all active:scale-[0.97] text-xs font-semibold cursor-pointer shadow-xs" id="themeToggle" aria-label="Toggle theme">
+            <button class="theme-toggle-btn flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full border border-primary/20 dark:border-white/15 bg-primary/5 dark:bg-white/5 text-primary dark:text-[#c6d6e9] hover:bg-primary/10 dark:hover:bg-[#70b4f8]/14 dark:hover:text-[#70b4f8] dark:hover:border-[#70b4f8]/35 transition-all active:scale-[0.97] text-xs font-semibold cursor-pointer shadow-xs" id="themeToggle" aria-label="Toggle theme">
               <span class="material-symbols-outlined text-[17px] theme-icon-dark">dark_mode</span>
               <span class="material-symbols-outlined text-[17px] theme-icon-light">light_mode</span>
               <span class="theme-toggle-label text-xs font-semibold theme-label-dark">Dark</span>
@@ -529,40 +476,52 @@
       </header>
 
       <!-- ========== WORK PANELS (Elevated Layer) ========== -->
-      <section class="flex-1 flex items-start justify-center p-3.5 sm:p-6 md:p-8 w-full min-w-0 relative z-30 work-panel-container">
-        <div class="w-full max-w-2xl space-y-4 min-w-0 relative z-30">
+      <section class="flex-1 flex flex-col items-center justify-center p-3.5 sm:p-6 md:p-8 w-full min-w-0 relative z-30 work-panel-container min-h-[calc(100vh-5.5rem)] sm:min-h-[calc(100vh-6rem)]">
+        <div class="w-full max-w-2xl space-y-4 min-w-0 relative z-30 my-auto">
 
           <!-- ===== SHARE PANEL ===== -->
           <div class="tab-panel w-full" id="panelShare" data-active="true">
 
-            <!-- Type Selector — outside the card, at top -->
-            <div class="flex gap-2 mb-4" id="typeSelector">
-              <button class="type-btn active flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-2xl bg-primary text-on-primary font-semibold transition-all text-sm shadow-sm" data-type="text">
+            <!-- Type Selector — segmented control -->
+            <div class="type-segment flex mb-4" id="typeSelector" role="tablist" aria-label="What do you want to share?">
+              <button class="type-btn active flex-1 flex items-center justify-center gap-2 py-2 px-3 text-sm" data-type="text" role="tab">
                 <span class="material-symbols-outlined text-base">edit_note</span> Text
               </button>
-              <button class="type-btn flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-2xl bg-surface-container text-primary/60 hover:bg-surface-container-high hover:text-primary transition-all text-sm" data-type="link">
+              <button class="type-btn flex-1 flex items-center justify-center gap-2 py-2 px-3 text-sm" data-type="link" role="tab">
                 <span class="material-symbols-outlined text-base">link</span> Link
               </button>
-              <button class="type-btn flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-2xl bg-surface-container text-primary/60 hover:bg-surface-container-high hover:text-primary transition-all text-sm" data-type="image">
-                <span class="material-symbols-outlined text-base">image</span> Image
+              <button class="type-btn flex-1 flex items-center justify-center gap-2 py-2 px-3 text-sm" data-type="image" role="tab" title="Share files, images, PDFs, docs, audio">
+                <span class="material-symbols-outlined text-base">attach_file</span> File
               </button>
             </div>
 
             <!-- Main Card -->
             <div class="bg-surface-container-lowest rounded-[28px] editorial-shadow border border-outline-variant/15 overflow-hidden transition-all">
 
-              <!-- Note Meta (title + category for notes) -->
-              <div id="noteMeta" class="p-4 sm:p-6 pb-2 space-y-3">
-                <div class="flex gap-3 p-3 sm:p-4 bg-[#f6f6f6] dark:bg-surface-container-low rounded-2xl border border-outline-variant/15">
-                  <div class="flex-1 min-w-0">
-                    <label for="noteTitle" class="text-[9px] uppercase tracking-[0.2em] font-bold block mb-1 text-on-surface-variant">Title</label>
-                    <input type="text" class="w-full bg-transparent border-none rounded-md focus:ring-0 text-on-surface font-semibold text-sm sm:text-base outline-none placeholder:text-on-surface-variant/40 truncate" placeholder="Give your note a title…" id="noteTitle" maxlength="100" autocomplete="off" />
-                  </div>
-                  <div class="w-px bg-outline-variant/20"></div>
-                  <div class="w-28 sm:w-32 flex-shrink-0">
-                    <label for="noteCategory" class="text-[9px] uppercase tracking-[0.2em] font-bold block mb-1 text-on-surface-variant">Category</label>
-                    <select class="w-full bg-transparent border-none rounded-md focus:ring-0 text-primary font-bold text-xs appearance-none cursor-pointer outline-none" id="noteCategory">
-                      <option value="">None</option>
+              <!-- Note Meta: title + tag + templates in one clean row -->
+              <div id="noteMeta" class="relative z-30 px-5 sm:px-6 pt-5 pb-3">
+                <div class="flex items-center gap-2">
+                  <label for="noteTitle" class="sr-only">Title</label>
+                  <input type="text" class="compose-title flex-1 min-w-0" placeholder="Title (optional)" id="noteTitle" name="enp-note-title" maxlength="100" autocomplete="off" data-lpignore="true" data-1p-ignore="true" data-form-type="other" />
+                  <!-- Tag (custom dropdown menu) -->
+                  <div id="noteTagWrap" class="relative z-40 flex-shrink-0">
+                    <button type="button" id="tagToggleBtn" class="compose-chip" aria-expanded="false" aria-controls="tagOptionsList" aria-haspopup="menu" title="Add a tag (optional)">
+                      <span class="text-[15px]" id="tagSelectedIcon">🏷️</span>
+                      <span id="tagSelectedLabel">Tag</span>
+                      <span class="material-symbols-outlined text-[16px]" id="tagToggleIcon">expand_more</span>
+                    </button>
+                    <div id="tagOptionsList" class="compose-menu hidden" style="left:0;right:auto;min-width:165px;" role="menu">
+                      <button type="button" class="compose-menu-item" data-tag="" role="menuitem"><span class="menu-item-icon">🏷️</span><span class="menu-item-text">None</span></button>
+                      <button type="button" class="compose-menu-item" data-tag="personal" role="menuitem"><span class="menu-item-icon">📝</span><span class="menu-item-text">Personal</span></button>
+                      <button type="button" class="compose-menu-item" data-tag="work" role="menuitem"><span class="menu-item-icon">💼</span><span class="menu-item-text">Work</span></button>
+                      <button type="button" class="compose-menu-item" data-tag="ideas" role="menuitem"><span class="menu-item-icon">💡</span><span class="menu-item-text">Ideas</span></button>
+                      <button type="button" class="compose-menu-item" data-tag="code" role="menuitem"><span class="menu-item-icon">🖥️</span><span class="menu-item-text">Code</span></button>
+                      <button type="button" class="compose-menu-item" data-tag="links" role="menuitem"><span class="menu-item-icon">🔗</span><span class="menu-item-text">Links</span></button>
+                      <button type="button" class="compose-menu-item" data-tag="important" role="menuitem"><span class="menu-item-icon">⭐</span><span class="menu-item-text">Important</span></button>
+                    </div>
+                    <!-- Hidden select for full backwards-compatibility with share.js, editor.js, drafts, etc. -->
+                    <select id="noteCategory" class="sr-only" aria-hidden="true" tabindex="-1">
+                      <option value="" selected>🏷️ Tag</option>
                       <option value="personal">📝 Personal</option>
                       <option value="work">💼 Work</option>
                       <option value="ideas">💡 Ideas</option>
@@ -571,35 +530,22 @@
                       <option value="important">⭐ Important</option>
                     </select>
                   </div>
-                </div>
 
-                <!-- Quick Starter Chips (Blank Canvas Accelerators) -->
-                <div id="editorStarterChips" class="flex items-center gap-1.5 p-1 rounded-2xl bg-surface-container-low/40 dark:bg-white/[0.02] border border-outline-variant/10 overflow-x-auto no-scrollbar max-w-full flex-nowrap whitespace-nowrap">
-                  <!-- Single Trigger Button -->
-                  <button type="button" id="starterToggleBtn" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-surface-container-low/80 hover:bg-primary/10 dark:bg-white/5 dark:hover:bg-white/10 text-primary dark:text-[#60a5fa] border border-outline-variant/15 dark:border-white/10 transition-all cursor-pointer shadow-2xs active:scale-95 flex-shrink-0" aria-expanded="false" aria-controls="starterOptionsList" title="Choose Starter Template">
-                    <span class="material-symbols-outlined text-xs text-primary dark:text-[#60a5fa]">bolt</span>
-                    <span>Starters</span>
-                    <span class="material-symbols-outlined text-xs transition-transform duration-200" id="starterToggleIcon">expand_more</span>
-                  </button>
-
-                  <!-- Collapsible Options Container -->
-                  <div id="starterOptionsList" class="hidden items-center gap-1.5 flex-nowrap whitespace-nowrap flex-shrink-0">
-                    <button type="button" class="starter-chip inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white dark:bg-white/5 hover:bg-primary/10 dark:hover:bg-white/10 text-on-surface-variant hover:text-primary dark:text-[#a0b2c6] dark:hover:text-white border border-outline-variant/15 dark:border-white/10 transition-all cursor-pointer flex-shrink-0 shadow-2xs active:scale-95" data-starter="secret" aria-label="Template: Quick Secret">
-                      <span>🔥</span>
-                      <span>Quick Secret</span>
+                  <!-- Templates (dropdown menu) -->
+                  <div id="editorStarterChips" class="relative z-40 flex-shrink-0">
+                    <button type="button" id="starterToggleBtn" class="compose-chip" aria-expanded="false" aria-controls="starterOptionsList" aria-haspopup="menu" title="Start from a template">
+                      <span class="material-symbols-outlined text-[16px]">bolt</span>
+                      <span>Templates</span>
+                      <span class="material-symbols-outlined text-[16px]" id="starterToggleIcon">expand_more</span>
                     </button>
-                    <button type="button" class="starter-chip inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white dark:bg-white/5 hover:bg-primary/10 dark:hover:bg-white/10 text-on-surface-variant hover:text-primary dark:text-[#a0b2c6] dark:hover:text-white border border-outline-variant/15 dark:border-white/10 transition-all cursor-pointer flex-shrink-0 shadow-2xs active:scale-95" data-starter="code" aria-label="Template: Code Snippet">
-                      <span>💻</span>
-                      <span>Code Snippet</span>
-                    </button>
-                    <button type="button" class="starter-chip inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white dark:bg-white/5 hover:bg-primary/10 dark:hover:bg-white/10 text-on-surface-variant hover:text-primary dark:text-[#a0b2c6] dark:hover:text-white border border-outline-variant/15 dark:border-white/10 transition-all cursor-pointer flex-shrink-0 shadow-2xs active:scale-95" data-starter="meeting" aria-label="Template: Meeting Memo">
-                      <span>📋</span>
-                      <span>Meeting Memo</span>
-                    </button>
-                    <button type="button" class="starter-chip inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white dark:bg-white/5 hover:bg-primary/10 dark:hover:bg-white/10 text-on-surface-variant hover:text-primary dark:text-[#a0b2c6] dark:hover:text-white border border-outline-variant/15 dark:border-white/10 transition-all cursor-pointer flex-shrink-0 shadow-2xs active:scale-95" data-starter="todo" aria-label="Template: Checklist">
-                      <span>✅</span>
-                      <span>Checklist</span>
-                    </button>
+                    <div id="starterOptionsList" class="compose-menu hidden" role="menu">
+                      <button type="button" class="compose-menu-item" data-starter="meeting" role="menuitem"><span class="menu-item-icon">📋</span><span class="menu-item-text">Meeting memo</span></button>
+                      <button type="button" class="compose-menu-item" data-starter="todo" role="menuitem"><span class="menu-item-icon">✅</span><span class="menu-item-text">Checklist</span></button>
+                      <button type="button" class="compose-menu-item" data-starter="journal" role="menuitem"><span class="menu-item-icon">📔</span><span class="menu-item-text">Journal entry</span></button>
+                      <button type="button" class="compose-menu-item" data-starter="brainstorm" role="menuitem"><span class="menu-item-icon">💡</span><span class="menu-item-text">Brainstorm</span></button>
+                      <button type="button" class="compose-menu-item" data-starter="code" role="menuitem"><span class="menu-item-icon">💻</span><span class="menu-item-text">Code snippet</span></button>
+                      <button type="button" class="compose-menu-item" data-starter="secret" role="menuitem"><span class="menu-item-icon">🔥</span><span class="menu-item-text">Quick secret</span></button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -616,6 +562,45 @@
                       <button class="toolbar-btn" data-cmd="bold" title="Bold (Ctrl+B)" aria-label="Bold (Ctrl+B)"><span class="material-symbols-outlined">format_bold</span></button>
                       <button class="toolbar-btn" data-cmd="italic" title="Italic (Ctrl+I)" aria-label="Italic (Ctrl+I)"><span class="material-symbols-outlined">format_italic</span></button>
                       <button class="toolbar-btn" data-cmd="underline" title="Underline (Ctrl+U)" aria-label="Underline (Ctrl+U)"><span class="material-symbols-outlined">format_underlined</span></button>
+                    </div>
+                    <div class="toolbar-divider"></div>
+
+
+                    <!-- Structure -->
+                    <div class="toolbar-group">
+                      <div class="toolbar-dropdown-wrap">
+                        <button class="toolbar-btn has-caret" data-cmd="heading" title="Heading" aria-label="Heading Level"><span class="material-symbols-outlined">title</span></button>
+                        <div class="editor-dropdown" id="headingDropdown">
+                          <button class="dropdown-item heading-h1" data-heading="h1">Heading 1</button>
+                          <button class="dropdown-item heading-h2" data-heading="h2">Heading 2</button>
+                          <button class="dropdown-item heading-h3" data-heading="h3">Heading 3</button>
+                          <button class="dropdown-item" data-heading="p">Normal Text</button>
+                        </div>
+                      </div>
+                      <button class="toolbar-btn" data-cmd="insertUnorderedList" title="Bullet List" aria-label="Bullet List"><span class="material-symbols-outlined">format_list_bulleted</span></button>
+                      <button class="toolbar-btn" data-cmd="insertOrderedList" title="Numbered List" aria-label="Numbered List"><span class="material-symbols-outlined">format_list_numbered</span></button>
+                      <button class="toolbar-btn" data-cmd="checklist" title="Checklist" aria-label="Checklist"><span class="material-symbols-outlined">checklist</span></button>
+                    </div>
+                    <div class="toolbar-divider"></div>
+
+                    <!-- Undo/Redo -->
+                    <div class="toolbar-group">
+                      <button class="toolbar-btn" data-cmd="undo" title="Undo (Ctrl+Z)" aria-label="Undo (Ctrl+Z)"><span class="material-symbols-outlined">undo</span></button>
+                      <button class="toolbar-btn" data-cmd="redo" title="Redo (Ctrl+Y)" aria-label="Redo (Ctrl+Y)"><span class="material-symbols-outlined">redo</span></button>
+                    </div>
+
+                    <!-- Toggle secondary row -->
+                    <div class="toolbar-spacer"></div>
+                    <button class="toolbar-btn toolbar-expand-btn" id="toggleSecondaryToolbar" title="More formatting tools" aria-label="More formatting tools" style="width:auto;padding:0 8px;gap:2px;display:inline-flex;align-items:center;font-size:12px;font-weight:600;">
+                      <span style="font-size:12px">More</span>
+                      <span class="material-symbols-outlined">expand_more</span>
+                    </button>
+                  </div>
+
+                  <!-- Secondary Row: Advanced Tools (collapsible) -->
+                  <div class="editor-toolbar-row toolbar-secondary" id="secondaryToolbar" data-hidden="true">
+                    <!-- Text extras -->
+                    <div class="toolbar-group">
                       <button class="toolbar-btn" data-cmd="strikeThrough" title="Strikethrough" aria-label="Strikethrough"><span class="material-symbols-outlined">strikethrough_s</span></button>
                     </div>
                     <div class="toolbar-divider"></div>
@@ -695,38 +680,6 @@
                     </div>
                     <div class="toolbar-divider"></div>
 
-                    <!-- Structure -->
-                    <div class="toolbar-group">
-                      <div class="toolbar-dropdown-wrap">
-                        <button class="toolbar-btn has-caret" data-cmd="heading" title="Heading" aria-label="Heading Level"><span class="material-symbols-outlined">title</span></button>
-                        <div class="editor-dropdown" id="headingDropdown">
-                          <button class="dropdown-item heading-h1" data-heading="h1">Heading 1</button>
-                          <button class="dropdown-item heading-h2" data-heading="h2">Heading 2</button>
-                          <button class="dropdown-item heading-h3" data-heading="h3">Heading 3</button>
-                          <button class="dropdown-item" data-heading="p">Normal Text</button>
-                        </div>
-                      </div>
-                      <button class="toolbar-btn" data-cmd="insertUnorderedList" title="Bullet List" aria-label="Bullet List"><span class="material-symbols-outlined">format_list_bulleted</span></button>
-                      <button class="toolbar-btn" data-cmd="insertOrderedList" title="Numbered List" aria-label="Numbered List"><span class="material-symbols-outlined">format_list_numbered</span></button>
-                      <button class="toolbar-btn" data-cmd="checklist" title="Checklist" aria-label="Checklist"><span class="material-symbols-outlined">checklist</span></button>
-                    </div>
-                    <div class="toolbar-divider"></div>
-
-                    <!-- Undo/Redo -->
-                    <div class="toolbar-group">
-                      <button class="toolbar-btn" data-cmd="undo" title="Undo (Ctrl+Z)" aria-label="Undo (Ctrl+Z)"><span class="material-symbols-outlined">undo</span></button>
-                      <button class="toolbar-btn" data-cmd="redo" title="Redo (Ctrl+Y)" aria-label="Redo (Ctrl+Y)"><span class="material-symbols-outlined">redo</span></button>
-                    </div>
-
-                    <!-- Toggle secondary row -->
-                    <div class="toolbar-spacer"></div>
-                    <button class="toolbar-btn toolbar-expand-btn" id="toggleSecondaryToolbar" title="More tools" aria-label="More tools">
-                      <span class="material-symbols-outlined">expand_more</span>
-                    </button>
-                  </div>
-
-                  <!-- Secondary Row: Advanced Tools (collapsible) -->
-                  <div class="editor-toolbar-row toolbar-secondary" id="secondaryToolbar" data-hidden="true">
                     <!-- Quote, Code, HR -->
                     <div class="toolbar-group">
                       <button class="toolbar-btn" data-cmd="formatBlock" title="Block Quote" aria-label="Block Quote" onclick="event.preventDefault(); document.getElementById('richEditor').focus(); document.execCommand('formatBlock', false, '<blockquote>')"><span class="material-symbols-outlined">format_quote</span></button>
@@ -949,14 +902,22 @@
                 </div>
 
                 <!-- Editor Surface -->
-                <div class="relative px-5 py-5" id="inputText">
-                  <div contenteditable="true" class="rich-editor" id="richEditor" role="textbox" aria-multiline="true" aria-label="Note content editor" data-placeholder="Start writing your note here…" spellcheck="true"></div>
+                <div class="relative px-5 sm:px-6 pt-4 pb-3" id="inputText">
+                  <div contenteditable="true" class="rich-editor" id="richEditor" role="textbox" aria-multiline="true" aria-label="Note content editor" data-placeholder="Type or paste anything…" spellcheck="true"></div>
                   <textarea class="markdown-textarea" id="markdownArea" aria-label="Markdown note editor" style="display:none" placeholder="Write in Markdown..."></textarea>
                   <!-- Floating AI Assist Button inside textarea -->
                   <button type="button" id="aiFloatingBtn" class="ai-floating-btn" title="AI Writing Assist ✨" aria-label="AI Writing Assist">
                     <span class="material-symbols-outlined ai-floating-icon">auto_awesome</span>
                     <span class="ai-floating-label">AI Assist</span>
                   </button>
+                  <!-- Subtle live stats -->
+                  <div class="editor-stats compose-stats" aria-live="polite">
+                    <span><span id="editorWordCount">0</span> words</span>
+                    <span aria-hidden="true">·</span>
+                    <span><span id="editorCharCount">0</span> chars</span>
+                    <span aria-hidden="true" class="hidden sm:inline">·</span>
+                    <span id="editorReadTime" class="hidden sm:inline">~1 min read</span>
+                  </div>
                 </div>
 
                 <!-- Link Dialog -->
@@ -1001,118 +962,232 @@
               </div>
 
               <!-- Link Input -->
-              <div class="relative px-5 py-5 space-y-3" id="inputLink" data-hidden="true">
-                <div id="linkInputsContainer" class="space-y-2">
-                  <div class="flex items-center gap-3 p-4 bg-[#f6f6f6] dark:bg-surface-container-low rounded-2xl link-input-row border border-outline-variant/15">
-                    <span class="material-symbols-outlined text-primary/40 text-lg">link</span>
-                    <input type="url" class="flex-1 border-none rounded-md focus:ring-0 font-body text-base placeholder:text-outline-variant/40 outline-none shareLinkInput" placeholder="https://example.com" aria-label="Share URL link" />
-                    <button class="remove-link-btn text-error/50 hover:text-error transition-colors hidden" type="button" aria-label="Remove link">
-                      <span class="material-symbols-outlined text-base">close</span>
+              <div class="relative px-5 py-5 space-y-3.5 border-t border-outline-variant/15" id="inputLink" data-hidden="true">
+                <!-- Link Section Header -->
+                <div class="flex items-center justify-between gap-3 pb-0.5 flex-wrap">
+                  <div class="flex items-center gap-2">
+                    <span class="w-6 h-6 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                      <span class="material-symbols-outlined text-[15px]">link</span>
+                    </span>
+                    <span class="text-xs font-bold uppercase tracking-wider text-on-surface">Web Links & URLs</span>
+                    <span id="linkCountBadge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant border border-outline-variant/20">1 link</span>
+                  </div>
+                  <div class="flex items-center gap-1.5">
+                    <button type="button" id="pasteFromClipboardBtn" class="compose-chip compose-chip-sm text-xs font-medium hover:text-primary" title="Paste link from clipboard">
+                      <span class="material-symbols-outlined text-[14px]">content_paste</span>
+                      <span>Paste</span>
+                    </button>
+                    <button type="button" id="clearAllLinksBtn" class="compose-chip compose-chip-sm text-xs font-medium text-on-surface-variant hover:text-error hidden" title="Clear all links">
+                      <span>Clear all</span>
                     </button>
                   </div>
                 </div>
-                <button type="button" class="border-2 border-dashed border-primary-container/40 flex items-center gap-1.5 text-sm text-primary/60 font-semibold hover:text-primary px-3 py-1.5 rounded-xl transition-colors hover:bg-surface-container-low" id="addLinkBtn">
-                  <span class="material-symbols-outlined text-base">add</span> Add another link
-                </button>
+
+                <!-- Link Inputs Container -->
+                <div id="linkInputsContainer" class="space-y-2.5">
+                  <div class="link-input-row group relative flex flex-col gap-2 p-3 sm:p-3.5 bg-surface-container-low/60 dark:bg-white/[0.03] rounded-2xl border border-outline-variant/20 dark:border-white/10 hover:border-primary/40 focus-within:border-primary/70 focus-within:ring-2 focus-within:ring-primary/15 transition-all">
+                    <div class="flex items-center gap-2.5">
+                      <div class="link-row-badge flex-shrink-0 w-7 h-7 rounded-xl bg-surface-container-high/70 dark:bg-white/5 border border-outline-variant/15 text-[11px] font-mono font-bold text-primary flex items-center justify-center select-none">
+                        1
+                      </div>
+                      <div class="flex-1 min-w-0 relative flex items-center">
+                        <input type="url" class="shareLinkInput w-full bg-transparent text-sm sm:text-base font-body text-on-surface placeholder:text-outline-variant/50 outline-none border-none focus:ring-0 p-0" placeholder="Paste or type URL (e.g., https://...)" aria-label="Share URL link" autocomplete="off" />
+                      </div>
+                      <div class="flex items-center gap-1 flex-shrink-0">
+                        <a href="#" target="_blank" rel="noopener noreferrer" class="test-link-btn w-8 h-8 rounded-xl flex items-center justify-center text-on-surface-variant/50 hover:text-primary hover:bg-primary/10 transition-colors hidden" title="Test open link" aria-label="Test open link">
+                          <span class="material-symbols-outlined text-[18px]">open_in_new</span>
+                        </a>
+                        <button type="button" class="clear-link-field-btn w-8 h-8 rounded-xl flex items-center justify-center text-on-surface-variant/40 hover:text-on-surface hover:bg-surface-container-high transition-colors hidden" title="Clear input" aria-label="Clear field">
+                          <span class="material-symbols-outlined text-[17px]">backspace</span>
+                        </button>
+                        <button class="remove-link-btn w-8 h-8 rounded-xl flex items-center justify-center text-error/50 hover:text-error hover:bg-error/10 transition-colors hidden" type="button" title="Remove this link" aria-label="Remove link">
+                          <span class="material-symbols-outlined text-[18px]">delete</span>
+                        </button>
+                      </div>
+                    </div>
+                    <div class="link-meta-pill hidden items-center gap-2 pt-1 border-t border-outline-variant/10 text-[11px] text-on-surface-variant">
+                      <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-primary/10 text-primary font-semibold text-[10px] tracking-wide font-mono link-domain-display"></span>
+                      <span class="text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-0.5 text-[10px]">
+                        <span class="material-symbols-outlined text-[12px]">check_circle</span> Ready
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Footer Controls -->
+                <div class="flex items-center justify-between gap-3 pt-1 flex-wrap">
+                  <button type="button" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-dashed border-primary/30 hover:border-primary/60 bg-primary/5 hover:bg-primary/10 text-primary text-xs sm:text-sm font-bold transition-all active:scale-[0.98]" id="addLinkBtn">
+                    <span class="material-symbols-outlined text-base">add_circle</span>
+                    <span>Add Another Link</span>
+                  </button>
+                  <div class="text-[11px] text-on-surface-variant/60 flex items-center gap-1">
+                    <span class="material-symbols-outlined text-xs">info</span>
+                    <span>Paste multiple URLs to add them at once</span>
+                  </div>
+                </div>
               </div>
 
-              <!-- Image Upload Dropzone -->
-              <div class="px-5 py-5" id="inputImage" data-hidden="true">
-                <div class="group relative w-full h-40 border-2 border-dashed border-outline-variant/30 rounded-2xl flex flex-col items-center justify-center bg-surface-container-low/50 hover:bg-surface-container-low transition-colors cursor-pointer" id="dropzone">
-                  <span class="material-symbols-outlined text-4xl text-primary/30 group-hover:scale-110 group-hover:text-primary/50 transition-all">add_photo_alternate</span>
-                  <p class="mt-2 text-sm text-on-surface-variant font-medium">Click or drag to upload an image</p>
-                  <p class="text-xs text-on-surface-variant/50 mt-1">JPEG, PNG, WebP</p>
-                  <input type="file" accept="image/*" id="imageFileInput" class="absolute inset-0 opacity-0 cursor-pointer" title="Upload image" aria-label="Upload image file" />
+              <!-- Files & Media Upload Section -->
+              <div class="px-5 py-5 border-t border-outline-variant/15 space-y-4" id="inputImage" data-hidden="true">
+                <!-- Header -->
+                <div class="flex items-center justify-between gap-3 pb-0.5 flex-wrap">
+                  <div class="flex items-center gap-2">
+                    <span class="w-6 h-6 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                      <span class="material-symbols-outlined text-[15px]">upload_file</span>
+                    </span>
+                    <span class="text-xs font-bold uppercase tracking-wider text-on-surface">Files & Media Sharing</span>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant border border-outline-variant/20">Images, PDFs, Docs, Audio</span>
+                  </div>
+                  <div class="text-[11px] text-on-surface-variant/60 hidden sm:flex items-center gap-1">
+                    <span class="material-symbols-outlined text-xs">content_paste</span>
+                    <span>Supports Ctrl+V paste</span>
+                  </div>
                 </div>
+
+                <!-- Dropzone Box -->
+                <div class="group relative w-full border-2 border-dashed border-outline-variant/30 hover:border-primary/60 dark:hover:border-primary/50 rounded-2xl flex flex-col items-center justify-center p-6 sm:p-8 bg-surface-container-low/50 hover:bg-surface-container-low dark:bg-white/[0.02] dark:hover:bg-white/[0.04] transition-all cursor-pointer text-center" id="dropzone">
+                  <div class="w-14 h-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                    <span class="material-symbols-outlined text-3xl">cloud_upload</span>
+                  </div>
+                  <h4 class="text-sm sm:text-base font-bold text-on-surface mb-1">Click to browse or drop your file here</h4>
+                  <p class="text-xs text-on-surface-variant max-w-sm mb-3">Images (PNG, JPG, WebP, GIF), Documents (PDF, Word, Text), Audio (MP3), Code & Archives</p>
+                  
+                  <div class="flex flex-wrap items-center justify-center gap-2 text-[11px] text-on-surface-variant/70">
+                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-surface-container-high border border-outline-variant/15 font-medium">
+                      <span class="material-symbols-outlined text-xs text-rose-500">image</span> Images up to 10MB
+                    </span>
+                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-surface-container-high border border-outline-variant/15 font-medium">
+                      <span class="material-symbols-outlined text-xs text-red-500">picture_as_pdf</span> PDFs & Docs
+                    </span>
+                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-surface-container-high border border-outline-variant/15 font-medium">
+                      <span class="material-symbols-outlined text-xs text-amber-500">folder_zip</span> Zip & Audio
+                    </span>
+                  </div>
+                  <input type="file" id="imageFileInput" class="absolute inset-0 opacity-0 cursor-pointer" title="Upload file or image" aria-label="Upload file or image" />
+                </div>
+
+                <!-- Preview Card (shown once file is selected) -->
                 <div class="mt-3 relative" id="imagePreview" data-hidden="true">
-                  <img id="imagePreviewImg" alt="Preview" class="w-full max-h-[200px] object-contain rounded-xl shadow-md" />
-                  <button class="absolute top-2 right-2 w-7 h-7 bg-error text-on-error rounded-full flex items-center justify-center shadow-md hover:scale-110 transition-transform" id="removeImageBtn" aria-label="Remove uploaded image">
-                    <span class="material-symbols-outlined text-base">close</span>
-                  </button>
+                  <div id="filePreviewContainer" class="p-4 bg-surface-container-low/70 dark:bg-white/[0.03] rounded-2xl border border-outline-variant/20 dark:border-white/10 flex flex-col gap-3">
+                    <!-- Image preview element -->
+                    <div id="imagePreviewImgWrap" class="relative w-full flex justify-center bg-black/5 dark:bg-black/20 rounded-xl overflow-hidden p-2">
+                      <img id="imagePreviewImg" alt="Preview" class="max-h-[260px] object-contain rounded-lg shadow-sm" />
+                    </div>
+
+                    <!-- Non-image file preview element (hidden by default) -->
+                    <div id="genericFilePreviewWrap" class="hidden items-center gap-3.5 p-3 bg-surface-container-high/50 rounded-xl border border-outline-variant/15">
+                      <div id="genericFileIconWrap" class="w-12 h-12 rounded-xl flex items-center justify-center border flex-shrink-0">
+                        <span class="material-symbols-outlined text-2xl" id="genericFileIcon">description</span>
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <h4 class="text-sm font-bold text-on-surface truncate" id="genericFileName">file.pdf</h4>
+                        <div class="flex items-center gap-2 mt-0.5 text-xs text-on-surface-variant">
+                          <span id="genericFileSize" class="font-medium font-mono">0 KB</span>
+                          <span>•</span>
+                          <span id="genericFileTypeBadge" class="uppercase font-bold text-[10px] tracking-wider px-1.5 py-0.5 rounded bg-surface-container text-on-surface-variant">PDF</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- File Details & Actions Bar -->
+                    <div class="flex items-center justify-between gap-3 pt-1 border-t border-outline-variant/10 flex-wrap">
+                      <div class="flex items-center gap-2 text-xs text-on-surface-variant min-w-0 truncate">
+                        <span class="material-symbols-outlined text-emerald-500 text-base">check_circle</span>
+                        <span class="truncate font-medium" id="selectedFileName">filename.jpg</span>
+                        <span class="text-outline-variant/40">•</span>
+                        <span class="font-mono text-[11px]" id="selectedFileSize">0 KB</span>
+                      </div>
+                      <div class="flex items-center gap-2">
+                        <button type="button" id="changeFileBtn" class="compose-chip compose-chip-sm text-xs font-semibold hover:text-primary">
+                          <span class="material-symbols-outlined text-sm">swap_horiz</span>
+                          <span>Change</span>
+                        </button>
+                        <button type="button" id="removeImageBtn" class="compose-chip compose-chip-sm text-xs font-semibold text-error/80 hover:text-error hover:bg-error/10">
+                          <span class="material-symbols-outlined text-sm">delete</span>
+                          <span>Remove</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <!-- Expiry & Security Controls Bar -->
-              <div class="px-6 py-3 bg-surface-container-low/60 border-t border-outline-variant/15 flex items-center justify-between gap-3 flex-wrap text-xs">
-                <!-- Expiry Duration Selector -->
+              <!-- Collapsible Password Input (opens above footer) -->
+              <div id="sharePasswordRow" style="display: none;" class="px-5 sm:px-6 py-3 border-t border-outline-variant/15">
                 <div class="flex items-center gap-2">
-                  <span class="material-symbols-outlined text-primary/60 text-base">schedule</span>
-                  <label for="shareExpirySelect" class="font-bold text-[11px] text-on-surface-variant uppercase tracking-wider">Expiry:</label>
-                  <select id="shareExpirySelect" class="bg-surface-container-lowest border border-outline-variant/30 rounded-xl px-2.5 py-1 text-xs font-semibold text-primary focus:ring-2 focus:ring-primary/20 outline-none cursor-pointer">
-                    <option value="5">5 Minutes</option>
-                    <option value="20" selected>20 Minutes (Default)</option>
-                    <option value="60">1 Hour</option>
-                    <option value="1440">24 Hours</option>
-                    <option value="10080">7 Days</option>
-                    <option value="burn">🔥 Burn After Reading (1-Time)</option>
-                  </select>
+                  <span class="material-symbols-outlined text-primary text-[18px]">key</span>
+                  <input type="password" id="sharePasswordInput" placeholder="Password the reader must enter" aria-label="Set access password or PIN" class="compose-input flex-1" autocomplete="new-password" />
+                  <button type="button" id="clearSharePasswordBtn" class="compose-chip compose-chip-ghost" title="Remove password">Remove</button>
+                </div>
+              </div>
+
+              <!-- Footer: options on the left, actions on the right -->
+              <div class="compose-footer px-5 sm:px-6 py-4 border-t border-outline-variant/15">
+                <div class="compose-options">
+                  <!-- Expiry / Timer (custom dropdown menu) -->
+                  <div id="expiryDropdownWrap" class="relative z-40 flex-shrink-0">
+                    <button type="button" id="expiryToggleBtn" class="compose-chip" aria-expanded="false" aria-controls="expiryOptionsList" aria-haspopup="menu" title="How long before this note is deleted">
+                      <span class="material-symbols-outlined text-[16px]" id="expirySelectedIcon">timer</span>
+                      <span id="expirySelectedLabel">20 min</span>
+                      <span class="material-symbols-outlined text-[16px]" id="expiryToggleIcon">expand_less</span>
+                    </button>
+                    <div id="expiryOptionsList" class="compose-menu menu-dropup hidden" style="min-width:185px;" role="menu">
+                      <button type="button" class="compose-menu-item" data-expiry="5" role="menuitem"><span class="menu-item-icon">⏱️</span><span class="menu-item-text">5 minutes</span></button>
+                      <button type="button" class="compose-menu-item" data-expiry="20" role="menuitem"><span class="menu-item-icon">⏱️</span><span class="menu-item-text">20 minutes</span></button>
+                      <button type="button" class="compose-menu-item" data-expiry="60" role="menuitem"><span class="menu-item-icon">⏱️</span><span class="menu-item-text">1 hour</span></button>
+                      <button type="button" class="compose-menu-item" data-expiry="1440" role="menuitem"><span class="menu-item-icon">⏱️</span><span class="menu-item-text">24 hours</span></button>
+                      <button type="button" class="compose-menu-item" data-expiry="10080" role="menuitem"><span class="menu-item-icon">⏱️</span><span class="menu-item-text">7 days</span></button>
+                      <button type="button" class="compose-menu-item" data-expiry="burn" role="menuitem"><span class="menu-item-icon">🔥</span><span class="menu-item-text">After 1 view (Burn)</span></button>
+                    </div>
+                    <!-- Hidden select for full backwards-compatibility with share.js, editor.js, expiry logic -->
+                    <select id="shareExpirySelect" class="sr-only" aria-hidden="true" tabindex="-1">
+                      <option value="5">5 min</option>
+                      <option value="20" selected>20 min</option>
+                      <option value="60">1 hour</option>
+                      <option value="1440">24 hours</option>
+                      <option value="10080">7 days</option>
+                      <option value="burn">After 1 view 🔥</option>
+                    </select>
+                  </div>
+                  <button type="button" id="toggleSharePasswordBtn" class="compose-chip" title="Protect with a password" data-hidden="true">
+                    <span class="material-symbols-outlined text-[16px]">lock</span>
+                    <span id="toggleSharePasswordLabel">Password</span>
+                  </button>
+                  <!-- Kept for JS compatibility; info is already shown by the timer chip -->
+                  <div id="expiryStatusBadge" class="hidden"><span id="expiryBadgeText">Auto-erases in <strong>20 min</strong></span></div>
                 </div>
 
-                <!-- Password Protection Toggle -->
-                <div class="flex items-center gap-2">
-                  <button type="button" id="toggleSharePasswordBtn" class="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-surface-container-lowest border border-outline-variant/30 text-on-surface-variant hover:text-primary transition-all text-xs font-medium">
-                    <span class="material-symbols-outlined text-sm">lock</span>
-                    <span id="toggleSharePasswordLabel">Add Password</span>
+                <div class="compose-actions">
+                  <!-- Send to @user toggle (logged-in only) -->
+                  <div id="sendToUserWrapper" data-hidden="true" class="flex items-center">
+                    <button class="send-to-user-toggle compose-icon-btn" id="sendToUserToggle" title="Send to a user (@username)" aria-label="Send to username">
+                      <span class="material-symbols-outlined text-[18px]">alternate_email</span>
+                    </button>
+                  </div>
+
+                  <!-- Guest: Share button -->
+                  <button class="compose-primary-btn" id="shareBtn" title="Create a short code anyone can use to open this note">
+                    <span class="material-symbols-outlined text-[18px]">send</span>
+                    Share
+                  </button>
+
+                  <!-- Logged-in: Save (secondary) + Share (primary) -->
+                  <button class="compose-chip" id="saveBtn" data-hidden="true" title="Keep this note in your account">
+                    <span class="material-symbols-outlined text-[16px]">bookmark</span>
+                    Save
+                  </button>
+                  <button class="compose-primary-btn" id="shareIconBtn" data-hidden="true" title="Create a short code anyone can use to open this note" aria-label="Share with code">
+                    <span class="material-symbols-outlined text-[18px]">send</span>
+                    Share
                   </button>
                 </div>
               </div>
 
-              <!-- Collapsible Password Input -->
-              <div id="sharePasswordRow" style="display: none;" class="px-6 py-2.5 bg-primary/5 border-t border-primary/10">
-                <div class="flex items-center gap-2 max-w-sm">
-                  <span class="material-symbols-outlined text-primary text-base">key</span>
-                  <input type="password" id="sharePasswordInput" placeholder="Set access password / PIN" aria-label="Set access password or PIN" class="flex-1 px-3 py-1.5 bg-surface-container-lowest border border-primary/30 rounded-xl text-xs text-on-surface placeholder:text-on-surface-variant/40 focus:ring-2 focus:ring-primary/20 outline-none" autocomplete="new-password" />
-                  <button type="button" id="clearSharePasswordBtn" class="text-error text-xs hover:underline">Remove</button>
-                </div>
-              </div>
-
-              <!-- Bottom Bar: Timer + Stats + Actions -->
-              <div class="px-6 py-4 border-t border-outline-variant/15 flex items-center gap-3 flex-wrap">
-                <div id="expiryStatusBadge" class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold uppercase tracking-wider">
-                  <span class="material-symbols-outlined text-xs">timer</span>
-                  <span id="expiryBadgeText">Auto-erases in <strong>20 min</strong></span>
-                </div>
-                <div class="editor-stats flex items-center gap-2.5 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/60">
-                  <span><span id="editorWordCount">0</span> words</span>
-                  <span>·</span>
-                  <span><span id="editorCharCount">0</span> chars</span>
-                  <span>·</span>
-                  <span id="editorReadTime">~1 min read</span>
-                </div>
-                <span class="flex-1"></span>
-
-                <!-- Send to @user toggle (logged-in only) -->
-                <div id="sendToUserWrapper" data-hidden="true" class="flex items-center gap-2">
-                  <button class="send-to-user-toggle w-10 h-10 bg-surface-container-low border border-outline-variant/15 text-on-surface-variant rounded-full hover:bg-surface-container-high hover:text-primary transition-all flex items-center justify-center shadow-sm" id="sendToUserToggle" title="Send to @username" aria-label="Send to username">
-                    <span class="material-symbols-outlined text-base">alternate_email</span>
-                  </button>
-                </div>
-
-                <!-- Guest: Share button -->
-                <button class="px-7 py-3 bg-primary text-on-primary rounded-full font-bold text-xs shadow-md hover:bg-primary-dim transition-all active:scale-[0.98] flex items-center gap-2" id="shareBtn">
-                  <span class="material-symbols-outlined text-sm">send</span>
-                  Share Note
-                </button>
-
-                <!-- Logged-in: Share icon + Save -->
-                <button class="w-10 h-10 bg-surface-container-low border border-outline-variant/15 text-on-surface-variant rounded-full font-semibold hover:bg-surface-container-high hover:text-primary transition-all active:scale-[0.95] flex items-center justify-center shadow-sm" id="shareIconBtn" data-hidden="true" title="Share with code" aria-label="Share with code">
-                  <span class="material-symbols-outlined text-base">ios_share</span>
-                </button>
-                <button class="px-7 py-3 bg-primary text-on-primary rounded-full font-bold text-xs shadow-md hover:bg-primary-dim transition-all active:scale-[0.98] flex items-center gap-2" id="saveBtn" data-hidden="true">
-                  <span class="material-symbols-outlined text-sm">bookmark</span>
-                  Save Note
-                </button>
-              </div>
-
-              <!-- Guest Storage Notice & Sign-In Helper -->
-              <div id="guestShareNotice" class="px-6 py-2.5 bg-surface-container-low/40 dark:bg-white/[0.02] border-t border-outline-variant/10 flex items-center justify-between text-[11px] text-on-surface-variant/70 dark:text-white/50 flex-wrap gap-2">
-                <span class="inline-flex items-center gap-1.5 font-medium">
-                  <span class="material-symbols-outlined text-xs text-primary/70 dark:text-blue-400">lock_reset</span>
-                  <span><strong>Guest Mode:</strong> Generates instant 6-character code. Auto-expires after timer.</span>
-                </span>
-                <a href="#" onclick="if(typeof switchToTab==='function')switchToTab('auth'); return false;" class="text-primary dark:text-[#60a5fa] hover:underline font-semibold inline-flex items-center gap-1 cursor-pointer">
-                  <span>Save permanently to Library? Sign in</span>
-                  <span class="material-symbols-outlined text-xs">arrow_forward</span>
+              <!-- Guest hint (one line) -->
+              <div id="guestShareNotice" class="compose-hint px-5 sm:px-6 py-2.5 border-t border-outline-variant/10">
+                <span>No account needed. You'll get a 6-character code to open this on any device.</span>
+                <a href="#" onclick="if(typeof switchToTab==='function')switchToTab('auth'); return false;" class="compose-hint-link">
+                  Sign in to keep notes<span class="material-symbols-outlined text-[14px]">arrow_forward</span>
                 </a>
               </div>
 
@@ -1140,7 +1215,7 @@
                 <span class="material-symbols-outlined text-2xl text-primary">check_circle</span>
               </div>
               <div>
-                <p class="text-[10px] uppercase tracking-widest text-primary/50 font-bold mb-2">Your Secret Code</p>
+                <p class="text-[10px] uppercase tracking-widest text-primary/50 font-bold mb-2">Your note is ready. Share this code:</p>
                 <p class="font-headline text-5xl font-bold tracking-[0.3em] text-primary code-reveal" id="codeValue"></p>
                 <p class="text-sm text-on-surface-variant mt-2" id="codeExpiry"></p>
                 <!-- Note title & category displayed after sharing -->
@@ -1181,7 +1256,7 @@
 
               <div>
                 <button class="text-sm text-primary/50 hover:text-primary font-medium transition-colors" id="shareAnotherBtn">
-                  ← Share another
+                  ← Write another note
                 </button>
               </div>
             </div>
@@ -1199,11 +1274,11 @@
                 <div class="space-y-3">
                   <div class="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-primary/8 dark:bg-white/[0.06] border border-primary/15 dark:border-white/10 text-primary dark:text-[#c6d6e9] font-bold text-xs uppercase tracking-wider">
                     <span class="material-symbols-outlined text-sm text-primary dark:text-[#60a5fa]">key</span>
-                    <span>Universal Note Retrieval</span>
+                    <span>Open Note</span>
                   </div>
-                  <h2 class="font-headline text-3xl sm:text-4xl italic text-on-surface tracking-tight">Enter Secret Code</h2>
-                  <p class="text-on-surface-variant max-w-sm mx-auto text-xs sm:text-sm leading-relaxed font-body">
-                    Enter the 6-character access key shared with you to decrypt and view the curated content.
+                  <h2 class="text-2xl sm:text-3xl font-bold text-on-surface tracking-tight">Enter 6-Character Code</h2>
+                  <p class="text-on-surface-variant max-w-sm mx-auto text-xs sm:text-sm leading-relaxed">
+                    Enter the code you received to view and read the shared note.
                   </p>
                 </div>
 
@@ -1240,8 +1315,8 @@
                 <!-- Fetch Button & Keyboard Hint -->
                 <div class="pt-2 space-y-2.5">
                   <button class="access-fetch-btn px-10 sm:px-14 py-3.5 sm:py-4 rounded-full font-bold text-base sm:text-lg transition-all active:scale-[0.98] flex items-center justify-center gap-3 mx-auto cursor-pointer shadow-lg" id="fetchBtn">
-                    <span>Fetch Content</span>
-                    <span class="material-symbols-outlined text-xl sm:text-2xl">cloud_download</span>
+                    <span>Open Note</span>
+                    <span class="material-symbols-outlined text-xl sm:text-2xl">arrow_forward</span>
                   </button>
                   <p class="text-[11px] text-on-surface-variant/50 font-medium">Auto-fetches on 6th character or press <kbd class="px-1.5 py-0.5 rounded bg-surface-container-low border border-outline-variant/20 font-mono text-[10px]">Enter ↵</kbd></p>
                 </div>
@@ -1325,15 +1400,18 @@
                           <span class="material-symbols-outlined text-base">file_download</span>
                           <span>Export</span>
                         </button>
-                        <div id="contentExportDropdown" style="display:none" class="absolute right-0 top-full mt-1.5 bg-surface-container-lowest dark:bg-[#181c24] border border-outline-variant/20 dark:border-white/15 rounded-2xl shadow-xl py-1.5 w-40 z-30 animate-scale-in">
-                          <button class="w-full text-left px-3.5 py-2 text-xs font-semibold text-on-surface hover:bg-primary/8 dark:hover:bg-white/8 flex items-center gap-2 export-format-btn" data-format="txt">
-                            <span class="material-symbols-outlined text-sm text-primary dark:text-blue-400">description</span> Plain Text (.txt)
+                        <div id="contentExportDropdown" style="display:none" class="compose-menu export-dropdown">
+                          <button type="button" class="compose-menu-item export-format-btn" data-format="txt">
+                            <span class="menu-item-icon material-symbols-outlined text-[17px] text-primary dark:text-blue-400">description</span>
+                            <span class="menu-item-text">Plain Text (.txt)</span>
                           </button>
-                          <button class="w-full text-left px-3.5 py-2 text-xs font-semibold text-on-surface hover:bg-primary/8 dark:hover:bg-white/8 flex items-center gap-2 export-format-btn" data-format="md">
-                            <span class="material-symbols-outlined text-sm text-primary dark:text-blue-400">markdown</span> Markdown (.md)
+                          <button type="button" class="compose-menu-item export-format-btn" data-format="md">
+                            <span class="menu-item-icon material-symbols-outlined text-[17px] text-primary dark:text-blue-400">markdown</span>
+                            <span class="menu-item-text">Markdown (.md)</span>
                           </button>
-                          <button class="w-full text-left px-3.5 py-2 text-xs font-semibold text-on-surface hover:bg-primary/8 dark:hover:bg-white/8 flex items-center gap-2 export-format-btn" data-format="html">
-                            <span class="material-symbols-outlined text-sm text-primary dark:text-blue-400">html</span> HTML Webpage (.html)
+                          <button type="button" class="compose-menu-item export-format-btn" data-format="html">
+                            <span class="menu-item-icon material-symbols-outlined text-[17px] text-primary dark:text-blue-400">html</span>
+                            <span class="menu-item-text">HTML Webpage (.html)</span>
                           </button>
                         </div>
                       </div>
@@ -1439,6 +1517,10 @@
                         <span class="material-symbols-outlined text-sm" id="togglePasswordIcon">visibility</span>
                       </button>
                     </div>
+                    <div id="passwordErrorMsg" class="hidden text-xs text-error font-semibold mt-1.5 flex items-center gap-1.5" role="alert">
+                      <span class="material-symbols-outlined text-sm">error</span>
+                      <span id="passwordErrorText">Incorrect password. Please try again.</span>
+                    </div>
                   </div>
 
                   <!-- Auth Button -->
@@ -1543,30 +1625,30 @@
                 
                 <!-- Page Header -->
                 <div class="mb-5 sm:mb-6 min-w-0">
-                  <h1 class="font-serif text-2xl sm:text-4xl text-on-surface font-semibold tracking-tight mb-1 truncate">My Archive</h1>
-                  <p class="text-[9px] sm:text-xs font-bold uppercase tracking-[0.2em] text-on-surface-variant/60 truncate">A CURATED HISTORY OF YOUR THOUGHTS</p>
+                  <h2 class="text-xl sm:text-2xl font-bold text-on-surface tracking-tight mb-1 truncate">Recent Activity</h2>
+                  <p class="text-xs text-on-surface-variant/70 truncate">Notes you have created, saved, or viewed</p>
                 </div>
 
                 <!-- Security Access Banner -->
-                <div class="bg-surface-container/60 dark:bg-surface-container-low/60 border border-outline-variant/15 rounded-2xl p-3.5 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-6 sm:mb-8 shadow-sm backdrop-blur-sm min-w-0 w-full overflow-hidden">
-                  <div class="flex items-center gap-3 sm:gap-3.5 min-w-0 flex-1">
-                    <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
-                      <span class="material-symbols-outlined text-lg sm:text-xl">lock</span>
+                <div class="bg-surface-container/60 dark:bg-surface-container-low/60 border border-outline-variant/15 rounded-2xl p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 shadow-sm backdrop-blur-sm min-w-0 w-full overflow-hidden">
+                  <div class="flex items-center gap-3 min-w-0 flex-1">
+                    <div class="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
+                      <span class="material-symbols-outlined text-lg">lock</span>
                     </div>
                     <div class="min-w-0 flex-1">
-                      <h4 class="font-bold text-xs sm:text-base text-on-surface leading-snug truncate">Secure Access Active</h4>
-                      <p class="text-[11px] sm:text-xs text-on-surface-variant/70 italic truncate">4-digit PIN required for editing permanent records.</p>
+                      <h4 class="font-bold text-xs sm:text-sm text-on-surface truncate">Security PIN Protected</h4>
+                      <p class="text-[11px] text-on-surface-variant/70 truncate">A 4-digit PIN secures your saved notes.</p>
                     </div>
                   </div>
-                  <button id="reverifyPinBtn" class="w-full sm:w-auto px-4 py-2 rounded-xl text-xs font-bold bg-surface-container-high hover:bg-surface-container-highest text-on-surface border border-outline-variant/20 transition-all shadow-sm flex-shrink-0 active:scale-[0.98]">
-                    Re-verify
+                  <button id="reverifyPinBtn" class="w-full sm:w-auto px-3.5 py-1.5 rounded-xl text-xs font-bold bg-surface-container-high hover:bg-surface-container-highest text-on-surface border border-outline-variant/20 transition-all shadow-sm flex-shrink-0 active:scale-[0.98]">
+                    Verify PIN
                   </button>
                 </div>
 
                 <!-- Saved Notes Grid Header -->
                 <div class="flex items-center justify-between mb-3.5 sm:mb-4 border-b border-outline-variant/10 pb-2 w-full min-w-0 gap-2">
-                  <h3 class="font-serif text-lg sm:text-2xl italic text-on-surface truncate flex-1 min-w-0">Saved Notes</h3>
-                  <button id="historyViewAllSavedBtn" class="text-xs font-semibold text-on-surface-variant/60 hover:text-primary transition-colors flex-shrink-0 whitespace-nowrap">
+                  <h3 class="text-base sm:text-lg font-bold text-on-surface truncate flex-1 min-w-0">Saved Notes</h3>
+                  <button id="historyViewAllSavedBtn" class="text-xs font-semibold text-primary hover:underline transition-colors flex-shrink-0 whitespace-nowrap">
                     View All
                   </button>
                 </div>
@@ -1580,8 +1662,8 @@
 
                 <!-- Recent History Timeline Header -->
                 <div class="flex items-center justify-between mb-4 sm:mb-5 border-b border-outline-variant/10 pb-2 w-full min-w-0 gap-2">
-                  <h3 class="font-serif text-lg sm:text-2xl italic text-on-surface truncate flex-1 min-w-0">Recent History</h3>
-                  <button class="text-xs text-on-surface-variant/50 hover:text-primary transition-colors font-semibold flex items-center gap-1 flex-shrink-0 whitespace-nowrap" id="clearHistoryBtn">
+                  <h3 class="text-base sm:text-lg font-bold text-on-surface truncate flex-1 min-w-0">Recent History</h3>
+                  <button class="text-xs text-on-surface-variant/60 hover:text-primary transition-colors font-semibold flex items-center gap-1 flex-shrink-0 whitespace-nowrap" id="clearHistoryBtn">
                     <span class="material-symbols-outlined text-sm">delete_sweep</span> Clear
                   </button>
                 </div>
@@ -1589,16 +1671,6 @@
                 <!-- Recent History Timeline Container -->
                 <div class="relative pl-5 sm:pl-6 space-y-4 sm:space-y-5 before:absolute before:left-2 before:sm:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-outline-variant/25 min-w-0 overflow-hidden" id="historyTimelineList">
                   <p class="text-xs text-on-surface-variant/50 italic py-4" id="historyEmpty">No recent activity found.</p>
-                </div>
-
-                <!-- Footer Branding inside page -->
-                <div class="mt-10 sm:mt-12 pt-5 sm:pt-6 border-t border-outline-variant/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-on-surface-variant/50 min-w-0">
-                  <span>© eNotePad - Digital Curator</span>
-                  <div class="flex gap-4">
-                    <a href="privacy.html" class="hover:underline">Privacy</a>
-                    <a href="terms.html" class="hover:underline">Terms</a>
-                    <a href="support.html" class="hover:underline">Support</a>
-                  </div>
                 </div>
 
               </div>
@@ -2010,7 +2082,7 @@
                 <span class="material-symbols-outlined text-sm">chat_bubble</span> Rooms
               </button>
               <button class="admin-tab-btn px-4 py-2.5 rounded-xl text-[11px] font-bold transition-all flex items-center gap-1.5 whitespace-nowrap" data-admin-tab="codeshare">
-                <span class="material-symbols-outlined text-sm">code</span> CodeShare
+                <span class="material-symbols-outlined text-sm">code</span> Coding Room
               </button>
               <button class="admin-tab-btn px-4 py-2.5 rounded-xl text-[11px] font-bold transition-all flex items-center gap-1.5 whitespace-nowrap" data-admin-tab="shares">
                 <span class="material-symbols-outlined text-sm">content_copy</span> Shares
@@ -2064,7 +2136,7 @@
                   </div>
                   <div>
                     <p class="text-2xl md:text-3xl font-headline font-bold text-on-surface" id="adminStatCodeShare">—</p>
-                    <p class="text-[9px] uppercase tracking-[0.2em] text-on-surface-variant font-bold mt-1">CodeShare Rooms</p>
+                    <p class="text-[9px] uppercase tracking-[0.2em] text-on-surface-variant font-bold mt-1">Coding Rooms</p>
                   </div>
                 </div>
                 <div class="bg-surface-container-lowest p-6 rounded-[28px] border border-outline-variant/15 flex flex-col items-center text-center space-y-3 editorial-shadow group hover:border-error/30 transition-all cursor-pointer" onclick="document.querySelector('[data-admin-tab=feedback]').click()">
@@ -2308,7 +2380,7 @@
                     <span class="material-symbols-outlined text-base">code</span>
                   </div>
                   <div>
-                    <h3 class="text-sm font-bold text-on-surface">CodeShare Real-Time Rooms</h3>
+                    <h3 class="text-sm font-bold text-on-surface">Coding Room Real-Time Rooms</h3>
                     <p class="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">Inspect, monitor, and moderate collaborative coding sessions</p>
                   </div>
                 </div>
@@ -2598,7 +2670,7 @@
                 <span class="material-symbols-outlined text-base">code</span>
               </div>
               <div>
-                <h3 class="text-sm font-bold text-on-surface font-mono" id="adminCodeShareViewerTitle">CodeShare Room</h3>
+                <h3 class="text-sm font-bold text-on-surface font-mono" id="adminCodeShareViewerTitle">Coding Room</h3>
                 <p class="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">Live Editor Code Inspection</p>
               </div>
             </div>
@@ -2792,7 +2864,7 @@
                   </tr>
                   <tr class="hover:bg-surface-container-low/30 transition-colors">
                     <td class="p-4 font-semibold text-on-surface">PIN Password Protection</td>
-                    <td class="p-4 text-emerald-600 dark:text-emerald-400 font-bold">Built-In & Free</td>
+                    <td class="p-4 text-emerald-600 dark:text-emerald-400 font-bold">Free with Account</td>
                     <td class="p-4">Often locked behind PRO</td>
                     <td class="p-4">Tied to entire Google account</td>
                     <td class="p-4">None for single email</td>
@@ -2929,7 +3001,7 @@
                 <span class="material-symbols-outlined text-primary group-open:rotate-180 transition-transform text-lg">expand_more</span>
               </summary>
               <div class="mt-3 text-xs text-on-surface-variant leading-relaxed pt-2 border-t border-outline-variant/10">
-                Guest mode gives you immediate, zero-friction ephemeral note sharing. Creating a free account gives you personal folder organization, permanent note archives, saved drafts, custom user handles (@username), and direct user-to-user note dispatch.
+                Guest mode gives you immediate, zero-friction ephemeral note sharing. Creating a free account gives you personal folder organization, permanent note archives, saved drafts, custom user handles (@username), password protection, and direct user-to-user note dispatch.
               </div>
             </details>
 
@@ -2949,7 +3021,7 @@
             </a>
             <span>·</span>
             <a href="codeshare/index.html" class="hover:underline flex items-center gap-1">
-              <span class="material-symbols-outlined text-sm">code</span> CodeShare
+              <span class="material-symbols-outlined text-sm">code</span> Coding Room
             </a>
             <span>·</span>
             <a href="support.html" class="hover:underline flex items-center gap-1">
@@ -2970,7 +3042,7 @@
 
       <!-- Footer -->
       <footer class="flex flex-col sm:flex-row justify-center items-center gap-4 py-8 pb-28 md:pb-8 w-full opacity-70 bg-transparent text-primary font-label text-sm">
-        <span>© eNotePad — Digital Curator</span>
+        <span>© eNotePad — Instant Note Sharing</span>
         <div class="flex gap-4">
           <a class="text-primary/60 hover:text-primary transition-colors underline-offset-4 hover:underline" href="privacy.html">Privacy</a>
           <a class="text-primary/60 hover:text-primary transition-colors underline-offset-4 hover:underline" href="terms.html">Terms</a>
@@ -3708,17 +3780,17 @@
 
   <!-- App Scripts -->
   <script src="js/firebase-config.js?v=13"></script>
-  <script src="js/utils.js?v=12"></script>
+  <script src="js/utils.js?v=14"></script>
   <script src="js/admin.js?v=14"></script>
-  <script src="js/editor.js?v=12"></script>
-  <script src="js/share.js?v=13"></script>
-  <script src="js/access.js?v=12"></script>
-  <script src="js/auth.js?v=13"></script>
+  <script src="js/editor.js?v=15"></script>
+  <script src="js/share.js?v=19"></script>
+  <script src="js/access.js?v=14"></script>
+  <script src="js/auth.js?v=17"></script>
   <script src="js/filemanager.js?v=12"></script>
   <script src="js/users.js?v=3"></script>
   <script src="js/coffee.js?v=1"></script>
   <script src="js/env.js"></script>
   <script src="js/ai-assist.js?v=2"></script>
-  <script src="js/app.js?v=22"></script>
+  <script src="js/app.js?v=24"></script>
 </body>
 </html>
