@@ -84,6 +84,9 @@ function initEditor() {
       case 'emoji':
         toggleDropdown('emojiDropdown');
         return;
+      case 'templates':
+        toggleDropdown('templateDropdown');
+        return;
       case 'findReplace':
         toggleFindReplace();
         return;
@@ -806,20 +809,49 @@ function initEditor() {
     const item = e.target.closest('[data-template]');
     if (!item) return;
     const templateKey = item.dataset.template;
+    const titleInput = document.getElementById('noteTitle');
+    const catSelect = document.getElementById('noteCategory');
     const templates = {
-      meeting: `<h2>📋 Meeting Notes</h2><p><strong>Date:</strong> ${new Date().toLocaleDateString()}</p><p><strong>Attendees:</strong></p><ul><li>Person 1</li><li>Person 2</li></ul><h3>Agenda</h3><ul><li>Topic 1</li><li>Topic 2</li></ul><h3>Action Items</h3><div class="editor-checklist-item"><input type="checkbox" class="editor-checkbox" /><span contenteditable="true">Action item 1</span></div><div class="editor-checklist-item"><input type="checkbox" class="editor-checkbox" /><span contenteditable="true">Action item 2</span></div>`,
-      todo: `<h2>✅ To-Do List</h2><p><em>${new Date().toLocaleDateString()}</em></p><div class="editor-checklist-item"><input type="checkbox" class="editor-checkbox" /><span contenteditable="true">Task 1</span></div><div class="editor-checklist-item"><input type="checkbox" class="editor-checkbox" /><span contenteditable="true">Task 2</span></div><div class="editor-checklist-item"><input type="checkbox" class="editor-checkbox" /><span contenteditable="true">Task 3</span></div><div class="editor-checklist-item"><input type="checkbox" class="editor-checkbox" /><span contenteditable="true">Task 4</span></div><div class="editor-checklist-item"><input type="checkbox" class="editor-checkbox" /><span contenteditable="true">Task 5</span></div>`,
-      journal: `<h2>📔 Journal Entry</h2><p><em>${new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</em></p><h3>How I'm feeling</h3><p>Today I feel...</p><h3>What happened</h3><p>Today's highlights...</p><h3>Grateful for</h3><ul><li>Thing 1</li><li>Thing 2</li><li>Thing 3</li></ul>`,
-      brainstorm: `<h2>💡 Brainstorm</h2><p><strong>Topic:</strong> [Your topic here]</p><hr class="editor-hr"><h3>Ideas</h3><ul><li>Idea 1</li><li>Idea 2</li><li>Idea 3</li></ul><h3>Pros & Cons</h3><table class="editor-table"><tbody><tr><td><strong>Pros</strong></td><td><strong>Cons</strong></td></tr><tr><td>Pro 1</td><td>Con 1</td></tr><tr><td>Pro 2</td><td>Con 2</td></tr></tbody></table><h3>Next Steps</h3><div class="editor-checklist-item"><input type="checkbox" class="editor-checkbox" /><span contenteditable="true">Follow up on...</span></div>`
+      meeting: {
+        title: 'Meeting Notes',
+        category: 'work',
+        html: `<h2>📋 Meeting Notes</h2><p><strong>Date:</strong> ${new Date().toLocaleDateString()}</p><p><strong>Attendees:</strong></p><ul><li>Person 1</li><li>Person 2</li></ul><h3>Agenda</h3><ul><li>Topic 1</li><li>Topic 2</li></ul><h3>Action Items</h3><div class="editor-checklist-item"><input type="checkbox" class="editor-checkbox" /><span contenteditable="true">Action item 1</span></div><div class="editor-checklist-item"><input type="checkbox" class="editor-checkbox" /><span contenteditable="true">Action item 2</span></div><p><br></p>`
+      },
+      todo: {
+        title: 'To-Do Checklist',
+        category: 'personal',
+        html: `<h2>✅ Tasks (${new Date().toLocaleDateString()})</h2><div class="editor-checklist-item"><input type="checkbox" class="editor-checkbox" /><span contenteditable="true">Priority item 1</span></div><div class="editor-checklist-item"><input type="checkbox" class="editor-checkbox" /><span contenteditable="true">Priority item 2</span></div><div class="editor-checklist-item"><input type="checkbox" class="editor-checkbox" /><span contenteditable="true">Follow-up reminder</span></div><p><br></p>`
+      },
+      journal: {
+        title: 'Journal Entry',
+        category: 'personal',
+        html: `<h2>📔 Journal Entry</h2><p><em>${new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</em></p><h3>How I'm feeling</h3><p>Today I feel...</p><h3>What happened</h3><p>Today's highlights...</p><h3>Grateful for</h3><ul><li>Thing 1</li><li>Thing 2</li><li>Thing 3</li></ul><p><br></p>`
+      },
+      brainstorm: {
+        title: 'Brainstorm Session',
+        category: 'ideas',
+        html: `<h2>💡 Brainstorm</h2><p><strong>Topic:</strong> [Your topic here]</p><hr class="editor-hr"><h3>Ideas</h3><ul><li>Idea 1</li><li>Idea 2</li><li>Idea 3</li></ul><h3>Pros &amp; Cons</h3><table class="editor-table"><tbody><tr><td><strong>Pros</strong></td><td><strong>Cons</strong></td></tr><tr><td>Pro 1</td><td>Con 1</td></tr><tr><td>Pro 2</td><td>Con 2</td></tr></tbody></table><h3>Next Steps</h3><div class="editor-checklist-item"><input type="checkbox" class="editor-checkbox" /><span contenteditable="true">Follow up on...</span></div><p><br></p>`
+      }
     };
-    if (templates[templateKey]) {
-      editor.innerHTML = templates[templateKey];
+    const t = templates[templateKey];
+    if (t) {
+      if (titleInput && (!titleInput.value || !titleInput.value.trim() || titleInput.value === 'Untitled note')) {
+        titleInput.value = t.title;
+      }
+      if (catSelect && t.category) {
+        catSelect.value = t.category;
+        catSelect.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+      editor.innerHTML = t.html;
+      editor.dispatchEvent(new Event('input', { bubbles: true }));
       updateStats();
+      scheduleDraftSave();
+      editor.focus();
     }
     closeAllDropdowns();
   });
 
-  // ─── Quick Starter Chips (Blank Canvas Accelerators) ───
+  // ─── Quick Starter Chips / Templates Dropdown Menu ───
   const starterContainer = document.getElementById('editorStarterChips');
   const starterToggleBtn = document.getElementById('starterToggleBtn');
   const starterOptionsList = document.getElementById('starterOptionsList');
@@ -836,6 +868,10 @@ function initEditor() {
 
   const expandStarters = () => {
     if (starterOptionsList) {
+      const tagList = document.getElementById('tagOptionsList');
+      if (tagList) tagList.classList.add('hidden');
+      const expList = document.getElementById('expiryOptionsList');
+      if (expList) expList.classList.add('hidden');
       starterOptionsList.classList.remove('hidden');
       starterOptionsList.classList.add('flex');
       if (starterToggleBtn) starterToggleBtn.setAttribute('aria-expanded', 'true');
@@ -863,36 +899,51 @@ function initEditor() {
 
   if (starterContainer) {
     starterContainer.addEventListener('click', (e) => {
-      const chip = e.target.closest('.starter-chip');
+      const chip = e.target.closest('[data-starter]');
       if (!chip) return;
       const starter = chip.dataset.starter;
       const titleInput = document.getElementById('noteTitle');
       const catSelect = document.getElementById('noteCategory');
       const expirySelect = document.getElementById('shareExpirySelect');
 
-      if (starter === 'secret') {
-        if (titleInput && !titleInput.value) titleInput.value = 'Confidential Message';
+      const shouldSetTitle = !titleInput || !titleInput.value || !titleInput.value.trim() || titleInput.value === 'Untitled note';
+
+      if (starter === 'meeting') {
+        if (shouldSetTitle && titleInput) titleInput.value = 'Meeting Notes';
+        if (catSelect) catSelect.value = 'work';
+        editor.innerHTML = `<h2>📋 Meeting Notes</h2><p><strong>Date:</strong> ${new Date().toLocaleDateString()}</p><p><strong>Attendees:</strong></p><ul><li>Person 1</li><li>Person 2</li></ul><h3>Agenda</h3><ul><li>Topic 1</li><li>Topic 2</li></ul><h3>Action Items</h3><div class="editor-checklist-item"><input type="checkbox" class="editor-checkbox" /><span contenteditable="true">Action item 1</span></div><div class="editor-checklist-item"><input type="checkbox" class="editor-checkbox" /><span contenteditable="true">Action item 2</span></div><p><br></p>`;
+      } else if (starter === 'todo') {
+        if (shouldSetTitle && titleInput) titleInput.value = 'To-Do Checklist';
+        if (catSelect) catSelect.value = 'personal';
+        editor.innerHTML = `<h2>✅ Tasks (${new Date().toLocaleDateString()})</h2><div class="editor-checklist-item"><input type="checkbox" class="editor-checkbox" /><span contenteditable="true">Priority item 1</span></div><div class="editor-checklist-item"><input type="checkbox" class="editor-checkbox" /><span contenteditable="true">Priority item 2</span></div><div class="editor-checklist-item"><input type="checkbox" class="editor-checkbox" /><span contenteditable="true">Follow-up reminder</span></div><p><br></p>`;
+      } else if (starter === 'journal') {
+        if (shouldSetTitle && titleInput) titleInput.value = 'Journal Entry';
+        if (catSelect) catSelect.value = 'personal';
+        editor.innerHTML = `<h2>📔 Journal Entry</h2><p><em>${new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</em></p><h3>How I'm feeling</h3><p>Today I feel...</p><h3>What happened</h3><p>Today's highlights...</p><h3>Grateful for</h3><ul><li>Thing 1</li><li>Thing 2</li><li>Thing 3</li></ul><p><br></p>`;
+      } else if (starter === 'brainstorm') {
+        if (shouldSetTitle && titleInput) titleInput.value = 'Brainstorm Session';
+        if (catSelect) catSelect.value = 'ideas';
+        editor.innerHTML = `<h2>💡 Brainstorm</h2><p><strong>Topic:</strong> [Your topic here]</p><hr class="editor-hr"><h3>Ideas</h3><ul><li>Idea 1</li><li>Idea 2</li><li>Idea 3</li></ul><h3>Pros &amp; Cons</h3><table class="editor-table"><tbody><tr><td><strong>Pros</strong></td><td><strong>Cons</strong></td></tr><tr><td>Pro 1</td><td>Con 1</td></tr><tr><td>Pro 2</td><td>Con 2</td></tr></tbody></table><h3>Next Steps</h3><div class="editor-checklist-item"><input type="checkbox" class="editor-checkbox" /><span contenteditable="true">Follow up on...</span></div><p><br></p>`;
+      } else if (starter === 'code') {
+        if (shouldSetTitle && titleInput) titleInput.value = 'Code Snippet';
+        if (catSelect) catSelect.value = 'code';
+        editor.innerHTML = '<pre class="editor-code-block"><code>// Paste or write code snippet here...\nconsole.log("Hello from eNotePad");\n</code></pre><p><br></p>';
+      } else if (starter === 'secret') {
+        if (shouldSetTitle && titleInput) titleInput.value = 'Confidential Message';
         if (catSelect) catSelect.value = 'important';
         if (expirySelect) {
           expirySelect.value = 'burn';
           expirySelect.dispatchEvent(new Event('change'));
         }
         editor.innerHTML = '<p><em>🔒 This note will automatically self-destruct after being opened once.</em></p><p><br></p>';
-      } else if (starter === 'code') {
-        if (titleInput && !titleInput.value) titleInput.value = 'Code Snippet';
-        if (catSelect) catSelect.value = 'code';
-        editor.innerHTML = '<pre class="editor-code-block"><code>// Paste or write code snippet here...\nconsole.log("Hello from eNotePad");\n</code></pre><p><br></p>';
-      } else if (starter === 'meeting') {
-        if (titleInput && !titleInput.value) titleInput.value = 'Team Sync Memo';
-        if (catSelect) catSelect.value = 'work';
-        editor.innerHTML = `<h2>📋 Meeting Notes</h2><p><strong>Date:</strong> ${new Date().toLocaleDateString()}</p><p><strong>Attendees:</strong> </p><h3>Agenda</h3><ul><li>Discussion topic 1</li><li>Discussion topic 2</li></ul><h3>Action Items</h3><div class="editor-checklist-item"><input type="checkbox" class="editor-checkbox" /><span contenteditable="true">Task 1</span></div><p><br></p>`;
-      } else if (starter === 'todo') {
-        if (titleInput && !titleInput.value) titleInput.value = 'Quick Checklist';
-        if (catSelect) catSelect.value = 'personal';
-        editor.innerHTML = `<h2>✅ Tasks (${new Date().toLocaleDateString()})</h2><div class="editor-checklist-item"><input type="checkbox" class="editor-checkbox" /><span contenteditable="true">Priority item 1</span></div><div class="editor-checklist-item"><input type="checkbox" class="editor-checkbox" /><span contenteditable="true">Priority item 2</span></div><div class="editor-checklist-item"><input type="checkbox" class="editor-checkbox" /><span contenteditable="true">Follow-up reminder</span></div><p><br></p>`;
+      }
+      if (catSelect) {
+        catSelect.dispatchEvent(new Event('change', { bubbles: true }));
       }
 
+      editor.dispatchEvent(new Event('input', { bubbles: true }));
       updateStats();
+      scheduleDraftSave();
       editor.focus();
       try {
         const range = document.createRange();
@@ -907,7 +958,8 @@ function initEditor() {
       collapseStarters();
 
       if (typeof showToast === 'function') {
-        showToast(`Template applied: ${chip.textContent.trim()}`, 'success');
+        const label = chip.querySelector('.menu-item-text')?.textContent.trim() || chip.textContent.trim();
+        showToast(`Template applied: ${label}`, 'success');
       }
     });
   }

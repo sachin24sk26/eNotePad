@@ -1177,7 +1177,7 @@ async function loadAdminCodeShareRooms(reset = true) {
       container.innerHTML = `
         <div class="col-span-full py-16 flex flex-col items-center gap-3 text-center">
           <span class="material-symbols-outlined text-4xl text-on-surface-variant/20">code</span>
-          <p class="text-on-surface-variant/40 italic text-xs">No active CodeShare rooms found.</p>
+          <p class="text-on-surface-variant/40 italic text-xs">No active Coding Rooms found.</p>
         </div>`;
       const countEl = document.getElementById('adminCodeShareCount');
       if (countEl) countEl.textContent = '0 rooms';
@@ -1236,7 +1236,7 @@ async function loadAdminCodeShareRooms(reset = true) {
     if (countEl) countEl.textContent = `${container.children.length} rooms`;
   } catch (e) {
     console.error('CodeShare load failed:', e);
-    container.innerHTML = '<div class="col-span-full py-16 text-center text-error/50 text-xs">Failed to load CodeShare rooms.</div>';
+    container.innerHTML = '<div class="col-span-full py-16 text-center text-error/50 text-xs">Failed to load Coding Rooms.</div>';
   }
 }
 
@@ -1246,7 +1246,7 @@ async function viewCodeShareRoomCode(roomId, lang) {
   const codeEl = document.getElementById('adminCodeShareViewerCode');
   if (!modal || !codeEl) return;
 
-  if (title) title.textContent = `CodeShare Room: ${roomId} (${lang.toUpperCase()})`;
+  if (title) title.textContent = `Coding Room: ${roomId} (${lang.toUpperCase()})`;
   codeEl.textContent = 'Loading code snippet...';
   modal.style.display = 'flex';
 
@@ -1269,7 +1269,7 @@ function closeAdminCodeShareViewer() {
 }
 
 async function deleteCodeShareRoom(roomId) {
-  const confirmed = await showAdminConfirm('Delete CodeShare Room?', `Room ${roomId} and its collaborative chat will be permanently deleted.`);
+  const confirmed = await showAdminConfirm('Delete Coding Room?', `Room ${roomId} and its collaborative chat will be permanently deleted.`);
   if (!confirmed) return;
 
   try {
@@ -1281,14 +1281,14 @@ async function deleteCodeShareRoom(roomId) {
     }
 
     await db.collection('codeshare_rooms').doc(roomId).delete();
-    showToast(`CodeShare room ${roomId} deleted`, 'warning');
-    logAdminAction('codeshare_deleted', `Deleted CodeShare room ${roomId}`);
+    showToast(`Coding Room ${roomId} deleted`, 'warning');
+    logAdminAction('codeshare_deleted', `Deleted Coding Room ${roomId}`);
     adminState.statsCache.timestamp = 0;
     loadAdminCodeShareRooms();
     loadAdminStats();
   } catch (e) {
-    console.error('CodeShare deletion failed:', e);
-    showToast('Failed to delete CodeShare room', 'error');
+    console.error('Coding Room deletion failed:', e);
+    showToast('Failed to delete Coding Room', 'error');
   }
 }
 

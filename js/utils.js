@@ -179,45 +179,139 @@ function isExpired(expiresAt) {
 }
 
 /**
- * Compress/resize an image before upload to save bandwidth.
- * @param {File} file - Image file
- * @param {number} maxWidth - Maximum width in pixels
- * @param {number} quality - JPEG quality (0-1)
- * @returns {Promise<string>} Compressed image Data URL (base64)
+ * Smart Compress / Optimize an image before upload to Firestore.
+ * Preserves high resolution (up to 2048px) and high visual fidelity (0.90 quality),
+ * while guaranteeing the base64 payload safely fits within Firestore's 1MB document limit.
+ * If the image is already small (<= 650KB) and within normal dimensions, it preserves 100% original quality.
+ *
+ * @param {File|Blob} file - Image file
+ * @param {number} maxDimension - Maximum width or height in pixels (default: 2048)
+ * @param {number} quality - Target image quality (default: 0.90)
+ * @returns {Promise<string>} Base64 image Data URL
  */
-function compressImage(file, maxWidth = 800, quality = 0.7) {
+function compressImage(file, maxDimension = 2048, quality = 0.90) {
   return new Promise((resolve, reject) => {
+    if (!file || !file.type || !file.type.startsWith('image/')) {
+      return reject(new Error('Invalid image file.'));
+    }
+
     const reader = new FileReader();
+    reader.onerror = () => reject(new Error('File reading failed.'));
     reader.onload = (e) => {
+      const originalDataUrl = e.target.result;
+
+      // Firestore document hard limit is 1,048,576 bytes (~1MB).
+      // A base64 string length <= 880KB leaves plenty of room for Firestore metadata.
+      const MAX_DATA_URL_LENGTH = 880 * 1024; // ~901,120 chars
+
       const img = new Image();
+      img.onerror = () => reject(new Error('Failed to load image format. Is it supported?'));
       img.onload = () => {
         try {
-          const canvas = document.createElement('canvas');
           let { width, height } = img;
 
-          // Process reasonable images normally
-          if (width > maxWidth) {
-            height = (height * maxWidth) / width;
-            width = maxWidth;
+          // If the file is already under 650KB and dimensions are within reasonable bounds,
+          // keep original dataUrl directly for 100% lossless, zero-compression quality!
+          if (file.size <= 650 * 1024 && width <= 2560 && height <= 2560 && originalDataUrl.length <= MAX_DATA_URL_LENGTH) {
+            return resolve(originalDataUrl);
           }
 
+          // Calculate aspect-ratio preserving dimensions capped at maxDimension (default 2048px)
+          if (width > maxDimension || height > maxDimension) {
+            if (width >= height) {
+              height = Math.round((height * maxDimension) / width);
+              width = maxDimension;
+            } else {
+              width = Math.round((width * maxDimension) / height);
+              height = maxDimension;
+            }
+          }
+
+          const canvas = document.createElement('canvas');
           canvas.width = width;
           canvas.height = height;
           const ctx = canvas.getContext('2d');
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
+
+          // Detect WebP support for maximum visual quality at lower size and transparency support
+          const supportsWebP = (() => {
+            try {
+              const testCanvas = document.createElement('canvas');
+              testCanvas.width = 1;
+              testCanvas.height = 1;
+              return testCanvas.toDataURL('image/webp').startsWith('data:image/webp');
+            } catch (e) {
+              return false;
+            }
+          })();
+
+          // Use WebP if supported; fallback to JPEG
+          const mimeType = supportsWebP ? 'image/webp' : 'image/jpeg';
+          if (!supportsWebP && (file.type === 'image/png' || file.type === 'image/webp')) {
+            // Fill background with white to avoid black backgrounds on transparent PNGs when falling back to JPEG
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, width, height);
+          }
+
           ctx.drawImage(img, 0, 0, width, height);
 
-          const dataUrl = canvas.toDataURL('image/jpeg', quality);
-          resolve(dataUrl);
+          // Progressive optimization: attempt high quality (0.90), stepping down only if exceeding Firestore safe limit
+          let resultDataUrl = canvas.toDataURL(mimeType, quality);
+
+          if (resultDataUrl.length > MAX_DATA_URL_LENGTH) {
+            const qualitySteps = [0.85, 0.80, 0.75];
+            for (const q of qualitySteps) {
+              resultDataUrl = canvas.toDataURL(mimeType, q);
+              if (resultDataUrl.length <= MAX_DATA_URL_LENGTH) break;
+            }
+          }
+
+          // If still over budget, downscale dimensions slightly while keeping clean quality
+          if (resultDataUrl.length > MAX_DATA_URL_LENGTH) {
+            const scales = [0.8, 0.65, 0.5];
+            for (const s of scales) {
+              const sw = Math.round(width * s);
+              const sh = Math.round(height * s);
+              const tempCanvas = document.createElement('canvas');
+              tempCanvas.width = sw;
+              tempCanvas.height = sh;
+              const tctx = tempCanvas.getContext('2d');
+              tctx.imageSmoothingEnabled = true;
+              tctx.imageSmoothingQuality = 'high';
+              if (!supportsWebP) {
+                tctx.fillStyle = '#FFFFFF';
+                tctx.fillRect(0, 0, sw, sh);
+              }
+              tctx.drawImage(canvas, 0, 0, sw, sh);
+              resultDataUrl = tempCanvas.toDataURL(mimeType, 0.82);
+              if (resultDataUrl.length <= MAX_DATA_URL_LENGTH) break;
+            }
+          }
+
+          resolve(resultDataUrl);
         } catch (err) {
           reject(new Error('Image processing failed: ' + err.message));
         }
       };
-      img.onerror = () => reject(new Error('Failed to load image format. Is it supported?'));
-      img.src = e.target.result;
+
+      img.src = originalDataUrl;
     };
-    reader.onerror = () => reject(new Error('File reading failed.'));
+
     reader.readAsDataURL(file);
   });
+}
+
+/**
+ * Format bytes into human-readable file size string.
+ * @param {number} bytes
+ * @returns {string} e.g. "450 KB", "1.2 MB"
+ */
+function formatFileSize(bytes) {
+  if (!bytes || bytes <= 0) return '0 B';
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
 }
 
 /**

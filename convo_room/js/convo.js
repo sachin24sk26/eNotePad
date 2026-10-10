@@ -355,7 +355,7 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 let dataUrl;
                 if (file.type.startsWith('image/') && typeof compressImage === 'function') {
-                   dataUrl = await compressImage(file, 800, 0.7);
+                   dataUrl = await compressImage(file);
                 } else {
                    dataUrl = await new Promise((resolve, reject) => {
                        const reader = new FileReader();

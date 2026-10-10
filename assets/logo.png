@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none" class="enotepad-logo-svg">
+  <defs>
+    <!-- Light Mode Gradient -->
+    <linearGradient id="enpLightGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#1e293b" />
+    </linearGradient>
+    <!-- Dark Mode Gradient -->
+    <linearGradient id="enpDarkGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#60a5fa" />
+      <stop offset="50%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#93c5fd" />
+    </linearGradient>
+  </defs>
+
+  <style>
+    .enp-stroke {
+      stroke: #182433;
+      stroke-width: 6.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .enp-fold-fill {
+      fill: none;
+      stroke: #182433;
+      stroke-width: 6.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .enp-arrow {
+      fill: #182433;
+    }
+
+    /* Dark Mode Auto-Detection & Selector Support */
+    @media (prefers-color-scheme: dark) {
+      .enp-stroke {
+        stroke: url(#enpDarkGrad);
+      }
+      .enp-fold-fill {
+        stroke: url(#enpDarkGrad);
+      }
+      .enp-arrow {
+        fill: #38bdf8;
+      }
+    }
+    :root.dark .enp-stroke,
+    .dark .enp-stroke {
+      stroke: url(#enpDarkGrad) !important;
+    }
+    :root.dark .enp-fold-fill,
+    .dark .enp-fold-fill {
+      stroke: url(#enpDarkGrad) !important;
+    }
+    :root.dark .enp-arrow,
+    .dark .enp-arrow {
+      fill: #38bdf8 !important;
+    }
+  </style>
+
+  <!-- Document Outline -->
+  <path class="enp-stroke" d="M 26 12 H 60 L 82 34 V 80 C 82 85.5 77.5 90 72 90 H 26 C 20.5 90 16 85.5 16 80 V 22 C 16 16.5 20.5 12 26 12 Z" />
+
+  <!-- Document Top-Right Fold Flap -->
+  <path class="enp-fold-fill" d="M 60 12 V 26 C 60 30.5 63.5 34 68 34 H 82" />
+
+  <!-- Stylized 'e' Center Crossbar & Upper Bowl Loop -->
+  <path class="enp-stroke" d="M 28 55 H 66 C 66 43 57 35.5 45 35.5 C 32 35.5 22.5 46 22.5 59 C 22.5 73.5 34.5 83 48.5 83 C 58.5 83 66 77 68.5 69" />
+
+  <!-- Stylized 'e' Arrowhead -->
+  <path class="enp-arrow" d="M 70.5 58 L 74.5 72 L 62.5 69.5 Z" />
+</svg>

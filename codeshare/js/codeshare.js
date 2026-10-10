@@ -1,5 +1,5 @@
 /**
- * eNotePad — CodeShare Real-Time Engine (v2.1)
+ * eNotePad — Coding Room Real-Time Engine (v2.1)
  * Seamless multi-peer collaborative code editor with live syntax highlighting,
  * robust Firestore & BroadcastChannel synchronization without keystroke erasure,
  * in-browser Python (Skulpt) + JavaScript runtime, collaborative chat, and
@@ -31,7 +31,7 @@ const LANGUAGES = {
     name: 'JavaScript', 
     mode: 'javascript', 
     ext: 'js', 
-    defaultCode: `// Welcome to eNotePad CodeShare
+    defaultCode: `// Welcome to eNotePad Coding Room
 // Share this link with teammates to code in real-time!
 
 function calculateFactorial(n) {
@@ -65,7 +65,7 @@ console.log(\`Active session for \${currentUser.name}\`);
     name: 'Python', 
     mode: 'python', 
     ext: 'py', 
-    defaultCode: `# eNotePad CodeShare — Python Session
+    defaultCode: `# eNotePad Coding Room — Python Session
 import math
 
 def fibonacci(n):
@@ -127,7 +127,7 @@ print("Square root of 144 is:", math.sqrt(144))
   <div class="card">
     <h2>✨ Collaborative Live Preview</h2>
     <p>Edit this code in the editor to see instant updates!</p>
-    <button onclick="alert('Hello from eNotePad CodeShare!')">Click Me</button>
+    <button onclick="alert('Hello from eNotePad Coding Room!')">Click Me</button>
   </div>
 </body>
 </html>
@@ -137,7 +137,7 @@ print("Square root of 144 is:", math.sqrt(144))
     name: 'CSS', 
     mode: 'css', 
     ext: 'css', 
-    defaultCode: `/* eNotePad CodeShare — Stylesheet */
+    defaultCode: `/* eNotePad Coding Room — Stylesheet */
 :root {
   --primary: #516070;
   --accent: #70b4f8;
@@ -161,7 +161,7 @@ print("Square root of 144 is:", math.sqrt(144))
 int main() {
     std::vector<std::string> features = {"Real-time sync", "Multi-language", "Zero latency"};
     
-    std::cout << "eNotePad CodeShare Features:" << std::endl;
+    std::cout << "eNotePad Coding Room Features:" << std::endl;
     for(const auto& f : features) {
         std::cout << " • " << f << std::endl;
     }
@@ -193,7 +193,7 @@ public class Main {
 namespace ENotePad {
     class Program {
         static void Main(string[] args) {
-            Console.WriteLine("Hello from eNotePad CodeShare!");
+            Console.WriteLine("Hello from eNotePad Coding Room!");
         }
     }
 }
@@ -203,7 +203,7 @@ namespace ENotePad {
     name: 'SQL', 
     mode: 'text/x-sql', 
     ext: 'sql', 
-    defaultCode: `-- eNotePad CodeShare — SQL Query
+    defaultCode: `-- eNotePad Coding Room — SQL Query
 SELECT 
     u.id,
     u.username,
@@ -220,9 +220,9 @@ ORDER BY total_notes DESC;
     name: 'Rust', 
     mode: 'rust', 
     ext: 'rs', 
-    defaultCode: `// eNotePad CodeShare — Rust
+    defaultCode: `// eNotePad Coding Room — Rust
 fn main() {
-    let room = "CodeShare-Live";
+    let room = "Coding-Room-Live";
     println!("Connected to real-time session: {}", room);
     
     let sum: u32 = (1..=100).sum();
@@ -242,7 +242,7 @@ import (
 )
 
 func main() {
-\tfmt.Println("eNotePad CodeShare initialized at", time.Now().Format(time.RFC822))
+\tfmt.Println("eNotePad Coding Room initialized at", time.Now().Format(time.RFC822))
 }
 ` 
   },
@@ -251,7 +251,7 @@ func main() {
     mode: 'application/json', 
     ext: 'json', 
     defaultCode: `{
-  "service": "eNotePad CodeShare",
+  "service": "eNotePad Coding Room",
   "version": "2.0.0",
   "realtime": true,
   "supportedLanguages": [
@@ -288,7 +288,7 @@ Collaborative code workspace built on **eNotePad Tactile Editorial Design System
     mode: 'application/x-httpd-php', 
     ext: 'php', 
     defaultCode: `<?php
-// eNotePad CodeShare — PHP Script
+// eNotePad Coding Room — PHP Script
 $users = ["Alice", "Bob", "Charlie"];
 echo "Active collaborators in room:\n";
 foreach ($users as $user) {
@@ -603,7 +603,7 @@ async function subscribeToCloudRoom(roomCode, isNew) {
       setEditorLanguage(data.language, false);
     }
   }, (error) => {
-    console.warn('CodeShare sync listener warning:', error);
+    console.warn('Coding Room sync listener warning:', error);
   });
 }
 
@@ -1236,7 +1236,7 @@ function generateQrCode() {
   const roomUrl = window.location.href;
   const qrImg = document.createElement('img');
   qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(roomUrl)}`;
-  qrImg.alt = 'CodeShare Room QR Code';
+  qrImg.alt = 'Coding Room QR Code';
   qrImg.className = 'w-36 h-36 mx-auto rounded-xl shadow-md';
   qrContainer.appendChild(qrImg);
 }

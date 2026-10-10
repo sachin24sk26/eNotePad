@@ -601,6 +601,29 @@ function initNavigation() {
       if (icon) icon.style.fontVariationSettings = isActive ? "'FILL' 1" : "'FILL' 0";
     });
 
+    // Update top bar page title
+    const PAGE_TITLES = {
+      share: ['Write & Share', 'Type a note, get a short code, open it anywhere.'],
+      access: ['Open with Code', 'Enter the code you received to view a note.'],
+      search: ['Find People', 'Search users and send them notes directly.'],
+      account: ['My Account', 'Your notes, files, inbox and settings.'],
+      admin: ['Admin', 'Manage users, rooms and content.']
+    };
+    const pt = PAGE_TITLES[tabName];
+    if (pt) {
+      const t = document.getElementById('topBarTitle');
+      const st = document.getElementById('topBarSubtitle');
+      if (t) t.textContent = pt[0];
+      if (st) st.textContent = pt[1];
+    }
+
+    // Hide editorial guide when not on the write tab or when signed in
+    const guideSection = document.getElementById('editorialGuideSection');
+    if (guideSection) {
+      const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+      guideSection.style.display = (tabName === 'share' && !user) ? '' : 'none';
+    }
+
     // If opening admin tab, initialize admin functions
     if (tabName === 'admin' && typeof initAdmin === 'function') {
       initAdmin();

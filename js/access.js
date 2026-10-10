@@ -172,17 +172,19 @@ function initAccess() {
     return null;
   }
 
-  function isSafeImageSource(url) {
+  function isSafeFileSource(url) {
     if (!url || typeof url !== 'string') return false;
     const trimmed = url.trim();
     if (trimmed.startsWith('https://') || trimmed.startsWith('http://')) {
       return true;
     }
-    if (/^data:image\/(png|jpeg|jpg|webp|gif);base64,[A-Za-z0-9+/=]+$/i.test(trimmed)) {
+    // Safe Data URLs for images, documents, audio, video, archives, text, and code
+    if (/^data:(image\/[a-z0-9.+_-]+|application\/(pdf|zip|x-zip-compressed|x-rar|octet-stream|json|msword|vnd\.[a-z0-9._-]+)|audio\/[a-z0-9.+_-]+|video\/[a-z0-9.+_-]+|text\/[a-z0-9.+_-]+);base64,[A-Za-z0-9+/=]+$/i.test(trimmed)) {
       return true;
     }
     return false;
   }
+  const isSafeImageSource = isSafeFileSource;
 
   // ─── Universal Access Code String Extractor ───────────────
   // Intelligently parses raw pastes, full URLs, formatted keys (e.g. ABC-123), and standalone tokens.
@@ -733,8 +735,32 @@ function initAccess() {
     const contentBody = document.getElementById('contentBody');
     const copyBtn = document.getElementById('contentCopyBtn');
 
-    const typeLabels = { text: '📝 TEXT', link: '🔗 LINK', image: '🖼️ IMAGE' };
-    typeBadge.textContent = typeLabels[data.type] || data.type;
+    let typeBadgeLabel = '📝 TEXT';
+    if (data.type === 'link') typeBadgeLabel = '🔗 LINK';
+    else if (data.type === 'image') {
+      if (data.isImage === false) {
+        const mime = (data.fileType || '').toLowerCase();
+        if (mime.startsWith('audio/')) typeBadgeLabel = '🎵 AUDIO';
+        else if (mime === 'application/pdf') typeBadgeLabel = '📄 PDF';
+        else typeBadgeLabel = '📎 FILE';
+      } else {
+        typeBadgeLabel = '🖼️ IMAGE';
+      }
+    }
+    typeBadge.textContent = typeBadgeLabel;
+
+    resultContainer.dataset.type = data.type || 'text';
+    resultContainer.dataset.content = data.content || '';
+    resultContainer.dataset.title = data.title || '';
+    resultContainer.dataset.category = data.category || '';
+    if (data.fileName) resultContainer.dataset.fileName = data.fileName;
+    else delete resultContainer.dataset.fileName;
+    if (data.fileSize) resultContainer.dataset.fileSize = data.fileSize;
+    else delete resultContainer.dataset.fileSize;
+    if (data.fileType) resultContainer.dataset.fileType = data.fileType;
+    else delete resultContainer.dataset.fileType;
+    if (typeof data.isImage !== 'undefined') resultContainer.dataset.isImage = data.isImage ? 'true' : 'false';
+    else delete resultContainer.dataset.isImage;
 
     contentBody.innerHTML = '';
 
@@ -811,40 +837,196 @@ function initAccess() {
       data.content = links.join('\n');
 
     } else if (data.type === 'image') {
-      const imageDiv = document.createElement('div');
-      imageDiv.className = 'content-image-display flex flex-col items-center';
+      const fileSrc = String(data.content || '').trim();
+      const isImage = (data.isImage !== false) && (
+        (data.fileType && data.fileType.startsWith('image/')) ||
+        fileSrc.startsWith('data:image/') ||
+        /\.(png|jpe?g|webp|gif|svg)(\?.*)?$/i.test(fileSrc)
+      );
 
-      const imgSrc = String(data.content || '').trim();
-      if (isSafeImageSource(imgSrc)) {
-        const img = document.createElement('img');
-        img.src = imgSrc;
-        img.alt = data.title ? `Shared image: ${data.title}` : 'Shared image';
-        img.className = 'w-full max-h-[400px] object-contain rounded-xl shadow-sm';
-        img.loading = 'lazy';
-        imageDiv.appendChild(img);
+      if (isImage) {
+        const imageDiv = document.createElement('div');
+        imageDiv.className = 'content-image-display flex flex-col items-center w-full';
 
-        const downloadLink = document.createElement('a');
-        downloadLink.className = 'inline-flex items-center gap-2 mt-4 px-6 py-2.5 rounded-full text-xs font-bold text-primary bg-surface-container-low hover:bg-surface-container transition-all';
-        downloadLink.href = imgSrc;
-        downloadLink.target = '_blank';
-        downloadLink.download = 'enotepad-image.png';
-        downloadLink.rel = 'noopener noreferrer';
+        if (isSafeImageSource(fileSrc)) {
+          const img = document.createElement('img');
+          img.src = fileSrc;
+          img.alt = data.title ? `Shared image: ${data.title}` : 'Shared image';
+          img.className = 'w-full max-h-[520px] object-contain rounded-xl shadow-sm cursor-zoom-in hover:opacity-95 transition-opacity';
+          img.loading = 'lazy';
+          img.title = 'Click to view full resolution';
+          
+          const openFullImage = () => {
+            const w = window.open('');
+            if (w) {
+              w.document.write(`<!DOCTYPE html><html><head><title>${escText(data.title || 'Shared Image')}</title><style>body{margin:0;background:#0b0f19;display:flex;align-items:center;justify-content:center;min-height:100vh;}img{max-width:100%;max-height:100vh;object-fit:contain;box-shadow:0 10px 40px rgba(0,0,0,0.5);}</style></head><body><img src="${fileSrc}" alt="Full size image"></body></html>`);
+            }
+          };
+          img.addEventListener('click', openFullImage);
+          imageDiv.appendChild(img);
 
-        const dlIcon = document.createElement('span');
-        dlIcon.className = 'material-symbols-outlined text-base';
-        dlIcon.textContent = 'download';
+          // Resolution badge
+          const badge = document.createElement('div');
+          badge.className = 'text-[11px] font-medium text-on-surface-variant/70 mt-2 flex items-center gap-1.5';
+          img.addEventListener('load', () => {
+            if (img.naturalWidth && img.naturalHeight) {
+              badge.innerHTML = `<span class="material-symbols-outlined text-[14px]">photo_size_select_actual</span> <span>${img.naturalWidth} × ${img.naturalHeight} px</span>`;
+            }
+          });
+          imageDiv.appendChild(badge);
 
-        downloadLink.appendChild(dlIcon);
-        downloadLink.appendChild(document.createTextNode(' Download Image'));
-        imageDiv.appendChild(downloadLink);
+          let ext = 'jpg';
+          if (fileSrc.startsWith('data:image/webp')) ext = 'webp';
+          else if (fileSrc.startsWith('data:image/png')) ext = 'png';
+          else if (fileSrc.startsWith('data:image/gif')) ext = 'gif';
+
+          const btnRow = document.createElement('div');
+          btnRow.className = 'flex items-center gap-2 mt-3 flex-wrap justify-center';
+
+          const viewBtn = document.createElement('button');
+          viewBtn.type = 'button';
+          viewBtn.className = 'inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold text-on-surface bg-surface-container-low hover:bg-surface-container transition-all cursor-pointer';
+          viewBtn.innerHTML = '<span class="material-symbols-outlined text-base">fullscreen</span> <span>View Full Size</span>';
+          viewBtn.addEventListener('click', openFullImage);
+          btnRow.appendChild(viewBtn);
+
+          const downloadLink = document.createElement('a');
+          downloadLink.className = 'inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold text-primary bg-primary/10 hover:bg-primary/20 transition-all';
+          downloadLink.href = fileSrc;
+          downloadLink.target = '_blank';
+          downloadLink.download = data.fileName || `enotepad-image.${ext}`;
+          downloadLink.rel = 'noopener noreferrer';
+          downloadLink.innerHTML = '<span class="material-symbols-outlined text-base">download</span> <span>Download Image</span>';
+          btnRow.appendChild(downloadLink);
+
+          imageDiv.appendChild(btnRow);
+        } else {
+          const warningDiv = document.createElement('div');
+          warningDiv.className = 'p-6 text-center text-error bg-error/10 rounded-xl text-sm font-semibold';
+          warningDiv.textContent = '⚠️ Blocked untrusted or invalid image data for your security.';
+          imageDiv.appendChild(warningDiv);
+        }
+        contentBody.appendChild(imageDiv);
+        copyBtn.style.display = 'none';
+
       } else {
-        const warningDiv = document.createElement('div');
-        warningDiv.className = 'p-6 text-center text-error bg-error/10 rounded-xl text-sm font-semibold';
-        warningDiv.textContent = '⚠️ Blocked untrusted or invalid image data for your security.';
-        imageDiv.appendChild(warningDiv);
+        // Non-image file card
+        const fileCardDiv = document.createElement('div');
+        fileCardDiv.className = 'content-file-display w-full flex flex-col gap-3 py-1';
+
+        if (isSafeFileSource(fileSrc)) {
+          const fileName = data.fileName || data.title || 'shared-file';
+          const fileExt = fileName.includes('.') ? fileName.split('.').pop().toLowerCase() : (data.fileType ? data.fileType.split('/')[1] : 'file');
+          const mime = (data.fileType || '').toLowerCase();
+          const fileSizeStr = data.fileSize ? (typeof formatFileSize === 'function' ? formatFileSize(data.fileSize) : '') : '';
+
+          let iconName = 'description';
+          let themeColor = 'bg-blue-500/10 text-blue-500 border-blue-500/20';
+
+          if (fileExt === 'pdf' || mime === 'application/pdf') {
+            iconName = 'picture_as_pdf';
+            themeColor = 'bg-red-500/10 text-red-500 border-red-500/20';
+          } else if (['mp3', 'wav', 'ogg', 'm4a', 'aac', 'flac'].includes(fileExt) || mime.startsWith('audio/')) {
+            iconName = 'audio_file';
+            themeColor = 'bg-purple-500/10 text-purple-500 border-purple-500/20';
+          } else if (['zip', 'rar', '7z', 'tar', 'gz'].includes(fileExt) || mime.includes('zip') || mime.includes('compressed')) {
+            iconName = 'folder_zip';
+            themeColor = 'bg-amber-500/10 text-amber-500 border-amber-500/20';
+          } else if (['xls', 'xlsx', 'ods', 'csv'].includes(fileExt) || mime.includes('spreadsheet') || mime.includes('csv')) {
+            iconName = 'table_chart';
+            themeColor = 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20';
+          } else if (['ppt', 'pptx', 'odp'].includes(fileExt) || mime.includes('presentation')) {
+            iconName = 'slideshow';
+            themeColor = 'bg-orange-500/10 text-orange-500 border-orange-500/20';
+          } else if (['js', 'ts', 'jsx', 'tsx', 'py', 'json', 'html', 'css', 'cpp', 'java', 'sql', 'sh', 'md'].includes(fileExt)) {
+            iconName = 'code';
+            themeColor = 'bg-cyan-500/10 text-cyan-500 border-cyan-500/20';
+          }
+
+          const card = document.createElement('div');
+          card.className = 'p-5 sm:p-6 bg-surface-container-low/70 dark:bg-white/[0.03] rounded-2xl border border-outline-variant/20 flex flex-col gap-4';
+
+          const topRow = document.createElement('div');
+          topRow.className = 'flex items-center gap-4';
+
+          const iconWrap = document.createElement('div');
+          iconWrap.className = `w-14 h-14 rounded-2xl flex items-center justify-center border flex-shrink-0 ${themeColor}`;
+          iconWrap.innerHTML = `<span class="material-symbols-outlined text-3xl">${iconName}</span>`;
+
+          const infoWrap = document.createElement('div');
+          infoWrap.className = 'flex-1 min-w-0';
+
+          const titleEl = document.createElement('h3');
+          titleEl.className = 'text-base font-bold text-on-surface truncate';
+          titleEl.textContent = fileName;
+          titleEl.title = fileName;
+
+          const metaRow = document.createElement('div');
+          metaRow.className = 'flex items-center gap-2 mt-1 text-xs text-on-surface-variant flex-wrap';
+
+          if (fileSizeStr) {
+            metaRow.innerHTML += `<span class="font-mono font-medium">${fileSizeStr}</span><span>•</span>`;
+          }
+          metaRow.innerHTML += `<span class="uppercase font-bold text-[10px] tracking-wider px-2 py-0.5 rounded bg-surface-container text-on-surface-variant">${fileExt.toUpperCase()}</span>`;
+
+          infoWrap.appendChild(titleEl);
+          infoWrap.appendChild(metaRow);
+          topRow.appendChild(iconWrap);
+          topRow.appendChild(infoWrap);
+          card.appendChild(topRow);
+
+          // Audio player embed if audio file
+          if (['mp3', 'wav', 'ogg', 'm4a', 'aac', 'flac'].includes(fileExt) || mime.startsWith('audio/')) {
+            const audioWrap = document.createElement('div');
+            audioWrap.className = 'w-full pt-1';
+            const audioEl = document.createElement('audio');
+            audioEl.controls = true;
+            audioEl.src = fileSrc;
+            audioEl.className = 'w-full rounded-xl';
+            audioWrap.appendChild(audioEl);
+            card.appendChild(audioWrap);
+          }
+
+          // Action buttons row
+          const actionRow = document.createElement('div');
+          actionRow.className = 'flex items-center gap-2 pt-2 border-t border-outline-variant/10 flex-wrap';
+
+          // Preview button for PDF
+          if (fileExt === 'pdf' || mime === 'application/pdf') {
+            const previewBtn = document.createElement('button');
+            previewBtn.type = 'button';
+            previewBtn.className = 'inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-on-surface bg-surface-container-high hover:bg-surface-container transition-all cursor-pointer';
+            previewBtn.innerHTML = '<span class="material-symbols-outlined text-base">visibility</span> <span>Preview PDF</span>';
+            previewBtn.addEventListener('click', () => {
+              const w = window.open('');
+              if (w) {
+                w.document.write(`<!DOCTYPE html><html><head><title>${escText(fileName)}</title><style>body,html,iframe{margin:0;padding:0;width:100%;height:100%;border:none;}</style></head><body><iframe src="${fileSrc}"></iframe></body></html>`);
+              }
+            });
+            actionRow.appendChild(previewBtn);
+          }
+
+          // Download button
+          const downloadBtn = document.createElement('a');
+          downloadBtn.className = 'inline-flex items-center gap-1.5 px-5 py-2 rounded-xl text-xs font-bold text-white bg-primary hover:bg-primary-hover shadow-sm transition-all cursor-pointer';
+          downloadBtn.href = fileSrc;
+          downloadBtn.download = fileName;
+          downloadBtn.rel = 'noopener noreferrer';
+          downloadBtn.innerHTML = '<span class="material-symbols-outlined text-base">download</span> <span>Download File</span>';
+          actionRow.appendChild(downloadBtn);
+
+          card.appendChild(actionRow);
+          fileCardDiv.appendChild(card);
+        } else {
+          const warningDiv = document.createElement('div');
+          warningDiv.className = 'p-6 text-center text-error bg-error/10 rounded-xl text-sm font-semibold';
+          warningDiv.textContent = '⚠️ Blocked untrusted or invalid file data for your security.';
+          fileCardDiv.appendChild(warningDiv);
+        }
+
+        contentBody.appendChild(fileCardDiv);
+        copyBtn.style.display = 'none';
       }
-      contentBody.appendChild(imageDiv);
-      copyBtn.style.display = 'none';
     }
 
     if (contentSaveBtn) {
@@ -886,7 +1068,7 @@ function initAccess() {
     contentExportBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       const isVisible = contentExportDropdown.style.display !== 'none';
-      contentExportDropdown.style.display = isVisible ? 'none' : 'block';
+      contentExportDropdown.style.display = isVisible ? 'none' : 'flex';
     });
 
     document.addEventListener('click', () => {
@@ -957,6 +1139,11 @@ function initAccess() {
       let content = resultContainer.dataset.content || '';
       const title = resultContainer.dataset.title || 'Saved Note';
       const category = resultContainer.dataset.category || '';
+      const fileName = resultContainer.dataset.fileName;
+      const fileSize = resultContainer.dataset.fileSize ? Number(resultContainer.dataset.fileSize) : undefined;
+      const fileType = resultContainer.dataset.fileType;
+      const isImg = resultContainer.dataset.isImage === 'true';
+      const fileMeta = fileName ? { fileName, fileSize, fileType, isImage: isImg } : {};
 
       if (typeof window.openSaveFolderModal === 'function') {
         window.openSaveFolderModal({
@@ -970,15 +1157,20 @@ function initAccess() {
             contentSaveBtn.disabled = true;
             try {
               const noteId = generateCode(8);
-              const preview = title || content.substring(0, 100);
+              const preview = title || (type === 'image' ? (isImg ? '🖼️ Image' : `📎 ${fileName || 'File'}`) : content.substring(0, 100));
 
               if (typeof window.saveNoteToFileManager === 'function') {
-                await window.saveNoteToFileManager({ title, category, noteType: type, content }, folderId);
+                await window.saveNoteToFileManager({ title, category, noteType: type, content, ...(fileMeta || {}) }, folderId);
               }
 
               await db.collection('users').doc(currentUser.username)
                 .collection('savedNotes').doc(noteId)
-                .set({ type, content, title, category, preview, noteId, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+                .set({ type, content, title, category, preview, noteId, createdAt: firebase.firestore.FieldValue.serverTimestamp(), ...(fileMeta || {}) });
+
+              // History entry
+              await db.collection('users').doc(currentUser.username)
+                .collection('history').doc(noteId)
+                .set({ type, preview, code: noteId, saved: true, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
 
               const dest = folderName ? `"${folderName}"` : 'My Files';
               showToast(`Note saved to ${dest}! 📁`, 'success');
