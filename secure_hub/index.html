@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <meta name="description" content="eNotePad Secure Hub — One-click website launcher and Google SSO hub. Open your favorite web tools with seamless session continuity and zero password tracking." />
+  <meta name="author" content="eNotePad — Digital Curator" />
+  <title>eNotePad | Secure Hub — Website Launcher &amp; Google SSO</title>
+  <link rel="icon" href="../assets/Favicon.png" type="image/png" />
+  <link rel="canonical" href="https://enotepad.site/secure_hub/index.html" />
+
+  <!-- Preconnect & Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400..700,0..1,0&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+  <!-- Custom Secure Hub Styling -->
+  <link rel="stylesheet" href="css/secure-hub.css?v=1.0" />
+
+  <!-- Tailwind Config: Tactile Editorial Design System -->
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#516070",
+            "primary-dim": "#455464",
+            "on-primary": "#f4f8ff",
+            "primary-container": "#d4e4f8",
+            "on-primary-container": "#445363",
+            "surface": "#faf9f5",
+            "on-surface": "#2f342e",
+            "surface-container-lowest": "#ffffff",
+            "surface-container-low": "#f4f4ef",
+            "surface-container": "#edeee8",
+            "surface-container-high": "#e6e9e2",
+            "on-surface-variant": "#5c605a",
+            "outline-variant": "#afb3ac",
+            "error": "#b3261e"
+          },
+          fontFamily: {
+            headline: ["Inter", "sans-serif"],
+            body: ["Newsreader", "serif"],
+            mono: ["Fira Code", "monospace"],
+            label: ["Inter", "sans-serif"]
+          }
+        }
+      }
+    };
+  </script>
+</head>
+
+<body class="bg-surface text-on-surface font-label min-h-screen flex flex-col relative selection:bg-primary-container selection:text-on-primary-container">
+
+  <!-- Paper Grain Overlay -->
+  <div class="fixed inset-0 pointer-events-none paper-grain z-50"></div>
+
+  <!-- Toast Container -->
+  <div class="fixed top-5 right-5 z-[9999] flex flex-col gap-2 pointer-events-none max-w-sm w-[calc(100vw-2rem)]" id="toastContainer"></div>
+
+  <!-- ===== TOP NAVIGATION BAR ===== -->
+  <header class="bg-surface-container-lowest/90 backdrop-blur-md border-b border-outline-variant/15 sticky top-0 z-40 px-4 sm:px-8 py-3 flex items-center justify-between shadow-xs">
+    
+    <!-- Left: Brand Logo & Back to NotePad -->
+    <div class="flex items-center gap-3 sm:gap-6">
+      <a href="../index.html" class="flex items-center gap-2.5 group no-underline" title="Return to eNotePad Note Sharing">
+        <div class="w-8 h-8 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+          <img src="../assets/logo-light.svg" alt="eNotePad Logo" class="w-full h-full object-contain dark:hidden" />
+          <img src="../assets/logo-dark.svg" alt="eNotePad Logo" class="w-full h-full object-contain hidden dark:block" />
+        </div>
+        <div class="flex items-baseline leading-none">
+          <span style="color:#00a8ff" class="text-lg font-bold">e</span>
+          <span class="text-primary text-lg font-bold">NotePad</span>
+        </div>
+      </a>
+
+      <!-- Pill: Hub Identifier -->
+      <div class="flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 dark:bg-white/10 text-primary dark:text-[#c6d6e9] text-xs font-semibold">
+        <span class="material-symbols-outlined text-sm">hub</span>
+        <span>Secure Hub</span>
+      </div>
+
+      <!-- Quick Links to other sub-apps -->
+      <nav class="hidden md:flex items-center gap-4 text-xs font-semibold text-primary/70 dark:text-primary-dim/80 pl-2">
+        <a href="../index.html" class="hover:text-primary transition-colors flex items-center gap-1">
+          <span class="material-symbols-outlined text-sm">edit_note</span> Notes
+        </a>
+        <a href="../codeshare/index.html" class="hover:text-primary transition-colors flex items-center gap-1" title="Real-time Coding Room">
+          <span class="material-symbols-outlined text-sm">code</span> CodeShare
+        </a>
+        <a href="../convo_room/index.html" class="hover:text-primary transition-colors flex items-center gap-1" title="Live Collaborative Convo Room">
+          <span class="material-symbols-outlined text-sm">forum</span> Convo Room
+        </a>
+      </nav>
+    </div>
+
+    <!-- Right: Google Account Status & Theme Toggle -->
+    <div class="flex items-center gap-2.5 sm:gap-3.5">
+      
+      <!-- Account Info Pill -->
+      <div class="flex items-center gap-2 sm:gap-2.5 bg-surface-container-low dark:bg-white/5 border border-outline-variant/15 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs">
+        <img id="userAvatar" src="../assets/Favicon.png" alt="Avatar" class="w-6 h-6 rounded-full object-cover border border-outline-variant/20" />
+        <div id="userStatusText" class="hidden sm:flex flex-col text-left leading-tight">
+          <span class="font-bold text-on-surface">Guest Session</span>
+          <span class="text-[10px] text-on-surface-variant/70">Connect Google for Cloud Sync</span>
+        </div>
+      </div>
+
+      <!-- Sign In / Sign Out Button -->
+      <button id="authActionBtn" type="button" class="px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-bold bg-primary text-white hover:bg-primary-dim dark:bg-primary-container dark:text-on-primary-container transition-all flex items-center gap-1.5 shadow-xs cursor-pointer">
+        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-3.5 h-3.5" alt="" />
+        <span>Sign In with Google</span>
+      </button>
+
+      <!-- Theme Switcher -->
+      <button id="themeToggle" type="button" class="w-8 h-8 rounded-full border border-outline-variant/20 flex items-center justify-center hover:bg-surface-container transition-all text-primary dark:text-[#c6d6e9]" title="Toggle Dark/Light Mode" aria-label="Toggle theme">
+        <span class="material-symbols-outlined text-[17px] dark:hidden">dark_mode</span>
+        <span class="material-symbols-outlined text-[17px] hidden dark:inline">light_mode</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ===== HERO SECTION & TECHNICAL OVERVIEW ===== -->
+  <section class="max-w-6xl w-full mx-auto px-4 sm:px-6 pt-8 pb-6">
+    <div class="bg-surface-container-lowest border border-outline-variant/15 rounded-3xl p-6 sm:p-8 editorial-shadow relative overflow-hidden">
+      
+      <!-- Top Pill Tag -->
+      <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 dark:bg-white/10 text-primary dark:text-[#d4e4f8] text-xs font-bold mb-4">
+        <span class="material-symbols-outlined text-sm">shield</span>
+        <span>Universal Website Launcher with Google SSO Continuity</span>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-center">
+        <!-- Left 2 Cols: Description -->
+        <div class="lg:col-span-2 space-y-3">
+          <h1 class="text-2xl sm:text-3xl font-headline font-bold text-on-surface tracking-tight">
+            Open Your Favorite Tools in One Click
+          </h1>
+          <p class="text-sm sm:text-base text-on-surface-variant font-body leading-relaxed">
+            When you sign in to eNotePad with Google, launching Google Workspace tools (Gmail, Drive, Docs, Calendar) and sites that support Google Single Sign-On reuses your browser’s authenticated session automatically. No repeating logins, no wasted time.
+          </p>
+
+          <!-- Key Safeguards Badges -->
+          <div class="flex flex-wrap items-center gap-2 pt-2 text-xs">
+            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-surface-container-low text-on-surface font-semibold border border-outline-variant/10">
+              <span class="material-symbols-outlined text-sm text-emerald-600">verified_user</span>
+              100% Privacy First — No Password or Cookie Collection
+            </span>
+            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-surface-container-low text-on-surface font-semibold border border-outline-variant/10">
+              <span class="material-symbols-outlined text-sm text-blue-600">open_in_new</span>
+              Isolated Tabs (<code class="text-[10px]">noopener,noreferrer</code>)
+            </span>
+            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-surface-container-low text-on-surface font-semibold border border-outline-variant/10">
+              <span class="material-symbols-outlined text-sm text-amber-600">cloud_sync</span>
+              Cross-Device Cloud Sync
+            </span>
+          </div>
+        </div>
+
+        <!-- Right 1 Col: Quick Action Card -->
+        <div class="bg-surface-container-low dark:bg-white/5 rounded-2xl p-4 sm:p-5 border border-outline-variant/15 flex flex-col justify-between space-y-4">
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-xs uppercase tracking-wider font-bold text-primary dark:text-[#c6d6e9]">Your Catalog</span>
+              <span class="text-xs font-mono font-bold bg-primary/10 px-2 py-0.5 rounded-full text-primary" id="statsTotalCount">22</span>
+            </div>
+            <p class="text-xs text-on-surface-variant">
+              Add your university portals, workplace dashboards, or personal sites to keep everything accessible in one clean launchpad.
+            </p>
+          </div>
+          <button id="addSiteBtn" type="button" class="w-full py-2.5 rounded-xl bg-primary hover:bg-primary-dim text-white font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-xs cursor-pointer">
+            <span class="material-symbols-outlined text-base">add_circle</span>
+            <span>Add Custom Website</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===== SEARCH & FILTER CONTROLS ===== -->
+  <section class="max-w-6xl w-full mx-auto px-4 sm:px-6 pb-4">
+    <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+      
+      <!-- Search Input -->
+      <div class="relative flex-1 max-w-md">
+        <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant/50 text-lg">search</span>
+        <input 
+          id="searchInput" 
+          type="text" 
+          placeholder="Search websites, apps, or domains... (Press '/' to focus)" 
+          class="w-full pl-10 pr-10 py-2.5 rounded-2xl bg-surface-container-lowest border border-outline-variant/20 text-xs sm:text-sm text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all editorial-shadow"
+          autocomplete="off"
+        />
+        <span class="hidden sm:inline-block absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono px-1.5 py-0.5 rounded bg-surface-container border border-outline-variant/20 text-on-surface-variant/60">/</span>
+      </div>
+
+      <!-- Category Filter Pills -->
+      <div class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 custom-scrollbar" id="categoryPills">
+        <button type="button" data-category="all" class="category-pill active px-3.5 py-1.5 rounded-xl border border-outline-variant/20 text-xs font-semibold bg-surface-container-lowest text-on-surface whitespace-nowrap">
+          All
+        </button>
+        <button type="button" data-category="favorites" class="category-pill px-3.5 py-1.5 rounded-xl border border-outline-variant/20 text-xs font-semibold bg-surface-container-lowest text-on-surface whitespace-nowrap flex items-center gap-1">
+          <span class="text-amber-500">⭐</span> Favorites
+        </button>
+        <button type="button" data-category="google" class="category-pill px-3.5 py-1.5 rounded-xl border border-outline-variant/20 text-xs font-semibold bg-surface-container-lowest text-on-surface whitespace-nowrap">
+          Google Suite
+        </button>
+        <button type="button" data-category="productivity" class="category-pill px-3.5 py-1.5 rounded-xl border border-outline-variant/20 text-xs font-semibold bg-surface-container-lowest text-on-surface whitespace-nowrap">
+          Productivity
+        </button>
+        <button type="button" data-category="dev" class="category-pill px-3.5 py-1.5 rounded-xl border border-outline-variant/20 text-xs font-semibold bg-surface-container-lowest text-on-surface whitespace-nowrap">
+          Developer
+        </button>
+        <button type="button" data-category="ai" class="category-pill px-3.5 py-1.5 rounded-xl border border-outline-variant/20 text-xs font-semibold bg-surface-container-lowest text-on-surface whitespace-nowrap">
+          AI Tools
+        </button>
+        <button type="button" data-category="creative" class="category-pill px-3.5 py-1.5 rounded-xl border border-outline-variant/20 text-xs font-semibold bg-surface-container-lowest text-on-surface whitespace-nowrap">
+          Creative
+        </button>
+        <button type="button" data-category="custom" class="category-pill px-3.5 py-1.5 rounded-xl border border-outline-variant/20 text-xs font-semibold bg-surface-container-lowest text-on-surface whitespace-nowrap">
+          My Custom Sites
+        </button>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===== WEBSITES DIRECTORY GRID ===== -->
+  <main class="max-w-6xl w-full mx-auto px-4 sm:px-6 py-4 flex-1">
+    
+    <!-- Dynamic Cards Grid -->
+    <div id="sitesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+      <!-- Injected via secure-hub.js -->
+    </div>
+
+    <!-- Empty State -->
+    <div id="emptyState" class="hidden text-center py-16 px-4 bg-surface-container-lowest rounded-3xl border border-outline-variant/15 editorial-shadow mt-4">
+      <div class="w-16 h-16 rounded-full bg-surface-container flex items-center justify-center mx-auto mb-3 text-primary/60">
+        <span class="material-symbols-outlined text-3xl">travel_explore</span>
+      </div>
+      <h3 class="font-headline font-bold text-lg text-on-surface mb-1">No matching websites found</h3>
+      <p class="text-xs text-on-surface-variant max-w-sm mx-auto mb-5">
+        Try adjusting your search terms or filter, or add a custom shortcut to your personal launcher.
+      </p>
+      <button type="button" onclick="document.getElementById('addSiteBtn').click()" class="px-4 py-2 rounded-xl bg-primary text-white text-xs font-bold inline-flex items-center gap-1.5 hover:bg-primary-dim transition-all">
+        <span class="material-symbols-outlined text-sm">add</span>
+        <span>Add This Website</span>
+      </button>
+    </div>
+
+  </main>
+
+  <!-- ===== ADD CUSTOM SITE MODAL ===== -->
+  <div id="addSiteModal" class="fixed inset-0 z-[9990] bg-black/50 modal-backdrop hidden items-center justify-center p-4">
+    <div class="bg-surface-container-lowest w-full max-w-md rounded-3xl p-6 sm:p-7 editorial-shadow border border-outline-variant/15 modal-panel relative">
+      
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between pb-4 border-b border-outline-variant/10 mb-4">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+            <span class="material-symbols-outlined text-lg">add_link</span>
+          </div>
+          <div>
+            <h3 class="font-headline font-bold text-base text-on-surface">Add Custom Website</h3>
+            <p class="text-xs text-on-surface-variant">Save a private shortcut to your Secure Hub</p>
+          </div>
+        </div>
+        <button id="modalCloseBtn" type="button" class="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant/60 hover:text-on-surface hover:bg-surface-container transition-all">
+          <span class="material-symbols-outlined text-lg">close</span>
+        </button>
+      </div>
+
+      <!-- Add Site Form -->
+      <form id="addSiteForm" class="space-y-4">
+        
+        <!-- Site Name -->
+        <div>
+          <label for="customSiteName" class="block text-xs font-bold text-on-surface mb-1">Website Name *</label>
+          <input 
+            id="customSiteName" 
+            type="text" 
+            required 
+            placeholder="e.g. My College Portal, Jira, Dribbble" 
+            maxlength="40"
+            class="w-full px-3.5 py-2 rounded-xl bg-surface-container-low border border-outline-variant/20 text-xs sm:text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"
+          />
+        </div>
+
+        <!-- HTTPS URL -->
+        <div>
+          <label for="customSiteUrl" class="block text-xs font-bold text-on-surface mb-1">
+            Website URL (HTTPS Only) *
+          </label>
+          <input 
+            id="customSiteUrl" 
+            type="url" 
+            required 
+            placeholder="https://example.com" 
+            class="w-full px-3.5 py-2 rounded-xl bg-surface-container-low border border-outline-variant/20 text-xs sm:text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"
+          />
+          <p class="text-[10px] text-on-surface-variant/70 mt-1">
+            For security, only valid <code class="font-mono">https://</code> destinations are permitted.
+          </p>
+        </div>
+
+        <!-- Category -->
+        <div>
+          <label for="customSiteCategory" class="block text-xs font-bold text-on-surface mb-1">Category</label>
+          <select 
+            id="customSiteCategory" 
+            class="w-full px-3.5 py-2 rounded-xl bg-surface-container-low border border-outline-variant/20 text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
+          >
+            <option value="productivity">Productivity &amp; Office</option>
+            <option value="dev">Developer &amp; Code</option>
+            <option value="google">Google Ecosystem</option>
+            <option value="ai">AI &amp; Research</option>
+            <option value="creative">Creative &amp; Design</option>
+            <option value="media">Media &amp; Entertainment</option>
+            <option value="community">Social &amp; Community</option>
+            <option value="custom" selected>Personal / Other</option>
+          </select>
+        </div>
+
+        <!-- Brief Description -->
+        <div>
+          <label for="customSiteDesc" class="block text-xs font-bold text-on-surface mb-1">Brief Description (Optional)</label>
+          <input 
+            id="customSiteDesc" 
+            type="text" 
+            maxlength="80" 
+            placeholder="e.g. My team tracking dashboard" 
+            class="w-full px-3.5 py-2 rounded-xl bg-surface-container-low border border-outline-variant/20 text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"
+          />
+        </div>
+
+        <!-- Google SSO Checkbox -->
+        <div class="flex items-start gap-2.5 p-3 rounded-xl bg-surface-container-low border border-outline-variant/15">
+          <input 
+            type="checkbox" 
+            id="customSiteSso" 
+            class="mt-0.5 rounded border-outline-variant text-primary focus:ring-primary/20 cursor-pointer"
+          />
+          <label for="customSiteSso" class="text-xs text-on-surface cursor-pointer leading-tight">
+            <span class="font-bold">Supports Sign in with Google</span>
+            <span class="block text-[11px] text-on-surface-variant/70 mt-0.5">
+              Tag this site so you know your active Google account can be used to log in.
+            </span>
+          </label>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex items-center justify-end gap-2 pt-2">
+          <button 
+            id="modalCancelBtn" 
+            type="button" 
+            class="px-4 py-2 rounded-xl text-xs font-semibold text-on-surface-variant hover:bg-surface-container transition-all"
+          >
+            Cancel
+          </button>
+          <button 
+            type="submit" 
+            class="px-5 py-2 rounded-xl bg-primary hover:bg-primary-dim text-white text-xs font-bold transition-all shadow-xs"
+          >
+            Save to Hub
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="border-t border-outline-variant/15 bg-surface-container-low py-8 mt-12 text-center text-xs text-on-surface-variant">
+    <div class="max-w-6xl mx-auto px-4 space-y-3">
+      <div class="flex flex-wrap justify-center items-center gap-4 font-semibold text-primary">
+        <a href="../index.html" class="hover:underline flex items-center gap-1">
+          <span class="material-symbols-outlined text-sm">edit_note</span> Notes
+        </a>
+        <span>·</span>
+        <a href="../codeshare/index.html" class="hover:underline flex items-center gap-1">
+          <span class="material-symbols-outlined text-sm">code</span> Coding Room
+        </a>
+        <span>·</span>
+        <a href="../convo_room/index.html" class="hover:underline flex items-center gap-1">
+          <span class="material-symbols-outlined text-sm">forum</span> Convo Room
+        </a>
+        <span>·</span>
+        <a href="../how-it-works.html" class="hover:underline flex items-center gap-1">
+          <span class="material-symbols-outlined text-sm">menu_book</span> How It Works
+        </a>
+        <span>·</span>
+        <a href="../support.html" class="hover:underline flex items-center gap-1">
+          <span class="material-symbols-outlined text-sm">support_agent</span> Help &amp; FAQs
+        </a>
+        <span>·</span>
+        <a href="../privacy.html" class="hover:underline flex items-center gap-1">
+          <span class="material-symbols-outlined text-sm">shield</span> Privacy Policy
+        </a>
+        <span>·</span>
+        <a href="../terms.html" class="hover:underline flex items-center gap-1">
+          <span class="material-symbols-outlined text-sm">gavel</span> Terms of Service
+        </a>
+      </div>
+      <p class="text-[11px] text-on-surface-variant/70">
+        eNotePad Secure Hub is an open web launcher with direct browser session continuity. Third-party brand names and logos belong to their respective copyright holders.
+      </p>
+    </div>
+  </footer>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+  <!-- eNotePad Core Configurations -->
+  <script src="../js/firebase-config.js"></script>
+  <script src="../js/utils.js"></script>
+
+  <!-- Secure Hub Engine -->
+  <script src="js/secure-hub.js?v=1.0"></script>
+</body>
+</html>

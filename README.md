@@ -29,6 +29,7 @@
 | 🛡️ **Admin Command Center** | v3.0 Dashboard with real-time stats and broadcast controls |
 | 👤 **Account System** | Optional registration with username & 4-digit PIN |
 | 💾 **Saved Notes** | Logged-in users can save and categorize permanent notes |
+| 🌐 **Secure Hub** | One-click website launcher & Google SSO continuity hub with zero password tracking |
 | 📱 **Responsive Design** | Bespoke sidebar for desktop + glassmorphic mobile nav |
 
 ---

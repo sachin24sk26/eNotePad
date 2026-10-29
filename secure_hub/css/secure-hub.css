@@ -1,0 +1,140 @@
+/* ============================================================
+   eNotePad — Secure Hub Stylesheet
+   Tactile Editorial Design System & Responsive Layout
+   ============================================================ */
+
+/* Paper Grain Texture */
+.paper-grain {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.025'/%3E%3C/svg%3E");
+}
+
+/* Base Editorial Tokens */
+:root {
+  --hub-primary: #516070;
+  --hub-primary-dim: #455464;
+  --hub-surface: #faf9f5;
+  --hub-card-bg: #ffffff;
+  --hub-border: rgba(175, 179, 172, 0.22);
+}
+
+.dark {
+  --hub-primary: #8ba4b8;
+  --hub-primary-dim: #708599;
+  --hub-surface: #12161c;
+  --hub-card-bg: #1a222c;
+  --hub-border: rgba(255, 255, 255, 0.08);
+}
+
+/* Custom Scrollbars */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(81, 96, 112, 0.2);
+  border-radius: 9999px;
+}
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Editorial Shadows & Borders */
+.editorial-shadow {
+  box-shadow: 0 4px 20px -2px rgba(47, 52, 46, 0.05), 0 2px 6px -1px rgba(47, 52, 46, 0.03);
+}
+.dark .editorial-shadow {
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.35), 0 2px 6px -1px rgba(0, 0, 0, 0.2);
+}
+
+.editorial-card {
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid var(--hub-border);
+  background-color: var(--hub-card-bg);
+}
+
+.editorial-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px -4px rgba(47, 52, 46, 0.09), 0 4px 10px -2px rgba(47, 52, 46, 0.04);
+  border-color: rgba(81, 96, 112, 0.35);
+}
+.dark .editorial-card:hover {
+  box-shadow: 0 12px 30px -4px rgba(0, 0, 0, 0.55), 0 4px 12px -2px rgba(0, 0, 0, 0.3);
+  border-color: rgba(139, 164, 184, 0.35);
+}
+
+/* Interactive Category Filter Pills */
+.category-pill {
+  transition: all 0.18s ease;
+  cursor: pointer;
+  user-select: none;
+}
+.category-pill.active {
+  background: #516070;
+  color: #f4f8ff;
+  border-color: #516070;
+}
+.dark .category-pill.active {
+  background: #d4e4f8;
+  color: #1e242b;
+  border-color: #d4e4f8;
+}
+
+/* Star Favorite Button */
+.fav-btn {
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+.fav-btn:hover {
+  transform: scale(1.18);
+}
+.fav-btn.is-favorite {
+  color: #eab308 !important;
+  font-variation-settings: 'FILL' 1;
+}
+
+/* Quick Launch Button */
+.launch-btn {
+  transition: all 0.18s ease;
+}
+.launch-btn:hover {
+  background-color: #516070;
+  color: #ffffff;
+}
+.dark .launch-btn:hover {
+  background-color: #d4e4f8;
+  color: #1a222c;
+}
+
+/* SSO Badge Glow */
+.sso-badge-google {
+  background: linear-gradient(135deg, rgba(66, 133, 244, 0.12), rgba(52, 168, 83, 0.12));
+  color: #2563eb;
+  border: 1px solid rgba(66, 133, 244, 0.25);
+}
+.dark .sso-badge-google {
+  background: linear-gradient(135deg, rgba(66, 133, 244, 0.22), rgba(52, 168, 83, 0.22));
+  color: #93c5fd;
+  border: 1px solid rgba(66, 133, 244, 0.35);
+}
+
+/* Modal Animations */
+.modal-backdrop {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.modal-panel {
+  animation: modalScaleUp 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes modalScaleUp {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}

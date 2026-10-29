@@ -2,7 +2,7 @@
 // eNotePad — Service Worker (High-Performance Caching & PWA)
 // ============================================================
 
-const CACHE_NAME = 'enotepad-cache-v18';
+const CACHE_NAME = 'enotepad-cache-v19';
 const FONT_CACHE_NAME = 'enotepad-fonts-v2';
 const CDN_CACHE_NAME = 'enotepad-cdn-v2';
 
@@ -31,7 +31,10 @@ const ASSETS_TO_CACHE = [
   './assets/logo.svg',
   './assets/logo-light.svg',
   './assets/logo-dark.svg',
-  './manifest.json'
+  './manifest.json',
+  './secure_hub/index.html',
+  './secure_hub/css/secure-hub.css',
+  './secure_hub/js/secure-hub.js'
 ];
 
 // Install Event — Pre-cache local app shell with resilient Promise.allSettled
