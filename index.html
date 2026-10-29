@@ -759,138 +759,8 @@
                       </div>
                       <button class="toolbar-btn" data-cmd="shortcuts" title="Shortcuts" aria-label="Keyboard Shortcuts"><span class="material-symbols-outlined">keyboard</span></button>
                     </div>
-                    <div class="toolbar-divider"></div>
-                    <!-- AI Assist -->
-                    <div class="toolbar-group">
-                      <button class="toolbar-btn" data-cmd="aiAssist" title="AI Writing Assist ✨" aria-label="AI Writing Assist" style="position:relative;">
-                        <span class="material-symbols-outlined">auto_awesome</span>
-                        <span style="position:absolute;top:2px;right:2px;width:5px;height:5px;border-radius:50%;background:linear-gradient(135deg,#516070,#8ba4b8);flex-shrink:0;"></span>
-                      </button>
-                    </div>
                   </div>
                 </div>
-
-                <!-- AI Assist Panel -->
-                <div id="aiAssistPanel" class="ai-assist-panel" style="display:none;">
-
-                  <!-- Panel Header -->
-                  <div class="ai-panel-header">
-                    <div class="ai-panel-title">
-                      <span class="material-symbols-outlined ai-panel-title-icon">auto_awesome</span>
-                      AI Writing Assist
-                      <span class="ai-badge-gemini" style="font-size:9px;padding:2px 8px;border-radius:20px;background:rgba(81,96,112,0.1);color:#516070;font-weight:600;border:1px solid rgba(81,96,112,0.15);">Gemini</span>
-                    </div>
-                    <div style="display:flex;align-items:center;gap:6px;">
-                      <button id="aiChangeKeyBtn" class="ai-change-key-btn" title="Change API key">⚙ Key</button>
-                      <button id="aiAssistCloseBtn" class="ai-change-key-btn" style="width:24px;height:24px;padding:0;border-radius:50%;display:flex;align-items:center;justify-content:center;" title="Close AI Assist" aria-label="Close AI Assist">
-                        <span class="material-symbols-outlined" style="font-size:14px;">close</span>
-                      </button>
-                    </div>
-                  </div>
-
-                  <!-- API Key Setup (shown when changing key or no key) -->
-                  <div id="aiKeySetup" class="ai-key-setup" style="display:none;">
-                    <div class="ai-key-title">
-                      <span class="material-symbols-outlined" style="font-size:14px;">key</span>
-                      Gemini API Key
-                    </div>
-                    <p class="ai-key-desc">A default Gemini API key is already configured for all users! You can also paste your personal API key if preferred.</p>
-                    <div class="ai-key-input-row">
-                      <input type="password" id="aiApiKeyInput" class="ai-key-input" placeholder="Paste custom Gemini API key..." aria-label="Custom Gemini API Key" autocomplete="off" />
-                      <button id="aiSaveApiKeyBtn" class="ai-key-save-btn" title="Save custom API key">
-                        <span class="material-symbols-outlined" style="font-size:13px;">check</span> Save
-                      </button>
-                      <button id="aiResetApiKeyBtn" type="button" class="ai-key-save-btn" style="background:transparent;border:1px solid rgba(175,179,172,0.35);color:inherit;" title="Use default shared API key">
-                        <span class="material-symbols-outlined" style="font-size:13px;">restart_alt</span> Default
-                      </button>
-                    </div>
-                    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
-                      <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" class="ai-key-link">
-                        <span class="material-symbols-outlined" style="font-size:11px;">open_in_new</span>
-                        Get your own Gemini API key
-                      </a>
-                      <button id="aiCancelKeyBtn" type="button" class="ai-change-key-btn" style="border:none;text-decoration:underline;cursor:pointer;">Back to AI tools</button>
-                    </div>
-                  </div>
-
-                  <!-- Action Section (shown when key is set) -->
-                  <div id="aiActionSection" style="display:block;">
-
-                    <!-- Scope badge -->
-                    <div style="padding:10px 14px 0;">
-                      <span id="aiScopeToggle" class="ai-scope-badge">📄 Full note</span>
-                    </div>
-
-                    <!-- Action Chips -->
-                    <div class="ai-actions-grid">
-                      <button class="ai-action-chip" data-action="grammar" title="Fix grammar and spelling">
-                        <span class="chip-icon">🔧</span>
-                        Fix Grammar
-                      </button>
-                      <button class="ai-action-chip" data-action="rephrase" title="Rephrase for clarity">
-                        <span class="chip-icon">🔄</span>
-                        Rephrase
-                      </button>
-                      <button class="ai-action-chip" data-action="beautify" title="Beautify and format with rich structure">
-                        <span class="chip-icon">💎</span>
-                        Beautify
-                      </button>
-                      <button class="ai-action-chip" data-action="summarize" title="Summarize into key points">
-                        <span class="chip-icon">📝</span>
-                        Summarize
-                      </button>
-                      <button class="ai-action-chip" data-action="continue" title="Continue writing from here">
-                        <span class="chip-icon">✍️</span>
-                        Continue
-                      </button>
-                      <button class="ai-action-chip" data-action="custom" title="Enter a custom AI instruction">
-                        <span class="chip-icon">🌐</span>
-                        Custom
-                      </button>
-                    </div>
-
-                    <!-- Custom prompt row -->
-                    <div id="aiCustomPromptRow" class="ai-custom-prompt-row" style="display:none;">
-                      <textarea id="aiCustomPromptInput" class="ai-custom-prompt-input" rows="2" placeholder="e.g. Translate to Hindi, make it formal, add more examples…" aria-label="Custom AI prompt instructions"></textarea>
-                    </div>
-
-                    <!-- Generate button row -->
-                      <div class="ai-run-row">
-                        <button id="aiRunBtn" class="ai-run-btn">
-                          <span class="material-symbols-outlined text-sm">auto_awesome</span> Generate
-                        </button>
-                        <span style="font-size:10px;color:#5c605a;">AI will process your note &amp; show a preview below</span>
-                      </div>
-                      <div class="px-3.5 pb-2 text-[10px] text-on-surface-variant/60 flex items-center gap-1.5">
-                        <span class="material-symbols-outlined text-xs text-primary/60">shield_lock</span>
-                        <span>Processed securely via Google Gemini. Never submit private credentials or sensitive secrets.</span>
-                      </div>
-
-                    <!-- Preview Section -->
-                    <div id="aiPreviewSection" class="ai-preview-section" style="display:none;">
-                      <div class="ai-preview-header">
-                        <span>✨ AI Result Preview</span>
-                        <div class="ai-preview-actions">
-                          <button id="aiRegenerateBtn" class="ai-preview-action-btn regenerate" title="Regenerate" aria-label="Regenerate AI result">
-                            <span class="material-symbols-outlined" style="font-size:11px;">refresh</span>
-                          </button>
-                          <button id="aiCopyBtn" class="ai-preview-action-btn copy" title="Copy result" aria-label="Copy AI result">
-                            <span class="material-symbols-outlined" style="font-size:11px;">content_copy</span> Copy
-                          </button>
-                          <button id="aiDiscardBtn" class="ai-preview-action-btn discard" title="Discard result" aria-label="Discard AI result">
-                            Discard
-                          </button>
-                          <button id="aiApplyBtn" class="ai-preview-action-btn apply" title="Apply to editor" aria-label="Apply AI result to editor">
-                            <span class="material-symbols-outlined" style="font-size:11px;">check</span> Apply
-                          </button>
-                        </div>
-                      </div>
-                      <div id="aiPreviewContent" class="ai-preview-content"></div>
-                    </div>
-
-                  </div>
-                </div>
-
                 <!-- Find & Replace Panel -->
                 <div class="find-replace-panel" id="findReplacePanel" style="display:none">
                   <input type="text" class="find-replace-input" id="findInput" placeholder="Find..." aria-label="Find text" />
@@ -905,11 +775,6 @@
                 <div class="relative px-5 sm:px-6 pt-4 pb-3" id="inputText">
                   <div contenteditable="true" class="rich-editor" id="richEditor" role="textbox" aria-multiline="true" aria-label="Note content editor" data-placeholder="Type or paste anything…" spellcheck="true"></div>
                   <textarea class="markdown-textarea" id="markdownArea" aria-label="Markdown note editor" style="display:none" placeholder="Write in Markdown..."></textarea>
-                  <!-- Floating AI Assist Button inside textarea -->
-                  <button type="button" id="aiFloatingBtn" class="ai-floating-btn" title="AI Writing Assist ✨" aria-label="AI Writing Assist">
-                    <span class="material-symbols-outlined ai-floating-icon">auto_awesome</span>
-                    <span class="ai-floating-label">AI Assist</span>
-                  </button>
                   <!-- Subtle live stats -->
                   <div class="editor-stats compose-stats" aria-live="polite">
                     <span><span id="editorWordCount">0</span> words</span>
@@ -3790,7 +3655,6 @@
   <script src="js/users.js?v=3"></script>
   <script src="js/coffee.js?v=1"></script>
   <script src="js/env.js"></script>
-  <script src="js/ai-assist.js?v=2"></script>
   <script src="js/app.js?v=24"></script>
 </body>
 </html>

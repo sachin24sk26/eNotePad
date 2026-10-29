@@ -102,9 +102,6 @@ function initEditor() {
       case 'shortcuts':
         toggleShortcutsPanel();
         return;
-      case 'aiAssist':
-        if (typeof window.toggleAiAssistPanel === 'function') window.toggleAiAssistPanel();
-        return;
       case 'insertHR':
         exec('insertHTML', '<hr class="editor-hr">');
         return;
@@ -1020,13 +1017,4 @@ function initEditor() {
     }
     updatePlaceholder();
   });
-
-  // ─── AI Assist: expose selection helper ───────────────────
-  window.getEditorSelection = () => {
-    const sel = window.getSelection();
-    if (!sel || sel.isCollapsed || !editor.contains(sel.anchorNode)) {
-      return { text: '', hasSelection: false };
-    }
-    return { text: sel.toString().trim(), hasSelection: true };
-  };
 }

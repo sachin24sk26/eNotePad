@@ -26,7 +26,6 @@ function startApp() {
   safeInit(initFeedback, 'initFeedback');
   safeInit(initGuestNudgeSystem, 'initGuestNudgeSystem');
   safeInit(initPWA, 'initPWA');
-  safeInit(initAiAssist, 'initAiAssist');
   console.log('✨ eNotePad — Digital Curator initialized');
 }
 

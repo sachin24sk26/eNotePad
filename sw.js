@@ -2,7 +2,7 @@
 // eNotePad — Service Worker (High-Performance Caching & PWA)
 // ============================================================
 
-const CACHE_NAME = 'enotepad-cache-v17';
+const CACHE_NAME = 'enotepad-cache-v18';
 const FONT_CACHE_NAME = 'enotepad-fonts-v2';
 const CDN_CACHE_NAME = 'enotepad-cdn-v2';
 
@@ -26,7 +26,6 @@ const ASSETS_TO_CACHE = [
   './js/filemanager.js',
   './js/users.js',
   './js/coffee.js',
-  './js/ai-assist.js',
   './js/app.js',
   './assets/favicon.svg',
   './assets/logo.svg',

@@ -6,7 +6,8 @@
       "**/.*",
       "**/node_modules/**",
       "functions/**",
-      "scratch/**"
+      "scratch/**",
+      "js/env.js"
     ],
     "rewrites": [
       {
