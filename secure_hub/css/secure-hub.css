@@ -1,6 +1,6 @@
 /* ============================================================
    eNotePad — Secure Hub Stylesheet
-   Tactile Editorial Design System & Responsive Layout
+   Tactile Editorial Design System & Responsive Dark/Light Layout
    ============================================================ */
 
 /* Paper Grain Texture */
@@ -18,11 +18,12 @@
 }
 
 .dark {
-  --hub-primary: #8ba4b8;
-  --hub-primary-dim: #708599;
-  --hub-surface: #12161c;
-  --hub-card-bg: #1a222c;
+  --hub-primary: #70b4f8;
+  --hub-primary-dim: #93c5fd;
+  --hub-surface: #0d1117;
+  --hub-card-bg: #161c24;
   --hub-border: rgba(255, 255, 255, 0.08);
+  color-scheme: dark;
 }
 
 /* Custom Scrollbars */
@@ -38,15 +39,12 @@
   border-radius: 9999px;
 }
 .dark .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.18);
 }
 
 /* Editorial Shadows & Borders */
 .editorial-shadow {
   box-shadow: 0 4px 20px -2px rgba(47, 52, 46, 0.05), 0 2px 6px -1px rgba(47, 52, 46, 0.03);
-}
-.dark .editorial-shadow {
-  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.35), 0 2px 6px -1px rgba(0, 0, 0, 0.2);
 }
 
 .editorial-card {
@@ -60,10 +58,6 @@
   box-shadow: 0 12px 28px -4px rgba(47, 52, 46, 0.09), 0 4px 10px -2px rgba(47, 52, 46, 0.04);
   border-color: rgba(81, 96, 112, 0.35);
 }
-.dark .editorial-card:hover {
-  box-shadow: 0 12px 30px -4px rgba(0, 0, 0, 0.55), 0 4px 12px -2px rgba(0, 0, 0, 0.3);
-  border-color: rgba(139, 164, 184, 0.35);
-}
 
 /* Interactive Category Filter Pills */
 .category-pill {
@@ -75,11 +69,6 @@
   background: #516070;
   color: #f4f8ff;
   border-color: #516070;
-}
-.dark .category-pill.active {
-  background: #d4e4f8;
-  color: #1e242b;
-  border-color: #d4e4f8;
 }
 
 /* Star Favorite Button */
@@ -102,21 +91,12 @@
   background-color: #516070;
   color: #ffffff;
 }
-.dark .launch-btn:hover {
-  background-color: #d4e4f8;
-  color: #1a222c;
-}
 
-/* SSO Badge Glow */
+/* SSO Badge */
 .sso-badge-google {
   background: linear-gradient(135deg, rgba(66, 133, 244, 0.12), rgba(52, 168, 83, 0.12));
   color: #2563eb;
   border: 1px solid rgba(66, 133, 244, 0.25);
-}
-.dark .sso-badge-google {
-  background: linear-gradient(135deg, rgba(66, 133, 244, 0.22), rgba(52, 168, 83, 0.22));
-  color: #93c5fd;
-  border: 1px solid rgba(66, 133, 244, 0.35);
 }
 
 /* Modal Animations */
@@ -137,4 +117,322 @@
     opacity: 1;
     transform: scale(1) translateY(0);
   }
+}
+
+/* ============================================================
+   COMPREHENSIVE DARK MODE OVERRIDES FOR SECURE HUB
+   Deep, immersive, high-contrast dark theme
+   ============================================================ */
+
+.dark body {
+  background-color: #0d1117 !important;
+  color: #f0f6fc !important;
+}
+
+/* Navigation & Header */
+.dark header {
+  background-color: rgba(22, 28, 36, 0.94) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.dark header a {
+  color: #c6d6e9;
+}
+.dark header a:hover {
+  color: #ffffff;
+}
+
+.dark #themeToggle {
+  border-color: rgba(255, 255, 255, 0.14) !important;
+  color: #70b4f8 !important;
+}
+.dark #themeToggle:hover {
+  background-color: rgba(112, 180, 248, 0.14) !important;
+  border-color: rgba(112, 180, 248, 0.3) !important;
+}
+
+/* Surfaces & Container Tones */
+.dark .bg-surface {
+  background-color: #0d1117 !important;
+}
+
+.dark .bg-surface-container-lowest {
+  background-color: #161c24 !important;
+}
+
+.dark .bg-surface-container-low {
+  background-color: #1c232d !important;
+}
+
+.dark .bg-surface-container {
+  background-color: #222b37 !important;
+}
+
+.dark .bg-surface-container-high {
+  background-color: #283341 !important;
+}
+
+.dark .bg-surface-dim {
+  background-color: #11161d !important;
+}
+
+/* Typography & Contrast in Dark Mode */
+.dark .text-on-surface {
+  color: #f0f6fc !important;
+}
+
+.dark .text-on-surface-variant {
+  color: #94a3b8 !important;
+}
+
+.dark .text-on-surface-variant\/70 {
+  color: rgba(148, 163, 184, 0.72) !important;
+}
+
+.dark .text-on-surface-variant\/60 {
+  color: rgba(148, 163, 184, 0.62) !important;
+}
+
+.dark .text-on-surface-variant\/50 {
+  color: rgba(148, 163, 184, 0.52) !important;
+}
+
+.dark .text-on-surface-variant\/40 {
+  color: rgba(148, 163, 184, 0.42) !important;
+}
+
+.dark .text-primary {
+  color: #70b4f8 !important;
+}
+
+.dark .text-primary\/70 {
+  color: rgba(112, 180, 248, 0.75) !important;
+}
+
+.dark .text-primary-dim {
+  color: #93c5fd !important;
+}
+
+.dark .text-on-primary {
+  color: #ffffff !important;
+}
+
+/* Borders in Dark Mode */
+.dark .border-outline-variant\/10 {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.dark .border-outline-variant\/15 {
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+.dark .border-outline-variant\/20 {
+  border-color: rgba(255, 255, 255, 0.16) !important;
+}
+
+.dark .editorial-shadow {
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.55), 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Website Cards in Dark Mode */
+.dark .editorial-card {
+  background-color: #161c24 !important;
+  border-color: rgba(255, 255, 255, 0.09) !important;
+}
+
+.dark .editorial-card:hover {
+  background-color: #1a222c !important;
+  border-color: rgba(112, 180, 248, 0.38) !important;
+  box-shadow: 0 16px 36px -4px rgba(0, 0, 0, 0.75), 0 0 14px rgba(112, 180, 248, 0.09) !important;
+}
+
+.dark .editorial-card h3 {
+  color: #f0f6fc !important;
+}
+
+.dark .editorial-card p {
+  color: #94a3b8 !important;
+}
+
+/* Search Input in Dark Mode */
+.dark #searchInput {
+  background-color: #161c24 !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  color: #f0f6fc !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
+}
+
+.dark #searchInput::placeholder {
+  color: #64748b !important;
+}
+
+.dark #searchInput:focus {
+  border-color: #70b4f8 !important;
+  box-shadow: 0 0 0 3px rgba(112, 180, 248, 0.25) !important;
+}
+
+/* Category Filter Pills in Dark Mode */
+.dark .category-pill {
+  background-color: #161c24 !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: #94a3b8 !important;
+}
+
+.dark .category-pill:hover {
+  background-color: #222b37 !important;
+  color: #f0f6fc !important;
+  border-color: rgba(112, 180, 248, 0.35) !important;
+}
+
+.dark .category-pill.active {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+  color: #ffffff !important;
+  border-color: #3b82f6 !important;
+  box-shadow: 0 2px 10px rgba(37, 99, 235, 0.4) !important;
+}
+
+/* Launch Button in Dark Mode */
+.dark .launch-btn {
+  background-color: rgba(255, 255, 255, 0.06) !important;
+  color: #70b4f8 !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+.dark .launch-btn:hover {
+  background-color: #2563eb !important;
+  color: #ffffff !important;
+  border-color: #2563eb !important;
+  box-shadow: 0 2px 10px rgba(37, 99, 235, 0.45) !important;
+}
+
+/* SSO & Status Badges in Dark Mode */
+.dark .sso-badge-google {
+  background: linear-gradient(135deg, rgba(66, 133, 244, 0.22), rgba(52, 168, 83, 0.18)) !important;
+  color: #93c5fd !important;
+  border: 1px solid rgba(66, 133, 244, 0.35) !important;
+}
+
+/* Primary Action Buttons in Dark Mode */
+.dark .bg-primary {
+  background-color: #2563eb !important;
+  color: #ffffff !important;
+}
+
+.dark .bg-primary:hover {
+  background-color: #1d4ed8 !important;
+}
+
+.dark .bg-primary\/10 {
+  background-color: rgba(112, 180, 248, 0.14) !important;
+}
+
+/* Favorite Star & Custom Site Delete Buttons */
+.dark .fav-btn {
+  color: rgba(148, 163, 184, 0.45) !important;
+}
+
+.dark .fav-btn:hover {
+  color: #fbbf24 !important;
+  background-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+.dark .fav-btn.is-favorite {
+  color: #eab308 !important;
+  filter: drop-shadow(0 0 6px rgba(234, 179, 8, 0.45));
+}
+
+.dark .delete-custom-btn {
+  color: rgba(148, 163, 184, 0.45) !important;
+}
+
+.dark .delete-custom-btn:hover {
+  color: #f87171 !important;
+  background-color: rgba(239, 68, 68, 0.15) !important;
+}
+
+/* Modal Form in Dark Mode */
+.dark input[type="checkbox"] {
+  accent-color: #2563eb;
+}
+
+.dark .modal-panel {
+  background-color: #161c24 !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8) !important;
+}
+
+.dark .modal-panel label {
+  color: #f0f6fc !important;
+}
+
+.dark .modal-panel input[type="text"],
+.dark .modal-panel input[type="url"],
+.dark .modal-panel select {
+  background-color: #1c232d !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  color: #f0f6fc !important;
+}
+
+.dark .modal-panel input[type="text"]::placeholder,
+.dark .modal-panel input[type="url"]::placeholder {
+  color: #64748b !important;
+}
+
+.dark .modal-panel input:focus,
+.dark .modal-panel select:focus {
+  border-color: #70b4f8 !important;
+  box-shadow: 0 0 0 2px rgba(112, 180, 248, 0.25) !important;
+}
+
+.dark .modal-panel select option {
+  background-color: #1c232d !important;
+  color: #f0f6fc !important;
+}
+
+.dark #modalCancelBtn {
+  color: #94a3b8 !important;
+}
+
+.dark #modalCancelBtn:hover {
+  background-color: rgba(255, 255, 255, 0.07) !important;
+  color: #f0f6fc !important;
+}
+
+.dark #modalCloseBtn {
+  color: #94a3b8 !important;
+}
+
+.dark #modalCloseBtn:hover {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  color: #f0f6fc !important;
+}
+
+/* Empty State Card in Dark Mode */
+.dark #emptyState {
+  background-color: #161c24 !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Footer in Dark Mode */
+.dark footer {
+  background-color: #11161d !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  color: #94a3b8 !important;
+}
+
+.dark footer a {
+  color: #70b4f8 !important;
+}
+
+.dark footer a:hover {
+  color: #93c5fd !important;
+  text-decoration: underline;
+}
+
+/* Toast Notification in Dark Mode */
+.dark .toast {
+  background-color: #1c232d !important;
+  color: #f0f6fc !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6) !important;
 }
