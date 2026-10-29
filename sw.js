@@ -2,7 +2,7 @@
 // eNotePad — Service Worker (High-Performance Caching & PWA)
 // ============================================================
 
-const CACHE_NAME = 'enotepad-cache-v19';
+const CACHE_NAME = 'enotepad-cache-v20';
 const FONT_CACHE_NAME = 'enotepad-fonts-v2';
 const CDN_CACHE_NAME = 'enotepad-cdn-v2';
 
@@ -72,11 +72,14 @@ self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   const url = new URL(event.request.url);
 
-  // 1. Bypass real-time Firebase, Firestore, and AdSense APIs
+    // 1. Bypass real-time Firebase, Firestore, OAuth Auth Handlers, and AdSense APIs
   if (
+    url.pathname.startsWith('/__') ||
     url.hostname.includes('firestore.googleapis.com') ||
     url.hostname.includes('identitytoolkit.googleapis.com') ||
     url.hostname.includes('securetoken.googleapis.com') ||
+    url.hostname.includes('accounts.google.com') ||
+    url.hostname.includes('apis.google.com') ||
     url.hostname.includes('pagead2') ||
     url.hostname.includes('googleads') ||
     url.hostname.includes('ep1.adtrafficquality.google')

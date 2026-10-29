@@ -121,6 +121,42 @@ function initAuth() {
   // Backwards compat helper
   const fetchUserProfileByUid = (uid) => fetchUserProfile({ uid, email: '' });
 
+  // Helper for clear, actionable Google Auth feedback
+  function handleGoogleAuthError(error) {
+    console.error('Google Auth error:', error);
+    if (!error) return;
+    if (error.code === 'auth/popup-closed-by-user') {
+      showToast('Sign-in window was closed', 'info');
+    } else if (error.code === 'auth/cancelled-popup-request') {
+      // Ignored - rapid multiple clicks
+    } else if (error.code === 'auth/unauthorized-domain') {
+      showToast('This domain is not authorized in Firebase Console -> Authentication -> Settings -> Authorized Domains.', 'error');
+    } else if (error.code === 'auth/account-exists-with-different-credential') {
+      showToast('An account already exists with this email address. Please sign in with your email and password.', 'warning');
+    } else if (error.code === 'auth/operation-not-allowed') {
+      showToast('Google Sign-In is not enabled in Firebase Console. Please enable it in Authentication -> Sign-in method.', 'error');
+    } else if (error.code === 'auth/network-request-failed') {
+      showToast('Network connection error. Please check your internet connection.', 'error');
+    } else {
+      showToast(error.message || 'Google sign-in failed. Please try again.', 'error');
+    }
+  }
+
+  // Handle Google redirect sign-in results on page load (seamless fallback when popup is blocked)
+  if (typeof firebase !== 'undefined' && firebase.auth && typeof firebase.auth().getRedirectResult === 'function') {
+    firebase.auth().getRedirectResult().then((result) => {
+      if (result && result.user) {
+        console.log('Google redirect sign-in completed for:', result.user.email);
+        showToast('Successfully signed in with Google! 🎉', 'success');
+      }
+    }).catch((error) => {
+      console.warn('Google redirect sign-in notice:', error);
+      if (error && error.code && error.code !== 'auth/credential-already-in-use') {
+        handleGoogleAuthError(error);
+      }
+    });
+  }
+
   // ----- Auth State Observer -----
   firebase.auth().onAuthStateChanged(async (user) => {
     try {
@@ -199,11 +235,13 @@ function initAuth() {
         console.log('User profile loaded:', userProfile.username, '| isAdmin:', isAdmin);
         setCurrentUser({ username: userProfile.username, email: user.email || userProfile.email, uid: user.uid, role: userProfile.role });
 
-        // Ensure active session token exists
+        // Ensure active session token exists and stays in sync
         let myToken = localStorage.getItem('enotepad_session_token');
         if (!myToken) {
           myToken = userProfile.sessionToken || generateSessionToken();
           localStorage.setItem('enotepad_session_token', myToken);
+          await db.collection('users').doc(userProfile.username).update({ sessionToken: myToken }).catch(() => {});
+        } else if (userProfile.sessionToken !== myToken) {
           await db.collection('users').doc(userProfile.username).update({ sessionToken: myToken }).catch(() => {});
         }
 
@@ -534,60 +572,46 @@ function initAuth() {
   // ----- Google Sign-In -----
   if (googleAuthBtn) {
     googleAuthBtn.addEventListener('click', async () => {
+      if (window.location.protocol === 'file:') {
+        showToast('Google Sign-In requires a local or hosted web server (http:// or https://), not file://. Use Live Server or visit https://enotpad.web.app', 'warning');
+        return;
+      }
+
+      if (typeof firebase === 'undefined' || !firebase.auth) {
+        showToast('Firebase Authentication is not available. Please check your connection.', 'error');
+        return;
+      }
+
       const provider = new firebase.auth.GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: 'select_account' });
+      provider.addScope('email');
+      provider.addScope('profile');
+
       try {
         googleAuthBtn.classList.add('btn-loading');
         googleAuthBtn.disabled = true;
+
+        // Ensure session token exists before sign-in so onAuthStateChanged reuses it consistently
+        if (!localStorage.getItem('enotepad_session_token')) {
+          localStorage.setItem('enotepad_session_token', generateSessionToken());
+        }
+
         const result = await firebase.auth().signInWithPopup(provider);
-        const user = result.user;
-        const newToken = generateSessionToken();
-        localStorage.setItem('enotepad_session_token', newToken);
-
-        let userProfile = await fetchUserProfile(user);
-        if (!userProfile) {
-          const isUserAdmin = (user.email || '').toLowerCase() === ADMIN_EMAIL.toLowerCase();
-          const baseName = isUserAdmin 
-            ? 'sachin24sk26'
-            : (user.displayName || (user.email ? user.email.split('@')[0] : 'user'))
-                .replace(/[^a-zA-Z0-9_]/g, '')
-                .toLowerCase()
-                .substring(0, 15) || 'user';
-          let finalUsername = baseName;
-          let suffix = 1;
-          try {
-            while ((await db.collection('users').doc(finalUsername).get().catch(() => ({ exists: false }))).exists) {
-              finalUsername = `${baseName}${suffix}`;
-              suffix++;
-            }
-          } catch (e) {
-            finalUsername = isUserAdmin ? 'sachin24sk26' : `${baseName}_${user.uid.substring(0, 5)}`;
-          }
-
-          const newProfile = {
-            username: finalUsername,
-            email: user.email,
-            uid: user.uid,
-            sessionToken: newToken,
-            role: isUserAdmin ? 'admin' : 'member',
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-          };
-          await db.collection('users').doc(finalUsername).set(newProfile, { merge: true });
-          if (typeof window.writeUserSearchIndex === 'function') {
-            await window.writeUserSearchIndex(finalUsername, { displayName: user.displayName || finalUsername });
-          }
-          showToast(`Welcome, ${finalUsername}! 🎉`, 'success');
-        } else {
-          await db.collection('users').doc(userProfile.username).update({ sessionToken: newToken }).catch(() => {});
-          showToast('Successfully logged in with Google!', 'success');
+        if (result && result.user) {
+          showToast('Successfully signed in with Google! 🎉', 'success');
         }
       } catch (error) {
-        console.error('Google Auth error:', error);
-        if (error.code === 'auth/popup-closed-by-user') {
-          showToast('Sign-in popup closed', 'info');
-        } else if (error.code === 'auth/cancelled-popup-request') {
-          // ignore double clicks
+        // If popup is blocked by browser or mobile environment, automatically fallback to redirect sign-in
+        if (error.code === 'auth/popup-blocked' || error.code === 'auth/cancelled-popup-request') {
+          console.warn('Popup blocked, attempting redirect sign-in fallback...');
+          try {
+            await firebase.auth().signInWithRedirect(provider);
+            return;
+          } catch (redirectErr) {
+            handleGoogleAuthError(redirectErr);
+          }
         } else {
-          showToast(error.message || 'Google login failed', 'error');
+          handleGoogleAuthError(error);
         }
       } finally {
         googleAuthBtn.classList.remove('btn-loading');
