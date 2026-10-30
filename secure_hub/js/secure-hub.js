@@ -724,9 +724,48 @@
       .replace(/'/g, '&#39;');
   }
 
-  // ─── Safe Launcher (Isolated Browser Tab) ───
-  window.launchSite = function (rawUrl, siteName) {
-    const safeUrl = sanitizeUrl(rawUrl);
+  // ─── Smart SSO URL Resolver & Safe Launcher ───
+  function resolveSsoUrl(rawUrl, site) {
+    let target = rawUrl;
+    const userEmail = currentUser && currentUser.email ? currentUser.email.trim() : null;
+
+    if (!userEmail) return target;
+
+    try {
+      const parsed = new URL(target);
+      const host = parsed.hostname.toLowerCase();
+
+      // Deep link Google Ecosystem directly with the logged-in user's Google account
+      if (host.includes('google.com') || host.includes('youtube.com')) {
+        if (host === 'mail.google.com') {
+          return `https://mail.google.com/mail/u/?authuser=${encodeURIComponent(userEmail)}`;
+        } else if (host === 'drive.google.com') {
+          return `https://drive.google.com/drive/u/?authuser=${encodeURIComponent(userEmail)}`;
+        } else if (host === 'docs.google.com') {
+          return `https://docs.google.com/document/u/?authuser=${encodeURIComponent(userEmail)}`;
+        } else if (host === 'sheets.google.com') {
+          return `https://docs.google.com/spreadsheets/u/?authuser=${encodeURIComponent(userEmail)}`;
+        } else if (host === 'calendar.google.com') {
+          return `https://calendar.google.com/calendar/u/?authuser=${encodeURIComponent(userEmail)}`;
+        } else if (host === 'keep.google.com') {
+          return `https://keep.google.com/u/?authuser=${encodeURIComponent(userEmail)}`;
+        } else if (host === 'meet.google.com') {
+          return `https://meet.google.com/?authuser=${encodeURIComponent(userEmail)}`;
+        } else {
+          return `https://accounts.google.com/AccountChooser?Email=${encodeURIComponent(userEmail)}&continue=${encodeURIComponent(target)}`;
+        }
+      }
+    } catch (e) {
+      console.warn('[SecureHub] SSO resolve notice:', e);
+    }
+
+    return target;
+  }
+
+  window.launchSite = function (rawUrl, siteName, ssoEnabled = false) {
+    let resolvedUrl = resolveSsoUrl(rawUrl, { ssoGoogle: ssoEnabled });
+    const safeUrl = sanitizeUrl(resolvedUrl);
+
     if (!safeUrl) {
       if (typeof showToast === 'function') {
         showToast('Invalid or unsafe URL format. Only HTTPS links are allowed.', 'error');
@@ -736,14 +775,21 @@
       return;
     }
 
-    // Open in separate browsing context with noopener and noreferrer protection
-    const win = window.open(safeUrl, '_blank', 'noopener,noreferrer');
+    // Open in separate browsing context with noopener (preserving safe referral for SSO handshakes)
+    const win = window.open(safeUrl, '_blank', 'noopener');
     if (win) {
       win.opener = null;
     }
 
+    const userEmail = currentUser && currentUser.email ? currentUser.email : null;
     if (typeof showToast === 'function') {
-      showToast(`Opening ${siteName || 'website'} in safe browser tab...`, 'info');
+      if (safeUrl.includes('authuser=') || safeUrl.includes('AccountChooser')) {
+        showToast(`Opening ${siteName} with ${userEmail} 🚀`, 'success');
+      } else if (ssoEnabled) {
+        showToast(`Opening ${siteName}... Click "Continue with Google" to complete sign-in.`, 'info');
+      } else {
+        showToast(`Opening ${siteName || 'website'} in safe browser tab...`, 'info');
+      }
     }
   };
 
@@ -852,7 +898,7 @@
             </div>
 
             <!-- Launch Button -->
-            <button type="button" onclick="launchSite('${site.url}', '${escapeHtml(site.name)}')" class="launch-btn px-3.5 py-1.5 rounded-xl bg-surface-container-low hover:bg-primary text-primary hover:text-white dark:bg-white/5 dark:hover:bg-primary-container dark:hover:text-primary-dim text-xs font-semibold flex items-center gap-1 border border-outline-variant/15 transition-all shadow-xs cursor-pointer" title="Open ${escapeHtml(site.name)} in a new browser tab">
+            <button type="button" onclick="launchSite('${site.url}', '${escapeHtml(site.name)}', ${!!site.ssoGoogle})" class="launch-btn px-3.5 py-1.5 rounded-xl bg-surface-container-low hover:bg-primary text-primary hover:text-white dark:bg-white/5 dark:hover:bg-primary-container dark:hover:text-primary-dim text-xs font-semibold flex items-center gap-1 border border-outline-variant/15 transition-all shadow-xs cursor-pointer" title="Open ${escapeHtml(site.name)} in a new browser tab">
               <span>Open</span>
               <span class="material-symbols-outlined text-xs">open_in_new</span>
             </button>
