@@ -392,12 +392,57 @@
       });
     }
 
+    // Listen for single sign-out from other eNotePad tabs
+    try {
+      if ('BroadcastChannel' in window) {
+        const authChannel = new BroadcastChannel('enotepad_auth_sync');
+        authChannel.onmessage = (event) => {
+          if (event.data && event.data.type === 'LOGOUT') {
+            console.log('[SecureHub] Logout broadcast received from another tab');
+            if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) {
+              firebase.auth().signOut().catch(() => {});
+            }
+            currentUser = null;
+            customSites = [];
+            favoriteIds = new Set(['gmail', 'gdrive', 'github', 'notion']);
+            try {
+              localStorage.removeItem(STORAGE_KEY_CUSTOM);
+              localStorage.removeItem(STORAGE_KEY_FAVS);
+            } catch (e) {}
+            updateAuthUI(null);
+            renderSites();
+          }
+        };
+      }
+    } catch (e) {}
+
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'enotepad_logout_event') {
+        if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) {
+          firebase.auth().signOut().catch(() => {});
+        }
+        currentUser = null;
+        customSites = [];
+        favoriteIds = new Set(['gmail', 'gdrive', 'github', 'notion']);
+        updateAuthUI(null);
+        renderSites();
+      }
+    });
+
     firebase.auth().onAuthStateChanged(async (user) => {
       currentUser = user;
       updateAuthUI(user);
 
       if (user && window.db) {
         await syncFromFirestore(user);
+      } else if (!user) {
+        // Purge private custom sites and reset favorites to defaults on sign-out
+        customSites = [];
+        favoriteIds = new Set(['gmail', 'gdrive', 'github', 'notion']);
+        try {
+          localStorage.removeItem(STORAGE_KEY_CUSTOM);
+          localStorage.removeItem(STORAGE_KEY_FAVS);
+        } catch (e) {}
       }
       renderSites();
     });
@@ -602,8 +647,40 @@
   async function handleSignOut() {
     if (typeof firebase === 'undefined' || !firebase.auth) return;
     try {
+      // 1. Sign out of Firebase session
       await firebase.auth().signOut();
-      if (typeof showToast === 'function') showToast('Signed out of Google session.', 'info');
+      currentUser = null;
+
+      // 2. Clear private bookmarks & reset favorites
+      customSites = [];
+      favoriteIds = new Set(['gmail', 'gdrive', 'github', 'notion']);
+
+      // 3. Purge all related local storage keys
+      try {
+        localStorage.removeItem(STORAGE_KEY_CUSTOM);
+        localStorage.removeItem(STORAGE_KEY_FAVS);
+        localStorage.removeItem('enotepad_session_token');
+        localStorage.removeItem('enotepad_session_id');
+        localStorage.removeItem('enotpad_user');
+      } catch (e) {}
+
+      // 4. Update UI to clean guest state
+      updateAuthUI(null);
+      renderSites();
+
+      // 5. Broadcast Single Sign-Out to all other open eNotePad tabs
+      try {
+        if ('BroadcastChannel' in window) {
+          const ch = new BroadcastChannel('enotepad_auth_sync');
+          ch.postMessage({ type: 'LOGOUT', timestamp: Date.now() });
+          ch.close();
+        }
+        localStorage.setItem('enotepad_logout_event', Date.now().toString());
+      } catch (e) {}
+
+      if (typeof showToast === 'function') {
+        showToast('Signed out completely from eNotePad. 🔒', 'success');
+      }
     } catch (err) {
       console.error('[SecureHub] Sign-out failed:', err);
     }

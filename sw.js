@@ -2,7 +2,7 @@
 // eNotePad — Service Worker (High-Performance Caching & PWA)
 // ============================================================
 
-const CACHE_NAME = 'enotepad-cache-v20';
+const CACHE_NAME = 'enotepad-cache-v21';
 const FONT_CACHE_NAME = 'enotepad-fonts-v2';
 const CDN_CACHE_NAME = 'enotepad-cdn-v2';
 

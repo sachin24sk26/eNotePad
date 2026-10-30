@@ -733,19 +733,33 @@ function initAuth() {
     logoutBtn.addEventListener('click', async () => {
       showConfirmModal({
         title: 'Sign Out',
-        message: 'Are you sure you want to log out from this device?',
+        message: 'Are you sure you want to sign out from eNotePad? Your local session, bookmarks, and draft data will be securely cleared from this browser.',
         icon: 'logout',
         iconBg: 'rgba(159,64,61,0.08)',
         iconColor: '#9f403d',
-        confirmText: 'Logout',
+        confirmText: 'Sign Out',
         confirmClass: 'bg-error text-on-error hover:opacity-90',
         onConfirm: async () => {
           try {
             await terminateCurrentSession();
-            if (window.currentSessionUnsub) { window.currentSessionUnsub(); window.currentSessionUnsub = null; }
+            if (window.currentSessionUnsub) { 
+              window.currentSessionUnsub(); 
+              window.currentSessionUnsub = null; 
+            }
             await firebase.auth().signOut();
-            showToast('Logged out successfully', 'success');
+            showLoggedOutView();
+
+            // Broadcast logout to all other open eNotePad / Secure Hub tabs
+            try {
+              if (window.enotepadAuthChannel) {
+                window.enotepadAuthChannel.postMessage({ type: 'LOGOUT', timestamp: Date.now() });
+              }
+              localStorage.setItem('enotepad_logout_event', Date.now().toString());
+            } catch (e) {}
+
+            showToast('Signed out completely from eNotePad', 'success');
           } catch (error) {
+            console.error('Logout error:', error);
             showToast('Logout failed', 'error');
           }
         }
@@ -900,11 +914,31 @@ function initAuth() {
   }
 
   function showLoggedOutView() {
-    // Use data-hidden attribute (not CSS class) since CSS uses [data-hidden="true"] selector
+    // 1. Toggle Tab Panel Visibility
     const authCard = getEl('authCard');
     const accountView = getEl('accountView');
     if (authCard) authCard.removeAttribute('data-hidden');
     if (accountView) accountView.setAttribute('data-hidden', 'true');
+
+    // 2. Clear Profile Header & Sidebar User Details
+    setElText('userAvatar', '');
+    setElText('userName', '');
+    const userRoleContainer = getEl('userRoleContainer');
+    if (userRoleContainer) {
+      userRoleContainer.classList.remove('text-error', 'font-bold');
+    }
+    setElText('userRoleText', '');
+    setElText('userJoinDate', '—');
+
+    const sidebarAvatar = getEl('sidebarUserAvatar');
+    const sidebarName = getEl('sidebarUserName');
+    const sidebarRole = getEl('sidebarUserRole');
+    if (sidebarAvatar) sidebarAvatar.textContent = '';
+    if (sidebarName) sidebarName.textContent = '';
+    if (sidebarRole) {
+      sidebarRole.textContent = 'Member';
+      sidebarRole.classList.remove('text-error', 'font-bold');
+    }
 
     const sidebarInfo = document.getElementById('sidebarUserInfo');
     const sidebarLinks = document.getElementById('sidebarLoggedInLinks');
@@ -920,12 +954,37 @@ function initAuth() {
       sidebarAdmin.style.display = 'none';
     }
 
-    // Stop file manager listeners
+    // 3. Purge Cached User Lists & DOM Containers
+    const recentHistoryList = document.getElementById('recentHistoryList');
+    if (recentHistoryList) recentHistoryList.innerHTML = '<p class="text-center text-on-surface-variant/40 text-xs italic py-6">Sign in to view recent history</p>';
+
+    const historyTableBody = document.getElementById('historyTableBody');
+    if (historyTableBody) historyTableBody.innerHTML = '';
+
+    const savedNotesList = document.getElementById('savedNotesList');
+    if (savedNotesList) savedNotesList.innerHTML = '<p class="text-center text-on-surface-variant/40 text-xs italic py-6">Sign in to view saved notes</p>';
+
+    const activeSessionsList = document.getElementById('activeSessionsList');
+    if (activeSessionsList) activeSessionsList.innerHTML = '';
+
+    // Clear counters
+    setElText('accountNotesCount', '0');
+    setElText('accountHistoryCount', '0');
+    setElText('accountFilesCount', '0');
+    setElText('accountFollowingCount', '0');
+
+    // Reset inbox counters & badges
+    const inboxBadge = document.getElementById('inboxBadge');
+    if (inboxBadge) inboxBadge.classList.add('hidden');
+    const navInboxBadge = document.getElementById('topNavInboxBadge');
+    if (navInboxBadge) navInboxBadge.classList.add('hidden');
+
+    // 4. Stop File Manager Listeners & Reset File Manager
     if (typeof window.fileManagerRefresh === 'function') {
       try { window.fileManagerRefresh(null); } catch(e) {}
     }
 
-    // Hide send-to-user button for logged-out / guest users
+    // 5. Hide Send-to-User for Logged-Out Guests
     const stuWrapper = document.getElementById('sendToUserWrapper');
     if (stuWrapper) stuWrapper.setAttribute('data-hidden', 'true');
 
@@ -934,19 +993,60 @@ function initAuth() {
       try { window.updateShareButtons(); } catch(e) {}
     }
 
-    // Reset fields & switch to login tab
+    // 6. Reset Input Fields & Auth Form
     if (emailInput) emailInput.value = '';
     if (passwordInput) passwordInput.value = '';
     if (usernameInput) usernameInput.value = '';
     switchAuthMode('login');
     updateUsernameUI(null);
 
-    // Restore marketing guide for guest on share tab
+    // 7. Thorough Storage Purge (Remove all user session & private sync data)
+    try {
+      localStorage.removeItem('enotepad_session_token');
+      localStorage.removeItem('enotepad_session_id');
+      localStorage.removeItem('enotpad_user');
+      localStorage.removeItem('enotepad_secure_hub_custom');
+      localStorage.removeItem('enotepad_secure_hub_favs');
+    } catch (e) {
+      console.warn('Storage purge error:', e);
+    }
+
+    // 8. Restore Marketing Guide for Guests
     const guideSection = document.getElementById('editorialGuideSection');
     if (guideSection) {
       const activeTab = document.querySelector('.sidebar-nav-btn.active')?.dataset?.tab || 'share';
       guideSection.style.display = (activeTab === 'share') ? '' : 'none';
     }
+  }
+
+  // Multi-Tab Single Sign-Out Synchronizer
+  if (typeof window !== 'undefined') {
+    // Cross-tab broadcast channel
+    try {
+      if ('BroadcastChannel' in window) {
+        const authChannel = new BroadcastChannel('enotepad_auth_sync');
+        authChannel.onmessage = (event) => {
+          if (event.data && event.data.type === 'LOGOUT') {
+            console.log('Single Sign-Out broadcast received from another tab');
+            if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) {
+              firebase.auth().signOut();
+            }
+            showLoggedOutView();
+          }
+        };
+        window.enotepadAuthChannel = authChannel;
+      }
+    } catch (e) {}
+
+    // Storage event fallback for older browsers
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'enotepad_logout_event') {
+        if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) {
+          firebase.auth().signOut();
+        }
+        showLoggedOutView();
+      }
+    });
   }
 
   // ----- Profile & Data Loaders -----
