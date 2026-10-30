@@ -429,6 +429,53 @@
   text-decoration: underline;
 }
 
+/* SSO Quick Card & Session Modal Styling */
+.sso-quick-card {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid var(--hub-border);
+  background-color: var(--hub-card-bg);
+}
+.sso-quick-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(66, 133, 244, 0.4);
+  box-shadow: 0 8px 20px -3px rgba(66, 133, 244, 0.12);
+}
+
+.hub-session-tab {
+  background-color: transparent;
+  color: var(--hub-primary);
+  border: 1px solid transparent;
+}
+.hub-session-tab.active {
+  background-color: #516070;
+  color: #ffffff;
+  border-color: #516070;
+}
+.hub-session-tab:hover:not(.active) {
+  background-color: rgba(81, 96, 112, 0.08);
+}
+
+.dark .hub-session-tab {
+  color: #c6d6e9;
+}
+.dark .hub-session-tab.active {
+  background-color: #70b4f8;
+  color: #0d1117;
+  border-color: #70b4f8;
+}
+.dark .hub-session-tab:hover:not(.active) {
+  background-color: rgba(255, 255, 255, 0.06);
+}
+
+.dark .sso-quick-card {
+  background-color: #161c24 !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+.dark .sso-quick-card:hover {
+  border-color: rgba(112, 180, 248, 0.4) !important;
+  box-shadow: 0 8px 20px -3px rgba(112, 180, 248, 0.15) !important;
+}
+
 /* Toast Notification in Dark Mode */
 .dark .toast {
   background-color: #1c232d !important;

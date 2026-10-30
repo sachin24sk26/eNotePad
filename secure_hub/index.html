@@ -19,7 +19,7 @@
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 
   <!-- Custom Secure Hub Styling -->
-  <link rel="stylesheet" href="css/secure-hub.css?v=1.1" />
+  <link rel="stylesheet" href="css/secure-hub.css?v=2.0" />
 
   <!-- Tailwind Config: Tactile Editorial Design System -->
   <script>
@@ -117,6 +117,12 @@
         <span>Sign In with Google</span>
       </button>
 
+      <!-- Session & Login History Trigger Button -->
+      <button id="hubSessionHistoryBtn" type="button" class="px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-full text-xs font-bold bg-surface-container-low dark:bg-white/5 border border-outline-variant/20 hover:border-primary/40 text-on-surface hover:bg-surface-container transition-all flex items-center gap-1.5 shadow-xs cursor-pointer" title="View Active Devices, Login History &amp; SSO Activity">
+        <span class="material-symbols-outlined text-sm text-primary dark:text-[#70b4f8]">manage_history</span>
+        <span class="hidden md:inline">Session History</span>
+      </button>
+
       <!-- Theme Switcher -->
       <button id="themeToggle" type="button" class="w-8 h-8 rounded-full border border-outline-variant/20 flex items-center justify-center hover:bg-surface-container transition-all text-primary dark:text-[#c6d6e9]" title="Toggle Dark/Light Mode" aria-label="Toggle theme">
         <span class="material-symbols-outlined text-[17px] dark:hidden">dark_mode</span>
@@ -195,6 +201,43 @@
     </div>
   </section>
 
+  <!-- ===== GOOGLE SSO APPS & CLOUD ECOSYSTEM SECTION ===== -->
+  <section class="max-w-6xl w-full mx-auto px-4 sm:px-6 pb-6" id="ssoAppsSection">
+    <div class="bg-surface-container-lowest border border-outline-variant/15 rounded-3xl p-5 sm:p-7 editorial-shadow relative overflow-hidden">
+      
+      <!-- Top Bar: Title, SSO Status Pill & History Shortcut -->
+      <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 pb-4 border-b border-outline-variant/10">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center flex-shrink-0">
+            <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          </div>
+          <div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <h2 class="text-base sm:text-lg font-headline font-bold text-on-surface">Google SSO &amp; Cloud Apps</h2>
+              <span id="ssoBannerBadge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> 1-Click SSO Ready
+              </span>
+            </div>
+            <p class="text-xs text-on-surface-variant font-body">Launch connected web tools with verified Google single sign-on continuity and persistent browser sessions.</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 w-full md:w-auto justify-end flex-wrap">
+          <button id="ssoHistoryQuickBtn" type="button" class="px-3.5 py-1.5 rounded-xl bg-surface-container-low hover:bg-surface-container text-primary dark:text-[#70b4f8] text-xs font-semibold border border-outline-variant/15 flex items-center gap-1.5 transition-all shadow-xs cursor-pointer" title="View SSO Launch Activity &amp; Active Device Sessions">
+            <span class="material-symbols-outlined text-sm">manage_history</span>
+            <span>SSO Activity &amp; Sessions</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Featured SSO Apps Quick Grid -->
+      <div id="ssoAppsQuickGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 pt-4">
+        <!-- Dynamically injected via secure-hub.js -->
+      </div>
+
+    </div>
+  </section>
+
   <!-- ===== SEARCH & FILTER CONTROLS ===== -->
   <section class="max-w-6xl w-full mx-auto px-4 sm:px-6 pb-4">
     <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
@@ -219,6 +262,10 @@
         </button>
         <button type="button" data-category="favorites" class="category-pill px-3.5 py-1.5 rounded-xl border border-outline-variant/20 text-xs font-semibold bg-surface-container-lowest text-on-surface whitespace-nowrap flex items-center gap-1">
           <span class="text-amber-500">⭐</span> Favorites
+        </button>
+        <button type="button" data-category="sso" class="category-pill px-3.5 py-1.5 rounded-xl border border-outline-variant/20 text-xs font-semibold bg-surface-container-lowest text-on-surface whitespace-nowrap flex items-center gap-1.5">
+          <svg class="w-3 h-3 flex-shrink-0" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          Google SSO
         </button>
         <button type="button" data-category="google" class="category-pill px-3.5 py-1.5 rounded-xl border border-outline-variant/20 text-xs font-semibold bg-surface-container-lowest text-on-surface whitespace-nowrap">
           Google Suite
@@ -388,6 +435,141 @@
     </div>
   </div>
 
+  <!-- ===== SESSION & LOGIN HISTORY MODAL ===== -->
+  <div id="hubSessionModal" class="fixed inset-0 z-[9995] bg-black/50 modal-backdrop hidden items-center justify-center p-3 sm:p-4">
+    <div class="bg-surface-container-lowest w-full max-w-2xl max-h-[90vh] rounded-3xl p-5 sm:p-7 editorial-shadow border border-outline-variant/15 modal-panel flex flex-col relative overflow-hidden">
+      
+      <!-- Modal Header -->
+      <div class="flex items-start justify-between pb-4 border-b border-outline-variant/10 flex-shrink-0">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-primary/10 text-primary dark:text-[#70b4f8] flex items-center justify-center flex-shrink-0">
+            <span class="material-symbols-outlined text-2xl">manage_history</span>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="font-headline font-bold text-base sm:text-lg text-on-surface">Session &amp; Login History</h3>
+              <span id="hubActiveIndicator" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Active
+              </span>
+            </div>
+            <p class="text-xs text-on-surface-variant font-body">Track connected devices, Google SSO sign-ins, and launched cloud applications.</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-1">
+          <button id="hubSessionRefreshBtn" type="button" class="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant/60 hover:text-on-surface hover:bg-surface-container transition-all cursor-pointer" title="Refresh session data">
+            <span class="material-symbols-outlined text-lg" id="hubRefreshIcon">refresh</span>
+          </button>
+          <button id="hubSessionModalCloseBtn" type="button" class="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant/60 hover:text-on-surface hover:bg-surface-container transition-all cursor-pointer" title="Close modal">
+            <span class="material-symbols-outlined text-lg">close</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Scrollable Modal Body -->
+      <div class="overflow-y-auto flex-1 py-4 space-y-4 custom-scrollbar pr-1">
+        
+        <!-- Current Device & SSO Status Card (Prominent Header) -->
+        <div class="bg-surface-container-low dark:bg-white/[0.03] rounded-2xl p-4 sm:p-5 border border-outline-variant/15 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div class="flex items-center gap-3.5 min-w-0">
+            <div class="w-11 h-11 rounded-xl bg-primary/10 dark:bg-white/5 text-primary dark:text-[#70b4f8] flex items-center justify-center flex-shrink-0 shadow-xs">
+              <span class="material-symbols-outlined text-2xl" id="currentDeviceIcon">laptop_mac</span>
+            </div>
+            <div class="min-w-0">
+              <div class="flex items-center gap-2 flex-wrap">
+                <h4 class="font-headline font-bold text-sm sm:text-base text-on-surface truncate" id="currentDeviceName">Desktop • Browser</h4>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">Current Device</span>
+              </div>
+              <div class="flex items-center gap-2 text-xs text-on-surface-variant/80 flex-wrap mt-0.5">
+                <span id="currentDeviceIp">IP: Fetching...</span>
+                <span>•</span>
+                <span id="currentDeviceMethod">Google SSO (Gmail)</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2 flex-shrink-0 w-full sm:w-auto justify-end">
+            <button id="hubLogoutOtherBtn" type="button" class="w-full sm:w-auto px-3.5 py-1.5 rounded-xl bg-error/10 hover:bg-error/20 text-error text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer">
+              <span class="material-symbols-outlined text-sm">phonelink_erase</span>
+              <span>Sign Out Others</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Modal Tab Switcher -->
+        <div class="flex items-center gap-2 border-b border-outline-variant/15 pb-2" id="hubSessionTabs">
+          <button type="button" data-tab="devices" class="hub-session-tab active px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all">
+            <span class="material-symbols-outlined text-sm">devices</span>
+            <span>Active Devices</span>
+            <span class="text-[10px] font-mono px-1.5 py-0.2 rounded-full bg-primary/10 dark:bg-white/10" id="hubTabDevicesCount">1</span>
+          </button>
+          <button type="button" data-tab="apps" class="hub-session-tab px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all">
+            <span class="material-symbols-outlined text-sm">apps</span>
+            <span>SSO App Launches</span>
+            <span class="text-[10px] font-mono px-1.5 py-0.2 rounded-full bg-primary/10 dark:bg-white/10" id="hubTabAppsCount">0</span>
+          </button>
+          <button type="button" data-tab="history" class="hub-session-tab px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all">
+            <span class="material-symbols-outlined text-sm">history</span>
+            <span>Login Audit Trail</span>
+            <span class="text-[10px] font-mono px-1.5 py-0.2 rounded-full bg-primary/10 dark:bg-white/10" id="hubTabHistoryCount">0</span>
+          </button>
+        </div>
+
+        <!-- Tab 1: Active Devices Panel -->
+        <div id="hubPanelDevices" class="space-y-3">
+          <div class="flex items-center justify-between text-xs text-on-surface-variant">
+            <span>Devices currently signed in with this account</span>
+            <span class="text-[11px] font-mono text-on-surface-variant/60" id="hubSessionIdDisplay">Session ID: ...</span>
+          </div>
+          <div id="hubSessionsList" class="space-y-2.5">
+            <!-- Dynamically injected via secure-hub.js -->
+          </div>
+        </div>
+
+        <!-- Tab 2: SSO App Launches Panel -->
+        <div id="hubPanelApps" class="space-y-3 hidden">
+          <div class="flex items-center justify-between text-xs text-on-surface-variant">
+            <span>Tools &amp; services launched via Secure Hub Google SSO</span>
+            <button id="clearHubAppHistoryBtn" type="button" class="text-[11px] text-error/80 hover:text-error hover:underline flex items-center gap-1 cursor-pointer">
+              <span class="material-symbols-outlined text-xs">delete_sweep</span>
+              <span>Clear Activity</span>
+            </button>
+          </div>
+          <div id="hubAppHistoryList" class="space-y-2.5">
+            <!-- Dynamically injected via secure-hub.js -->
+          </div>
+        </div>
+
+        <!-- Tab 3: Login History Panel -->
+        <div id="hubPanelHistory" class="space-y-3 hidden">
+          <div class="flex items-center justify-between text-xs text-on-surface-variant">
+            <span>Audit trail of all previous logins and security sessions</span>
+            <button id="clearHubLoginHistoryBtn" type="button" class="text-[11px] text-error/80 hover:text-error hover:underline flex items-center gap-1 cursor-pointer">
+              <span class="material-symbols-outlined text-xs">delete_sweep</span>
+              <span>Clear Inactive</span>
+            </button>
+          </div>
+          <div id="hubLoginHistoryList" class="space-y-2.5">
+            <!-- Dynamically injected via secure-hub.js -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="pt-3 border-t border-outline-variant/10 flex items-center justify-between text-xs text-on-surface-variant flex-shrink-0">
+        <div class="flex items-center gap-1 text-[11px] text-on-surface-variant/70">
+          <span class="material-symbols-outlined text-sm text-emerald-500">verified</span>
+          <span>Zero passwords saved • Encrypted isolated sessions</span>
+        </div>
+        <button id="hubSessionModalDoneBtn" type="button" class="px-4 py-1.5 rounded-xl bg-primary hover:bg-primary-dim text-white text-xs font-bold transition-all shadow-xs cursor-pointer">
+          Done
+        </button>
+      </div>
+
+    </div>
+  </div>
+
   <!-- ===== FOOTER ===== -->
   <footer class="border-t border-outline-variant/15 bg-surface-container-low py-8 mt-12 text-center text-xs text-on-surface-variant">
     <div class="max-w-6xl mx-auto px-4 space-y-3">
@@ -436,7 +618,7 @@
   <script src="../js/utils.js"></script>
 
   <!-- Secure Hub Engine -->
-  <script src="js/secure-hub.js?v=1.5"></script>
+  <script src="js/secure-hub.js?v=2.0"></script>
 </body>
 </html>
 

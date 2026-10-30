@@ -270,6 +270,11 @@
   // Storage Keys
   const STORAGE_KEY_CUSTOM = 'enotepad_secure_hub_custom_sites';
   const STORAGE_KEY_FAVS = 'enotepad_secure_hub_favorites';
+  const STORAGE_KEY_RECENT_LAUNCHES = 'enotepad_hub_recent_launches';
+
+  // ─── Session & Modal State ───
+  let currentSessionTab = 'devices';
+  let cachedClientIp = null;
 
   // ─── DOM References ───
   let sitesGrid;
@@ -287,6 +292,35 @@
   let emptyState;
   let statsTotalCount;
 
+  // SSO Section & Session History Modal References
+  let ssoAppsQuickGrid;
+  let ssoBannerBadge;
+  let ssoHistoryQuickBtn;
+  let hubSessionHistoryBtn;
+  let hubSessionModal;
+  let hubSessionModalCloseBtn;
+  let hubSessionModalDoneBtn;
+  let hubSessionRefreshBtn;
+  let hubRefreshIcon;
+  let hubSessionTabs;
+  let hubPanelDevices;
+  let hubPanelApps;
+  let hubPanelHistory;
+  let hubSessionsList;
+  let hubAppHistoryList;
+  let hubLoginHistoryList;
+  let hubLogoutOtherBtn;
+  let clearHubAppHistoryBtn;
+  let clearHubLoginHistoryBtn;
+  let currentDeviceIcon;
+  let currentDeviceName;
+  let currentDeviceIp;
+  let currentDeviceMethod;
+  let hubSessionIdDisplay;
+  let hubTabDevicesCount;
+  let hubTabAppsCount;
+  let hubTabHistoryCount;
+
   // ─── Initialization ───
   function init() {
     bindDomElements();
@@ -294,6 +328,7 @@
     loadLocalState();
     setupEventListeners();
     initAuthObserver();
+    renderSsoAppsQuickGrid();
     renderSites();
   }
 
@@ -312,6 +347,35 @@
     themeToggleBtn = document.getElementById('themeToggle');
     emptyState = document.getElementById('emptyState');
     statsTotalCount = document.getElementById('statsTotalCount');
+
+    // SSO Section & Session History Modal
+    ssoAppsQuickGrid = document.getElementById('ssoAppsQuickGrid');
+    ssoBannerBadge = document.getElementById('ssoBannerBadge');
+    ssoHistoryQuickBtn = document.getElementById('ssoHistoryQuickBtn');
+    hubSessionHistoryBtn = document.getElementById('hubSessionHistoryBtn');
+    hubSessionModal = document.getElementById('hubSessionModal');
+    hubSessionModalCloseBtn = document.getElementById('hubSessionModalCloseBtn');
+    hubSessionModalDoneBtn = document.getElementById('hubSessionModalDoneBtn');
+    hubSessionRefreshBtn = document.getElementById('hubSessionRefreshBtn');
+    hubRefreshIcon = document.getElementById('hubRefreshIcon');
+    hubSessionTabs = document.getElementById('hubSessionTabs');
+    hubPanelDevices = document.getElementById('hubPanelDevices');
+    hubPanelApps = document.getElementById('hubPanelApps');
+    hubPanelHistory = document.getElementById('hubPanelHistory');
+    hubSessionsList = document.getElementById('hubSessionsList');
+    hubAppHistoryList = document.getElementById('hubAppHistoryList');
+    hubLoginHistoryList = document.getElementById('hubLoginHistoryList');
+    hubLogoutOtherBtn = document.getElementById('hubLogoutOtherBtn');
+    clearHubAppHistoryBtn = document.getElementById('clearHubAppHistoryBtn');
+    clearHubLoginHistoryBtn = document.getElementById('clearHubLoginHistoryBtn');
+    currentDeviceIcon = document.getElementById('currentDeviceIcon');
+    currentDeviceName = document.getElementById('currentDeviceName');
+    currentDeviceIp = document.getElementById('currentDeviceIp');
+    currentDeviceMethod = document.getElementById('currentDeviceMethod');
+    hubSessionIdDisplay = document.getElementById('hubSessionIdDisplay');
+    hubTabDevicesCount = document.getElementById('hubTabDevicesCount');
+    hubTabAppsCount = document.getElementById('hubTabAppsCount');
+    hubTabHistoryCount = document.getElementById('hubTabHistoryCount');
   }
 
   // ─── Theme Management ───
@@ -435,6 +499,14 @@
 
       if (user && window.db) {
         await syncFromFirestore(user);
+        try {
+          const username = await getUsernameForUser(user);
+          if (username) {
+            await recordLoginSession(username);
+          }
+        } catch (e) {
+          console.warn('[SecureHub] Error recording session:', e);
+        }
       } else if (!user) {
         // Purge private custom sites and reset favorites to defaults on sign-out
         customSites = [];
@@ -445,6 +517,11 @@
         } catch (e) {}
       }
       renderSites();
+      if (isSessionModalOpen()) {
+        loadHubSessions();
+        if (currentSessionTab === 'apps') loadHubAppHistory();
+        if (currentSessionTab === 'history') loadHubLoginHistory();
+      }
     });
   }
 
@@ -459,6 +536,13 @@
           <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Google SSO Synced
         </span>
       `;
+      if (ssoBannerBadge) {
+        ssoBannerBadge.innerHTML = `
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span>Google SSO Active: ${escapeHtml(user.email || name)}</span>
+        `;
+        ssoBannerBadge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center gap-1';
+      }
       if (userAvatar) {
         if (user.photoURL) {
           userAvatar.src = user.photoURL;
@@ -479,6 +563,13 @@
         <span class="font-bold text-on-surface">Guest Session</span>
         <span class="text-xs text-on-surface-variant/70">Connect Google for Cloud Sync</span>
       `;
+      if (ssoBannerBadge) {
+        ssoBannerBadge.innerHTML = `
+          <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+          <span>1-Click Launch Ready</span>
+        `;
+        ssoBannerBadge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 flex items-center gap-1';
+      }
       if (userAvatar) {
         userAvatar.src = '../assets/Favicon.png';
       }
@@ -858,29 +949,13 @@
       win.opener = null;
     }
 
-    // Record launch in Devices & Apps History
-    try {
-      const stored = localStorage.getItem('enotpad_user');
-      let username = null;
-      if (stored) {
-        try { username = JSON.parse(stored)?.username; } catch(e) {}
-      }
-      if (!username && currentUser) {
-        username = currentUser.displayName || (currentUser.email ? currentUser.email.split('@')[0] : currentUser.uid);
-      }
-      if (username && window.db) {
-        window.db.collection('users').doc(username).collection('appLaunches').add({
-          appName: siteName || 'Web App',
-          appUrl: safeUrl,
-          provider: ssoEnabled ? 'Google SSO' : 'Web',
-          category: 'secure_hub',
-          device: /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop',
-          browser: /Chrome/i.test(navigator.userAgent) ? 'Chrome' : /Safari/i.test(navigator.userAgent) ? 'Safari' : /Firefox/i.test(navigator.userAgent) ? 'Firefox' : 'Browser',
-          os: /Windows/i.test(navigator.userAgent) ? 'Windows' : /Mac/i.test(navigator.userAgent) ? 'macOS' : /Android/i.test(navigator.userAgent) ? 'Android' : 'iOS',
-          launchedAt: firebase.firestore.FieldValue.serverTimestamp()
-        }).catch(() => {});
-      }
-    } catch(e) {}
+    // Record app launch event locally & in Firestore
+    recordAppLaunchEvent({
+      appName: siteName || 'Web App',
+      appUrl: safeUrl,
+      provider: ssoEnabled ? 'Google SSO' : 'Direct Launch',
+      category: 'web'
+    });
 
     const userEmail = currentUser && currentUser.email ? currentUser.email : null;
     if (typeof showToast === 'function') {
@@ -916,6 +991,7 @@
 
       if (currentCategory === 'all') return true;
       if (currentCategory === 'favorites') return favoriteIds.has(site.id);
+      if (currentCategory === 'sso') return site.ssoGoogle === true;
       if (currentCategory === 'custom') return site.isCustom === true;
       return site.category === currentCategory;
     });
@@ -1130,6 +1206,63 @@
     if (addSiteForm) {
       addSiteForm.addEventListener('submit', handleAddCustomSite);
     }
+
+    // Session & Login History Modal triggers
+    if (hubSessionHistoryBtn) {
+      hubSessionHistoryBtn.addEventListener('click', () => openSessionModal('devices'));
+    }
+    if (ssoHistoryQuickBtn) {
+      ssoHistoryQuickBtn.addEventListener('click', () => openSessionModal('apps'));
+    }
+    if (hubSessionModalCloseBtn) {
+      hubSessionModalCloseBtn.addEventListener('click', closeSessionModal);
+    }
+    if (hubSessionModalDoneBtn) {
+      hubSessionModalDoneBtn.addEventListener('click', closeSessionModal);
+    }
+    if (hubSessionRefreshBtn) {
+      hubSessionRefreshBtn.addEventListener('click', () => {
+        if (hubRefreshIcon) {
+          hubRefreshIcon.classList.add('animate-spin');
+          setTimeout(() => hubRefreshIcon.classList.remove('animate-spin'), 650);
+        }
+        loadHubSessions();
+        if (currentSessionTab === 'apps') loadHubAppHistory();
+        if (currentSessionTab === 'history') loadHubLoginHistory();
+        if (typeof showToast === 'function') showToast('Session data refreshed 🔄', 'info');
+      });
+    }
+
+    // Modal Tabs Switching
+    if (hubSessionTabs) {
+      hubSessionTabs.addEventListener('click', (e) => {
+        const btn = e.target.closest('.hub-session-tab');
+        if (!btn) return;
+        const tab = btn.getAttribute('data-tab');
+        if (tab) switchSessionTab(tab);
+      });
+    }
+
+    // Backdrop click and ESC for Session Modal
+    if (hubSessionModal) {
+      hubSessionModal.addEventListener('click', (e) => {
+        if (e.target === hubSessionModal) closeSessionModal();
+      });
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && isSessionModalOpen()) closeSessionModal();
+      });
+    }
+
+    // Action buttons inside Session Modal
+    if (hubLogoutOtherBtn) {
+      hubLogoutOtherBtn.addEventListener('click', handleLogoutOtherDevices);
+    }
+    if (clearHubAppHistoryBtn) {
+      clearHubAppHistoryBtn.addEventListener('click', handleClearAppHistory);
+    }
+    if (clearHubLoginHistoryBtn) {
+      clearHubLoginHistoryBtn.addEventListener('click', handleClearEndedSessions);
+    }
   }
 
   function isModalOpen() {
@@ -1149,6 +1282,734 @@
     addSiteModal.classList.add('hidden');
     addSiteModal.classList.remove('flex');
     if (addSiteForm) addSiteForm.reset();
+  }
+
+  // ─── User Agent & Device Resolver ───
+  function parseUserAgent(ua) {
+    let device = 'Desktop';
+    let os = 'Unknown OS';
+    let browser = 'Unknown Browser';
+
+    if (/Mobi|Android|iPhone|iPad|iPod/i.test(ua)) {
+      device = /iPad|Tablet/i.test(ua) ? 'Tablet' : 'Mobile';
+    }
+
+    if (/Windows NT 10/i.test(ua)) os = 'Windows 10/11';
+    else if (/Windows NT/i.test(ua)) os = 'Windows';
+    else if (/Mac OS X/i.test(ua)) os = /iPhone|iPad/i.test(ua) ? 'iOS' : 'macOS';
+    else if (/Android/i.test(ua)) os = 'Android';
+    else if (/Linux/i.test(ua)) os = 'Linux';
+    else if (/CrOS/i.test(ua)) os = 'ChromeOS';
+
+    if (/Edg\//i.test(ua)) browser = 'Edge';
+    else if (/OPR\//i.test(ua)) browser = 'Opera';
+    else if (/Chrome/i.test(ua)) browser = 'Chrome';
+    else if (/Safari/i.test(ua) && !/Chrome/i.test(ua)) browser = 'Safari';
+    else if (/Firefox/i.test(ua)) browser = 'Firefox';
+
+    return { device, os, browser };
+  }
+
+  function generateSessionToken() {
+    const arr = new Uint8Array(24);
+    crypto.getRandomValues(arr);
+    return Array.from(arr, b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  function formatFullDateTime(timestamp) {
+    if (!timestamp) return 'Unknown';
+    let date;
+    if (timestamp && timestamp.toDate) date = timestamp.toDate();
+    else if (timestamp instanceof Date) date = timestamp;
+    else date = new Date(timestamp);
+    if (isNaN(date.getTime())) return 'Unknown';
+    return date.toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+
+  async function getClientIp() {
+    if (cachedClientIp) return cachedClientIp;
+    try {
+      const res = await fetch('https://api.ipify.org?format=json', { signal: AbortSignal.timeout(1200) });
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.ip) {
+          cachedClientIp = data.ip;
+          return cachedClientIp;
+        }
+      }
+    } catch (e) {}
+    return 'Direct Web';
+  }
+
+  async function getUsernameForUser(user) {
+    if (!user) return null;
+    try {
+      if (typeof getCurrentUser === 'function') {
+        const u = getCurrentUser();
+        if (u && u.username) return u.username;
+      }
+    } catch (e) {}
+
+    if (window.db) {
+      try {
+        const snap = await window.db.collection('users').where('uid', '==', user.uid).limit(1).get();
+        if (!snap.empty) {
+          return snap.docs[0].id;
+        }
+      } catch (e) {}
+
+      if (user.email) {
+        try {
+          const snapEmail = await window.db.collection('users').where('email', '==', user.email.toLowerCase().trim()).limit(1).get();
+          if (!snapEmail.empty) {
+            return snapEmail.docs[0].id;
+          }
+        } catch (e) {}
+      }
+    }
+
+    return (user.email ? user.email.split('@')[0] : 'user').replace(/[^a-zA-Z0-9_]/g, '').toLowerCase() || user.uid;
+  }
+
+  // ─── Record Login Session ───
+  async function recordLoginSession(username) {
+    if (!username || !window.db) return;
+    try {
+      const ua = navigator.userAgent;
+      const deviceInfo = parseUserAgent(ua);
+      const authUser = firebase.auth().currentUser;
+      const isGoogle = authUser && authUser.providerData && authUser.providerData.some(p => p.providerId === 'google.com');
+      const loginMethod = isGoogle ? 'Google SSO (Gmail)' : (authUser?.isAnonymous ? 'Guest' : 'Password');
+      const accountEmail = (authUser && authUser.email) ? authUser.email : '';
+
+      const existingSessionId = localStorage.getItem('enotepad_session_id');
+      const existingToken = localStorage.getItem('enotepad_session_token');
+
+      if (existingSessionId && existingToken) {
+        try {
+          const docRef = window.db.collection('users').doc(username).collection('sessions').doc(existingSessionId);
+          const doc = await docRef.get();
+          if (doc.exists && doc.data().isActive) {
+            await docRef.update({
+              lastSeen: firebase.firestore.FieldValue.serverTimestamp(),
+              loginMethod,
+              accountEmail: accountEmail || doc.data().accountEmail || ''
+            });
+            return;
+          }
+        } catch (e) {
+          console.warn('[SecureHub] Session reuse notice:', e);
+        }
+      }
+
+      const sessionId = 'ses_' + generateSessionToken().slice(0, 16);
+      let myToken = localStorage.getItem('enotepad_session_token');
+      if (!myToken) {
+        myToken = generateSessionToken();
+        localStorage.setItem('enotepad_session_token', myToken);
+      }
+      await window.db.collection('users').doc(username).update({ sessionToken: myToken }).catch(() => {});
+
+      const clientIp = await getClientIp();
+
+      const sessionData = {
+        sessionId,
+        sessionToken: myToken,
+        loginMethod,
+        accountEmail,
+        device: deviceInfo.device,
+        browser: deviceInfo.browser,
+        os: deviceInfo.os,
+        ip: clientIp,
+        loginAt: firebase.firestore.FieldValue.serverTimestamp(),
+        lastSeen: firebase.firestore.FieldValue.serverTimestamp(),
+        isActive: true,
+        userAgent: ua.substring(0, 200)
+      };
+
+      localStorage.setItem('enotepad_session_id', sessionId);
+      await window.db.collection('users').doc(username).collection('sessions').doc(sessionId).set(sessionData);
+    } catch (e) {
+      console.warn('[SecureHub] Session record error:', e);
+    }
+  }
+
+  // ─── Record App Launch Event ───
+  async function recordAppLaunchEvent(appInfo) {
+    const ua = navigator.userAgent;
+    const deviceInfo = parseUserAgent(ua);
+    const now = Date.now();
+
+    const launchRecord = {
+      appName: appInfo.appName,
+      appUrl: appInfo.appUrl,
+      provider: appInfo.provider || 'Google SSO',
+      category: appInfo.category || 'web',
+      device: deviceInfo.device,
+      browser: deviceInfo.browser,
+      os: deviceInfo.os,
+      launchedAtMs: now
+    };
+
+    // 1. Local storage cache
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY_RECENT_LAUNCHES);
+      let list = raw ? JSON.parse(raw) : [];
+      if (!Array.isArray(list)) list = [];
+      list.unshift(launchRecord);
+      list = list.slice(0, 30);
+      localStorage.setItem(STORAGE_KEY_RECENT_LAUNCHES, JSON.stringify(list));
+    } catch (e) {}
+
+    // 2. Firestore sync
+    if (currentUser && window.db) {
+      try {
+        const username = await getUsernameForUser(currentUser);
+        if (username) {
+          await window.db.collection('users').doc(username).collection('appLaunches').add({
+            appName: appInfo.appName,
+            appUrl: appInfo.appUrl,
+            provider: appInfo.provider || 'Google SSO',
+            category: appInfo.category || 'web',
+            device: deviceInfo.device,
+            browser: deviceInfo.browser,
+            os: deviceInfo.os,
+            launchedAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+        }
+      } catch (err) {
+        console.warn('[SecureHub] Firestore app launch save warning:', err);
+      }
+    }
+
+    if (isSessionModalOpen() && currentSessionTab === 'apps') {
+      loadHubAppHistory();
+    }
+  }
+
+  // ─── Render Google SSO Apps Shelf ───
+  function renderSsoAppsQuickGrid() {
+    if (!ssoAppsQuickGrid) return;
+    const ssoPresetIds = ['gmail', 'gdrive', 'gdocs', 'gsheets', 'gcalendar', 'gmeet', 'youtube', 'github', 'notion', 'chatgpt', 'canva', 'figma'];
+    const ssoSites = PRESET_SITES.filter(s => ssoPresetIds.includes(s.id));
+
+    const html = ssoSites.map(site => {
+      const faviconUrl = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(site.domain)}&sz=128`;
+      return `
+        <div class="sso-quick-card rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between group relative cursor-pointer" onclick="launchSite('${site.url}', '${escapeHtml(site.name)}', true)" title="1-Click Launch ${escapeHtml(site.name)} via Google SSO">
+          <div class="flex items-center gap-2.5 mb-2.5">
+            <div class="w-8 h-8 rounded-xl bg-surface-container-low dark:bg-white/5 flex items-center justify-center p-1.5 border border-outline-variant/15 flex-shrink-0 group-hover:scale-110 transition-transform overflow-hidden shadow-xs">
+              <img src="${faviconUrl}" alt="${escapeHtml(site.name)}" class="w-full h-full object-contain" onerror="this.style.display='none';this.nextElementSibling.style.display='block';" />
+              <span class="material-symbols-outlined text-primary text-base" style="display:none;">${site.icon || 'public'}</span>
+            </div>
+            <div class="min-w-0 flex-1 leading-tight">
+              <h4 class="font-headline font-bold text-xs sm:text-sm text-on-surface truncate group-hover:text-primary transition-colors">${escapeHtml(site.name)}</h4>
+              <span class="text-[10px] text-on-surface-variant/70 font-mono truncate block">${escapeHtml(site.domain.replace(/^www\./, ''))}</span>
+            </div>
+          </div>
+          
+          <div class="flex items-center justify-between pt-2 border-t border-outline-variant/10 text-[10px]">
+            <span class="sso-badge-google text-[9px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-1">
+              <svg class="w-2 h-2 flex-shrink-0" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+              SSO
+            </span>
+            <span class="text-primary dark:text-[#70b4f8] font-bold flex items-center gap-0.5 group-hover:translate-x-0.5 transition-transform">
+              Launch
+              <span class="material-symbols-outlined text-[11px]">open_in_new</span>
+            </span>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    ssoAppsQuickGrid.innerHTML = html;
+  }
+
+  // ─── Session & Login History Modal Controller ───
+  function isSessionModalOpen() {
+    return hubSessionModal && !hubSessionModal.classList.contains('hidden');
+  }
+
+  function openSessionModal(defaultTab = 'devices') {
+    if (!hubSessionModal) return;
+    hubSessionModal.classList.remove('hidden');
+    hubSessionModal.classList.add('flex');
+    switchSessionTab(defaultTab);
+  }
+
+  function closeSessionModal() {
+    if (!hubSessionModal) return;
+    hubSessionModal.classList.add('hidden');
+    hubSessionModal.classList.remove('flex');
+  }
+
+  function switchSessionTab(tabName) {
+    currentSessionTab = tabName;
+    if (hubSessionTabs) {
+      hubSessionTabs.querySelectorAll('.hub-session-tab').forEach(b => {
+        if (b.getAttribute('data-tab') === tabName) {
+          b.classList.add('active');
+        } else {
+          b.classList.remove('active');
+        }
+      });
+    }
+
+    if (hubPanelDevices) hubPanelDevices.classList.toggle('hidden', tabName !== 'devices');
+    if (hubPanelApps) hubPanelApps.classList.toggle('hidden', tabName !== 'apps');
+    if (hubPanelHistory) hubPanelHistory.classList.toggle('hidden', tabName !== 'history');
+
+    loadHubSessions();
+    if (tabName === 'apps') loadHubAppHistory();
+    else if (tabName === 'history') loadHubLoginHistory();
+  }
+
+  async function loadHubSessions() {
+    if (!hubSessionsList) return;
+    hubSessionsList.innerHTML = `<div class="flex items-center justify-center py-6 text-on-surface-variant/40 text-xs"><span class="material-symbols-outlined text-base mr-2 animate-spin">progress_activity</span> Loading active devices...</div>`;
+
+    const ua = navigator.userAgent;
+    const currentDevice = parseUserAgent(ua);
+    const mySessionId = localStorage.getItem('enotepad_session_id') || 'Current Browser';
+
+    if (currentDeviceName) {
+      currentDeviceName.textContent = `${currentDevice.os} • ${currentDevice.browser}`;
+    }
+    if (currentDeviceIcon) {
+      currentDeviceIcon.textContent = currentDevice.device === 'Mobile' ? 'phone_android' : (currentDevice.device === 'Tablet' ? 'tablet' : 'laptop_mac');
+    }
+    if (hubSessionIdDisplay) {
+      hubSessionIdDisplay.textContent = `Session: ${mySessionId.slice(0, 16)}`;
+    }
+
+    getClientIp().then(ip => {
+      if (currentDeviceIp) currentDeviceIp.textContent = `IP: ${ip}`;
+    });
+
+    if (!currentUser || !window.db) {
+      if (currentDeviceMethod) {
+        currentDeviceMethod.textContent = 'Guest Browser Session';
+      }
+      if (hubTabDevicesCount) hubTabDevicesCount.textContent = '1';
+      hubSessionsList.innerHTML = `
+        <div class="p-4 rounded-2xl bg-surface-container-low border border-outline-variant/15 flex items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
+              <span class="material-symbols-outlined text-lg">${currentDevice.device === 'Mobile' ? 'phone_android' : 'laptop_mac'}</span>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-bold text-on-surface">${currentDevice.os} • ${currentDevice.browser}</span>
+                <span class="text-[9px] font-bold px-1.5 py-0.2 rounded-full bg-emerald-500/10 text-emerald-600">Active</span>
+              </div>
+              <p class="text-[11px] text-on-surface-variant/70">Local guest session on this browser</p>
+            </div>
+          </div>
+          <button type="button" onclick="document.getElementById('authActionBtn').click()" class="px-3 py-1.5 rounded-xl bg-primary text-white text-[11px] font-bold hover:bg-primary-dim transition-all cursor-pointer">
+            Sign In to Sync
+          </button>
+        </div>
+        <div class="p-3.5 rounded-2xl bg-primary/5 border border-primary/15 text-xs text-on-surface-variant flex items-center gap-2.5">
+          <span class="material-symbols-outlined text-primary text-lg flex-shrink-0">cloud_sync</span>
+          <span>Sign in with Google to sync your active sessions, revoke other devices, and view cross-device login history.</span>
+        </div>
+      `;
+      return;
+    }
+
+    if (currentDeviceMethod) {
+      currentDeviceMethod.textContent = currentUser.email ? `Google SSO (${currentUser.email})` : 'Google SSO (Gmail)';
+    }
+
+    try {
+      const username = await getUsernameForUser(currentUser);
+      let sessionsSnap;
+      try {
+        sessionsSnap = await window.db.collection('users').doc(username).collection('sessions').where('isActive', '==', true).get();
+      } catch (e) {
+        sessionsSnap = await window.db.collection('users').doc(username).collection('sessions').limit(10).get();
+      }
+
+      const docs = [];
+      sessionsSnap.forEach(d => docs.push(d.data()));
+
+      if (hubTabDevicesCount) hubTabDevicesCount.textContent = docs.length || 1;
+
+      if (docs.length === 0) {
+        hubSessionsList.innerHTML = `
+          <div class="p-4 rounded-2xl bg-surface-container-low border border-outline-variant/15 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <span class="material-symbols-outlined text-primary text-xl">devices</span>
+              <div>
+                <span class="text-xs font-bold text-on-surface">${currentDevice.os} • ${currentDevice.browser}</span>
+                <p class="text-[11px] text-on-surface-variant/70">Current Active Device</p>
+              </div>
+            </div>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600">Active Now</span>
+          </div>
+        `;
+        return;
+      }
+
+      hubSessionsList.innerHTML = docs.map(s => {
+        const isCurrent = s.sessionId === mySessionId;
+        const deviceIconName = (s.device === 'Mobile' || s.device === 'Tablet') ? 'phone_android' : 'laptop_mac';
+        const lastSeenStr = s.lastSeen ? (typeof formatTimestamp === 'function' ? formatTimestamp(s.lastSeen) : 'Recently') : 'Active now';
+        return `
+          <div class="p-3.5 sm:p-4 rounded-2xl bg-surface-container-low border border-outline-variant/15 flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3 min-w-0 flex-1">
+              <div class="w-9 h-9 rounded-xl ${isCurrent ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-primary/10 text-primary'} flex items-center justify-center flex-shrink-0">
+                <span class="material-symbols-outlined text-lg">${deviceIconName}</span>
+              </div>
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span class="text-xs sm:text-sm font-bold text-on-surface truncate">${escapeHtml(s.os || 'Unknown OS')} • ${escapeHtml(s.browser || 'Browser')}</span>
+                  ${isCurrent ? '<span class="text-[9px] font-bold px-1.5 py-0.2 rounded-full bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">Current Device</span>' : ''}
+                </div>
+                <div class="flex items-center gap-2 text-[10px] text-on-surface-variant/70 flex-wrap mt-0.5">
+                  <span>IP: ${escapeHtml(s.ip || 'Direct Web')}</span>
+                  <span>•</span>
+                  <span>${escapeHtml(s.loginMethod || 'Google SSO')}</span>
+                  <span>•</span>
+                  <span>Seen ${lastSeenStr}</span>
+                </div>
+              </div>
+            </div>
+            <div class="flex-shrink-0">
+              ${isCurrent ? `
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Active
+                </span>
+              ` : `
+                <button type="button" class="px-2.5 py-1 rounded-lg text-error/80 hover:text-error hover:bg-error/10 text-[11px] font-semibold transition-all logout-single-session-btn cursor-pointer" data-session-id="${escapeHtml(s.sessionId)}" title="Terminate this session">
+                  Sign Out
+                </button>
+              `}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      attachSessionActions();
+
+    } catch (err) {
+      console.error('[SecureHub] Failed to load sessions:', err);
+      hubSessionsList.innerHTML = `<p class="text-xs text-center py-4 text-error/70">Failed to load active sessions.</p>`;
+    }
+  }
+
+  function attachSessionActions() {
+    if (!hubSessionsList) return;
+    hubSessionsList.querySelectorAll('.logout-single-session-btn').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const targetSid = btn.getAttribute('data-session-id');
+        if (!targetSid || !currentUser || !window.db) return;
+        if (!confirm('Terminate this device session?')) return;
+        try {
+          const username = await getUsernameForUser(currentUser);
+          await window.db.collection('users').doc(username).collection('sessions').doc(targetSid).update({ isActive: false });
+          if (typeof showToast === 'function') showToast('Device session terminated 🔒', 'info');
+          loadHubSessions();
+        } catch (err) {
+          console.error('[SecureHub] Single logout error:', err);
+        }
+      });
+    });
+  }
+
+  async function loadHubAppHistory() {
+    if (!hubAppHistoryList) return;
+    hubAppHistoryList.innerHTML = `<div class="flex items-center justify-center py-6 text-on-surface-variant/40 text-xs"><span class="material-symbols-outlined text-base mr-2 animate-spin">progress_activity</span> Loading app activity...</div>`;
+
+    let historyDocs = [];
+
+    if (currentUser && window.db) {
+      try {
+        const username = await getUsernameForUser(currentUser);
+        let snap;
+        try {
+          snap = await window.db.collection('users').doc(username).collection('appLaunches').orderBy('launchedAt', 'desc').limit(25).get();
+        } catch (e) {
+          snap = await window.db.collection('users').doc(username).collection('appLaunches').limit(25).get();
+        }
+        snap.forEach(d => {
+          const data = d.data();
+          historyDocs.push({
+            id: d.id,
+            appName: data.appName,
+            appUrl: data.appUrl,
+            provider: data.provider || 'Google SSO',
+            browser: data.browser,
+            os: data.os,
+            launchedAt: data.launchedAt ? (typeof formatTimestamp === 'function' ? formatTimestamp(data.launchedAt) : 'Recently') : 'Recently',
+            fullTime: data.launchedAt ? formatFullDateTime(data.launchedAt) : ''
+          });
+        });
+      } catch (e) {
+        console.warn('[SecureHub] Firestore app history error:', e);
+      }
+    }
+
+    if (historyDocs.length === 0) {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY_RECENT_LAUNCHES);
+        if (raw) {
+          const localList = JSON.parse(raw);
+          if (Array.isArray(localList)) {
+            localList.forEach((item, idx) => {
+              historyDocs.push({
+                id: 'local_' + idx,
+                appName: item.appName,
+                appUrl: item.appUrl,
+                provider: item.provider || 'Google SSO',
+                browser: item.browser,
+                os: item.os,
+                launchedAt: item.launchedAtMs ? (typeof formatTimestamp === 'function' ? formatTimestamp(new Date(item.launchedAtMs)) : 'Recently') : 'Recently',
+                fullTime: item.launchedAtMs ? new Date(item.launchedAtMs).toLocaleString() : ''
+              });
+            });
+          }
+        }
+      } catch (e) {}
+    }
+
+    if (hubTabAppsCount) hubTabAppsCount.textContent = historyDocs.length;
+
+    if (historyDocs.length === 0) {
+      hubAppHistoryList.innerHTML = `
+        <div class="p-6 rounded-2xl bg-surface-container-low text-center space-y-2 border border-outline-variant/10">
+          <span class="material-symbols-outlined text-2xl text-on-surface-variant/40">apps</span>
+          <p class="text-xs text-on-surface-variant font-medium">No SSO app activity recorded yet.</p>
+          <p class="text-[11px] text-on-surface-variant/70">Launch Gmail, Google Drive, or your favorite tools from the Secure Hub to track your session history.</p>
+        </div>
+      `;
+      return;
+    }
+
+    hubAppHistoryList.innerHTML = historyDocs.slice(0, 15).map(item => {
+      const faviconUrl = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(item.appUrl || 'google.com')}&sz=64`;
+      return `
+        <div class="p-3 sm:p-3.5 rounded-2xl bg-surface-container-low border border-outline-variant/15 flex items-center justify-between gap-3">
+          <div class="flex items-center gap-3 min-w-0 flex-1">
+            <div class="w-8 h-8 rounded-xl bg-surface-container flex items-center justify-center p-1.5 flex-shrink-0 border border-outline-variant/10">
+              <img src="${faviconUrl}" alt="${escapeHtml(item.appName)}" class="w-full h-full object-contain" onerror="this.src='../assets/Favicon.png';" />
+            </div>
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="text-xs font-bold text-on-surface truncate">${escapeHtml(item.appName)}</span>
+                <span class="text-[9px] font-bold px-1.5 py-0.2 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">${escapeHtml(item.provider)}</span>
+              </div>
+              <div class="flex items-center gap-2 text-[10px] text-on-surface-variant/70 flex-wrap mt-0.5">
+                <span>${escapeHtml(item.browser || 'Browser')} on ${escapeHtml(item.os || 'OS')}</span>
+                <span>•</span>
+                <span title="${escapeHtml(item.fullTime)}">Opened ${escapeHtml(item.launchedAt)}</span>
+              </div>
+            </div>
+          </div>
+          <button type="button" onclick="launchSite('${item.appUrl}', '${escapeHtml(item.appName)}', true)" class="px-3 py-1.5 rounded-xl bg-primary/10 hover:bg-primary text-primary hover:text-white transition-all text-xs font-bold flex items-center gap-1 cursor-pointer" title="Re-launch ${escapeHtml(item.appName)}">
+            <span>Open</span>
+            <span class="material-symbols-outlined text-xs">open_in_new</span>
+          </button>
+        </div>
+      `;
+    }).join('');
+  }
+
+  async function loadHubLoginHistory() {
+    if (!hubLoginHistoryList) return;
+    hubLoginHistoryList.innerHTML = `<div class="flex items-center justify-center py-6 text-on-surface-variant/40 text-xs"><span class="material-symbols-outlined text-base mr-2 animate-spin">progress_activity</span> Loading login audit trail...</div>`;
+
+    if (!currentUser || !window.db) {
+      if (hubTabHistoryCount) hubTabHistoryCount.textContent = '1';
+      hubLoginHistoryList.innerHTML = `
+        <div class="p-4 rounded-2xl bg-surface-container-low border border-outline-variant/15 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-emerald-600 text-lg">check_circle</span>
+            <div>
+              <span class="text-xs font-bold text-on-surface">Active Guest Session</span>
+              <p class="text-[11px] text-on-surface-variant/70">Temporary local browser session</p>
+            </div>
+          </div>
+          <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600">Active</span>
+        </div>
+      `;
+      return;
+    }
+
+    try {
+      const username = await getUsernameForUser(currentUser);
+      let snap;
+      try {
+        snap = await window.db.collection('users').doc(username).collection('sessions').orderBy('loginAt', 'desc').limit(25).get();
+      } catch (e) {
+        snap = await window.db.collection('users').doc(username).collection('sessions').limit(25).get();
+      }
+
+      const docs = [];
+      snap.forEach(d => docs.push(d.data()));
+      docs.sort((a, b) => {
+        const getMs = (val) => val ? (val.toMillis ? val.toMillis() : new Date(val).getTime() || 0) : 0;
+        return getMs(b.loginAt) - getMs(a.loginAt);
+      });
+
+      if (hubTabHistoryCount) hubTabHistoryCount.textContent = docs.length;
+
+      if (docs.length === 0) {
+        hubLoginHistoryList.innerHTML = `<p class="text-xs text-center py-4 text-on-surface-variant/60">No login history recorded yet.</p>`;
+        return;
+      }
+
+      const mySessionId = localStorage.getItem('enotepad_session_id');
+
+      hubLoginHistoryList.innerHTML = docs.map(s => {
+        const isCurrent = s.sessionId && s.sessionId === mySessionId;
+        const isActive = s.isActive !== false;
+        const timeStr = s.loginAt ? (typeof formatTimestamp === 'function' ? formatTimestamp(s.loginAt) : 'Recently') : 'Recently';
+        const fullTime = s.loginAt ? formatFullDateTime(s.loginAt) : '';
+
+        return `
+          <div class="p-3.5 rounded-2xl bg-surface-container-low border border-outline-variant/15 flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3 min-w-0 flex-1">
+              <div class="w-8 h-8 rounded-xl ${isActive ? 'bg-emerald-500/10 text-emerald-600' : 'bg-surface-container text-on-surface-variant/60'} flex items-center justify-center flex-shrink-0">
+                <span class="material-symbols-outlined text-lg">${isActive ? 'login' : 'logout'}</span>
+              </div>
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span class="text-xs font-bold text-on-surface truncate">${escapeHtml(s.loginMethod || 'Google SSO')}</span>
+                  ${isCurrent ? '<span class="text-[9px] font-bold px-1.5 py-0.2 rounded-full bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">Current Device</span>' : ''}
+                </div>
+                <div class="flex items-center gap-2 text-[10px] text-on-surface-variant/70 flex-wrap mt-0.5">
+                  <span>${escapeHtml(s.os || 'OS')} • ${escapeHtml(s.browser || 'Browser')}</span>
+                  <span>•</span>
+                  <span>IP: ${escapeHtml(s.ip || 'Direct Web')}</span>
+                  <span>•</span>
+                  <span title="${escapeHtml(fullTime)}">${timeStr}</span>
+                </div>
+              </div>
+            </div>
+            <div class="flex-shrink-0">
+              ${isActive ? `
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">Active</span>
+              ` : `
+                <span class="text-[10px] font-medium px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant/60">Ended</span>
+              `}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+    } catch (err) {
+      console.error('[SecureHub] Login history error:', err);
+      hubLoginHistoryList.innerHTML = `<p class="text-xs text-center py-4 text-error/70">Failed to load login audit trail.</p>`;
+    }
+  }
+
+  async function handleLogoutOtherDevices() {
+    if (!currentUser || !window.db) {
+      if (typeof showToast === 'function') {
+        showToast('Connect with Google to manage and sign out other devices.', 'info');
+      }
+      return;
+    }
+
+    if (!confirm('Are you sure you want to sign out all other devices? Only this current browser will remain active.')) {
+      return;
+    }
+
+    try {
+      const username = await getUsernameForUser(currentUser);
+      if (!username) return;
+
+      const currentSessionId = localStorage.getItem('enotepad_session_id');
+      const newToken = generateSessionToken();
+      localStorage.setItem('enotepad_session_token', newToken);
+
+      await window.db.collection('users').doc(username).update({ sessionToken: newToken });
+
+      const sessionsRef = window.db.collection('users').doc(username).collection('sessions');
+      const activeSnap = await sessionsRef.where('isActive', '==', true).get();
+
+      const batch = window.db.batch();
+      activeSnap.forEach(doc => {
+        if (doc.data().sessionId !== currentSessionId) {
+          batch.update(doc.ref, { isActive: false });
+        }
+      });
+      await batch.commit();
+
+      if (typeof showToast === 'function') {
+        showToast('All other devices have been signed out! 🔒', 'success');
+      }
+
+      loadHubSessions();
+      loadHubLoginHistory();
+    } catch (err) {
+      console.error('[SecureHub] Sign out others error:', err);
+      if (typeof showToast === 'function') {
+        showToast('Failed to sign out other devices.', 'error');
+      }
+    }
+  }
+
+  async function handleClearAppHistory() {
+    if (!confirm('Are you sure you want to clear your SSO app launch activity history?')) {
+      return;
+    }
+
+    try {
+      localStorage.removeItem(STORAGE_KEY_RECENT_LAUNCHES);
+
+      if (currentUser && window.db) {
+        const username = await getUsernameForUser(currentUser);
+        if (username) {
+          const snap = await window.db.collection('users').doc(username).collection('appLaunches').limit(50).get();
+          const batch = window.db.batch();
+          snap.forEach(d => batch.delete(d.ref));
+          await batch.commit();
+        }
+      }
+
+      if (typeof showToast === 'function') {
+        showToast('SSO app launch history cleared! 🧹', 'success');
+      }
+
+      loadHubAppHistory();
+    } catch (err) {
+      console.error('[SecureHub] Clear app history error:', err);
+    }
+  }
+
+  async function handleClearEndedSessions() {
+    if (!currentUser || !window.db) return;
+
+    if (!confirm('Clear all inactive and ended login sessions from audit history?')) {
+      return;
+    }
+
+    try {
+      const username = await getUsernameForUser(currentUser);
+      if (!username) return;
+
+      const snap = await window.db.collection('users').doc(username).collection('sessions').where('isActive', '==', false).limit(50).get();
+      const batch = window.db.batch();
+      snap.forEach(d => batch.delete(d.ref));
+      await batch.commit();
+
+      if (typeof showToast === 'function') {
+        showToast('Ended sessions cleared from audit trail.', 'success');
+      }
+
+      loadHubLoginHistory();
+    } catch (err) {
+      console.error('[SecureHub] Clear ended sessions error:', err);
+    }
   }
 
   // ─── Add Custom Site Handler ───
