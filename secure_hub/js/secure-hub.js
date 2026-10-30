@@ -446,14 +446,99 @@
     }
   }
 
-  function handleHubAuthError(err) {
+    function showHubGoogleHelpModal(reason) {
+    const existing = document.getElementById('hubGoogleHelpModal');
+    if (existing) existing.remove();
+
+    const host = window.location.hostname || 'enotepad.vercel.app';
+    const modal = document.createElement('div');
+    modal.id = 'hubGoogleHelpModal';
+    modal.className = 'fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in';
+    modal.innerHTML = `
+      <div class="bg-surface rounded-2xl max-w-md w-full p-6 shadow-2xl border border-outline-variant/20 space-y-4 text-on-surface">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-full bg-amber-500/10 text-amber-500 flex items-center justify-center flex-shrink-0">
+            <span class="material-symbols-outlined text-2xl">shield_lock</span>
+          </div>
+          <div>
+            <h3 class="font-bold text-base text-primary dark:text-[#d4e4f8]">Google Sign-In Notice</h3>
+            <p class="text-xs text-on-surface-variant">Authorized Domain setup</p>
+          </div>
+        </div>
+
+        <p class="text-xs text-on-surface-variant leading-relaxed">
+          Google's sign-in popup closed automatically because <strong class="text-primary font-semibold">${host}</strong> must be added to your Firebase project's <strong>Authorized Domains</strong>.
+        </p>
+
+        <div class="p-3 bg-surface-container-low rounded-xl text-xs space-y-1.5 border border-outline-variant/10">
+          <div class="font-bold text-primary flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-sm text-emerald-500">check_circle</span>
+            How to fix in 10 seconds:
+          </div>
+          <ol class="list-decimal pl-4 space-y-1 text-on-surface-variant/90 text-[11px]">
+            <li>Open <strong>Firebase Console &gt; Authentication &gt; Settings</strong></li>
+            <li>Click <strong>Authorized domains &gt; Add domain</strong></li>
+            <li>Enter <code class="px-1.5 py-0.5 bg-primary/10 rounded font-mono font-bold text-primary">${host}</code> and click Add</li>
+          </ol>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-2 pt-2">
+          <a href="https://console.firebase.google.com/project/enotpad/authentication/settings" target="_blank" rel="noopener" class="flex-1 py-2.5 px-3 bg-primary text-on-primary rounded-xl font-bold text-xs text-center hover:bg-primary-dim transition-all flex items-center justify-center gap-1.5 shadow-sm">
+            <span>Open Firebase Settings</span>
+            <span class="material-symbols-outlined text-xs">open_in_new</span>
+          </a>
+          <button type="button" id="hubTryRedirectBtn" class="flex-1 py-2.5 px-3 bg-surface-container-high text-primary dark:text-white rounded-xl font-bold text-xs hover:bg-surface-container-highest transition-all flex items-center justify-center gap-1">
+            <span class="material-symbols-outlined text-sm">login</span>
+            <span>Try Full-Page Login</span>
+          </button>
+        </div>
+
+        <div class="text-center pt-1">
+          <button type="button" id="hubCloseHelpBtn" class="text-xs text-on-surface-variant hover:underline bg-transparent border-none cursor-pointer">
+            Dismiss
+          </button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    const close = () => modal.remove();
+    document.getElementById('hubCloseHelpBtn').onclick = close;
+    modal.onclick = (e) => { if (e.target === modal) close(); };
+
+    const redirectBtn = document.getElementById('hubTryRedirectBtn');
+    if (redirectBtn) {
+      redirectBtn.onclick = async () => {
+        close();
+        if (typeof firebase !== 'undefined' && firebase.auth) {
+          const provider = new firebase.auth.GoogleAuthProvider();
+          provider.setCustomParameters({ prompt: 'select_account' });
+          provider.addScope('email');
+          provider.addScope('profile');
+          try {
+            await firebase.auth().signInWithRedirect(provider);
+          } catch (e) {
+            console.error('Redirect sign-in error:', e);
+            if (typeof showToast === 'function') showToast(e.message || 'Redirect failed', 'error');
+          }
+        }
+      };
+    }
+  }
+
+  function handleHubAuthError(err, elapsedMs = 9999) {
     console.error('[SecureHub] Google sign-in failed:', err);
     if (!err) return;
+
+    if (err.code === 'auth/unauthorized-domain' || (err.code === 'auth/popup-closed-by-user' && elapsedMs < 3500)) {
+      showHubGoogleHelpModal(err.code);
+      return;
+    }
+
     let msg = err.message || 'Google login failed';
     if (err.code === 'auth/popup-closed-by-user') {
       msg = 'Sign-in window was closed';
-    } else if (err.code === 'auth/unauthorized-domain') {
-      msg = 'This domain is not authorized in Firebase Console -> Authentication -> Settings -> Authorized Domains.';
     } else if (err.code === 'auth/account-exists-with-different-credential') {
       msg = 'An account already exists with this email address. Please sign in with your email and password on the main notes page.';
     } else if (err.code === 'auth/operation-not-allowed') {
@@ -485,6 +570,8 @@
     provider.addScope('email');
     provider.addScope('profile');
 
+    const startTime = Date.now();
+
     try {
       authActionBtn.disabled = true;
       authActionBtn.classList.add('opacity-70');
@@ -494,16 +581,17 @@
         showToast(`Signed in as ${user.displayName || user.email}! 🚀`, 'success');
       }
     } catch (err) {
+      const elapsed = Date.now() - startTime;
       if (err.code === 'auth/popup-blocked' || err.code === 'auth/cancelled-popup-request') {
         console.warn('[SecureHub] Popup blocked, attempting redirect fallback...');
         try {
           await firebase.auth().signInWithRedirect(provider);
           return;
         } catch (redirectErr) {
-          handleHubAuthError(redirectErr);
+          handleHubAuthError(redirectErr, elapsed);
         }
       } else {
-        handleHubAuthError(err);
+        handleHubAuthError(err, elapsed);
       }
     } finally {
       authActionBtn.disabled = false;
