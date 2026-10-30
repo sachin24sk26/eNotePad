@@ -858,6 +858,30 @@
       win.opener = null;
     }
 
+    // Record launch in Devices & Apps History
+    try {
+      const stored = localStorage.getItem('enotpad_user');
+      let username = null;
+      if (stored) {
+        try { username = JSON.parse(stored)?.username; } catch(e) {}
+      }
+      if (!username && currentUser) {
+        username = currentUser.displayName || (currentUser.email ? currentUser.email.split('@')[0] : currentUser.uid);
+      }
+      if (username && window.db) {
+        window.db.collection('users').doc(username).collection('appLaunches').add({
+          appName: siteName || 'Web App',
+          appUrl: safeUrl,
+          provider: ssoEnabled ? 'Google SSO' : 'Web',
+          category: 'secure_hub',
+          device: /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop',
+          browser: /Chrome/i.test(navigator.userAgent) ? 'Chrome' : /Safari/i.test(navigator.userAgent) ? 'Safari' : /Firefox/i.test(navigator.userAgent) ? 'Firefox' : 'Browser',
+          os: /Windows/i.test(navigator.userAgent) ? 'Windows' : /Mac/i.test(navigator.userAgent) ? 'macOS' : /Android/i.test(navigator.userAgent) ? 'Android' : 'iOS',
+          launchedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }).catch(() => {});
+      }
+    } catch(e) {}
+
     const userEmail = currentUser && currentUser.email ? currentUser.email : null;
     if (typeof showToast === 'function') {
       if (safeUrl.includes('authuser=') || safeUrl.includes('AccountChooser')) {

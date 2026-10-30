@@ -883,6 +883,9 @@ function initAuth() {
     try { loadHistory(username); } catch(e) { console.warn('loadHistory error:', e); }
     try { loadSavedNotes(username); } catch(e) { console.warn('loadSavedNotes error:', e); }
     try { recordLoginSession(username); } catch(e) { console.warn('recordLoginSession error:', e); }
+    try { if (typeof window.loadActiveSessions === 'function') window.loadActiveSessions(username); } catch(e) {}
+    try { if (typeof window.loadLoginHistory === 'function') window.loadLoginHistory(username); } catch(e) {}
+    try { if (typeof window.loadAppHistory === 'function') window.loadAppHistory(username); } catch(e) {}
 
     // Load inbox badge (real-time listener)
     if (typeof window.loadInboxBadge === 'function') {
@@ -966,6 +969,12 @@ function initAuth() {
 
     const activeSessionsList = document.getElementById('activeSessionsList');
     if (activeSessionsList) activeSessionsList.innerHTML = '';
+    const sessionsList = document.getElementById('sessionsList');
+    if (sessionsList) sessionsList.innerHTML = '';
+    const loginHistoryList = document.getElementById('loginHistoryList');
+    if (loginHistoryList) loginHistoryList.innerHTML = '';
+    const appHistoryList = document.getElementById('appHistoryList');
+    if (appHistoryList) appHistoryList.innerHTML = '';
 
     // Clear counters
     setElText('accountNotesCount', '0');
@@ -1302,7 +1311,7 @@ function initAuth() {
       const target = tab.dataset.accountTab;
       document.querySelectorAll('.account-tab').forEach(t => t.classList.remove('active'));
       tab.classList.add('active');
-      ['history', 'recent', 'saved', 'settings', 'files', 'inbox'].forEach(k => {
+      ['history', 'recent', 'saved', 'settings', 'files', 'inbox', 'sessions'].forEach(k => {
         const el = document.getElementById(`section${k.charAt(0).toUpperCase() + k.slice(1)}`);
         if (el) el.setAttribute('data-account-active', k === target ? 'true' : 'false');
       });
@@ -1311,6 +1320,15 @@ function initAuth() {
         const username = (getEl('userName')?.textContent || '').trim();
         if (username && typeof loadHistory === 'function') {
           loadHistory(username);
+        }
+      }
+      // Load Devices, Google SSO & App History when Sessions tab opens
+      if (target === 'sessions') {
+        const username = (getEl('userName')?.textContent || '').trim();
+        if (username) {
+          if (typeof window.loadActiveSessions === 'function') window.loadActiveSessions(username);
+          if (typeof window.loadLoginHistory === 'function') window.loadLoginHistory(username);
+          if (typeof window.loadAppHistory === 'function') window.loadAppHistory(username);
         }
       }
       // Load session data when Settings tab opens
@@ -1332,6 +1350,15 @@ function initAuth() {
       }
     });
   });
+
+  // Jump from Settings to Devices & Apps History
+  const jumpToSessionsBtn = document.getElementById('jumpToSessionsBtn');
+  if (jumpToSessionsBtn) {
+    jumpToSessionsBtn.addEventListener('click', () => {
+      const sessionsTab = document.querySelector('.account-tab[data-account-tab="sessions"]');
+      if (sessionsTab) sessionsTab.click();
+    });
+  }
 
   document.querySelectorAll('.cat-filter-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -1494,7 +1521,7 @@ function initAuth() {
   }
 
   // =========================================================
-  // SESSION MANAGEMENT HELPERS
+  // SESSIONS, DEVICES & GOOGLE / CONNECTED APPS ENGINE
   // =========================================================
 
   /**
@@ -1507,13 +1534,63 @@ function initAuth() {
   }
 
   /**
-   * Record this login as a session in Firestore.
-   * Also writes the session token to Firestore so other devices can detect it.
+   * Parse a User-Agent string into readable device / browser / OS info.
+   */
+  function parseUserAgent(ua) {
+    let device = 'Desktop';
+    let os = 'Unknown OS';
+    let browser = 'Unknown Browser';
+
+    if (/Mobi|Android|iPhone|iPad|iPod/i.test(ua)) {
+      device = /iPad|Tablet/i.test(ua) ? 'Tablet' : 'Mobile';
+    }
+
+    if (/Windows NT 10/i.test(ua)) os = 'Windows 10/11';
+    else if (/Windows NT/i.test(ua)) os = 'Windows';
+    else if (/Mac OS X/i.test(ua)) os = /iPhone|iPad/i.test(ua) ? 'iOS' : 'macOS';
+    else if (/Android/i.test(ua)) os = 'Android';
+    else if (/Linux/i.test(ua)) os = 'Linux';
+    else if (/CrOS/i.test(ua)) os = 'ChromeOS';
+
+    if (/Edg\//i.test(ua)) browser = 'Edge';
+    else if (/OPR\//i.test(ua)) browser = 'Opera';
+    else if (/Chrome/i.test(ua)) browser = 'Chrome';
+    else if (/Safari/i.test(ua) && !/Chrome/i.test(ua)) browser = 'Safari';
+    else if (/Firefox/i.test(ua)) browser = 'Firefox';
+
+    return { device, os, browser };
+  }
+
+  /**
+   * Format full date and time string.
+   */
+  function formatFullDateTime(timestamp) {
+    if (!timestamp) return 'Unknown';
+    let date;
+    if (timestamp && timestamp.toDate) date = timestamp.toDate();
+    else if (timestamp instanceof Date) date = timestamp;
+    else date = new Date(timestamp);
+    if (isNaN(date.getTime())) return 'Unknown';
+    return date.toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+
+  /**
+   * Record this login as an active session in Firestore.
    */
   async function recordLoginSession(username) {
     try {
       const ua = navigator.userAgent;
       const deviceInfo = parseUserAgent(ua);
+      const authUser = firebase.auth().currentUser;
+      const isGoogle = authUser && authUser.providerData && authUser.providerData.some(p => p.providerId === 'google.com');
+      const loginMethod = isGoogle ? 'Google SSO (Gmail)' : (authUser?.isAnonymous ? 'Guest' : 'Password');
+      const accountEmail = (authUser && authUser.email) ? authUser.email : '';
 
       // Check if we can reuse the existing session to avoid duplicate logging on page refresh
       const existingSessionId = localStorage.getItem('enotepad_session_id');
@@ -1526,7 +1603,9 @@ function initAuth() {
           if (doc.exists && doc.data().isActive) {
             // Reuse existing session!
             await docRef.update({
-              lastSeen: firebase.firestore.FieldValue.serverTimestamp()
+              lastSeen: firebase.firestore.FieldValue.serverTimestamp(),
+              loginMethod,
+              accountEmail: accountEmail || doc.data().accountEmail || ''
             });
             console.log('📍 Session reused and updated lastSeen:', existingSessionId);
             return;
@@ -1536,7 +1615,7 @@ function initAuth() {
         }
       }
 
-      const sessionId = generateSessionToken().slice(0, 16);
+      const sessionId = 'ses_' + generateSessionToken().slice(0, 16);
 
       // Write a new session token to the user doc so this becomes the active session
       let myToken = localStorage.getItem('enotepad_session_token');
@@ -1544,55 +1623,153 @@ function initAuth() {
         myToken = generateSessionToken();
         localStorage.setItem('enotepad_session_token', myToken);
       }
-      // Always keep Firestore sessionToken in sync with this active session
       await db.collection('users').doc(username).update({ sessionToken: myToken }).catch(() => {});
+
+      // Non-blocking client IP resolution (max 1200ms)
+      let clientIp = 'Direct Web';
+      try {
+        const ipRes = await fetch('https://api.ipify.org?format=json', { signal: AbortSignal.timeout(1200) });
+        if (ipRes.ok) {
+          const ipData = await ipRes.json();
+          if (ipData && ipData.ip) clientIp = ipData.ip;
+        }
+      } catch (e) {}
 
       const sessionData = {
         sessionId,
         sessionToken: myToken,
+        loginMethod,
+        accountEmail,
         device: deviceInfo.device,
         browser: deviceInfo.browser,
         os: deviceInfo.os,
+        ip: clientIp,
         loginAt: firebase.firestore.FieldValue.serverTimestamp(),
         lastSeen: firebase.firestore.FieldValue.serverTimestamp(),
         isActive: true,
         userAgent: ua.substring(0, 200)
       };
 
-      // Save sessionId so we can update lastSeen
+      // Save sessionId so we can update lastSeen and match current device
       localStorage.setItem('enotepad_session_id', sessionId);
 
       await db.collection('users').doc(username)
         .collection('sessions').doc(sessionId).set(sessionData);
 
-      console.log('📍 Session recorded:', sessionId);
+      console.log('📍 Session recorded:', sessionId, '| Method:', loginMethod);
     } catch (e) {
       console.warn('Session record failed (non-critical):', e.message);
     }
   }
 
   /**
-   * Load and display active sessions in the Settings panel.
+   * Record a web app launch event (e.g. Gmail, Google Drive, GitHub) in Firestore.
+   */
+  window.recordAppLaunch = async function recordAppLaunch(username, appInfo) {
+    if (!username || !appInfo || !window.db) return;
+    try {
+      const ua = navigator.userAgent;
+      const deviceInfo = parseUserAgent(ua);
+      await db.collection('users').doc(username).collection('appLaunches').add({
+        appName: appInfo.appName || 'Web App',
+        appUrl: appInfo.appUrl || '#',
+        provider: appInfo.provider || 'Google SSO',
+        category: appInfo.category || 'tools',
+        device: deviceInfo.device,
+        browser: deviceInfo.browser,
+        os: deviceInfo.os,
+        launchedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      console.log('🚀 App launch recorded:', appInfo.appName);
+    } catch (e) {
+      console.warn('Record app launch error:', e.message);
+    }
+  };
+
+  /**
+   * Helper to get an icon name and color for popular web apps.
+   */
+  function getAppVisuals(appName, appUrl) {
+    const name = (appName || '').toLowerCase();
+    const url = (appUrl || '').toLowerCase();
+    if (name.includes('gmail') || url.includes('mail.google')) {
+      return { icon: 'mail', color: 'text-red-500', bg: 'bg-red-500/10' };
+    }
+    if (name.includes('drive') || url.includes('drive.google')) {
+      return { icon: 'add_to_drive', color: 'text-amber-500', bg: 'bg-amber-500/10' };
+    }
+    if (name.includes('doc') || url.includes('docs.google')) {
+      return { icon: 'description', color: 'text-blue-500', bg: 'bg-blue-500/10' };
+    }
+    if (name.includes('sheet') || url.includes('sheets.google')) {
+      return { icon: 'table_chart', color: 'text-emerald-500', bg: 'bg-emerald-500/10' };
+    }
+    if (name.includes('cal') || url.includes('calendar.google')) {
+      return { icon: 'calendar_month', color: 'text-blue-600', bg: 'bg-blue-600/10' };
+    }
+    if (name.includes('github') || url.includes('github.com')) {
+      return { icon: 'terminal', color: 'text-purple-500', bg: 'bg-purple-500/10' };
+    }
+    if (name.includes('notion') || url.includes('notion.so')) {
+      return { icon: 'notes', color: 'text-slate-700 dark:text-slate-300', bg: 'bg-slate-500/10' };
+    }
+    if (name.includes('youtube') || url.includes('youtube.com')) {
+      return { icon: 'smart_display', color: 'text-red-600', bg: 'bg-red-600/10' };
+    }
+    return { icon: 'open_in_new', color: 'text-primary', bg: 'bg-primary/10' };
+  }
+
+  /**
+   * Load and display active sessions and update Google SSO & Current Device cards.
    */
   window.loadActiveSessions = async function loadActiveSessions(username) {
     const container = document.getElementById('sessionsList');
     if (!container) return;
-    container.innerHTML = `<div class="flex items-center justify-center py-6 text-on-surface-variant/40 text-sm"><span class="material-symbols-outlined text-lg mr-2" style="animation:spin 1s linear infinite">progress_activity</span> Loading…</div>`;
+    container.innerHTML = `<div class="flex items-center justify-center py-6 text-on-surface-variant/40 text-sm"><span class="material-symbols-outlined text-lg mr-2" style="animation:spin 1s linear infinite">progress_activity</span> Loading devices…</div>`;
 
     if (!username) {
-      container.innerHTML = `<p class="text-xs text-center py-4 text-on-surface-variant/50">Please log in to view active sessions.</p>`;
+      container.innerHTML = `<p class="text-xs text-center py-4 text-on-surface-variant/50">Please log in to view active devices.</p>`;
       return;
     }
 
     try {
+      const authUser = firebase.auth().currentUser;
+      const isGoogle = authUser && authUser.providerData && authUser.providerData.some(p => p.providerId === 'google.com');
+
+      // 1. Update Google SSO Status Card
+      const googleEmailEl = document.getElementById('googleAccountEmailText');
+      const googleDetailsEl = document.getElementById('googleAccountDetailsText');
+      const googleBadgeEl = document.getElementById('googleSsoBadge');
+      const googleAvatarWrap = document.getElementById('googleAccountAvatarWrap');
+
+      if (isGoogle && authUser) {
+        if (googleEmailEl) googleEmailEl.textContent = authUser.email || 'Google Account Connected';
+        if (googleDetailsEl) googleDetailsEl.textContent = `Signed in with Google OAuth 2.0 • 1-click SSO active for Gmail & Drive`;
+        if (googleBadgeEl) {
+          googleBadgeEl.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> SSO Active`;
+          googleBadgeEl.className = 'inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20';
+        }
+        if (authUser.photoURL && googleAvatarWrap) {
+          googleAvatarWrap.innerHTML = `<img src="${authUser.photoURL}" alt="Google Avatar" class="w-10 h-10 rounded-xl object-cover shadow-xs" referrerpolicy="no-referrer" />`;
+        }
+      } else {
+        if (googleEmailEl) googleEmailEl.textContent = 'Google Account Not Linked';
+        if (googleDetailsEl) googleDetailsEl.textContent = 'Connect Google to enable instant 1-click SSO for Gmail, Drive and cloud tools';
+        if (googleBadgeEl) {
+          googleBadgeEl.innerHTML = 'Unlinked';
+          googleBadgeEl.className = 'inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-surface-container-high text-on-surface-variant border border-outline-variant/20';
+        }
+      }
+
+      // 2. Fetch Active Sessions from Firestore
       let snap;
       try {
         snap = await db.collection('users').doc(username)
           .collection('sessions')
-          .orderBy('lastSeen', 'desc')
-          .limit(20).get();
-      } catch (orderErr) {
-        console.warn('orderBy lastSeen failed, fetching without orderBy:', orderErr);
+          .where('isActive', '==', true)
+          .limit(25).get();
+      } catch (e) {
+        console.warn('where isActive failed, fetching all sessions:', e);
         snap = await db.collection('users').doc(username)
           .collection('sessions')
           .limit(30).get();
@@ -1605,64 +1782,124 @@ function initAuth() {
         }
       });
 
-      // Sort by lastSeen descending in JS (handles missing index or client-side fallback)
+      // Sort by lastSeen descending
       activeSessions.sort((a, b) => {
         const getMs = (val) => val ? (val.toMillis ? val.toMillis() : new Date(val).getTime() || 0) : 0;
         return getMs(b.data().lastSeen) - getMs(a.data().lastSeen);
       });
 
+      // Update Active Devices Count Badge
+      const countEl = document.getElementById('activeDevicesCount');
+      if (countEl) countEl.textContent = activeSessions.length || 1;
+
+      // 3. Update Current Device Card
       const mySessionId = localStorage.getItem('enotepad_session_id');
+      const ua = navigator.userAgent;
+      const myDeviceInfo = parseUserAgent(ua);
+
+      const curIcon = document.getElementById('currentDeviceIcon');
+      const curTitle = document.getElementById('currentDeviceTitle');
+      const curSubtitle = document.getElementById('currentDeviceSubtitle');
+      const curBadge = document.getElementById('currentSessionIdBadge');
+
+      if (curIcon) {
+        curIcon.textContent = myDeviceInfo.device === 'Mobile' ? 'smartphone' : (myDeviceInfo.device === 'Tablet' ? 'tablet' : 'computer');
+      }
+      if (curTitle) {
+        curTitle.textContent = `${myDeviceInfo.browser} on ${myDeviceInfo.os}`;
+      }
+      if (curSubtitle) {
+        const accountStr = authUser?.email ? ` (${authUser.email})` : '';
+        curSubtitle.textContent = `Signed in as ${username}${accountStr} • Active Now`;
+      }
+      if (curBadge) {
+        curBadge.textContent = mySessionId ? `Session: ${mySessionId.slice(0, 10)}…` : 'Session: Direct';
+      }
+
       container.innerHTML = '';
 
       if (activeSessions.length === 0) {
-        container.innerHTML = `<p class="text-xs text-center py-4 text-on-surface-variant/50">No active sessions found.</p>`;
+        // Fallback card if Firestore sessions was cleared
+        container.innerHTML = `
+          <div class="flex items-center justify-between p-3.5 sm:p-4 rounded-2xl bg-primary/5 border border-primary/15 min-w-0">
+            <div class="flex items-center gap-3.5 min-w-0">
+              <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
+                <span class="material-symbols-outlined text-xl">${myDeviceInfo.device === 'Mobile' ? 'smartphone' : 'computer'}</span>
+              </div>
+              <div class="min-w-0">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <p class="text-xs sm:text-sm font-bold text-on-surface truncate">${myDeviceInfo.browser} on ${myDeviceInfo.os}</p>
+                  <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-primary/15 text-primary border border-primary/20">Current Device</span>
+                </div>
+                <p class="text-[11px] text-on-surface-variant/80 mt-0.5 truncate">${myDeviceInfo.device} • Active Now</p>
+              </div>
+            </div>
+          </div>`;
         return;
       }
 
-      activeSessions.slice(0, 10).forEach(doc => {
+      activeSessions.slice(0, 12).forEach(doc => {
         const s = doc.data();
-        const isCurrentSession = s.sessionId === mySessionId;
-        const lastSeen = s.lastSeen ? formatTimestamp(s.lastSeen) : 'Unknown';
-        const loginAt = s.loginAt ? formatTimestamp(s.loginAt) : 'Unknown';
+        const isCurrentSession = (s.sessionId && s.sessionId === mySessionId);
+        const lastSeen = s.lastSeen ? formatTimestamp(s.lastSeen) : 'Active now';
+        const loginAt = s.loginAt ? formatTimestamp(s.loginAt) : 'Recently';
+        const fullLoginTime = s.loginAt ? formatFullDateTime(s.loginAt) : '';
         const deviceIcon = s.device === 'Mobile' ? 'smartphone' : s.device === 'Tablet' ? 'tablet' : 'computer';
 
+        let methodBadge = '';
+        if (s.loginMethod) {
+          const isG = s.loginMethod.includes('Google');
+          methodBadge = `<span class="px-2 py-0.5 rounded-full text-[9px] font-bold ${isG ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20' : 'bg-surface-container-high text-on-surface-variant'}">${escapeHTML(s.loginMethod)}</span>`;
+        }
+
         const el = document.createElement('div');
-        el.className = `flex items-center justify-between p-3 rounded-xl transition-all ${
+        el.className = `flex items-center justify-between p-3.5 sm:p-4 rounded-2xl transition-all min-w-0 ${
           isCurrentSession
-            ? 'bg-primary/5 border border-primary/15'
-            : 'bg-surface-container hover:bg-surface-container-high'
+            ? 'bg-primary/5 border border-primary/20 shadow-xs'
+            : 'bg-surface-container/60 hover:bg-surface-container border border-outline-variant/10'
         }`;
+
         el.innerHTML = `
-          <div class="flex items-center gap-3 min-w-0">
-            <div class="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 ${
-              isCurrentSession ? 'bg-primary/10 text-primary' : 'bg-surface-container-high text-on-surface-variant'
+          <div class="flex items-center gap-3.5 min-w-0 flex-1">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 shadow-xs ${
+              isCurrentSession ? 'bg-primary text-white' : 'bg-surface-container-high text-on-surface-variant'
             }">
-              <span class="material-symbols-outlined text-lg">${deviceIcon}</span>
+              <span class="material-symbols-outlined text-xl">${deviceIcon}</span>
             </div>
-            <div class="min-w-0">
+            <div class="min-w-0 flex-1">
               <div class="flex items-center gap-2 flex-wrap">
-                <p class="text-xs font-semibold text-on-surface truncate">${escapeHTML(s.browser || 'Browser')} on ${escapeHTML(s.os || 'OS')}</p>
-                ${isCurrentSession ? '<span class="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 bg-primary/15 text-primary rounded-full">This device</span>' : ''}
+                <p class="text-xs sm:text-sm font-bold text-on-surface truncate">${escapeHTML(s.browser || 'Browser')} on ${escapeHTML(s.os || 'OS')}</p>
+                ${isCurrentSession ? '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-primary/15 text-primary border border-primary/20">Current Device</span>' : '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Active</span>'}
+                ${methodBadge}
               </div>
-              <p class="text-[10px] text-on-surface-variant">${escapeHTML(s.device || 'Device')} &bull; Signed in ${loginAt} &bull; Last seen ${lastSeen}</p>
+              <div class="flex items-center gap-2 text-[10px] sm:text-[11px] text-on-surface-variant/75 flex-wrap mt-0.5">
+                <span>${escapeHTML(s.device || 'Device')}</span>
+                <span>&bull;</span>
+                <span>IP: ${escapeHTML(s.ip || 'Direct')}</span>
+                <span>&bull;</span>
+                <span title="${fullLoginTime}">Signed in ${loginAt}</span>
+                <span>&bull;</span>
+                <span>Last active ${lastSeen}</span>
+              </div>
             </div>
           </div>
           ${!isCurrentSession ? `
-          <button class="session-logout-btn flex-shrink-0 ml-2 px-3 py-1.5 rounded-full text-[10px] font-bold text-error/70 bg-error/5 hover:bg-error/10 border border-error/10 transition-all" data-session-id="${s.sessionId}" data-username="${username}">
+          <button class="session-logout-btn flex-shrink-0 ml-2 px-3 py-1.5 rounded-full text-xs font-semibold text-error/80 bg-error/5 hover:bg-error/10 border border-error/10 hover:border-error/25 transition-all flex items-center gap-1 active:scale-[0.98] cursor-pointer" data-session-id="${s.sessionId}" data-username="${username}" title="Sign out this device">
             <span class="material-symbols-outlined text-sm">logout</span>
+            <span class="hidden xs:inline">Sign Out</span>
           </button>` : ''}
         `;
         container.appendChild(el);
       });
 
-      // Attach logout handlers to each session card
+      // Attach individual sign-out handlers
       container.querySelectorAll('.session-logout-btn').forEach(btn => {
         btn.addEventListener('click', async () => {
           const sid = btn.dataset.sessionId;
           const uname = btn.dataset.username;
           showConfirmModal({
             title: 'Sign Out Device',
-            message: 'This device will be immediately signed out.',
+            message: 'Are you sure you want to sign out this device? The session will be revoked immediately.',
             icon: 'logout',
             iconBg: 'rgba(159,64,61,0.08)',
             iconColor: '#9f403d',
@@ -1670,15 +1907,12 @@ function initAuth() {
             confirmClass: 'bg-error text-on-error hover:opacity-90',
             onConfirm: async () => {
               try {
-                // Rotate session token so that device gets signed out
-                const newToken = generateSessionToken();
-                localStorage.setItem('enotepad_session_token', newToken);
-                await db.collection('users').doc(uname).update({ sessionToken: newToken });
                 await db.collection('users').doc(uname).collection('sessions').doc(sid).update({ isActive: false });
-                showToast('Device signed out', 'success');
+                showToast('Device signed out successfully', 'success');
                 loadActiveSessions(uname);
                 loadLoginHistory(uname);
               } catch (e) {
+                console.error(e);
                 showToast('Failed to sign out device', 'error');
               }
             }
@@ -1697,12 +1931,105 @@ function initAuth() {
   };
 
   /**
-   * Load and display login history (all sessions, including old ones).
+   * Load and display Google & Connected Apps Launch History.
+   */
+  window.loadAppHistory = async function loadAppHistory(username) {
+    const container = document.getElementById('appHistoryList');
+    if (!container) return;
+    container.innerHTML = `<div class="flex items-center justify-center py-6 text-on-surface-variant/40 text-sm"><span class="material-symbols-outlined text-lg mr-2" style="animation:spin 1s linear infinite">progress_activity</span> Loading app activity…</div>`;
+
+    if (!username) {
+      container.innerHTML = `<p class="text-xs text-center py-4 text-on-surface-variant/50">Please log in to view app activity.</p>`;
+      return;
+    }
+
+    try {
+      let snap;
+      try {
+        snap = await db.collection('users').doc(username)
+          .collection('appLaunches')
+          .orderBy('launchedAt', 'desc')
+          .limit(20).get();
+      } catch (orderErr) {
+        snap = await db.collection('users').doc(username)
+          .collection('appLaunches')
+          .limit(25).get();
+      }
+
+      const docs = [];
+      snap.forEach(doc => docs.push(doc));
+      docs.sort((a, b) => {
+        const getMs = (val) => val ? (val.toMillis ? val.toMillis() : new Date(val).getTime() || 0) : 0;
+        return getMs(b.data().launchedAt) - getMs(a.data().launchedAt);
+      });
+
+      container.innerHTML = '';
+
+      if (docs.length === 0) {
+        container.innerHTML = `
+          <div class="p-6 rounded-2xl bg-surface-container/40 border border-outline-variant/10 text-center space-y-3">
+            <span class="material-symbols-outlined text-3xl text-primary/30">apps</span>
+            <p class="text-xs text-on-surface-variant/80">No app launches recorded yet. Launch Gmail, Google Drive, or tools from Secure Hub to track your connected sessions.</p>
+            <div class="flex justify-center gap-2 pt-1 flex-wrap">
+              <button type="button" class="quick-app-launch-btn px-3 py-1.5 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface text-xs font-semibold border border-outline-variant/15 flex items-center gap-1 cursor-pointer" data-app="gmail" data-url="https://mail.google.com">
+                <span class="material-symbols-outlined text-sm text-red-500">mail</span> Launch Gmail
+              </button>
+              <button type="button" class="quick-app-launch-btn px-3 py-1.5 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface text-xs font-semibold border border-outline-variant/15 flex items-center gap-1 cursor-pointer" data-app="drive" data-url="https://drive.google.com">
+                <span class="material-symbols-outlined text-sm text-amber-500">add_to_drive</span> Launch Drive
+              </button>
+            </div>
+          </div>`;
+        setupQuickAppLaunchers();
+        return;
+      }
+
+      docs.slice(0, 10).forEach(doc => {
+        const a = doc.data();
+        const launchedAt = a.launchedAt ? formatTimestamp(a.launchedAt) : 'Recently';
+        const fullTime = a.launchedAt ? formatFullDateTime(a.launchedAt) : '';
+        const visuals = getAppVisuals(a.appName, a.appUrl);
+
+        const card = document.createElement('div');
+        card.className = 'flex items-center justify-between p-3.5 sm:p-4 rounded-2xl bg-surface-container/50 hover:bg-surface-container/80 border border-outline-variant/10 transition-all min-w-0';
+        card.innerHTML = `
+          <div class="flex items-center gap-3.5 min-w-0 flex-1">
+            <div class="w-10 h-10 rounded-xl ${visuals.bg} flex items-center justify-center flex-shrink-0 shadow-xs ${visuals.color}">
+              <span class="material-symbols-outlined text-xl">${visuals.icon}</span>
+            </div>
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-2 flex-wrap">
+                <p class="text-xs sm:text-sm font-bold text-on-surface truncate">${escapeHTML(a.appName || 'Web Tool')}</p>
+                <span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">${escapeHTML(a.provider || 'Google SSO')}</span>
+              </div>
+              <div class="flex items-center gap-2 text-[10px] sm:text-[11px] text-on-surface-variant/70 flex-wrap mt-0.5">
+                <span>${escapeHTML(a.browser || 'Browser')} on ${escapeHTML(a.os || 'OS')}</span>
+                <span>&bull;</span>
+                <span title="${fullTime}">Opened ${launchedAt}</span>
+              </div>
+            </div>
+          </div>
+          ${a.appUrl ? `
+          <a href="${escapeHTML(a.appUrl)}" target="_blank" rel="noopener" class="flex-shrink-0 ml-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-primary/10 hover:bg-primary text-primary hover:text-white transition-all flex items-center gap-1 shadow-xs" style="text-decoration:none" title="Launch ${escapeHTML(a.appName)}">
+            <span>Open</span>
+            <span class="material-symbols-outlined text-xs">open_in_new</span>
+          </a>` : ''}
+        `;
+        container.appendChild(card);
+      });
+
+    } catch (e) {
+      console.error('Load app history error:', e);
+      container.innerHTML = `<p class="text-xs text-center py-4 text-error/60">Failed to load app history.</p>`;
+    }
+  };
+
+  /**
+   * Load and display chronological Login History.
    */
   window.loadLoginHistory = async function loadLoginHistory(username) {
     const container = document.getElementById('loginHistoryList');
     if (!container) return;
-    container.innerHTML = `<div class="flex items-center justify-center py-6 text-on-surface-variant/40 text-sm"><span class="material-symbols-outlined text-lg mr-2" style="animation:spin 1s linear infinite">progress_activity</span> Loading…</div>`;
+    container.innerHTML = `<div class="flex items-center justify-center py-6 text-on-surface-variant/40 text-sm"><span class="material-symbols-outlined text-lg mr-2" style="animation:spin 1s linear infinite">progress_activity</span> Loading login history…</div>`;
 
     if (!username) {
       container.innerHTML = `<p class="text-xs text-center py-4 text-on-surface-variant/50">Please log in to view login history.</p>`;
@@ -1715,9 +2042,8 @@ function initAuth() {
         snap = await db.collection('users').doc(username)
           .collection('sessions')
           .orderBy('loginAt', 'desc')
-          .limit(20).get();
+          .limit(25).get();
       } catch (orderErr) {
-        console.warn('orderBy loginAt failed, fetching without orderBy:', orderErr);
         snap = await db.collection('users').doc(username)
           .collection('sessions')
           .limit(30).get();
@@ -1734,18 +2060,27 @@ function initAuth() {
       container.innerHTML = '';
 
       if (docs.length === 0) {
-        container.innerHTML = `<p class="text-xs text-center py-4 text-on-surface-variant/50">No login history found.</p>`;
+        container.innerHTML = `<p class="text-xs text-center py-4 text-on-surface-variant/50">No sign-in history found.</p>`;
         return;
       }
 
       let count = 0;
       docs.forEach(doc => {
         const s = doc.data();
-        const isCurrentSession = s.sessionId === mySessionId;
-        const loginAt = s.loginAt ? formatTimestamp(s.loginAt) : 'Unknown';
+        const isCurrentSession = (s.sessionId && s.sessionId === mySessionId);
+        const loginAt = s.loginAt ? formatTimestamp(s.loginAt) : 'Recently';
+        const fullTime = s.loginAt ? formatFullDateTime(s.loginAt) : '';
         const deviceIcon = s.device === 'Mobile' ? 'smartphone' : s.device === 'Tablet' ? 'tablet' : 'computer';
-        const statusColor = s.isActive ? 'text-green-500' : 'text-on-surface-variant/40';
-        const statusText = isCurrentSession ? 'Current' : s.isActive ? 'Active' : 'Ended';
+
+        let statusColor = 'bg-surface-container-high text-on-surface-variant/70';
+        let statusText = 'Ended';
+        if (isCurrentSession) {
+          statusColor = 'bg-primary/15 text-primary border border-primary/20';
+          statusText = 'Current';
+        } else if (s.isActive) {
+          statusColor = 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20';
+          statusText = 'Active';
+        }
 
         let durationText = '';
         if (!s.isActive && s.loginAt && s.lastSeen) {
@@ -1753,32 +2088,47 @@ function initAuth() {
           if (dur) durationText = ` &bull; Duration: ${dur}`;
         }
 
+        let methodBadge = '';
+        if (s.loginMethod) {
+          const isG = s.loginMethod.includes('Google');
+          methodBadge = `<span class="px-2 py-0.5 rounded-full text-[9px] font-bold ${isG ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20' : 'bg-surface-container-high text-on-surface-variant'}">${escapeHTML(s.loginMethod)}</span>`;
+        }
+
         const el = document.createElement('div');
-        el.className = 'flex items-center gap-3 p-3 rounded-xl bg-surface-container';
-        if (count >= 5) {
+        el.className = 'flex items-center justify-between p-3.5 sm:p-4 rounded-2xl bg-surface-container/50 border border-outline-variant/10 min-w-0';
+        if (count >= 6) {
           el.style.display = 'none';
           el.classList.add('hidden-login-item');
         }
         el.innerHTML = `
-          <div class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center flex-shrink-0 text-on-surface-variant">
-            <span class="material-symbols-outlined text-base">${deviceIcon}</span>
-          </div>
-          <div class="flex-1 min-w-0">
-            <div class="flex items-center gap-2">
-              <p class="text-xs font-semibold text-on-surface truncate">${escapeHTML(s.browser || 'Browser')} — ${escapeHTML(s.os || 'OS')}</p>
-              <span class="text-[9px] font-bold uppercase ${statusColor}">${statusText}</span>
+          <div class="flex items-center gap-3.5 min-w-0 flex-1">
+            <div class="w-9 h-9 rounded-xl bg-surface-container-high flex items-center justify-center flex-shrink-0 text-on-surface-variant">
+              <span class="material-symbols-outlined text-lg">${deviceIcon}</span>
             </div>
-            <p class="text-[10px] text-on-surface-variant">${escapeHTML(s.device || 'Device')} &bull; Signed in ${loginAt}${durationText}</p>
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-2 flex-wrap">
+                <p class="text-xs sm:text-sm font-semibold text-on-surface truncate">${escapeHTML(s.browser || 'Browser')} on ${escapeHTML(s.os || 'OS')}</p>
+                <span class="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${statusColor}">${statusText}</span>
+                ${methodBadge}
+              </div>
+              <div class="flex items-center gap-2 text-[10px] sm:text-[11px] text-on-surface-variant/70 flex-wrap mt-0.5">
+                <span>${escapeHTML(s.device || 'Device')}</span>
+                <span>&bull;</span>
+                <span>IP: ${escapeHTML(s.ip || 'Direct')}</span>
+                <span>&bull;</span>
+                <span title="${fullTime}">Signed in ${loginAt}${durationText}</span>
+              </div>
+            </div>
           </div>
         `;
         container.appendChild(el);
         count++;
       });
 
-      if (count > 5) {
+      if (count > 6) {
         const btnWrapper = document.createElement('div');
         btnWrapper.className = 'text-center mt-3';
-        btnWrapper.innerHTML = `<button class="text-xs text-primary/70 hover:text-primary font-bold px-4 py-2 bg-primary-container/20 hover:bg-primary-container/40 rounded-full transition-colors">View More</button>`;
+        btnWrapper.innerHTML = `<button class="text-xs text-primary font-bold px-4 py-2 bg-primary-container/20 hover:bg-primary-container/40 rounded-full transition-colors cursor-pointer">View More (${count - 6} more)</button>`;
         btnWrapper.addEventListener('click', () => {
           container.querySelectorAll('.hidden-login-item').forEach(el => {
             el.style.display = 'flex';
@@ -1795,31 +2145,173 @@ function initAuth() {
   };
 
   /**
-   * Parse a User-Agent string into readable device / browser / OS info.
+   * Set up Sessions Filter Pills (All / Devices / Google / Apps).
    */
-  function parseUserAgent(ua) {
-    let device = 'Desktop';
-    let os = 'Unknown OS';
-    let browser = 'Unknown Browser';
+  function setupSessionsFilterPills() {
+    const pills = document.querySelectorAll('.sessions-filter-pill');
+    pills.forEach(pill => {
+      pill.addEventListener('click', () => {
+        pills.forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        const filter = pill.dataset.filter;
 
-    if (/Mobi|Android|iPhone|iPad|iPod/i.test(ua)) {
-      device = /iPad/i.test(ua) ? 'Tablet' : 'Mobile';
+        const blocks = document.querySelectorAll('#sectionSessions .session-category-block');
+        blocks.forEach(b => {
+          const cat = b.dataset.cat;
+          if (filter === 'all') {
+            b.removeAttribute('data-hidden');
+          } else if (filter === 'devices') {
+            if (cat === 'devices' || cat === 'history') b.removeAttribute('data-hidden');
+            else b.setAttribute('data-hidden', 'true');
+          } else if (filter === 'google') {
+            if (cat === 'google' || cat === 'apps') b.removeAttribute('data-hidden');
+            else b.setAttribute('data-hidden', 'true');
+          } else if (filter === 'apps') {
+            if (cat === 'apps' || cat === 'google') b.removeAttribute('data-hidden');
+            else b.setAttribute('data-hidden', 'true');
+          }
+        });
+      });
+    });
+  }
+
+  /**
+   * Set up Quick App Launchers (Gmail & Google Drive buttons).
+   */
+  function setupQuickAppLaunchers() {
+    document.querySelectorAll('.quick-app-launch-btn').forEach(btn => {
+      // Remove any previously attached click listeners
+      btn.onclick = async (e) => {
+        e.preventDefault();
+        const app = btn.dataset.app;
+        const targetUrl = btn.dataset.url;
+        const username = (getEl('userName')?.textContent || '').trim();
+        const authUser = firebase.auth().currentUser;
+
+        let finalUrl = targetUrl;
+        if (app === 'gmail') {
+          finalUrl = 'https://mail.google.com';
+        } else if (app === 'drive') {
+          finalUrl = 'https://drive.google.com';
+        }
+
+        // Open in new browser tab
+        window.open(finalUrl, '_blank', 'noopener');
+
+        // Record launch event
+        if (username) {
+          const appName = app === 'gmail' ? 'Gmail' : (app === 'drive' ? 'Google Drive' : 'Web App');
+          await window.recordAppLaunch(username, {
+            appName,
+            appUrl: finalUrl,
+            provider: 'Google SSO',
+            category: 'google'
+          });
+          if (typeof window.loadAppHistory === 'function') {
+            window.loadAppHistory(username);
+          }
+          showToast(`Opening ${appName}...`, 'success');
+        }
+      };
+    });
+  }
+
+  /**
+   * Set up Refresh and Clear History action buttons.
+   */
+  function setupSessionsActions() {
+    const refreshBtn = document.getElementById('refreshSessionsBtn');
+    if (refreshBtn) {
+      refreshBtn.addEventListener('click', async () => {
+        const username = (getEl('userName')?.textContent || '').trim();
+        if (!username) return;
+        const icon = refreshBtn.querySelector('.material-symbols-outlined');
+        if (icon) icon.style.animation = 'spin 0.8s linear infinite';
+        await Promise.all([
+          window.loadActiveSessions(username),
+          window.loadLoginHistory(username),
+          window.loadAppHistory(username)
+        ]);
+        if (icon) icon.style.animation = '';
+        showToast('Sessions & History refreshed', 'success');
+      });
     }
 
-    if (/Windows NT/i.test(ua)) os = 'Windows';
-    else if (/Mac OS X/i.test(ua)) os = /iPhone|iPad/i.test(ua) ? 'iOS' : 'macOS';
-    else if (/Android/i.test(ua)) os = 'Android';
-    else if (/Linux/i.test(ua)) os = 'Linux';
-    else if (/CrOS/i.test(ua)) os = 'ChromeOS';
+    const clearLoginBtn = document.getElementById('clearLoginHistoryBtn');
+    if (clearLoginBtn) {
+      clearLoginBtn.addEventListener('click', () => {
+        const username = (getEl('userName')?.textContent || '').trim();
+        if (!username) return;
+        showConfirmModal({
+          title: 'Clear Ended Sessions',
+          message: 'This will remove past ended sessions from your login history audit log. Active sessions will not be affected.',
+          icon: 'delete_sweep',
+          iconBg: 'rgba(159,64,61,0.08)',
+          iconColor: '#9f403d',
+          confirmText: 'Clear Inactive',
+          confirmClass: 'bg-error text-on-error hover:opacity-90',
+          onConfirm: async () => {
+            try {
+              const sessionsRef = db.collection('users').doc(username).collection('sessions');
+              const snap = await sessionsRef.where('isActive', '==', false).limit(50).get();
+              if (snap.empty) {
+                showToast('No ended sessions to clear', 'info');
+                return;
+              }
+              const batch = db.batch();
+              snap.forEach(doc => batch.delete(doc.ref));
+              await batch.commit();
+              showToast(`Cleared ${snap.size} ended session(s)`, 'success');
+              window.loadLoginHistory(username);
+            } catch (e) {
+              console.error('Clear history error:', e);
+              showToast('Failed to clear login history', 'error');
+            }
+          }
+        });
+      });
+    }
 
-    if (/Edg\//i.test(ua)) browser = 'Edge';
-    else if (/OPR\//i.test(ua)) browser = 'Opera';
-    else if (/Chrome/i.test(ua)) browser = 'Chrome';
-    else if (/Safari/i.test(ua) && !/Chrome/i.test(ua)) browser = 'Safari';
-    else if (/Firefox/i.test(ua)) browser = 'Firefox';
-
-    return { device, os, browser };
+    const clearAppBtn = document.getElementById('clearAppHistoryBtn');
+    if (clearAppBtn) {
+      clearAppBtn.addEventListener('click', () => {
+        const username = (getEl('userName')?.textContent || '').trim();
+        if (!username) return;
+        showConfirmModal({
+          title: 'Clear App Activity',
+          message: 'This will clear all recorded launches of Gmail, Google Drive, and other web apps.',
+          icon: 'delete_sweep',
+          iconBg: 'rgba(159,64,61,0.08)',
+          iconColor: '#9f403d',
+          confirmText: 'Clear Activity',
+          confirmClass: 'bg-error text-on-error hover:opacity-90',
+          onConfirm: async () => {
+            try {
+              const appRef = db.collection('users').doc(username).collection('appLaunches');
+              const snap = await appRef.limit(50).get();
+              if (snap.empty) {
+                showToast('No app activity to clear', 'info');
+                return;
+              }
+              const batch = db.batch();
+              snap.forEach(doc => batch.delete(doc.ref));
+              await batch.commit();
+              showToast('App activity cleared', 'success');
+              window.loadAppHistory(username);
+            } catch (e) {
+              console.error('Clear app error:', e);
+              showToast('Failed to clear app activity', 'error');
+            }
+          }
+        });
+      });
+    }
   }
+
+  // Initialize Sessions UI handlers
+  setupSessionsFilterPills();
+  setupQuickAppLaunchers();
+  setupSessionsActions();
 
   /**
    * Show a polished in-app confirmation modal (replaces native confirm()).

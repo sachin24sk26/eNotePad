@@ -5161,6 +5161,7 @@ html, body {
 #sectionInbox,
 #sectionSettings,
 #sectionFiles,
+#sectionSessions,
 #historySavedGrid,
 #historySavedGrid > div,
 #historyTimelineList,
@@ -6182,4 +6183,31 @@ body.hide-native-cursor [disabled] {
   border-color: #3b82f6;
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
 }
+
+/* Devices & Apps History Section */
+.sessions-filter-pill {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+}
+.sessions-filter-pill.active {
+  background: #516070 !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(81, 96, 112, 0.25) !important;
+}
+.dark .sessions-filter-pill.active {
+  background: #3b82f6 !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.35) !important;
+}
+.sessions-filter-pill:not(.active) {
+  opacity: 0.85;
+}
+.sessions-filter-pill:not(.active):hover {
+  opacity: 1;
+}
+
+#sectionSessions .session-category-block[data-hidden="true"] {
+  display: none !important;
+}
+
 
